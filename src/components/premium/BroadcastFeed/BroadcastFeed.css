@@ -1,0 +1,126 @@
+/* Premium Broadcast Feed Styles */
+
+.broadcast-feed {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.broadcast-feed-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 16px;
+}
+
+.broadcast-feed-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.broadcast-feed-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  flex: 1;
+  max-width: 300px;
+}
+
+.broadcast-feed-search svg {
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+
+.broadcast-feed-search input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  color: #111827;
+  outline: none;
+}
+
+.broadcast-feed-search input::placeholder {
+  color: #9ca3af;
+}
+
+.broadcast-feed-filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.broadcast-filter {
+  padding: 8px 16px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.broadcast-filter:hover {
+  border-color: #d1d5db;
+  background: #f9fafb;
+}
+
+.broadcast-filter.active {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
+}
+
+.broadcast-feed-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.broadcast-feed-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #9ca3af;
+  text-align: center;
+}
+
+.broadcast-feed-empty svg {
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.broadcast-feed-empty p {
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .broadcast-feed {
+    padding: 16px;
+  }
+
+  .broadcast-feed-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .broadcast-feed-search {
+    max-width: none;
+  }
+}

@@ -1,0 +1,703 @@
+/* Master POG Management - Premium Theme */
+
+.master-pog-container {
+  min-height: 100%;
+  background: #f8fafc;
+}
+
+/* Header */
+.master-pog-header {
+  padding: 24px 32px;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.master-pog-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e1b4b;
+  margin: 0 0 4px 0;
+}
+
+.master-pog-subtitle {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+}
+
+/* Tabs */
+.master-pog-tabs {
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0 32px;
+}
+
+.pog-tabs-container {
+  display: flex;
+  gap: 0;
+}
+
+.pog-tab {
+  padding: 16px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #64748b;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.pog-tab:hover:not(:disabled) {
+  color: #4f46e5;
+}
+
+.pog-tab.active {
+  color: #4f46e5;
+  border-bottom-color: #4f46e5;
+}
+
+.pog-tab:disabled {
+  color: #cbd5e1;
+  cursor: not-allowed;
+}
+
+/* Content */
+.master-pog-content {
+  padding: 24px 32px;
+}
+
+/* POG Library */
+.pog-library-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+
+.pog-search-wrapper {
+  position: relative;
+  flex: 1;
+  max-width: 400px;
+}
+
+.pog-search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.pog-search-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 16px 0 44px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #1e293b;
+  background: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.pog-search-input:focus {
+  outline: none;
+  border-color: #818cf8;
+  box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.15);
+}
+
+.pog-search-input::placeholder {
+  color: #94a3b8;
+}
+
+.pog-toolbar-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.pog-toolbar-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pog-toolbar-btn.secondary {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+}
+
+.pog-toolbar-btn.secondary:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.pog-toolbar-btn.primary {
+  background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
+  border: none;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+
+.pog-toolbar-btn.primary:hover {
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+  transform: translateY(-1px);
+}
+
+/* Filter Stripe */
+.pog-filter-stripe {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  padding: 16px 20px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.pog-filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 140px;
+  flex: 1;
+}
+
+.pog-filter-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pog-filter-select {
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #1e293b;
+  background: #f8fafc;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 32px;
+}
+
+.pog-filter-select:hover {
+  border-color: #cbd5e1;
+  background-color: #ffffff;
+}
+
+.pog-filter-select:focus {
+  outline: none;
+  border-color: #818cf8;
+  box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.15);
+}
+
+.pog-filter-clear {
+  height: 38px;
+  padding: 0 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.pog-filter-clear:hover {
+  background: #f1f5f9;
+  color: #475569;
+  border-color: #cbd5e1;
+}
+
+/* POG Grid */
+.pog-library-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.pog-card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pog-card:hover {
+  border-color: #818cf8;
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.12);
+  transform: translateY(-2px);
+}
+
+.pog-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.pog-card-icon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #ede9fe 0%, #e0e7ff 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pog-card-icon svg {
+  width: 24px;
+  height: 24px;
+  color: #6366f1;
+}
+
+.pog-status-badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pog-status-badge.status-active {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.pog-status-badge.status-draft {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.pog-status-badge.status-archived {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.pog-card-body {
+  margin-bottom: 16px;
+}
+
+.pog-card-id {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #6366f1;
+  background: #eef2ff;
+  padding: 3px 8px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.pog-card-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 4px 0;
+}
+
+.pog-card-category {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+}
+
+.pog-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.pog-card-meta {
+  display: flex;
+  gap: 12px;
+}
+
+.pog-card-version,
+.pog-card-clusters {
+  font-size: 12px;
+  color: #64748b;
+  background: #f8fafc;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.pog-card-date {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+/* POG Workspace */
+.pog-workspace-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  padding: 20px 24px;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+}
+
+.pog-workspace-name {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 8px 0;
+}
+
+.pog-workspace-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pog-workspace-version,
+.pog-workspace-category {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.pog-workspace-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.pog-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pog-action-btn:hover {
+  background: #f1f5f9;
+}
+
+.pog-action-btn.danger {
+  color: #dc2626;
+}
+
+.pog-action-btn.danger:hover {
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+/* Workspace Content */
+.pog-workspace-content {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 24px;
+}
+
+.pog-workspace-viewer {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow: hidden;
+}
+
+.pog-viewer-image {
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.pog-viewer-placeholder {
+  text-align: center;
+  padding: 40px;
+}
+
+.pog-viewer-icon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #ede9fe 0%, #e0e7ff 100%);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+}
+
+.pog-viewer-icon svg {
+  width: 40px;
+  height: 40px;
+  color: #6366f1;
+}
+
+.pog-viewer-placeholder h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 8px 0;
+}
+
+.pog-viewer-placeholder p {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+}
+
+/* Workspace Sidebar */
+.pog-workspace-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.pog-sidebar-section {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  padding: 20px;
+}
+
+.pog-sidebar-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 16px 0;
+}
+
+.pog-version-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pog-version-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #64748b;
+  background: #f8fafc;
+}
+
+.pog-version-item.active {
+  background: #ede9fe;
+  color: #6366f1;
+}
+
+.pog-cluster-stat {
+  text-align: center;
+  padding: 16px;
+  background: linear-gradient(135deg, #ede9fe 0%, #e0e7ff 100%);
+  border-radius: 12px;
+}
+
+.pog-cluster-number {
+  display: block;
+  font-size: 32px;
+  font-weight: 700;
+  color: #4f46e5;
+}
+
+.pog-cluster-label {
+  font-size: 12px;
+  color: #6366f1;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pog-quick-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pog-quick-action-btn {
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.pog-quick-action-btn:hover {
+  background: #f1f5f9;
+  border-color: #818cf8;
+  color: #4f46e5;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .pog-workspace-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .pog-workspace-sidebar {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  
+  .pog-sidebar-section {
+    flex: 1;
+    min-width: 280px;
+  }
+}
+
+/* Applied Rules Section */
+.pog-applied-rules {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 16px;
+  margin-top: 8px;
+}
+
+.pog-rules-description {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0 0 12px 0;
+}
+
+.pog-rules-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pog-rule-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.pog-rule-item:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.pog-rule-icon {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.pog-rule-icon.facing {
+  background: #dcfce7;
+}
+
+.pog-rule-icon.mandatory {
+  background: #d1fae5;
+}
+
+.pog-rule-icon.brand {
+  background: #fce7f3;
+}
+
+.pog-rule-icon.priority {
+  background: #fef3c7;
+}
+
+.pog-rule-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pog-rule-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pog-rule-source {
+  font-size: 11px;
+  color: #64748b;
+}
+
+@media (max-width: 768px) {
+  .master-pog-header,
+  .master-pog-tabs,
+  .master-pog-content {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  
+  .pog-library-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .pog-search-wrapper {
+    max-width: none;
+  }
+  
+  .pog-toolbar-actions {
+    justify-content: flex-end;
+  }
+  
+  .pog-workspace-header {
+    flex-direction: column;
+    gap: 16px;
+  }
+}

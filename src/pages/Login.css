@@ -1,0 +1,335 @@
+/* Login Page Styles - Refined Premium */
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 0.25; }
+}
+
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #818cf8 0%, #a78bfa 25%, #c4b5fd 50%, #a78bfa 75%, #818cf8 100%);
+  background-size: 300% 300%;
+  animation: gradientShift 12s ease infinite;
+  padding: 20px;
+  position: relative;
+}
+
+/* Subtle decorative glows */
+.login-container::before {
+  content: '';
+  position: absolute;
+  top: 15%;
+  right: 10%;
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: pulse 4s ease-in-out infinite;
+}
+
+.login-container::after {
+  content: '';
+  position: absolute;
+  bottom: 20%;
+  left: 10%;
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: pulse 5s ease-in-out infinite 1s;
+}
+
+.login-content {
+  width: 100%;
+  max-width: 440px;
+  animation: fadeIn 0.5s ease-out;
+  position: relative;
+  z-index: 1;
+}
+
+.login-logo {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.login-logo img {
+  max-width: 200px;
+  height: auto;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1));
+  transition: all 0.3s ease;
+}
+
+.login-logo img:hover {
+  transform: scale(1.03);
+  filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.15));
+}
+
+/* Refined card */
+.login-container .MuiPaper-root,
+.login-container [class*="Card"] {
+  background: #ffffff !important;
+  border-radius: 20px !important;
+  box-shadow: 
+    0 20px 40px -10px rgba(99, 102, 241, 0.25),
+    0 8px 16px -6px rgba(0, 0, 0, 0.1) !important;
+  border: none !important;
+}
+
+.login-card {
+  padding: 44px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.login-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #1e1b4b;
+  margin: 0 0 8px 0;
+  text-align: center;
+  letter-spacing: -0.3px;
+}
+
+.login-subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0 0 28px 0;
+  text-align: center;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+.form-field {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  margin: 0 auto; /* Center the field if it has a max-width */
+}
+
+/* Ensure impact-ui components take full width */
+.form-field > div,
+.form-field .impact-input-container,
+.form-field .impact-select-container,
+.form-field .impact-input-wrapper,
+.form-field .impact-select-wrapper {
+  width: 100% !important;
+  display: block !important;
+}
+
+.login-form input,
+.login-form select,
+.login-form .impact-input,
+.login-form .impact-select,
+.login-form .MuiInputBase-root,
+.login-form .MuiOutlinedInput-root {
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Refined input styling */
+.login-form input[type="text"],
+.login-form input[type="email"],
+.login-form input[type="password"],
+.login-form .MuiInputBase-input {
+  border-radius: 10px !important;
+  border: 1.5px solid #e5e7eb !important;
+  transition: all 0.25s ease !important;
+  background: #fafafa !important;
+}
+
+.login-form input:hover {
+  border-color: #c4b5fd !important;
+  background: #ffffff !important;
+}
+
+.login-form input:focus,
+.login-form .MuiInputBase-input:focus {
+  border-color: #818cf8 !important;
+  box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.15) !important;
+  background: #ffffff !important;
+}
+
+/* Fix Impact UI input wrapper to position icon inside */
+.form-field .impact-input-wrapper {
+  position: relative !important;
+  display: block !important;
+}
+
+/* Position the right icon inside the input */
+.form-field .right-input-icon {
+  position: absolute !important;
+  right: 12px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  display: flex !important;
+  align-items: center !important;
+  z-index: 2 !important;
+  cursor: pointer !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Ensure MUI input takes full width but leaves space for icon */
+.form-field .MuiOutlinedInput-root {
+  width: 100% !important;
+}
+
+.form-field .MuiOutlinedInput-input {
+  padding-right: 44px !important;
+}
+
+/* Remove any extra spacing from the input container */
+.form-field .impact_inputbox_container_with_icons {
+  margin-bottom: 0 !important;
+}
+
+/* Remove extra spacing from helper text area */
+.form-field [class*="helperText"],
+.form-field [class*="HelperText"],
+.form-field [class*="helper-text"] {
+  display: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  min-height: 0 !important;
+  height: 0 !important;
+}
+
+/* Icon styling */
+.login-form .right-input-icon svg,
+.login-form [class*="icon"] svg,
+.login-form svg {
+  color: #9ca3af !important;
+  transition: color 0.2s ease !important;
+}
+
+.login-form .right-input-icon:hover svg,
+.login-form [class*="icon"]:hover svg,
+.form-field .right-input-icon:hover svg {
+  color: #7c3aed !important;
+}
+
+.error-message {
+  padding: 12px 16px;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  color: #dc2626;
+  font-size: 13px;
+  text-align: center;
+}
+
+.forgot-password-link {
+  text-align: right;
+  margin-top: -8px;
+}
+
+.forgot-password-link a {
+  color: #7c3aed;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.forgot-password-link a:hover {
+  color: #6d28d9;
+}
+
+/* Refined button */
+.login-button {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.login-container button,
+.login-button button,
+.login-form button {
+  background: linear-gradient(135deg, #818cf8 0%, #7c3aed 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 10px !important;
+  padding: 12px 24px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3) !important;
+  transition: all 0.2s ease !important;
+  width: 100% !important;
+}
+
+.login-container button:hover,
+.login-button button:hover,
+.login-form button:hover {
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4) !important;
+  transform: translateY(-1px) !important;
+}
+
+.signup-link {
+  text-align: center;
+  font-size: 14px;
+  color: #6b7280;
+  margin-top: 20px;
+}
+
+.signup-link a {
+  color: #7c3aed;
+  text-decoration: none;
+  font-weight: 600;
+  margin-left: 4px;
+  transition: color 0.2s ease;
+}
+
+.signup-link a:hover {
+  color: #6d28d9;
+}
+
+.login-footer {
+  margin-top: 28px;
+  text-align: center;
+}
+
+.login-footer p {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .login-card {
+    padding: 32px 24px;
+  }
+
+  .login-title {
+    font-size: 22px;
+  }
+  
+  .login-container::before {
+    display: none;
+  }
+}

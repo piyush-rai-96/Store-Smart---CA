@@ -1,0 +1,222 @@
+/* Insight Ribbon - Modern Pastel Cards */
+
+.insight-ribbon {
+  margin-bottom: 32px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #dee2e6 transparent;
+}
+
+.insight-ribbon::-webkit-scrollbar {
+  height: 6px;
+}
+
+.insight-ribbon::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 0 8px;
+}
+
+.insight-ribbon::-webkit-scrollbar-thumb {
+  background: #dee2e6;
+  border-radius: 3px;
+}
+
+.insight-ribbon::-webkit-scrollbar-thumb:hover {
+  background: #cbd5e1;
+}
+
+.insight-ribbon-container {
+  display: flex;
+  gap: 16px;
+  min-width: min-content;
+  padding-bottom: 8px;
+}
+
+.insight-ribbon-card {
+  position: relative;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  overflow: hidden;
+  min-width: 220px;
+  flex-shrink: 0;
+}
+
+.insight-ribbon-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.insight-ribbon-card:active {
+  transform: translateY(-6px) scale(1.01);
+}
+
+.insight-ribbon-card-inner {
+  position: relative;
+  z-index: 1;
+}
+
+.insight-ribbon-card-accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  border-radius: 16px 16px 0 0;
+  transition: all 0.3s ease;
+}
+
+.insight-ribbon-card:hover .insight-ribbon-card-accent {
+  height: 6px;
+}
+
+/* Impact UI Professional Style - Clean White Cards */
+.insight-ribbon-card-positive,
+.insight-ribbon-card-warning,
+.insight-ribbon-card-negative,
+.insight-ribbon-card-neutral {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+}
+
+.insight-ribbon-card-positive .insight-ribbon-card-accent {
+  background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
+}
+
+.insight-ribbon-card-warning .insight-ribbon-card-accent {
+  background: linear-gradient(90deg, #ffc107 0%, #fd7e14 100%);
+}
+
+.insight-ribbon-card-negative .insight-ribbon-card-accent {
+  background: linear-gradient(90deg, #dc3545 0%, #e83e8c 100%);
+}
+
+.insight-ribbon-card-neutral .insight-ribbon-card-accent {
+  background: linear-gradient(90deg, #0066cc 0%, #17a2b8 100%);
+}
+
+/* Status-based glow effects on hover - Professional */
+.insight-ribbon-card-positive:hover {
+  box-shadow: 0 8px 24px rgba(40, 167, 69, 0.2);
+}
+
+.insight-ribbon-card-warning:hover {
+  box-shadow: 0 8px 24px rgba(255, 193, 7, 0.2);
+}
+
+.insight-ribbon-card-negative:hover {
+  box-shadow: 0 8px 24px rgba(220, 53, 69, 0.2);
+}
+
+.insight-ribbon-card-neutral:hover {
+  box-shadow: 0 8px 24px rgba(0, 102, 204, 0.2);
+}
+
+.insight-ribbon-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  gap: 12px;
+}
+
+.insight-ribbon-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #6b7280;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  line-height: 1.4;
+  opacity: 0.8;
+}
+
+.insight-ribbon-trend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.insight-ribbon-trend-up {
+  background: rgba(40, 167, 69, 0.1);
+  color: #28a745;
+  border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.insight-ribbon-trend-down {
+  background: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+  border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+.insight-ribbon-card:hover .insight-ribbon-trend-up {
+  background: rgba(40, 167, 69, 0.15);
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.15);
+  transform: scale(1.05);
+}
+
+.insight-ribbon-card:hover .insight-ribbon-trend-down {
+  background: rgba(220, 53, 69, 0.15);
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.15);
+  transform: scale(1.05);
+}
+
+.insight-ribbon-value {
+  font-size: 44px;
+  font-weight: 900;
+  color: #0f172a;
+  line-height: 1;
+  margin-bottom: 10px;
+  letter-spacing: -0.04em;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+}
+
+.insight-ribbon-subtitle {
+  font-size: 14px;
+  color: #64748b;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .insight-ribbon-container {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .insight-ribbon-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .insight-ribbon-card {
+    padding: 20px;
+  }
+
+  .insight-ribbon-value {
+    font-size: 36px;
+  }
+}
+
+@media (max-width: 480px) {
+  .insight-ribbon-container {
+    grid-template-columns: 1fr;
+  }
+
+  .insight-ribbon-value {
+    font-size: 32px;
+  }
+}

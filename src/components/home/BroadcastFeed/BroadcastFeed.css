@@ -1,0 +1,29 @@
+/* Broadcast Feed Styles */
+
+.broadcast-feed {
+  margin-bottom: 40px;
+}
+
+.broadcast-feed-list {
+  /* Container for broadcast cards */
+}
+
+.broadcast-feed-empty {
+  background: white;
+  border-radius: 8px;
+  padding: 60px 40px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.broadcast-feed-empty p {
+  font-size: 16px;
+  color: #999;
+  margin: 8px 0;
+}
+
+.broadcast-feed-empty p:first-child {
+  font-size: 18px;
+  font-weight: 500;
+  color: #666;
+}

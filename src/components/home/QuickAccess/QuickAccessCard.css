@@ -1,0 +1,82 @@
+/* Quick Access Card Styles */
+
+.quick-access-card {
+  height: 100%;
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+}
+
+.quick-access-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15) !important;
+}
+
+.quick-access-card-content {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  min-height: 180px;
+  position: relative;
+}
+
+.quick-access-icon {
+  color: #667eea;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quick-access-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+  line-height: 1.3;
+}
+
+.quick-access-subtitle {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 12px 0;
+}
+
+.quick-access-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: auto;
+}
+
+.quick-access-coming-soon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background-color: #ff9800;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .quick-access-card-content {
+    padding: 20px;
+    min-height: 160px;
+  }
+
+  .quick-access-title {
+    font-size: 15px;
+  }
+
+  .quick-access-subtitle {
+    font-size: 13px;
+  }
+}

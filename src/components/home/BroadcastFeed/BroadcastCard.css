@@ -1,0 +1,165 @@
+/* Broadcast Card Styles */
+
+.broadcast-card {
+  margin-bottom: 16px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+}
+
+.broadcast-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.broadcast-card-unread {
+  background-color: #fafbff;
+}
+
+.broadcast-card-content {
+  padding: 16px;
+  padding-left: 20px;
+}
+
+.broadcast-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.broadcast-priority-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: 0.5px;
+}
+
+.broadcast-timestamp {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: #999;
+}
+
+.broadcast-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.broadcast-unread-dot {
+  color: #667eea;
+  font-size: 20px;
+  line-height: 1;
+  margin-top: -2px;
+}
+
+.broadcast-title h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.broadcast-card-unread .broadcast-title h3 {
+  font-weight: 700;
+}
+
+.broadcast-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+.broadcast-sender {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.broadcast-meta-separator {
+  color: #ccc;
+}
+
+.broadcast-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.broadcast-tag {
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.broadcast-tag-entity {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.broadcast-tag-category {
+  border: 1px solid currentColor;
+}
+
+.broadcast-message {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #444;
+  margin: 0 0 16px 0;
+}
+
+.broadcast-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.broadcast-acknowledged {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  color: #4caf50;
+  font-weight: 500;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .broadcast-card-content {
+    padding: 12px;
+    padding-left: 16px;
+  }
+
+  .broadcast-title h3 {
+    font-size: 16px;
+  }
+
+  .broadcast-message {
+    font-size: 13px;
+  }
+
+  .broadcast-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .broadcast-actions button {
+    width: 100%;
+  }
+}

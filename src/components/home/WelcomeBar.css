@@ -1,0 +1,102 @@
+/* Welcome Bar Styles */
+
+.welcome-bar {
+  background: linear-gradient(to bottom, #ffffff 0%, #f0f4ff 100%);
+  border-bottom: 1px solid #e0e0e0;
+  padding: 24px 32px;
+}
+
+.welcome-row-1 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.welcome-greeting {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.welcome-date {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  color: #666;
+}
+
+.welcome-date svg {
+  color: #667eea;
+}
+
+.welcome-row-2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.role-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.role-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+}
+
+.separator {
+  color: #999;
+  font-size: 16px;
+}
+
+.assignment {
+  font-size: 16px;
+  color: #666;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .welcome-bar {
+    padding: 16px;
+  }
+
+  .welcome-row-1 {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .welcome-greeting {
+    font-size: 20px;
+  }
+
+  .welcome-date {
+    font-size: 14px;
+  }
+
+  .welcome-row-2 {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .role-title,
+  .assignment {
+    font-size: 14px;
+  }
+
+  .separator {
+    display: none;
+  }
+}

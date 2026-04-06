@@ -1,0 +1,70 @@
+/* Home Page Styles */
+
+.home-container {
+  min-height: 100vh;
+  background-color: #f5f7fa;
+}
+
+.home-content {
+  padding: 40px 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.welcome-section {
+  background: white;
+  border-radius: 8px;
+  padding: 48px 32px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.welcome-title {
+  font-size: 32px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 16px 0;
+}
+
+.welcome-subtitle {
+  font-size: 16px;
+  color: #666;
+  margin: 0 0 40px 0;
+}
+
+.welcome-subtitle strong {
+  color: #667eea;
+  font-weight: 600;
+}
+
+.content-placeholder {
+  padding: 40px 20px;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 2px dashed #ddd;
+}
+
+.content-placeholder p {
+  font-size: 14px;
+  color: #999;
+  margin: 8px 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .home-content {
+    padding: 24px 16px;
+  }
+
+  .welcome-section {
+    padding: 32px 24px;
+  }
+
+  .welcome-title {
+    font-size: 24px;
+  }
+
+  .welcome-subtitle {
+    font-size: 14px;
+  }
+}

@@ -1,0 +1,136 @@
+/* Premium Critical Alert Banner Styles */
+
+.critical-alert-banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  border: 1px solid;
+  position: relative;
+}
+
+.critical-alert-critical {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.critical-alert-high {
+  background: #fef3c7;
+  border-color: #fde68a;
+  color: #92400e;
+}
+
+.critical-alert-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.critical-alert-critical .critical-alert-icon {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.critical-alert-high .critical-alert-icon {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.critical-alert-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.critical-alert-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+.critical-alert-message {
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0.9;
+  line-height: 1.5;
+}
+
+.critical-alert-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.critical-alert-action-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.critical-alert-critical .critical-alert-action-button {
+  background: #dc2626;
+  color: white;
+}
+
+.critical-alert-critical .critical-alert-action-button:hover {
+  background: #b91c1c;
+}
+
+.critical-alert-high .critical-alert-action-button {
+  background: #d97706;
+  color: white;
+}
+
+.critical-alert-high .critical-alert-action-button:hover {
+  background: #b45309;
+}
+
+.critical-alert-dismiss {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  opacity: 0.6;
+}
+
+.critical-alert-dismiss:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .critical-alert-banner {
+    flex-wrap: wrap;
+    padding: 14px 16px;
+  }
+
+  .critical-alert-actions {
+    width: 100%;
+    margin-top: 8px;
+    margin-left: 56px;
+  }
+
+  .critical-alert-action-button {
+    flex: 1;
+  }
+}

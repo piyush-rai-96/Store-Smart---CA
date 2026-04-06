@@ -1,0 +1,38 @@
+/* Main Layout - Premium Theme */
+
+.main-layout {
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+.main-layout-content {
+  margin-left: 280px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.main-layout-content.sidebar-collapsed {
+  margin-left: 72px;
+}
+
+.main-layout-main {
+  flex: 1;
+  overflow-y: auto;
+  padding-top: 64px;
+}
+
+/* Constrain Impact UI Header to content area only */
+.main-layout-content > div:first-child {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .main-layout-content {
+    margin-left: 72px;
+  }
+}

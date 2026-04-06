@@ -1,0 +1,127 @@
+/* Broadcast Feed - Operations Communication Center */
+
+.broadcast-feed {
+  background: #ffffff;
+  border-radius: 4px;
+  padding: 24px;
+  border: 1px solid #dee2e6;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.broadcast-feed-header {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.broadcast-feed-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #212529;
+  margin: 0;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.broadcast-feed-title::before {
+  content: '';
+  width: 4px;
+  height: 20px;
+  background: linear-gradient(180deg, #0066cc 0%, #17a2b8 100%);
+  border-radius: 2px;
+}
+
+.broadcast-feed-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  flex: 1;
+  max-width: 360px;
+  transition: all 0.2s ease;
+}
+
+.broadcast-feed-search:focus-within {
+  border-color: #0066cc;
+  background: #ffffff;
+  box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
+}
+
+.broadcast-feed-search svg {
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+.broadcast-feed-search input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  color: #0f172a;
+  outline: none;
+  font-weight: 600;
+}
+
+.broadcast-feed-search input::placeholder {
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.broadcast-feed-filters {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.broadcast-feed-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.broadcast-feed-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: #94a3b8;
+}
+
+.broadcast-feed-empty p {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .broadcast-feed {
+    padding: 24px 20px;
+  }
+
+  .broadcast-feed-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .broadcast-feed-search {
+    max-width: none;
+  }
+
+  .broadcast-feed-title {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .broadcast-feed {
+    padding: 20px 16px;
+  }
+}
