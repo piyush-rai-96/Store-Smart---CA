@@ -1,4 +1,4 @@
-import { DistrictIntelligence, StorePerformance, StoreException, Sales2x2Point, SEARiskPoint } from '../types/district';
+import { DistrictIntelligence } from '../types/district';
 
 // District 14 - Tennessee Mock Data
 export const DISTRICT_14_DATA: DistrictIntelligence = {
@@ -18,286 +18,49 @@ export const DISTRICT_14_DATA: DistrictIntelligence = {
     vsNational: 3,
   },
   
-  narrative: 'District 14 shows strong YoY sales growth (+3.6%) but slight MoM slowdown (-0.4%). VoC satisfaction declined marginally to 87% (-0.4%), while SEA compliance improved to 86.2 (+1.75 pts QoQ).',
-  
-  unreadBroadcasts: 3,
-  
+  narrative: '',
+  unreadBroadcasts: 0,
   metrics: {
     netSalesComp: {
-      value: '$2.4M',
-      yoyPercent: 3.6,
+      value: '',
+      yoyPercent: 0,
     },
     vocSatisfied: {
-      value: 87,
-      change: -0.4,
+      value: 0,
+      change: 0,
     },
     seaScore: {
-      value: 86.2,
-      qoqChange: 1.75,
+      value: 0,
+      qoqChange: 0,
     },
     salesVsLY: {
-      value: 3.6,
+      value: 0,
     },
     gmBpsVsLY: {
-      value: 120,
+      value: 0,
     },
   },
-  
-  exceptions: [
-    {
-      id: 'exc-1',
-      storeNumber: '1150',
-      storeName: 'Murfreesboro East',
-      severity: 'critical',
-      type: 'compliance',
-      title: 'Failed Safety Checkpoint P1',
-      description: 'Compliance Issue (Critical)',
-      impact: 'High risk',
-    },
-    {
-      id: 'exc-2',
-      storeNumber: '1022',
-      storeName: 'Nashville Central',
-      severity: 'high',
-      type: 'sales',
-      title: 'Sales below target (-12%)',
-      description: 'High revenue impact',
-      impact: '$45K revenue gap',
-    },
-    {
-      id: 'exc-3',
-      storeNumber: '1188',
-      storeName: 'Franklin West',
-      severity: 'high',
-      type: 'audit',
-      title: 'Audit overdue',
-      description: 'Audit overdue (3 days)',
-      daysOverdue: 3,
-    },
-    {
-      id: 'exc-4',
-      storeNumber: '1210',
-      storeName: 'Brentwood South',
-      severity: 'medium',
-      type: 'inventory',
-      title: 'Inventory risk on top SKUs',
-      description: 'Stock-out risk on high-velocity items',
-    },
-    {
-      id: 'exc-5',
-      storeNumber: '1092',
-      storeName: 'Hendersonville North',
-      severity: 'medium',
-      type: 'gm',
-      title: 'GM decline (-2.1 pts)',
-      description: 'Gross margin compression',
-    },
-  ],
-  
-  topStores: [
-    {
-      id: 's-1142',
-      storeNumber: '1142',
-      name: 'Gallatin',
-      city: 'Gallatin',
-      state: 'TN',
-      dpi: 95.4,
-      sales: '$312K',
-      salesValue: 312000,
-      seaScore: 91,
-      vocScore: 94,
-      alertCount: 0,
-      rank: 1,
-      yoyGrowth: 8.2,
-      momGrowth: 2.1,
-      gmPercent: 36.5,
-    },
-    {
-      id: 's-2034',
-      storeNumber: '2034',
-      name: 'Clarksville',
-      city: 'Clarksville',
-      state: 'TN',
-      dpi: 93.1,
-      sales: '$289K',
-      salesValue: 289000,
-      seaScore: 88,
-      vocScore: 91,
-      alertCount: 0,
-      rank: 2,
-      yoyGrowth: 6.5,
-      momGrowth: 1.8,
-      gmPercent: 35.2,
-    },
-    {
-      id: 's-1876',
-      storeNumber: '1876',
-      name: 'Hendersonville South',
-      city: 'Hendersonville',
-      state: 'TN',
-      dpi: 91.7,
-      sales: '$271K',
-      salesValue: 271000,
-      seaScore: 87,
-      vocScore: 92,
-      alertCount: 1,
-      rank: 3,
-      yoyGrowth: 5.8,
-      momGrowth: 1.2,
-      gmPercent: 34.8,
-    },
-  ],
-  
-  strugglingStores: [
-    {
-      id: 's-1150',
-      storeNumber: '1150',
-      name: 'Murfreesboro East',
-      city: 'Murfreesboro',
-      state: 'TN',
-      dpi: 68.2,
-      sales: '$91K',
-      salesValue: 91000,
-      seaScore: 69,
-      vocScore: 71,
-      alertCount: 3,
-      rank: 12,
-      yoyGrowth: -8.5,
-      momGrowth: -4.2,
-      gmPercent: 28.1,
-    },
-    {
-      id: 's-1022',
-      storeNumber: '1022',
-      name: 'Nashville Central',
-      city: 'Nashville',
-      state: 'TN',
-      dpi: 72.5,
-      sales: '$180K',
-      salesValue: 180000,
-      seaScore: 75,
-      vocScore: 78,
-      alertCount: 2,
-      rank: 11,
-      yoyGrowth: -8.0,
-      momGrowth: -4.0,
-      gmPercent: 29.5,
-    },
-    {
-      id: 's-1188',
-      storeNumber: '1188',
-      name: 'Franklin West',
-      city: 'Franklin',
-      state: 'TN',
-      dpi: 74.1,
-      sales: '$165K',
-      salesValue: 165000,
-      seaScore: 72,
-      vocScore: 80,
-      alertCount: 1,
-      rank: 10,
-      yoyGrowth: -3.2,
-      momGrowth: -1.5,
-      gmPercent: 30.2,
-    },
-  ],
-  
-  allStores: [], // Will be populated with all 12 stores
-  
+  exceptions: [],
+  topStores: [],
+  strugglingStores: [],
+  allStores: [],
   vocDistribution: {
-    satisfied: 62,
-    neutral: 21,
-    dissatisfied: 17,
-    topIssues: [
-      {
-        category: 'Staff Availability',
-        percentage: 38,
-        affectedStores: ['1150', '1022', '1188'],
-        trend: 'up',
-        trendValue: 6,
-      },
-      {
-        category: 'Checkout Speed',
-        percentage: 22,
-        affectedStores: ['1022', '1210'],
-        trend: 'stable',
-        trendValue: 0,
-      },
-      {
-        category: 'Product Availability',
-        percentage: 18,
-        affectedStores: ['1150', '1092'],
-        trend: 'down',
-        trendValue: -2,
-      },
-    ],
+    satisfied: 0,
+    neutral: 0,
+    dissatisfied: 0,
+    topIssues: [],
   },
-  
-  triageIssues: [
-    {
-      type: 'voc',
-      title: 'Staff Availability',
-      affectedStores: ['1150', '1022', '1188'],
-      trend: '+6% negative MoM',
-      details: 'Top Stores: 1150, 1022, 1188',
-    },
-    {
-      type: 'sales',
-      title: 'Revenue Leak in Nashville Central',
-      affectedStores: ['1022'],
-      trend: 'YoY: -8%, MoM: -4%',
-      details: 'Category: Batteries',
-      category: 'Batteries',
-    },
-    {
-      type: 'sea',
-      title: 'Planogram Failures',
-      affectedStores: ['1150', '1188', '1022'],
-      trend: 'Auto-fail checkpoints: 3',
-      details: 'Stores: 1150, 1188, 1022',
-    },
-  ],
-  
+  triageIssues: [],
   broadcastSummary: {
-    active: 3,
-    scheduled: 2,
-    pendingAcknowledgements: 4,
-    latest: {
-      title: 'Emergency Safety Protocol Update',
-      unacknowledgedStores: 3,
-    },
+    active: 0,
+    scheduled: 0,
+    pendingAcknowledgements: 0,
   },
-  
-  clusters: [
-    {
-      id: 'cluster-a',
-      name: 'Cluster A',
-      type: 'High Volume Urban',
-      storeCount: 5,
-      avgDPI: 91,
-      stores: ['1142', '2034', '1876', '1022', '1210'],
-    },
-    {
-      id: 'cluster-b',
-      name: 'Cluster B',
-      type: 'Suburban Standard',
-      storeCount: 4,
-      avgDPI: 84,
-      stores: ['1188', '1092', '1345', '1567'],
-    },
-    {
-      id: 'cluster-c',
-      name: 'Cluster C',
-      type: 'Low Volume Rural',
-      storeCount: 3,
-      avgDPI: 72,
-      stores: ['1150', '1789', '1234'],
-    },
-  ],
+  clusters: [],
 };
 
 // Sales 2x2 Matrix Data
-export const SALES_2X2_DATA: Sales2x2Point[] = [
+export const SALES_2X2_DATA: any[] = [
   {
     storeNumber: '1142',
     storeName: 'Gallatin',
@@ -341,7 +104,7 @@ export const SALES_2X2_DATA: Sales2x2Point[] = [
 ];
 
 // SEA Risk Grid Data
-export const SEA_RISK_DATA: SEARiskPoint[] = [
+export const SEA_RISK_DATA: any[] = [
   {
     storeNumber: '1150',
     storeName: 'Murfreesboro East',

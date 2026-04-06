@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" fill="none">
+  <!-- Background -->
+  <rect width="800" height="500" fill="#f8fafc"/>
+  
+  <!-- Cooler Frame -->
+  <rect x="50" y="30" width="700" height="440" rx="8" fill="#e2e8f0" stroke="#94a3b8" stroke-width="2"/>
+  
+  <!-- Cooler Header -->
+  <rect x="50" y="30" width="700" height="40" rx="8" fill="#3730a3"/>
+  <text x="400" y="57" text-anchor="middle" fill="white" font-family="Arial" font-size="16" font-weight="bold">BEVERAGE COOLER - STANDARD</text>
+  
+  <!-- Shelf 1 -->
+  <rect x="70" y="90" width="660" height="80" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+  <rect x="80" y="100" width="50" height="60" rx="4" fill="#dc2626"/>
+  <rect x="140" y="100" width="50" height="60" rx="4" fill="#dc2626"/>
+  <rect x="200" y="100" width="50" height="60" rx="4" fill="#dc2626"/>
+  <rect x="260" y="100" width="50" height="60" rx="4" fill="#2563eb"/>
+  <rect x="320" y="100" width="50" height="60" rx="4" fill="#2563eb"/>
+  <rect x="380" y="100" width="50" height="60" rx="4" fill="#2563eb"/>
+  <rect x="440" y="100" width="50" height="60" rx="4" fill="#16a34a"/>
+  <rect x="500" y="100" width="50" height="60" rx="4" fill="#16a34a"/>
+  <rect x="560" y="100" width="50" height="60" rx="4" fill="#eab308"/>
+  <rect x="620" y="100" width="50" height="60" rx="4" fill="#eab308"/>
+  <rect x="680" y="100" width="40" height="60" rx="4" fill="#f97316"/>
+  
+  <!-- Shelf 2 -->
+  <rect x="70" y="180" width="660" height="80" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+  <rect x="80" y="190" width="50" height="60" rx="4" fill="#dc2626"/>
+  <rect x="140" y="190" width="50" height="60" rx="4" fill="#dc2626"/>
+  <rect x="200" y="190" width="50" height="60" rx="4" fill="#7c3aed"/>
+  <rect x="260" y="190" width="50" height="60" rx="4" fill="#7c3aed"/>
+  <rect x="320" y="190" width="50" height="60" rx="4" fill="#2563eb"/>
+  <rect x="380" y="190" width="50" height="60" rx="4" fill="#2563eb"/>
+  <rect x="440" y="190" width="50" height="60" rx="4" fill="#2563eb"/>
+  <rect x="500" y="190" width="50" height="60" rx="4" fill="#16a34a"/>
+  <rect x="560" y="190" width="50" height="60" rx="4" fill="#16a34a"/>
+  <rect x="620" y="190" width="50" height="60" rx="4" fill="#16a34a"/>
+  <rect x="680" y="190" width="40" height="60" rx="4" fill="#f97316"/>
+  
+  <!-- Shelf 3 -->
+  <rect x="70" y="270" width="660" height="80" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+  <rect x="80" y="280" width="50" height="60" rx="4" fill="#0891b2"/>
+  <rect x="140" y="280" width="50" height="60" rx="4" fill="#0891b2"/>
+  <rect x="200" y="280" width="50" height="60" rx="4" fill="#0891b2"/>
+  <rect x="260" y="280" width="50" height="60" rx="4" fill="#0891b2"/>
+  <rect x="320" y="280" width="50" height="60" rx="4" fill="#ec4899"/>
+  <rect x="380" y="280" width="50" height="60" rx="4" fill="#ec4899"/>
+  <rect x="440" y="280" width="50" height="60" rx="4" fill="#eab308"/>
+  <rect x="500" y="280" width="50" height="60" rx="4" fill="#eab308"/>
+  <rect x="560" y="280" width="50" height="60" rx="4" fill="#eab308"/>
+  <rect x="620" y="280" width="50" height="60" rx="4" fill="#84cc16"/>
+  <rect x="680" y="280" width="40" height="60" rx="4" fill="#84cc16"/>
+  
+  <!-- Shelf 4 -->
+  <rect x="70" y="360" width="660" height="80" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+  <rect x="80" y="370" width="70" height="60" rx="4" fill="#1e40af"/>
+  <rect x="160" y="370" width="70" height="60" rx="4" fill="#1e40af"/>
+  <rect x="240" y="370" width="70" height="60" rx="4" fill="#1e40af"/>
+  <rect x="320" y="370" width="70" height="60" rx="4" fill="#b91c1c"/>
+  <rect x="400" y="370" width="70" height="60" rx="4" fill="#b91c1c"/>
+  <rect x="480" y="370" width="70" height="60" rx="4" fill="#15803d"/>
+  <rect x="560" y="370" width="70" height="60" rx="4" fill="#15803d"/>
+  <rect x="640" y="370" width="70" height="60" rx="4" fill="#a16207"/>
+  
+  <!-- Labels -->
+  <text x="130" y="175" text-anchor="middle" fill="#64748b" font-family="Arial" font-size="10">Cola</text>
+  <text x="310" y="175" text-anchor="middle" fill="#64748b" font-family="Arial" font-size="10">Sports Drinks</text>
+  <text x="490" y="175" text-anchor="middle" fill="#64748b" font-family="Arial" font-size="10">Energy</text>
+  <text x="650" y="175" text-anchor="middle" fill="#64748b" font-family="Arial" font-size="10">Juice</text>
+</svg>

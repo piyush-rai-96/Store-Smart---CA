@@ -1,19 +1,20 @@
 import React from 'react';
 import { AlertTriangle, Clock, Users, CheckCircle, Eye } from 'lucide-react';
 import { Button } from 'impact-ui/dist/components';
+import { BroadcastScope, BroadcastCategory } from '../../types/home';
 import './FeaturedBroadcast.css';
 
 interface FeaturedBroadcastProps {
   title: string;
   message: string;
-  severity: 'critical' | 'high' | 'medium';
+  severity: string;
   sender: string;
   senderRole: string;
-  postedTime: string;
-  scope: string;
-  scopeDetails: string;
-  dueTime?: string;
-  category: string;
+  postedTime: Date;
+  scope: BroadcastScope;
+  scopeDetails?: string;
+  dueTime: Date;
+  category: BroadcastCategory;
   onViewDetails: () => void;
   onAcknowledge: () => void;
 }
@@ -25,7 +26,7 @@ export const FeaturedBroadcast: React.FC<FeaturedBroadcastProps> = ({
   sender,
   senderRole,
   postedTime,
-  scope,
+  scope: _scope,
   scopeDetails,
   dueTime,
   category,
@@ -39,7 +40,7 @@ export const FeaturedBroadcast: React.FC<FeaturedBroadcastProps> = ({
       case 'high':
         return 'featured-broadcast-high';
       default:
-        return 'featured-broadcast-medium';
+        return 'featured-broadcast-normal';
     }
   };
 
@@ -83,14 +84,12 @@ export const FeaturedBroadcast: React.FC<FeaturedBroadcastProps> = ({
             </div>
             <div className="featured-broadcast-meta-item">
               <Clock size={14} />
-              <span>Posted {postedTime}</span>
+              <span>Posted {postedTime.toLocaleString()}</span>
             </div>
-            {dueTime && (
-              <div className="featured-broadcast-meta-item featured-broadcast-due">
-                <Clock size={14} />
-                <span>Due: {dueTime}</span>
-              </div>
-            )}
+            <div className="featured-broadcast-meta-item featured-broadcast-due">
+              <Clock size={14} />
+              <span>Due: {dueTime.toLocaleString()}</span>
+            </div>
           </div>
         </div>
 

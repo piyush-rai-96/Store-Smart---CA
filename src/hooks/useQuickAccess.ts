@@ -3,7 +3,7 @@ import { UserRole } from '../types';
 import { QuickAccessCard } from '../types/quickAccess';
 import { QUICK_ACCESS_CARDS } from '../constants/quickAccess';
 
-export const useQuickAccess = (userRole: UserRole | undefined) => {
+export const useQuickAccess = (userRole: UserRole | undefined): { cards: QuickAccessCard[] } => {
   const cards = useMemo(() => {
     if (!userRole) return [];
 
