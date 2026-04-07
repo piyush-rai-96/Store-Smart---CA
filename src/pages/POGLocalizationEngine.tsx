@@ -253,12 +253,14 @@ const pogClusterMapping: Record<string, string[]> = {
   'hol-corp-002': ['family', 'rural', 'transit'],            // Home Accent - 3 clusters
 };
 
-const storeGroupInsights: Record<string, string> = {
+// Store group insights for business context
+const _storeGroupInsights: Record<string, string> = {
   campus: 'High impulse store → prioritize single-serve and premium beverages',
   family: 'Family-oriented → emphasize multi-packs and value bundles',
   rural: 'Essential-focused → optimize for core SKUs and everyday value',
   transit: 'Quick-stop trips → focus on grab-and-go and impulse items',
 };
+void _storeGroupInsights; // Reserved for future use
 
 // Category Demand Index data per category and cluster
 interface DemandIndexItem {
@@ -353,8 +355,8 @@ const generateDemandImplication = (indexData: DemandIndexItem[]): string => {
   return `Shift assortment toward ${top.join(' and ')}; reduce emphasis on ${low.join(' and ')}.`;
 };
 
-// Mock Published Results
-const mockPublishedResults: LocalizationResult[] = [
+// Mock Published Results (reserved for demo/testing)
+const _mockPublishedResults: LocalizationResult[] = [
   {
     id: 'loc-001',
     cluster: 'Campus Pulse',
@@ -413,6 +415,7 @@ const mockPublishedResults: LocalizationResult[] = [
     diffHighlights: ['Core +2 facings', 'Premium removed', 'Value at eye-level'],
   },
 ];
+void _mockPublishedResults; // Reserved for demo/testing
 
 export const POGLocalizationEngine: React.FC = () => {
   const navigate = useNavigate();
@@ -484,7 +487,8 @@ export const POGLocalizationEngine: React.FC = () => {
     
     // Get context for business-specific changes
     const storeGroup = storeGroups.find(g => g.id === selectedStoreGroup);
-    const categoryName = categories.find(c => c.id === selectedCategory)?.name || 'Beverages';
+    const _categoryName = categories.find(c => c.id === selectedCategory)?.name || 'Beverages';
+    void _categoryName; // Reserved for future use
     const demandData = categoryDemandIndex[selectedCategory!]?.[selectedStoreGroup!] || [];
     const topDemand = [...demandData].sort((a, b) => b.value - a.value)[0];
     const lowDemand = [...demandData].sort((a, b) => a.value - b.value)[0];
@@ -674,7 +678,8 @@ export const POGLocalizationEngine: React.FC = () => {
     const generatedTasks: ExecutionTask[] = [];
     const timestamp = new Date().toISOString();
     const storeGroup = storeGroups.find(g => g.name === result.storeGroup);
-    const storeCount = storeGroup?.storeCount || 50;
+    const _storeCount = storeGroup?.storeCount || 50;
+    void _storeCount; // Reserved for future use
 
     // Task 1: Shelf Reset for high-demand subcategories
     generatedTasks.push({

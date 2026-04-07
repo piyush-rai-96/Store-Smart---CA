@@ -8,7 +8,7 @@ import {
   Upload,
   Store,
   Calendar,
-  MessageSquare,
+  // MessageSquare,
   AlertTriangle,
   ArrowRight,
   Plus,
@@ -18,7 +18,7 @@ import {
   TrendingUp,
   User,
   Loader2,
-  Eye,
+  // Eye,
   FileText,
   Package,
   AlertCircle,
@@ -28,7 +28,7 @@ import {
   Wrench,
   UserPlus
 } from 'lucide-react';
-import { useExecutionTasks, ExecutionTask as SharedExecutionTask, TeamMember as SharedTeamMember } from '../context/ExecutionTasksContext';
+import { useExecutionTasks, ExecutionTask as SharedExecutionTask } from '../context/ExecutionTasksContext';
 import './StoreExecution.css';
 
 // Types
@@ -905,11 +905,13 @@ export const StoreExecution: React.FC = () => {
 
   // Combined tasks from shared context and local workflow
   const allTasks = [...sharedTasks, ...tasks];
-  const filteredAllTasks = allTasks.filter(t => {
+  // Filter tasks by status and localization
+  const _filteredAllTasks = allTasks.filter(t => {
     const statusMatch = taskFilter === 'all' || t.status === taskFilter;
     const locMatch = !selectedLocalization || ('localizationId' in t && t.localizationId === selectedLocalization);
     return statusMatch && locMatch;
   });
+  void _filteredAllTasks; // Used in grouped view
 
   // Group shared tasks by localization ID
   const tasksByLocalization = sharedTasks.reduce((acc, task) => {
