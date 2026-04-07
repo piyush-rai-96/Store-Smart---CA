@@ -22,8 +22,13 @@ import {
   FileText,
   Package,
   AlertCircle,
-  Zap
+  Zap,
+  RefreshCw,
+  Tag,
+  Wrench,
+  UserPlus
 } from 'lucide-react';
+import { useExecutionTasks, ExecutionTask as SharedExecutionTask, TeamMember as SharedTeamMember } from '../context/ExecutionTasksContext';
 import './StoreExecution.css';
 
 // Types
@@ -219,7 +224,8 @@ const mockTasks: ExecutionTask[] = [
 ];
 
 export const StoreExecution: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'execution' | 'taskList'>('execution');
+  const { tasks: sharedTasks, assignTask, updateTaskStatus: updateSharedTaskStatus, teamMembers: sharedTeamMembers } = useExecutionTasks();
+  const [activeTab, setActiveTab] = useState<'execution' | 'taskList'>('taskList');
   const [currentStep, setCurrentStep] = useState<WorkflowStep>('select');
   const [selectedStore, setSelectedStore] = useState<string | null>(null);
   const [selectedPOG, setSelectedPOG] = useState<string | null>(null);
@@ -231,6 +237,9 @@ export const StoreExecution: React.FC = () => {
   const [isGeneratingTasks, setIsGeneratingTasks] = useState(false);
   const [taskFilter, setTaskFilter] = useState<'all' | TaskStatus>('all');
   const [isStepLoading, setIsStepLoading] = useState(false);
+  const [assigningTaskId, setAssigningTaskId] = useState<string | null>(null);
+  const [expandedLocalizations, setExpandedLocalizations] = useState<string[]>([]);
+  const [selectedLocalization, setSelectedLocalization] = useState<string | null>(null);
 
   const workflowSteps = [
     { id: 'select' as WorkflowStep, label: 'Select Store & POG', number: 1 },
@@ -893,6 +902,60 @@ export const StoreExecution: React.FC = () => {
     </div>
   );
 
+  // Combined tasks from shared context and local workflow
+  const allTasks = [...sharedTasks, ...tasks];
+  const filteredAllTasks = allTasks.filter(t => {
+    const statusMatch = taskFilter === 'all' || t.status === taskFilter;
+    const locMatch = !selectedLocalization || ('localizationId' in t && t.localizationId === selectedLocalization);
+    return statusMatch && locMatch;
+  });
+
+  // Group shared tasks by localization ID
+  const tasksByLocalization = sharedTasks.reduce((acc, task) => {
+    const locId = task.localizationId;
+    if (!acc[locId]) {
+      acc[locId] = {
+        id: locId,
+        pogName: task.pogName,
+        storeGroup: task.storeGroup,
+        category: task.category,
+        createdAt: task.createdAt,
+        tasks: []
+      };
+    }
+    acc[locId].tasks.push(task);
+    return acc;
+  }, {} as Record<string, { id: string; pogName: string; storeGroup: string; category: string; createdAt: string; tasks: SharedExecutionTask[] }>);
+
+  const localizationGroups = Object.values(tasksByLocalization);
+
+  const toggleLocalizationExpand = (locId: string) => {
+    setExpandedLocalizations(prev => 
+      prev.includes(locId) ? prev.filter(id => id !== locId) : [...prev, locId]
+    );
+  };
+
+  const getSharedTaskTypeIcon = (type: string) => {
+    switch (type) {
+      case 'Add': return <Plus size={16} />;
+      case 'Remove': return <Minus size={16} />;
+      case 'Move': return <Move size={16} />;
+      case 'Adjust Facing': return <Target size={16} />;
+      case 'Reset Shelf': return <RefreshCw size={16} />;
+      case 'Update Label': return <Tag size={16} />;
+      case 'Install Fixture': return <Wrench size={16} />;
+      default: return <Package size={16} />;
+    }
+  };
+
+  const handleAssignTask = (taskId: string, memberId: string) => {
+    const member = sharedTeamMembers.find(m => m.id === memberId);
+    if (member) {
+      assignTask(taskId, memberId, member.name);
+    }
+    setAssigningTaskId(null);
+  };
+
   const renderTaskListTab = () => (
     <div className="exec-task-list-view">
       <div className="exec-task-list-header">
@@ -902,30 +965,49 @@ export const StoreExecution: React.FC = () => {
             className={`exec-filter-btn ${taskFilter === 'all' ? 'active' : ''}`}
             onClick={() => setTaskFilter('all')}
           >
-            All ({tasks.length})
+            All ({allTasks.length})
           </button>
           <button 
             className={`exec-filter-btn ${taskFilter === 'Pending' ? 'active' : ''}`}
             onClick={() => setTaskFilter('Pending')}
           >
-            Pending ({tasks.filter(t => t.status === 'Pending').length})
+            Pending ({allTasks.filter(t => t.status === 'Pending').length})
           </button>
           <button 
             className={`exec-filter-btn ${taskFilter === 'In Progress' ? 'active' : ''}`}
             onClick={() => setTaskFilter('In Progress')}
           >
-            In Progress ({tasks.filter(t => t.status === 'In Progress').length})
+            In Progress ({allTasks.filter(t => t.status === 'In Progress').length})
           </button>
           <button 
             className={`exec-filter-btn ${taskFilter === 'Completed' ? 'active' : ''}`}
             onClick={() => setTaskFilter('Completed')}
           >
-            Completed ({tasks.filter(t => t.status === 'Completed').length})
+            Completed ({allTasks.filter(t => t.status === 'Completed').length})
           </button>
         </div>
       </div>
 
-      {tasks.length === 0 ? (
+      {/* Localization Filter Dropdown */}
+      {localizationGroups.length > 0 && (
+        <div className="exec-localization-filter">
+          <label>Filter by Localization:</label>
+          <select 
+            value={selectedLocalization || 'all'}
+            onChange={(e) => setSelectedLocalization(e.target.value === 'all' ? null : e.target.value)}
+            className="exec-loc-select"
+          >
+            <option value="all">All Localizations ({localizationGroups.length})</option>
+            {localizationGroups.map(loc => (
+              <option key={loc.id} value={loc.id}>
+                {loc.pogName} → {loc.storeGroup} ({loc.tasks.length} tasks)
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {allTasks.length === 0 ? (
         <div className="exec-no-tasks">
           <Package size={48} />
           <h4>No Tasks Yet</h4>
@@ -935,65 +1017,197 @@ export const StoreExecution: React.FC = () => {
           </button>
         </div>
       ) : (
-        <div className="exec-task-table">
-          <div className="exec-table-header">
-            <span>Task ID</span>
-            <span>SKU</span>
-            <span>Action</span>
-            <span>Assigned To</span>
-            <span>Due Date</span>
-            <span>Status</span>
-            <span>Actions</span>
-          </div>
-          <div className="exec-table-body">
-            {filteredTasks.map(task => {
-              const assignee = teamMembers.find(m => m.id === task.assignedTo);
-              return (
-                <div key={task.id} className="exec-table-row">
-                  <span className="exec-task-id">{task.id}</span>
-                  <span className="exec-task-sku">{task.skuName}</span>
-                  <span className="exec-task-action-cell">
-                    <div className="exec-task-type-badge small" data-type={task.type.toLowerCase().replace(' ', '-')}>
-                      {getTaskTypeIcon(task.type)}
-                      <span>{task.type}</span>
-                    </div>
-                  </span>
-                  <span className="exec-task-assignee">
-                    {assignee ? (
-                      <div className="exec-assignee-chip">
-                        <span className="exec-avatar small">{assignee.avatar}</span>
-                        <span>{assignee.name}</span>
+        <div className="exec-localization-groups">
+          {localizationGroups.map(locGroup => {
+            const isExpanded = expandedLocalizations.includes(locGroup.id) || expandedLocalizations.length === 0;
+            const groupTasks = locGroup.tasks.filter(t => taskFilter === 'all' || t.status === taskFilter);
+            const pendingCount = locGroup.tasks.filter(t => t.status === 'Pending').length;
+            const inProgressCount = locGroup.tasks.filter(t => t.status === 'In Progress').length;
+            const completedCount = locGroup.tasks.filter(t => t.status === 'Completed').length;
+
+            if (selectedLocalization && selectedLocalization !== locGroup.id) return null;
+            if (groupTasks.length === 0) return null;
+
+            return (
+              <div key={locGroup.id} className="exec-loc-group">
+                <div 
+                  className={`exec-loc-group-header ${isExpanded ? 'expanded' : ''}`}
+                  onClick={() => toggleLocalizationExpand(locGroup.id)}
+                >
+                  <div className="exec-loc-group-info">
+                    <ChevronRight size={18} className={`exec-loc-chevron ${isExpanded ? 'rotated' : ''}`} />
+                    <div className="exec-loc-group-details">
+                      <h4>{locGroup.pogName} <ArrowRight size={14} /> {locGroup.storeGroup}</h4>
+                      <div className="exec-loc-group-meta">
+                        <span className="exec-loc-tag category">{locGroup.category}</span>
+                        <span className="exec-loc-tag date">
+                          <Calendar size={12} />
+                          {new Date(locGroup.createdAt).toLocaleDateString()}
+                        </span>
+                        <span className="exec-loc-id">ID: {locGroup.id.slice(-8)}</span>
                       </div>
-                    ) : (
-                      <span className="exec-unassigned">Unassigned</span>
-                    )}
-                  </span>
-                  <span className="exec-task-due">
-                    {task.dueDate || <span className="exec-no-date">No date</span>}
-                  </span>
-                  <span>
-                    <select 
-                      className={`exec-status-select ${getStatusColor(task.status)}`}
-                      value={task.status}
-                      onChange={(e) => updateTaskStatus(task.id, e.target.value as TaskStatus)}
-                    >
-                      <option value="Pending">Pending</option>
-                      <option value="In Progress">In Progress</option>
-                      <option value="Completed">Completed</option>
-                    </select>
-                  </span>
-                  <span className="exec-task-actions">
-                    <button className="exec-action-btn" title="View Details">
-                      <Eye size={14} />
-                    </button>
-                    <button className="exec-action-btn" title="Comments">
-                      <MessageSquare size={14} />
-                    </button>
-                  </span>
+                    </div>
+                  </div>
+                  <div className="exec-loc-group-stats">
+                    <span className="exec-stat pending">{pendingCount} Pending</span>
+                    <span className="exec-stat in-progress">{inProgressCount} In Progress</span>
+                    <span className="exec-stat completed">{completedCount} Completed</span>
+                  </div>
                 </div>
-              );
-            })}
-          </div>
+
+                {isExpanded && (
+                  <div className="exec-task-cards">
+                    {groupTasks.map(task => {
+                      const assignee = sharedTeamMembers.find(m => m.id === task.assignedTo);
+                      
+                      return (
+                        <div key={task.id} className={`exec-task-card ${task.status.toLowerCase().replace(' ', '-')}`}>
+                          <div className="exec-task-card-header">
+                            <div className="exec-task-type-badge" data-type={task.type.toLowerCase().replace(' ', '-')}>
+                              {getSharedTaskTypeIcon(task.type)}
+                              <span>{task.type}</span>
+                            </div>
+                            <div className={`exec-task-priority ${task.priority.toLowerCase()}`}>
+                              {task.priority}
+                            </div>
+                          </div>
+                          
+                          <h4 className="exec-task-card-title">{task.title}</h4>
+                          
+                          <p className="exec-task-card-desc">{task.description}</p>
+
+                          <div className="exec-task-card-meta">
+                            <span className="exec-task-meta-item">
+                              <Store size={14} />
+                              {task.storeName}
+                            </span>
+                            <span className="exec-task-meta-item">
+                              <FileText size={14} />
+                              {task.pogName}
+                            </span>
+                          </div>
+
+                          <div className="exec-task-card-impact">
+                            <TrendingUp size={14} />
+                            <span>{task.impact}</span>
+                          </div>
+
+                          <div className="exec-task-card-footer">
+                            <div className="exec-task-assignee-section">
+                              {assigningTaskId === task.id ? (
+                                <select 
+                                  className="exec-assign-select"
+                                  onChange={(e) => handleAssignTask(task.id, e.target.value)}
+                                  defaultValue=""
+                                >
+                                  <option value="" disabled>Select team member</option>
+                                  {sharedTeamMembers.map(member => (
+                                    <option key={member.id} value={member.id}>
+                                      {member.name} - {member.role}
+                                    </option>
+                                  ))}
+                                </select>
+                              ) : assignee ? (
+                                <div className="exec-assignee-chip" onClick={() => setAssigningTaskId(task.id)}>
+                                  <span className="exec-avatar small">{assignee.avatar}</span>
+                                  <span>{assignee.name}</span>
+                                </div>
+                              ) : (
+                                <button 
+                                  className="exec-assign-btn"
+                                  onClick={() => setAssigningTaskId(task.id)}
+                                >
+                                  <UserPlus size={14} />
+                                  Assign
+                                </button>
+                              )}
+                            </div>
+                            
+                            <select 
+                              className={`exec-status-select ${getStatusColor(task.status)}`}
+                              value={task.status}
+                              onChange={(e) => updateSharedTaskStatus(task.id, e.target.value as TaskStatus)}
+                            >
+                              <option value="Pending">Pending</option>
+                              <option value="In Progress">In Progress</option>
+                              <option value="Completed">Completed</option>
+                            </select>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+
+          {/* Show workflow tasks separately if any */}
+          {tasks.length > 0 && (
+            <div className="exec-loc-group">
+              <div className="exec-loc-group-header expanded">
+                <div className="exec-loc-group-info">
+                  <div className="exec-loc-group-details">
+                    <h4>Workflow Generated Tasks</h4>
+                    <div className="exec-loc-group-meta">
+                      <span className="exec-loc-tag category">Store Execution</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="exec-task-cards">
+                {filteredTasks.map(task => {
+                  const assignee = teamMembers.find(m => m.id === task.assignedTo);
+                  
+                  return (
+                    <div key={task.id} className={`exec-task-card ${task.status.toLowerCase().replace(' ', '-')}`}>
+                      <div className="exec-task-card-header">
+                        <div className="exec-task-type-badge" data-type={task.type.toLowerCase().replace(' ', '-')}>
+                          {getTaskTypeIcon(task.type)}
+                          <span>{task.type}</span>
+                        </div>
+                        <div className={`exec-task-priority ${task.priority.toLowerCase()}`}>
+                          {task.priority}
+                        </div>
+                      </div>
+                      
+                      <h4 className="exec-task-card-title">{task.type}: {task.skuName}</h4>
+                      
+                      <p className="exec-task-card-desc">{task.reason}</p>
+
+                      <div className="exec-task-card-impact">
+                        <TrendingUp size={14} />
+                        <span>{task.impact}</span>
+                      </div>
+
+                      <div className="exec-task-card-footer">
+                        <div className="exec-task-assignee-section">
+                          {assignee ? (
+                            <div className="exec-assignee-chip">
+                              <span className="exec-avatar small">{assignee.avatar}</span>
+                              <span>{assignee.name}</span>
+                            </div>
+                          ) : (
+                            <span className="exec-unassigned">Unassigned</span>
+                          )}
+                        </div>
+                        
+                        <select 
+                          className={`exec-status-select ${getStatusColor(task.status)}`}
+                          value={task.status}
+                          onChange={(e) => updateTaskStatus(task.id, e.target.value as TaskStatus)}
+                        >
+                          <option value="Pending">Pending</option>
+                          <option value="In Progress">In Progress</option>
+                          <option value="Completed">Completed</option>
+                        </select>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

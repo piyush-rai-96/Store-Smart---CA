@@ -14,11 +14,11 @@ interface POGItem {
 }
 
 const mockPOGData: POGItem[] = [
-  { id: '1', name: 'Beverage Cooler - Standard', category: 'Beverages', lastModified: '2024-03-15', status: 'active', version: 'v2.1', clusters: 12, planogramImage: '/planograms/beverage-cooler-standard.svg' },
-  { id: '2', name: 'Beverage Aisle - Premium', category: 'Beverages', lastModified: '2024-03-14', status: 'active', version: 'v1.5', clusters: 8, planogramImage: '/planograms/beverage-aisle-premium.svg' },
-  { id: '3', name: 'Holiday Decor Display - Compact', category: 'Holiday Decor & Home Accent', lastModified: '2024-03-12', status: 'draft', version: 'v3.0', clusters: 5, planogramImage: '/planograms/holiday-decor-display.svg' },
-  { id: '4', name: 'Beverage End Cap - Large Format', category: 'Beverages', lastModified: '2024-03-10', status: 'active', version: 'v1.2', clusters: 15, planogramImage: '/planograms/beverage-end-cap.svg' },
-  { id: '5', name: 'Home Accent Shelf - End Cap', category: 'Holiday Decor & Home Accent', lastModified: '2024-03-08', status: 'archived', version: 'v2.0', clusters: 3, planogramImage: '/planograms/home-accent-shelf.svg' },
+  { id: '1', name: 'Beverage Cooler - Standard', category: 'Beverages', lastModified: '2024-03-15', status: 'active', version: 'v2.1', clusters: 12, planogramImage: '/assets/beverage-cooler-standard.png' },
+  { id: '2', name: 'Beverage Aisle - Premium', category: 'Beverages', lastModified: '2024-03-14', status: 'active', version: 'v1.5', clusters: 8, planogramImage: '/assets/beverage-aisle-premium.png' },
+  { id: '3', name: 'Holiday Decor Display - Compact', category: 'Holiday Decor & Home Accent', lastModified: '2024-03-12', status: 'draft', version: 'v3.0', clusters: 5, planogramImage: '/assets/holiday-decor-display-compact.png' },
+  { id: '4', name: 'Beverage End Cap - Large Format', category: 'Beverages', lastModified: '2024-03-10', status: 'active', version: 'v1.2', clusters: 15, planogramImage: '/assets/beverage-end-cap-large-format.png' },
+  { id: '5', name: 'Home Accent Shelf - End Cap', category: 'Holiday Decor & Home Accent', lastModified: '2024-03-08', status: 'archived', version: 'v2.0', clusters: 3, planogramImage: '/assets/home-accent-shelf-end-cap.png' },
 ];
 
 interface Filters {
@@ -317,8 +317,13 @@ export const MasterPOGManagement: React.FC = () => {
                   <h4 className="pog-sidebar-title">Cluster Mapping</h4>
                   <div className="pog-cluster-info">
                     <div className="pog-cluster-stat">
-                      <span className="pog-cluster-number">{selectedPOG.clusters}</span>
+                      <span className="pog-cluster-number">3</span>
                       <span className="pog-cluster-label">Total Clusters</span>
+                    </div>
+                    <div className="pog-cluster-names">
+                      <span className="pog-cluster-tag">Campus Pulse</span>
+                      <span className="pog-cluster-tag">Family Stock-Up</span>
+                      <span className="pog-cluster-tag">Value Transit</span>
                     </div>
                   </div>
                 </div>
@@ -335,34 +340,71 @@ export const MasterPOGManagement: React.FC = () => {
                 <div className="pog-sidebar-section pog-applied-rules">
                   <h4 className="pog-sidebar-title">Applied Rules</h4>
                   <p className="pog-rules-description">Rules dynamically applied based on category, cluster, and fixture mappings.</p>
-                  <div className="pog-rules-list">
-                    <div className="pog-rule-item">
-                      <div className="pog-rule-icon facing">🔢</div>
-                      <div className="pog-rule-info">
-                        <span className="pog-rule-name">Minimum Facing - Beverages</span>
-                        <span className="pog-rule-source">Source: Category</span>
+                  <div className="pog-rules-list premium">
+                    <div className="pog-rule-card">
+                      <div className="pog-rule-card-header">
+                        <div className="pog-rule-icon-badge placement">
+                          <span>�</span>
+                        </div>
+                        <div className="pog-rule-card-title">
+                          <span className="pog-rule-name">Product Fit & Placement</span>
+                          <span className="pog-rule-type-tag">Placement</span>
+                        </div>
+                        <span className="pog-rule-status active">Active</span>
                       </div>
+                      <p className="pog-rule-description">Place small single-serve drinks on top shelves, medium bottles in the middle, and large bottles on bottom shelves.</p>
                     </div>
-                    <div className="pog-rule-item">
-                      <div className="pog-rule-icon mandatory">✅</div>
-                      <div className="pog-rule-info">
-                        <span className="pog-rule-name">Mandatory SKU - Coca Cola</span>
-                        <span className="pog-rule-source">Source: Category + Cluster</span>
+                    <div className="pog-rule-card">
+                      <div className="pog-rule-card-header">
+                        <div className="pog-rule-icon-badge facing">
+                          <span>🔢</span>
+                        </div>
+                        <div className="pog-rule-card-title">
+                          <span className="pog-rule-name">Facing Rules</span>
+                          <span className="pog-rule-type-tag">Facing</span>
+                        </div>
+                        <span className="pog-rule-status active">Active</span>
                       </div>
+                      <p className="pog-rule-description">Ensure high-demand beverages have multiple front facings and shelves are fully stocked with no empty gaps.</p>
                     </div>
-                    <div className="pog-rule-item">
-                      <div className="pog-rule-icon brand">🏷️</div>
-                      <div className="pog-rule-info">
-                        <span className="pog-rule-name">Brand Blocking - Cola Products</span>
-                        <span className="pog-rule-source">Source: Fixture</span>
+                    <div className="pog-rule-card">
+                      <div className="pog-rule-card-header">
+                        <div className="pog-rule-icon-badge priority">
+                          <span>⭐</span>
+                        </div>
+                        <div className="pog-rule-card-title">
+                          <span className="pog-rule-name">Priority Placement</span>
+                          <span className="pog-rule-type-tag">Priority</span>
+                        </div>
+                        <span className="pog-rule-status active">Active</span>
                       </div>
+                      <p className="pog-rule-description">Keep top-selling drinks and core categories like soda and sports drinks at eye level.</p>
                     </div>
-                    <div className="pog-rule-item">
-                      <div className="pog-rule-icon priority">⭐</div>
-                      <div className="pog-rule-info">
-                        <span className="pog-rule-name">Eye-Level Priority - Store Brand</span>
-                        <span className="pog-rule-source">Source: Global</span>
+                    <div className="pog-rule-card">
+                      <div className="pog-rule-card-header">
+                        <div className="pog-rule-icon-badge space">
+                          <span>📊</span>
+                        </div>
+                        <div className="pog-rule-card-title">
+                          <span className="pog-rule-name">Space Allocation</span>
+                          <span className="pog-rule-type-tag">Space</span>
+                        </div>
+                        <span className="pog-rule-status active">Active</span>
                       </div>
+                      <p className="pog-rule-description">Divide shelf space clearly between soda, water, and energy drinks based on demand.</p>
+                    </div>
+                    <div className="pog-rule-card">
+                      <div className="pog-rule-card-header">
+                        <div className="pog-rule-icon-badge tier">
+                          <span>💰</span>
+                        </div>
+                        <div className="pog-rule-card-title">
+                          <span className="pog-rule-name">Price Tier Rules</span>
+                          <span className="pog-rule-type-tag">Price Tier</span>
+                        </div>
+                        <span className="pog-rule-status active">Active</span>
+                      </div>
+                      <p className="pog-rule-description">Place value drinks on lower shelves and premium drinks on upper or eye-level shelves.</p>
                     </div>
                   </div>
                 </div>

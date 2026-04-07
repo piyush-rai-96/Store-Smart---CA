@@ -1,6 +1,6 @@
 // Application constants
 export const APP_CONFIG = {
-  name: 'IA StoreHub',
+  name: 'StoreHub',
   fullName: 'Impact Analytics StoreHub',
   version: '1.0.0',
 } as const;

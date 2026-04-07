@@ -24,12 +24,17 @@ import {
   PackageX,
   Star,
   Box,
-  Building2
+  Building2,
+  PieChart,
+  TrendingUp,
+  Maximize2,
+  DollarSign,
+  Tag
 } from 'lucide-react';
 import './POGRuleManagement.css';
 
 // Types
-type RuleType = 'Dimensional' | 'Facing' | 'Brand Blocking' | 'Adjacency' | 'Mandatory SKU' | 'Prohibited SKU' | 'Priority' | 'Fixture-Specific' | 'Cluster-Specific';
+type RuleType = 'Space Allocation' | 'Performance' | 'Capacity' | 'Price Tier' | 'Dimensional' | 'Facing' | 'Brand Blocking' | 'Adjacency' | 'Mandatory SKU' | 'Prohibited SKU' | 'Priority' | 'Fixture-Specific' | 'Cluster-Specific';
 type RuleStatus = 'Active' | 'Inactive' | 'Draft';
 
 interface RuleMapping {
@@ -58,12 +63,16 @@ interface WizardStep {
 
 const wizardSteps: WizardStep[] = [
   { id: 1, title: 'Basic Info', description: 'Name and description' },
-  { id: 2, title: 'Rule Types', description: 'Select one or more rule types' },
-  { id: 3, title: 'Rule Definition', description: 'Configure rule parameters' },
-  { id: 4, title: 'Mapping', description: 'Apply to categories, clusters, fixtures' },
+  { id: 2, title: 'Mapping', description: 'Apply to categories, clusters, fixtures' },
+  { id: 3, title: 'Rule Types', description: 'Select one or more rule types' },
+  { id: 4, title: 'Rule Definition', description: 'Configure rule parameters' },
 ];
 
 const ruleTypeIcons: Record<RuleType, React.ReactNode> = {
+  'Space Allocation': <PieChart size={20} />,
+  'Performance': <TrendingUp size={20} />,
+  'Capacity': <Maximize2 size={20} />,
+  'Price Tier': <DollarSign size={20} />,
   'Dimensional': <Ruler size={20} />,
   'Facing': <LayoutGrid size={20} />,
   'Brand Blocking': <Layers size={20} />,
@@ -75,16 +84,63 @@ const ruleTypeIcons: Record<RuleType, React.ReactNode> = {
   'Cluster-Specific': <Building2 size={20} />,
 };
 
-const ruleTypeOptions: { value: RuleType; label: string; description: string }[] = [
-  { value: 'Dimensional', label: 'Dimensional', description: 'Size constraints' },
+// Rule type groups for visual organization
+const ruleTypeGroups = [
+  {
+    name: 'Critical Rules',
+    types: ['Space Allocation', 'Performance', 'Capacity', 'Price Tier'] as RuleType[]
+  },
+  {
+    name: 'Product Rules',
+    types: ['Mandatory SKU', 'Prohibited SKU', 'Brand Blocking'] as RuleType[]
+  },
+  {
+    name: 'Placement Rules',
+    types: ['Dimensional', 'Facing', 'Adjacency', 'Priority'] as RuleType[]
+  }
+];
+
+// Category-based size presets
+const categorySizePresets: Record<string, { small: string; medium: string; large: string; unit?: string }> = {
+  'Beverages': { small: '≤ 500 ml', medium: '500 ml – 1L', large: '≥ 1L', unit: 'Volume' },
+  'Carbonated Drinks': { small: '≤ 500 ml', medium: '500 ml – 1L', large: '≥ 1L', unit: 'Volume' },
+  'Energy Drinks': { small: '≤ 250 ml', medium: '250 ml – 500 ml', large: '≥ 500 ml', unit: 'Volume' },
+  'Juices': { small: '≤ 500 ml', medium: '500 ml – 1L', large: '≥ 1L', unit: 'Volume' },
+  'Water': { small: '≤ 500 ml', medium: '500 ml – 1.5L', large: '≥ 1.5L', unit: 'Volume' },
+  'Snacks': { small: 'Single serve packs', medium: 'Standard packs', large: 'Family / multi-pack', unit: 'Pack Size' },
+  'Chips': { small: 'Single serve (1-2 oz)', medium: 'Standard (5-10 oz)', large: 'Party size (12+ oz)', unit: 'Pack Size' },
+  'Cookies': { small: 'Single serve', medium: 'Standard pack', large: 'Family pack', unit: 'Pack Size' },
+  'Crackers': { small: 'Snack pack', medium: 'Standard box', large: 'Family box', unit: 'Pack Size' },
+  'Holiday Decor & Home Accent': { small: 'Handheld / hanging decor', medium: 'Tabletop decor', large: 'Floor / bulky decor', unit: 'Physical Size' },
+  'Dairy': { small: 'Single serve', medium: 'Standard size', large: 'Family size', unit: 'Pack Size' },
+  'Frozen': { small: 'Single serve', medium: 'Standard pack', large: 'Family / bulk', unit: 'Pack Size' },
+};
+
+// Get size preset for a category (with fallback)
+const getSizePreset = (category: string) => {
+  if (categorySizePresets[category]) return categorySizePresets[category];
+  // Check for partial matches
+  for (const key of Object.keys(categorySizePresets)) {
+    if (category.toLowerCase().includes(key.toLowerCase()) || key.toLowerCase().includes(category.toLowerCase())) {
+      return categorySizePresets[key];
+    }
+  }
+  // Default preset
+  return { small: 'Small items', medium: 'Medium items', large: 'Large items', unit: 'General' };
+};
+
+const ruleTypeOptions: { value: RuleType; label: string; description: string; critical?: boolean }[] = [
+  { value: 'Space Allocation', label: 'Space Allocation', description: 'Category space % targets', critical: true },
+  { value: 'Performance', label: 'Performance Rules', description: 'Sales-based placement', critical: true },
+  { value: 'Capacity', label: 'Capacity / Fit', description: 'Shelf & SKU limits', critical: true },
+  { value: 'Price Tier', label: 'Price Tier Rules', description: 'Tier mix & placement', critical: true },
+  { value: 'Dimensional', label: 'Product Fit & Placement', description: 'Size-based shelf placement' },
   { value: 'Facing', label: 'Facing', description: 'Product facings' },
   { value: 'Brand Blocking', label: 'Brand Blocking', description: 'Group by brand' },
   { value: 'Adjacency', label: 'Adjacency', description: 'Placement rules' },
   { value: 'Mandatory SKU', label: 'Mandatory SKU', description: 'Required SKUs' },
   { value: 'Prohibited SKU', label: 'Prohibited SKU', description: 'Excluded SKUs' },
   { value: 'Priority', label: 'Priority', description: 'Eye-level placement' },
-  { value: 'Fixture-Specific', label: 'Fixture-Specific', description: 'Fixture rules' },
-  { value: 'Cluster-Specific', label: 'Cluster-Specific', description: 'Cluster rules' },
 ];
 
 const allCategories = [
@@ -275,6 +331,48 @@ const SearchableDropdown: React.FC<{
   );
 };
 
+// Custom Select Dropdown Component for premium styling
+const CustomSelect: React.FC<{
+  options: { value: string; label: string }[];
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+}> = ({ options, value, onChange, placeholder }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const selectedOption = options.find(opt => opt.value === value);
+
+  return (
+    <div className="custom-select-wrapper">
+      <div 
+        className={`custom-select-trigger ${isOpen ? 'open' : ''} ${value ? 'has-value' : ''}`}
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <span className={value ? '' : 'placeholder'}>
+          {selectedOption ? selectedOption.label : placeholder}
+        </span>
+        <ChevronDown size={18} className={`custom-select-arrow ${isOpen ? 'rotated' : ''}`} />
+      </div>
+      {isOpen && (
+        <>
+          <div className="custom-select-menu">
+            {options.map(opt => (
+              <div 
+                key={opt.value} 
+                className={`custom-select-option ${opt.value === value ? 'selected' : ''}`}
+                onClick={() => { onChange(opt.value); setIsOpen(false); }}
+              >
+                {opt.label}
+                {opt.value === value && <Check size={16} />}
+              </div>
+            ))}
+          </div>
+          <div className="custom-select-backdrop" onClick={() => setIsOpen(false)} />
+        </>
+      )}
+    </div>
+  );
+};
+
 export const POGRuleManagement: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'library' | 'builder'>('library');
   const [searchQuery, setSearchQuery] = useState('');
@@ -315,6 +413,11 @@ export const POGRuleManagement: React.FC = () => {
       (filters.mappingStatus === 'Unmapped' && !isMapped(rule));
     const matchesRuleStatus = !filters.ruleStatus || rule.status === filters.ruleStatus;
     return matchesSearch && matchesType && matchesCategory && matchesMappingStatus && matchesRuleStatus;
+  }).sort((a, b) => {
+    // Sort drafts to top, then by last updated (newest first)
+    if (a.status === 'Draft' && b.status !== 'Draft') return -1;
+    if (a.status !== 'Draft' && b.status === 'Draft') return 1;
+    return new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime();
   });
 
   const handleViewRule = (rule: Rule) => setSelectedRule(rule);
@@ -351,9 +454,9 @@ export const POGRuleManagement: React.FC = () => {
   const isStepComplete = (stepId: number): boolean => {
     switch (stepId) {
       case 1: return !!builderForm.name && builderForm.name.length > 0;
-      case 2: return (builderForm.types?.length || 0) > 0;
-      case 3: return Object.keys(builderForm.definition || {}).length > 0;
-      case 4: return true;
+      case 2: return true; // Mapping is optional
+      case 3: return (builderForm.types?.length || 0) > 0;
+      case 4: return Object.keys(builderForm.definition || {}).length > 0;
       default: return false;
     }
   };
@@ -456,6 +559,7 @@ export const POGRuleManagement: React.FC = () => {
 
   const getTypeBadgeClass = (type: RuleType): string => {
     const typeMap: Record<RuleType, string> = {
+      'Space Allocation': 'type-critical', 'Performance': 'type-critical', 'Capacity': 'type-critical', 'Price Tier': 'type-critical',
       'Dimensional': 'type-dimensional', 'Facing': 'type-facing', 'Brand Blocking': 'type-brand-blocking',
       'Adjacency': 'type-adjacency', 'Mandatory SKU': 'type-mandatory-sku', 'Prohibited SKU': 'type-prohibited-sku',
       'Priority': 'type-priority', 'Fixture-Specific': 'type-fixture', 'Cluster-Specific': 'type-cluster',
@@ -475,12 +579,167 @@ export const POGRuleManagement: React.FC = () => {
 
   const renderDefinitionForType = (type: RuleType) => {
     const def = builderForm.definition?.[type] || {};
+    const mappedCategories = builderForm.mapping?.categories || [];
     
     switch (type) {
+      case 'Space Allocation':
+        return (
+          <div className="type-definition-card">
+            <h4>Space Allocation</h4>
+            <div className="wizard-field-group">
+              <label>Category</label>
+              {mappedCategories.length > 0 ? (
+                <div className="auto-mapped-tags">
+                  {mappedCategories.map(c => <span key={c} className="mapped-tag">{c}</span>)}
+                </div>
+              ) : (
+                <p className="no-mapping-hint">No categories mapped. Go back to Mapping step to select categories.</p>
+              )}
+            </div>
+            <div className="wizard-field-group">
+              <label>Target Space %</label>
+              <div className="slider-container">
+                <input type="range" min="0" max="100" value={def.targetPercent || 20} onChange={(e) => updateDefinition(type, 'targetPercent', parseInt(e.target.value))} />
+                <span className="slider-value">{def.targetPercent || 20}%</span>
+              </div>
+            </div>
+            <div className="wizard-field-row">
+              <div className="wizard-field-group">
+                <label>Min %</label>
+                <input type="number" min="0" max="100" value={def.minPercent || ''} onChange={(e) => updateDefinition(type, 'minPercent', parseInt(e.target.value) || 0)} placeholder="10" />
+              </div>
+              <div className="wizard-field-group">
+                <label>Max %</label>
+                <input type="number" min="0" max="100" value={def.maxPercent || ''} onChange={(e) => updateDefinition(type, 'maxPercent', parseInt(e.target.value) || 0)} placeholder="30" />
+              </div>
+            </div>
+          </div>
+        );
+      case 'Performance':
+        return (
+          <div className="type-definition-card">
+            <h4>Performance Rules</h4>
+            <div className="wizard-field-row">
+              <div className="wizard-field-group">
+                <label>Metric</label>
+                <select value={def.metric || ''} onChange={(e) => updateDefinition(type, 'metric', e.target.value)}>
+                  <option value="">Select Metric</option>
+                  <option value="Sales">Sales ($)</option>
+                  <option value="Units">Units Sold</option>
+                  <option value="Margin">Margin %</option>
+                  <option value="Velocity">Velocity</option>
+                </select>
+              </div>
+              <div className="wizard-field-group">
+                <label>Threshold</label>
+                <select value={def.threshold || ''} onChange={(e) => updateDefinition(type, 'threshold', e.target.value)}>
+                  <option value="">Select Threshold</option>
+                  <option value="Top 10%">Top 10%</option>
+                  <option value="Top 20%">Top 20%</option>
+                  <option value="Top 30%">Top 30%</option>
+                  <option value="Rank 1-5">Rank 1-5</option>
+                  <option value="Rank 1-10">Rank 1-10</option>
+                </select>
+              </div>
+            </div>
+            <div className="wizard-field-group">
+              <label>Action</label>
+              <select value={def.action || ''} onChange={(e) => updateDefinition(type, 'action', e.target.value)}>
+                <option value="">Select Action</option>
+                <option value="+1 Facing">+1 Facing</option>
+                <option value="+2 Facings">+2 Facings</option>
+                <option value="Eye Level">Move to Eye Level</option>
+                <option value="Prime Position">Prime Position</option>
+                <option value="Increase Space">Increase Space 10%</option>
+              </select>
+            </div>
+          </div>
+        );
+      case 'Capacity':
+        return (
+          <div className="type-definition-card">
+            <h4>Capacity / Fit</h4>
+            <div className="wizard-field-row">
+              <div className="wizard-field-group">
+                <label>Shelf Limit</label>
+                <input type="number" min="1" value={def.shelfLimit || ''} onChange={(e) => updateDefinition(type, 'shelfLimit', parseInt(e.target.value) || 0)} placeholder="5" />
+                <span className="field-hint">Max shelves to use</span>
+              </div>
+              <div className="wizard-field-group">
+                <label>Max SKUs</label>
+                <input type="number" min="1" value={def.maxSKUs || ''} onChange={(e) => updateDefinition(type, 'maxSKUs', parseInt(e.target.value) || 0)} placeholder="25" />
+                <span className="field-hint">Total SKUs allowed</span>
+              </div>
+              <div className="wizard-field-group">
+                <label>Max Facings</label>
+                <input type="number" min="1" value={def.maxFacings || ''} onChange={(e) => updateDefinition(type, 'maxFacings', parseInt(e.target.value) || 0)} placeholder="50" />
+                <span className="field-hint">Total facings allowed</span>
+              </div>
+            </div>
+          </div>
+        );
+      case 'Price Tier':
+        return (
+          <div className="type-definition-card">
+            <h4>Price Tier Rules</h4>
+            <div className="price-tier-section">
+              <label>Tier Mix (must total 100%)</label>
+              <div className="tier-sliders">
+                <div className="tier-slider-row">
+                  <span className="tier-label">Premium</span>
+                  <input type="range" min="0" max="100" value={def.premiumPercent || 20} onChange={(e) => updateDefinition(type, 'premiumPercent', parseInt(e.target.value))} />
+                  <span className="tier-value">{def.premiumPercent || 20}%</span>
+                </div>
+                <div className="tier-slider-row">
+                  <span className="tier-label">Mid-Tier</span>
+                  <input type="range" min="0" max="100" value={def.midTierPercent || 50} onChange={(e) => updateDefinition(type, 'midTierPercent', parseInt(e.target.value))} />
+                  <span className="tier-value">{def.midTierPercent || 50}%</span>
+                </div>
+                <div className="tier-slider-row">
+                  <span className="tier-label">Value</span>
+                  <input type="range" min="0" max="100" value={def.valuePercent || 30} onChange={(e) => updateDefinition(type, 'valuePercent', parseInt(e.target.value))} />
+                  <span className="tier-value">{def.valuePercent || 30}%</span>
+                </div>
+              </div>
+            </div>
+            <div className="wizard-field-group" style={{ marginTop: '16px' }}>
+              <label>Tier Placement Mapping</label>
+              <div className="tier-placement-grid">
+                <div className="tier-placement-row">
+                  <span>Premium →</span>
+                  <select value={def.premiumPlacement || ''} onChange={(e) => updateDefinition(type, 'premiumPlacement', e.target.value)}>
+                    <option value="">Select</option>
+                    <option value="Top Shelf">Top Shelf</option>
+                    <option value="Eye Level">Eye Level</option>
+                    <option value="Mid Level">Mid Level</option>
+                  </select>
+                </div>
+                <div className="tier-placement-row">
+                  <span>Mid-Tier →</span>
+                  <select value={def.midTierPlacement || ''} onChange={(e) => updateDefinition(type, 'midTierPlacement', e.target.value)}>
+                    <option value="">Select</option>
+                    <option value="Eye Level">Eye Level</option>
+                    <option value="Mid Level">Mid Level</option>
+                    <option value="Bottom">Bottom</option>
+                  </select>
+                </div>
+                <div className="tier-placement-row">
+                  <span>Value →</span>
+                  <select value={def.valuePlacement || ''} onChange={(e) => updateDefinition(type, 'valuePlacement', e.target.value)}>
+                    <option value="">Select</option>
+                    <option value="Mid Level">Mid Level</option>
+                    <option value="Bottom">Bottom</option>
+                    <option value="Floor">Floor Level</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
       case 'Facing':
         return (
           <div className="type-definition-card">
-            <h4>🔢 Facing Rules</h4>
+            <h4>Facing Rules</h4>
             <div className="wizard-field-row">
               <div className="wizard-field-group">
                 <label>Min Facings</label>
@@ -494,64 +753,205 @@ export const POGRuleManagement: React.FC = () => {
           </div>
         );
       case 'Dimensional':
+        const mappedCategory = mappedCategories[0] || 'Beverages';
+        const sizePreset = getSizePreset(mappedCategory);
+        const sizeDefinitionType = def.sizeDefinitionType || 'category_standard';
+        
         return (
           <div className="type-definition-card">
-            <h4>📐 Dimensional Rules</h4>
-            <div className="wizard-field-row">
-              <div className="wizard-field-group"><label>Min Width (in)</label><input type="number" value={def.minWidth || ''} onChange={(e) => updateDefinition(type, 'minWidth', parseInt(e.target.value) || 0)} /></div>
-              <div className="wizard-field-group"><label>Max Width (in)</label><input type="number" value={def.maxWidth || ''} onChange={(e) => updateDefinition(type, 'maxWidth', parseInt(e.target.value) || 0)} /></div>
-              <div className="wizard-field-group"><label>Min Height (in)</label><input type="number" value={def.minHeight || ''} onChange={(e) => updateDefinition(type, 'minHeight', parseInt(e.target.value) || 0)} /></div>
-              <div className="wizard-field-group"><label>Max Height (in)</label><input type="number" value={def.maxHeight || ''} onChange={(e) => updateDefinition(type, 'maxHeight', parseInt(e.target.value) || 0)} /></div>
+            <h4>Product Fit & Placement</h4>
+            <p className="card-description">Sizes are automatically derived based on category standards for correct shelf placement.</p>
+            
+            <div className="wizard-field-group">
+              <label>Size Definition</label>
+              <div className="size-definition-toggle">
+                <label className={`radio-option ${sizeDefinitionType === 'category_standard' ? 'selected' : ''}`}>
+                  <input 
+                    type="radio" 
+                    name="sizeDefinition" 
+                    value="category_standard"
+                    checked={sizeDefinitionType === 'category_standard'}
+                    onChange={() => updateDefinition(type, 'sizeDefinitionType', 'category_standard')}
+                  />
+                  <span className="radio-label">Use Category Standard</span>
+                  <span className="radio-badge">Recommended</span>
+                </label>
+                <label className={`radio-option ${sizeDefinitionType === 'custom' ? 'selected' : ''}`}>
+                  <input 
+                    type="radio" 
+                    name="sizeDefinition" 
+                    value="custom"
+                    checked={sizeDefinitionType === 'custom'}
+                    onChange={() => updateDefinition(type, 'sizeDefinitionType', 'custom')}
+                  />
+                  <span className="radio-label">Custom</span>
+                </label>
+              </div>
+            </div>
+
+            {sizeDefinitionType === 'category_standard' && (
+              <div className="size-preset-preview">
+                <div className="preset-header">
+                  <span className="preset-category">{mappedCategory}</span>
+                  <span className="preset-unit">{sizePreset.unit}</span>
+                </div>
+                <div className="preset-label">Size Buckets (Auto-applied)</div>
+                <div className="size-buckets-grid">
+                  <div className="size-bucket">
+                    <span className="bucket-size">Small</span>
+                    <span className="bucket-arrow">→</span>
+                    <span className="bucket-value">{sizePreset.small}</span>
+                  </div>
+                  <div className="size-bucket">
+                    <span className="bucket-size">Medium</span>
+                    <span className="bucket-arrow">→</span>
+                    <span className="bucket-value">{sizePreset.medium}</span>
+                  </div>
+                  <div className="size-bucket">
+                    <span className="bucket-size">Large</span>
+                    <span className="bucket-arrow">→</span>
+                    <span className="bucket-value">{sizePreset.large}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {sizeDefinitionType === 'custom' && (
+              <div className="custom-size-definition">
+                <div className="wizard-field-group">
+                  <label>Small</label>
+                  <input type="text" value={def.customSmall || ''} onChange={(e) => updateDefinition(type, 'customSmall', e.target.value)} placeholder="e.g., ≤ 500 ml" />
+                </div>
+                <div className="wizard-field-group">
+                  <label>Medium</label>
+                  <input type="text" value={def.customMedium || ''} onChange={(e) => updateDefinition(type, 'customMedium', e.target.value)} placeholder="e.g., 500 ml – 1L" />
+                </div>
+                <div className="wizard-field-group">
+                  <label>Large</label>
+                  <input type="text" value={def.customLarge || ''} onChange={(e) => updateDefinition(type, 'customLarge', e.target.value)} placeholder="e.g., ≥ 1L" />
+                </div>
+              </div>
+            )}
+
+            <div className="placement-rules-section">
+              <label>Placement Rules</label>
+              <p className="section-hint">Define where each size should be placed on the shelf.</p>
+              <div className="placement-grid">
+                <div className="placement-row">
+                  <span className="placement-size">Small</span>
+                  <span className="placement-arrow">→</span>
+                  <CustomSelect
+                    options={[
+                      { value: 'Top Shelf', label: 'Top Shelf' },
+                      { value: 'Eye Level', label: 'Eye Level' },
+                      { value: 'Mid Shelf', label: 'Mid Shelf' },
+                      { value: 'Bottom Shelf', label: 'Bottom Shelf' }
+                    ]}
+                    value={def.smallPlacement || 'Top Shelf'}
+                    onChange={(val) => updateDefinition(type, 'smallPlacement', val)}
+                    placeholder="Select placement"
+                  />
+                </div>
+                <div className="placement-row">
+                  <span className="placement-size">Medium</span>
+                  <span className="placement-arrow">→</span>
+                  <CustomSelect
+                    options={[
+                      { value: 'Top Shelf', label: 'Top Shelf' },
+                      { value: 'Eye Level', label: 'Eye Level' },
+                      { value: 'Mid Shelf', label: 'Mid Shelf' },
+                      { value: 'Bottom Shelf', label: 'Bottom Shelf' }
+                    ]}
+                    value={def.mediumPlacement || 'Eye Level'}
+                    onChange={(val) => updateDefinition(type, 'mediumPlacement', val)}
+                    placeholder="Select placement"
+                  />
+                </div>
+                <div className="placement-row">
+                  <span className="placement-size">Large</span>
+                  <span className="placement-arrow">→</span>
+                  <CustomSelect
+                    options={[
+                      { value: 'Top Shelf', label: 'Top Shelf' },
+                      { value: 'Eye Level', label: 'Eye Level' },
+                      { value: 'Mid Shelf', label: 'Mid Shelf' },
+                      { value: 'Bottom Shelf', label: 'Bottom Shelf' }
+                    ]}
+                    value={def.largePlacement || 'Bottom Shelf'}
+                    onChange={(val) => updateDefinition(type, 'largePlacement', val)}
+                    placeholder="Select placement"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         );
       case 'Brand Blocking':
         return (
           <div className="type-definition-card">
-            <h4>🏷️ Brand Blocking Rules</h4>
+            <h4>Brand Blocking Rules</h4>
+            <div className="wizard-field-group">
+              <label>Brands</label>
+              <SearchableDropdown
+                options={brandOptions}
+                selected={def.brands || []}
+                onChange={(brands) => updateDefinition(type, 'brands', brands)}
+                placeholder="Search and select brands..."
+              />
+            </div>
             <div className="wizard-field-row">
               <div className="wizard-field-group">
-                <label>Brand</label>
-                <select value={def.brand || ''} onChange={(e) => updateDefinition(type, 'brand', e.target.value)}>
-                  <option value="">Select Brand</option>
-                  {brandOptions.map(b => <option key={b} value={b}>{b}</option>)}
-                </select>
+                <label>Blocking Type</label>
+                <CustomSelect
+                  options={[
+                    { value: 'Vertical', label: 'Vertical' },
+                    { value: 'Horizontal', label: 'Horizontal' },
+                    { value: 'Block', label: 'Block' }
+                  ]}
+                  value={def.blockingType || ''}
+                  onChange={(val) => updateDefinition(type, 'blockingType', val)}
+                  placeholder="Choose blocking type"
+                />
               </div>
               <div className="wizard-field-group">
-                <label>Blocking Type</label>
-                <select value={def.blockingType || ''} onChange={(e) => updateDefinition(type, 'blockingType', e.target.value)}>
-                  <option value="">Select</option>
-                  <option value="Vertical">Vertical</option>
-                  <option value="Horizontal">Horizontal</option>
-                  <option value="Block">Block</option>
-                </select>
+                <label>Min Products per Brand</label>
+                <input type="number" value={def.minProducts || ''} onChange={(e) => updateDefinition(type, 'minProducts', parseInt(e.target.value) || 0)} placeholder="e.g., 3" />
               </div>
-              <div className="wizard-field-group"><label>Min Products</label><input type="number" value={def.minProducts || ''} onChange={(e) => updateDefinition(type, 'minProducts', parseInt(e.target.value) || 0)} /></div>
             </div>
           </div>
         );
       case 'Adjacency':
         return (
           <div className="type-definition-card">
-            <h4>↔️ Adjacency Rules</h4>
+            <h4>Adjacency Rules</h4>
             <div className="wizard-field-row">
-              <div className="wizard-field-group"><label>Category/Product A</label><input type="text" value={def.categoryA || ''} onChange={(e) => updateDefinition(type, 'categoryA', e.target.value)} placeholder="e.g., Cola" /></div>
+              <div className="wizard-field-group">
+                <label>Category/Product A</label>
+                <input type="text" value={def.categoryA || ''} onChange={(e) => updateDefinition(type, 'categoryA', e.target.value)} placeholder="e.g., Cola" />
+              </div>
               <div className="wizard-field-group">
                 <label>Condition</label>
-                <select value={def.condition || ''} onChange={(e) => updateDefinition(type, 'condition', e.target.value)}>
-                  <option value="">Select</option>
-                  <option value="Must Be Adjacent">Must Be Adjacent</option>
-                  <option value="Not Adjacent">Must NOT Be Adjacent</option>
-                </select>
+                <CustomSelect
+                  options={[
+                    { value: 'Must Be Adjacent', label: 'Must Be Adjacent' },
+                    { value: 'Not Adjacent', label: 'Must NOT Be Adjacent' }
+                  ]}
+                  value={def.condition || ''}
+                  onChange={(val) => updateDefinition(type, 'condition', val)}
+                  placeholder="Choose condition"
+                />
               </div>
-              <div className="wizard-field-group"><label>Category/Product B</label><input type="text" value={def.categoryB || ''} onChange={(e) => updateDefinition(type, 'categoryB', e.target.value)} placeholder="e.g., Diet Cola" /></div>
+              <div className="wizard-field-group">
+                <label>Category/Product B</label>
+                <input type="text" value={def.categoryB || ''} onChange={(e) => updateDefinition(type, 'categoryB', e.target.value)} placeholder="e.g., Diet Cola" />
+              </div>
             </div>
           </div>
         );
       case 'Mandatory SKU':
         return (
           <div className="type-definition-card">
-            <h4>✅ Mandatory SKU Rules</h4>
+            <h4>Mandatory SKU Rules</h4>
             <div className="wizard-field-group">
               <label>Select SKUs (search or upload)</label>
               <SearchableDropdown
@@ -572,7 +972,7 @@ export const POGRuleManagement: React.FC = () => {
       case 'Prohibited SKU':
         return (
           <div className="type-definition-card prohibited">
-            <h4>🚫 Prohibited SKU Rules</h4>
+            <h4>Prohibited SKU Rules</h4>
             <div className="wizard-field-group">
               <label>Select SKUs to Prohibit (search or upload)</label>
               <SearchableDropdown
@@ -593,35 +993,47 @@ export const POGRuleManagement: React.FC = () => {
       case 'Priority':
         return (
           <div className="type-definition-card">
-            <h4>⭐ Priority Rules</h4>
+            <h4>Priority Rules</h4>
             <div className="wizard-field-row">
               <div className="wizard-field-group">
                 <label>Target</label>
-                <select value={def.target || ''} onChange={(e) => updateDefinition(type, 'target', e.target.value)}>
-                  <option value="">Select</option>
-                  <option value="Store Brand">Store Brand</option>
-                  <option value="High Margin">High Margin</option>
-                  <option value="Promotion">Promotional</option>
-                  <option value="New Products">New Products</option>
-                </select>
+                <CustomSelect
+                  options={[
+                    { value: 'Store Brand', label: 'Store Brand' },
+                    { value: 'High Margin', label: 'High Margin' },
+                    { value: 'Promotion', label: 'Promotional' },
+                    { value: 'New Products', label: 'New Products' }
+                  ]}
+                  value={def.target || ''}
+                  onChange={(val) => updateDefinition(type, 'target', val)}
+                  placeholder="Choose target"
+                />
               </div>
               <div className="wizard-field-group">
                 <label>Placement</label>
-                <select value={def.placement || ''} onChange={(e) => updateDefinition(type, 'placement', e.target.value)}>
-                  <option value="">Select</option>
-                  <option value="Eye-level">Eye-level</option>
-                  <option value="Mid-level">Mid-level</option>
-                  <option value="Bottom">Bottom</option>
-                </select>
+                <CustomSelect
+                  options={[
+                    { value: 'Eye-level', label: 'Eye-level' },
+                    { value: 'Mid-level', label: 'Mid-level' },
+                    { value: 'Bottom', label: 'Bottom' }
+                  ]}
+                  value={def.placement || ''}
+                  onChange={(val) => updateDefinition(type, 'placement', val)}
+                  placeholder="Choose placement"
+                />
               </div>
               <div className="wizard-field-group">
-                <label>Priority</label>
-                <select value={def.priority || ''} onChange={(e) => updateDefinition(type, 'priority', e.target.value)}>
-                  <option value="">Select</option>
-                  <option value="High">High</option>
-                  <option value="Medium">Medium</option>
-                  <option value="Low">Low</option>
-                </select>
+                <label>Priority Level</label>
+                <CustomSelect
+                  options={[
+                    { value: 'High', label: 'High' },
+                    { value: 'Medium', label: 'Medium' },
+                    { value: 'Low', label: 'Low' }
+                  ]}
+                  value={def.priority || ''}
+                  onChange={(val) => updateDefinition(type, 'priority', val)}
+                  placeholder="Choose priority"
+                />
               </div>
             </div>
           </div>
@@ -687,48 +1099,8 @@ export const POGRuleManagement: React.FC = () => {
       case 2:
         return (
           <div className="wizard-step-content">
-            <h3 className="wizard-step-title">Select Rule Types</h3>
-            <p className="wizard-step-description">Choose one or more rule types to combine in this rule. You can select multiple types to create a comprehensive rule.</p>
-            <div className="wizard-rule-type-grid">
-              {ruleTypeOptions.map(rt => (
-                <div key={rt.value} className={`wizard-rule-type-card ${builderForm.types?.includes(rt.value) ? 'selected' : ''}`} onClick={() => handleTypeToggle(rt.value)}>
-                  <span className="wizard-rule-type-icon">{ruleTypeIcons[rt.value]}</span>
-                  <div className="wizard-rule-type-info">
-                    <h4>{rt.label}</h4>
-                    <p>{rt.description}</p>
-                  </div>
-                  {builderForm.types?.includes(rt.value) && <CheckCircle size={20} className="wizard-rule-type-check" />}
-                </div>
-              ))}
-            </div>
-            {(builderForm.types?.length || 0) > 0 && (
-              <div className="wizard-selected-types">
-                <strong>Selected:</strong> {builderForm.types?.map(t => ruleTypeOptions.find(r => r.value === t)?.label).join(', ')}
-              </div>
-            )}
-          </div>
-        );
-      case 3:
-        return (
-          <div className="wizard-step-content">
-            <h3 className="wizard-step-title">Rule Definition</h3>
-            <p className="wizard-step-description">Configure the parameters for each selected rule type.</p>
-            {(builderForm.types?.length || 0) === 0 ? (
-              <div className="wizard-warning-card"><AlertTriangle size={18} /><div>Please go back and select at least one rule type.</div></div>
-            ) : (
-              <div className="wizard-definitions-list">
-                {builderForm.types?.map(type => (
-                  <React.Fragment key={type}>{renderDefinitionForType(type)}</React.Fragment>
-                ))}
-              </div>
-            )}
-          </div>
-        );
-      case 4:
-        return (
-          <div className="wizard-step-content">
             <h3 className="wizard-step-title">Rule Mapping</h3>
-            <p className="wizard-step-description">Map this rule to categories, clusters/stores, and fixtures. Use the search to filter or upload a CSV/TXT file.</p>
+            <p className="wizard-step-description">Define where this rule applies. Select any combination of categories, clusters/stores, and fixtures — use one, two, or all three.</p>
             <div className="wizard-mapping-sections">
               <div className="wizard-mapping-group">
                 <h4>Categories</h4>
@@ -737,8 +1109,6 @@ export const POGRuleManagement: React.FC = () => {
                   selected={builderForm.mapping?.categories || []}
                   onChange={(cats) => handleMappingChange('categories', cats)}
                   placeholder="Search categories..."
-                  allowUpload
-                  onUpload={(items) => handleMappingChange('categories', [...(builderForm.mapping?.categories || []), ...items.filter(i => allCategories.includes(i))])}
                 />
               </div>
               <div className="wizard-mapping-group">
@@ -760,6 +1130,35 @@ export const POGRuleManagement: React.FC = () => {
                 />
               </div>
             </div>
+            <div className="wizard-or-divider">
+              <span>OR</span>
+            </div>
+            <div className="wizard-upload-section">
+              <h4>Bulk Upload</h4>
+              <p className="upload-hint">Upload a CSV or TXT file with categories, clusters, or fixtures to apply in bulk.</p>
+              <label className="upload-btn">
+                <Upload size={16} />
+                Upload CSV/TXT
+                <input type="file" accept=".csv,.txt" style={{ display: 'none' }} onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                      const text = event.target?.result as string;
+                      const items = text.split(/[\n,]/).map(s => s.trim()).filter(Boolean);
+                      const matchedCategories = items.filter(i => allCategories.includes(i));
+                      const matchedClusters = items.filter(i => clusterOptions.includes(i));
+                      const matchedFixtures = items.filter(i => fixtureOptions.includes(i));
+                      if (matchedCategories.length > 0) handleMappingChange('categories', [...(builderForm.mapping?.categories || []), ...matchedCategories]);
+                      if (matchedClusters.length > 0) handleMappingChange('clusters', [...(builderForm.mapping?.clusters || []), ...matchedClusters]);
+                      if (matchedFixtures.length > 0) handleMappingChange('fixtures', [...(builderForm.mapping?.fixtures || []), ...matchedFixtures]);
+                    };
+                    reader.readAsText(file);
+                  }
+                  e.target.value = '';
+                }} />
+              </label>
+            </div>
             {!isMapped(builderForm) && (
               <div className="wizard-warning-card"><AlertTriangle size={18} /><div><strong>No Mapping Selected</strong><p>This rule will be saved but marked as Unmapped.</p></div></div>
             )}
@@ -771,6 +1170,57 @@ export const POGRuleManagement: React.FC = () => {
                   {(builderForm.mapping?.fixtures?.length || 0) > 0 && <li>Fixtures: {builderForm.mapping?.fixtures.join(', ')}</li>}
                 </ul>
               </div></div>
+            )}
+          </div>
+        );
+      case 3:
+        return (
+          <div className="wizard-step-content">
+            <h3 className="wizard-step-title">Select Rule Types</h3>
+            <p className="wizard-step-description">Choose one or more rule types to combine in this rule. You can select multiple types to create a comprehensive rule.</p>
+            <div className="wizard-rule-type-groups">
+              {ruleTypeGroups.map(group => (
+                <div key={group.name} className="rule-type-group">
+                  <h4 className="rule-type-group-title">{group.name}</h4>
+                  <div className="rule-type-group-grid">
+                    {group.types.map(typeValue => {
+                      const rt = ruleTypeOptions.find(r => r.value === typeValue);
+                      if (!rt) return null;
+                      return (
+                        <div key={rt.value} className={`wizard-rule-type-card ${builderForm.types?.includes(rt.value) ? 'selected' : ''} ${rt.critical ? 'critical' : ''}`} onClick={() => handleTypeToggle(rt.value)}>
+                          <span className="wizard-rule-type-icon">{ruleTypeIcons[rt.value]}</span>
+                          <div className="wizard-rule-type-info">
+                            <h4>{rt.label}</h4>
+                            <p>{rt.description}</p>
+                          </div>
+                          {builderForm.types?.includes(rt.value) && <CheckCircle size={20} className="wizard-rule-type-check" />}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+            {(builderForm.types?.length || 0) > 0 && (
+              <div className="wizard-selected-types">
+                <strong>Selected:</strong> {builderForm.types?.map(t => ruleTypeOptions.find(r => r.value === t)?.label).join(', ')}
+              </div>
+            )}
+          </div>
+        );
+      case 4:
+        return (
+          <div className="wizard-step-content">
+            <h3 className="wizard-step-title">Rule Definition</h3>
+            <p className="wizard-step-description">Configure the parameters for each selected rule type.</p>
+            {(builderForm.types?.length || 0) === 0 ? (
+              <div className="wizard-warning-card"><AlertTriangle size={18} /><div>Please go back and select at least one rule type.</div></div>
+            ) : (
+              <div className="wizard-definitions-list">
+                {builderForm.types?.map(type => (
+                  <React.Fragment key={type}>{renderDefinitionForType(type)}</React.Fragment>
+                ))}
+              </div>
             )}
           </div>
         );
@@ -807,36 +1257,174 @@ export const POGRuleManagement: React.FC = () => {
             <div className="rule-search"><Search size={18} className="rule-search-icon" /><input type="text" placeholder="Search rules..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="rule-search-input" /></div>
             <button className="rule-create-btn" onClick={handleCreateNew}><Plus size={18} /><span>Create Rule</span></button>
           </div>
-          <div className="rule-filters">
-            <div className="rule-filter-item"><label className="rule-filter-label">Rule Type</label><select className="rule-filter-select" value={filters.ruleType} onChange={(e) => handleFilterChange('ruleType', e.target.value)}><option value="">All Types</option>{ruleTypeOptions.map(rt => <option key={rt.value} value={rt.value}>{rt.label}</option>)}</select></div>
-            <div className="rule-filter-item"><label className="rule-filter-label">Mapping Status</label><select className="rule-filter-select" value={filters.mappingStatus} onChange={(e) => handleFilterChange('mappingStatus', e.target.value)}><option value="">All</option><option value="Mapped">Mapped</option><option value="Unmapped">Unmapped</option></select></div>
-            <div className="rule-filter-item"><label className="rule-filter-label">Status</label><select className="rule-filter-select" value={filters.ruleStatus} onChange={(e) => handleFilterChange('ruleStatus', e.target.value)}><option value="">All</option><option value="Active">Active</option><option value="Inactive">Inactive</option><option value="Draft">Draft</option></select></div>
-            <button className="rule-filter-clear" onClick={clearAllFilters}>Clear All</button>
+          <div className="rule-filters-bar">
+            <div className="rule-filter-group">
+              <label>Rule Type</label>
+              <CustomSelect
+                options={[
+                  { value: '', label: 'All Types' },
+                  ...ruleTypeOptions.map(rt => ({ value: rt.value, label: rt.label }))
+                ]}
+                value={filters.ruleType}
+                onChange={(val) => handleFilterChange('ruleType', val)}
+                placeholder="All Types"
+              />
+            </div>
+            <div className="rule-filter-group">
+              <label>Mapping Status</label>
+              <CustomSelect
+                options={[
+                  { value: '', label: 'All' },
+                  { value: 'Mapped', label: 'Mapped' },
+                  { value: 'Unmapped', label: 'Unmapped' }
+                ]}
+                value={filters.mappingStatus}
+                onChange={(val) => handleFilterChange('mappingStatus', val)}
+                placeholder="All"
+              />
+            </div>
+            <div className="rule-filter-group">
+              <label>Status</label>
+              <CustomSelect
+                options={[
+                  { value: '', label: 'All' },
+                  { value: 'Active', label: 'Active' },
+                  { value: 'Inactive', label: 'Inactive' },
+                  { value: 'Draft', label: 'Draft' }
+                ]}
+                value={filters.ruleStatus}
+                onChange={(val) => handleFilterChange('ruleStatus', val)}
+                placeholder="All"
+              />
+            </div>
+            <button className="filter-clear-btn" onClick={clearAllFilters}>Clear All</button>
           </div>
-          <div className="rule-table-container">
-            <table className="rule-table">
-              <thead><tr><th>Rule ID</th><th>Rule Name</th><th>Types</th><th>Categories</th><th>Clusters</th><th>Fixtures</th><th>Mapping</th><th>Updated</th><th>Status</th><th>Actions</th></tr></thead>
+
+          <div className="premium-table-container">
+            <table className="premium-table">
+              <thead>
+                <tr>
+                  <th>Rule ID</th>
+                  <th>Rule Name</th>
+                  <th>Rule Types</th>
+                  <th>Categories</th>
+                  <th>Clusters</th>
+                  <th>Fixtures</th>
+                  <th>Mapping</th>
+                  <th>Last Updated</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
               <tbody>
-                {filteredRules.map(rule => {
-                  const mapped = isMapped(rule);
-                  const isDraft = rule.status === 'Draft';
-                  return (
-                    <tr key={rule.id} className={`${!mapped && !isDraft ? 'unmapped-row' : ''} ${isDraft ? 'draft-row' : ''}`}>
-                      <td><button className="rule-id-link" onClick={() => handleViewRule(rule)}>{rule.id}</button></td>
-                      <td className="rule-name-cell"><div className="rule-name-wrapper">{rule.name}{isDraft && <span className="rule-draft-indicator"><Circle size={8} />{rule.completedSteps.length}/4</span>}</div></td>
-                      <td><div className="rule-types-cell">{rule.types.slice(0, 2).map(t => <span key={t} className={`rule-type-badge ${getTypeBadgeClass(t)}`}>{t}</span>)}{rule.types.length > 2 && <span className="rule-mapping-more">+{rule.types.length - 2}</span>}</div></td>
-                      <td>{renderMappingBadges(rule.mapping.categories)}</td>
-                      <td>{renderMappingBadges(rule.mapping.clusters)}</td>
-                      <td>{renderMappingBadges(rule.mapping.fixtures)}</td>
-                      <td>{isDraft ? <span className="mapping-status draft"><FileText size={14} />Draft</span> : mapped ? <span className="mapping-status mapped"><CheckCircle size={14} />Mapped</span> : <span className="mapping-status unmapped"><AlertTriangle size={14} />Unmapped</span>}</td>
-                      <td>{rule.lastUpdated}</td>
-                      <td><span className={`rule-status-badge ${rule.status.toLowerCase()}`}>{rule.status}</span></td>
-                      <td><div className="rule-actions"><button className="rule-action-btn" onClick={() => handleViewRule(rule)} title="View"><Eye size={16} /></button><button className="rule-action-btn" onClick={() => handleEditRule(rule)} title="Edit"><Edit size={16} /></button><button className="rule-action-btn danger" onClick={() => handleDeleteClick(rule)} title="Delete"><Trash2 size={16} /></button></div></td>
-                    </tr>
-                  );
-                })}
+                {filteredRules.length === 0 ? (
+                  <tr className="empty-row">
+                    <td colSpan={10}>
+                      <div className="empty-state">
+                        <FileText size={40} />
+                        <p>No rules found</p>
+                        <span>Create a new rule or adjust your filters</span>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  filteredRules.map(rule => {
+                    const mapped = isMapped(rule);
+                    const isDraft = rule.status === 'Draft';
+                    return (
+                      <tr key={rule.id} className={`${!mapped && !isDraft ? 'unmapped-row' : ''} ${isDraft ? 'draft-row' : ''}`}>
+                        <td>
+                          <button className="rule-id-link" onClick={() => handleViewRule(rule)}>
+                            {rule.id}
+                          </button>
+                        </td>
+                        <td>
+                          <div className="rule-name-cell">
+                            <span className="rule-name-text">{rule.name}</span>
+                            {isDraft && (
+                              <span className="draft-progress">
+                                <Circle size={8} />
+                                {rule.completedSteps.length}/4
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td>
+                          <div className="rule-types-cell">
+                            {rule.types.slice(0, 2).map(t => (
+                              <span key={t} className={`rule-type-badge ${getTypeBadgeClass(t)}`}>
+                                {t === 'Dimensional' ? 'Product Fit' : t}
+                              </span>
+                            ))}
+                            {rule.types.length > 2 && (
+                              <span className="more-badge">+{rule.types.length - 2}</span>
+                            )}
+                          </div>
+                        </td>
+                        <td>{renderMappingBadges(rule.mapping.categories)}</td>
+                        <td>{renderMappingBadges(rule.mapping.clusters)}</td>
+                        <td>{renderMappingBadges(rule.mapping.fixtures)}</td>
+                        <td>
+                          {isDraft ? (
+                            <span className="mapping-badge draft"><FileText size={14} />Draft</span>
+                          ) : mapped ? (
+                            <span className="mapping-badge mapped"><CheckCircle size={14} />Mapped</span>
+                          ) : (
+                            <span className="mapping-badge unmapped"><AlertTriangle size={14} />Unmapped</span>
+                          )}
+                        </td>
+                        <td><span className="date-cell">{rule.lastUpdated}</span></td>
+                        <td>
+                          <span className={`status-pill ${rule.status.toLowerCase()}`}>
+                            {rule.status}
+                          </span>
+                        </td>
+                        <td>
+                          <div className="action-buttons">
+                            <button className="action-btn view" onClick={() => handleViewRule(rule)} title="View">
+                              <Eye size={16} />
+                            </button>
+                            <button className="action-btn edit" onClick={() => handleEditRule(rule)} title="Edit">
+                              <Edit size={16} />
+                            </button>
+                            <button className="action-btn delete" onClick={() => handleDeleteClick(rule)} title="Delete">
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </table>
+          </div>
+
+          <div className="table-pagination">
+            <div className="pagination-info">
+              Showing <strong>1-{Math.min(filteredRules.length, 10)}</strong> of <strong>{filteredRules.length}</strong> rules
+            </div>
+            <div className="pagination-controls">
+              <button className="pagination-btn" disabled>
+                <ChevronLeft size={16} />
+              </button>
+              <button className="pagination-page active">1</button>
+              <button className="pagination-page">2</button>
+              <button className="pagination-page">3</button>
+              <span className="pagination-ellipsis">...</span>
+              <button className="pagination-page">12</button>
+              <button className="pagination-btn">
+                <ChevronRight size={16} />
+              </button>
+            </div>
+            <div className="pagination-per-page">
+              <span>Rows per page:</span>
+              <select defaultValue="10">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+              </select>
+            </div>
           </div>
         </div>
       )}
@@ -845,7 +1433,7 @@ export const POGRuleManagement: React.FC = () => {
         <div className="rule-builder-wizard">
           <div className="wizard-progress">
             {wizardSteps.map((step, index) => {
-              const isCompleted = builderForm.completedSteps?.includes(step.id) || isStepComplete(step.id);
+              const isCompleted = builderForm.completedSteps?.includes(step.id) || (step.id < currentStep && isStepComplete(step.id));
               const isCurrent = currentStep === step.id;
               const isAccessible = canProceedToStep(step.id);
               return (
@@ -877,17 +1465,157 @@ export const POGRuleManagement: React.FC = () => {
 
       {selectedRule && (
         <div className="rule-modal-overlay" onClick={() => setSelectedRule(null)}>
-          <div className="rule-modal" onClick={e => e.stopPropagation()}>
-            <div className="rule-modal-header"><div><h2>{selectedRule.name}</h2><span className="rule-modal-id">{selectedRule.id}</span></div><button className="rule-modal-close" onClick={() => setSelectedRule(null)}><X size={20} /></button></div>
-            <div className="rule-modal-content">
-              <div className="rule-modal-row"><span className="rule-modal-label">Types:</span><div className="rule-types-cell">{selectedRule.types.map(t => <span key={t} className={`rule-type-badge ${getTypeBadgeClass(t)}`}>{t}</span>)}</div></div>
-              <div className="rule-modal-row"><span className="rule-modal-label">Status:</span><span className={`rule-status-badge ${selectedRule.status.toLowerCase()}`}>{selectedRule.status}</span></div>
-              <div className="rule-modal-row"><span className="rule-modal-label">Mapping:</span>{isMapped(selectedRule) ? <span className="mapping-status mapped"><CheckCircle size={14} />Mapped</span> : <span className="mapping-status unmapped"><AlertTriangle size={14} />Unmapped</span>}</div>
-              {selectedRule.description && <div className="rule-modal-section"><h4>Description</h4><p>{selectedRule.description}</p></div>}
-              <div className="rule-modal-section"><h4>Rule Definition</h4><pre className="rule-definition-preview">{JSON.stringify(selectedRule.definition, null, 2)}</pre></div>
-              <div className="rule-modal-section"><h4>Mappings</h4><div className="rule-modal-mappings"><div><strong>Categories:</strong> {selectedRule.mapping.categories.length > 0 ? selectedRule.mapping.categories.join(', ') : 'None'}</div><div><strong>Clusters:</strong> {selectedRule.mapping.clusters.length > 0 ? selectedRule.mapping.clusters.join(', ') : 'None'}</div><div><strong>Fixtures:</strong> {selectedRule.mapping.fixtures.length > 0 ? selectedRule.mapping.fixtures.join(', ') : 'None'}</div></div></div>
+          <div className="rule-detail-modal" onClick={e => e.stopPropagation()}>
+            <div className="rule-detail-header">
+              <div className="rule-detail-title-section">
+                <div className="rule-detail-icon">
+                  {ruleTypeIcons[selectedRule.types[0]] || <Layers size={24} />}
+                </div>
+                <div>
+                  <h2>{selectedRule.name}</h2>
+                  <span className="rule-detail-id">{selectedRule.id}</span>
+                </div>
+              </div>
+              <button className="rule-detail-close" onClick={() => setSelectedRule(null)}>
+                <X size={20} />
+              </button>
             </div>
-            <div className="rule-modal-actions"><button className="rule-modal-edit-btn" onClick={() => { setSelectedRule(null); handleEditRule(selectedRule); }}><Edit size={16} />Edit Rule</button></div>
+
+            <div className="rule-detail-status-bar">
+              <div className="status-item">
+                <span className="status-label">Status</span>
+                <span className={`rule-status-badge ${selectedRule.status.toLowerCase()}`}>{selectedRule.status}</span>
+              </div>
+              <div className="status-item">
+                <span className="status-label">Mapping</span>
+                {isMapped(selectedRule) ? (
+                  <span className="mapping-status mapped"><CheckCircle size={14} />Mapped</span>
+                ) : (
+                  <span className="mapping-status unmapped"><AlertTriangle size={14} />Unmapped</span>
+                )}
+              </div>
+              <div className="status-item">
+                <span className="status-label">Last Updated</span>
+                <span className="status-value">{selectedRule.lastUpdated}</span>
+              </div>
+            </div>
+
+            <div className="rule-detail-content">
+              {selectedRule.description && (
+                <div className="rule-detail-section">
+                  <h4>Description</h4>
+                  <p className="rule-description-text">{selectedRule.description}</p>
+                </div>
+              )}
+
+              <div className="rule-detail-section">
+                <h4>Rule Types</h4>
+                <div className="rule-types-display">
+                  {selectedRule.types.map(t => (
+                    <div key={t} className="rule-type-card-mini">
+                      <span className="rule-type-icon-mini">{ruleTypeIcons[t]}</span>
+                      <span className="rule-type-name">{t}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rule-detail-section">
+                <h4>Scope & Mapping</h4>
+                <div className="mapping-cards-grid">
+                  <div className="mapping-card">
+                    <div className="mapping-card-header">
+                      <Tag size={16} />
+                      <span>Categories</span>
+                    </div>
+                    <div className="mapping-card-content">
+                      {selectedRule.mapping.categories.length > 0 ? (
+                        <div className="mapping-tags">
+                          {selectedRule.mapping.categories.map(c => (
+                            <span key={c} className="mapping-tag">{c}</span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="no-mapping">No categories mapped</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="mapping-card">
+                    <div className="mapping-card-header">
+                      <Building2 size={16} />
+                      <span>Clusters</span>
+                    </div>
+                    <div className="mapping-card-content">
+                      {selectedRule.mapping.clusters.length > 0 ? (
+                        <div className="mapping-tags">
+                          {selectedRule.mapping.clusters.map(c => (
+                            <span key={c} className="mapping-tag">{c}</span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="no-mapping">No clusters mapped</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="mapping-card">
+                    <div className="mapping-card-header">
+                      <Box size={16} />
+                      <span>Fixtures</span>
+                    </div>
+                    <div className="mapping-card-content">
+                      {selectedRule.mapping.fixtures.length > 0 ? (
+                        <div className="mapping-tags">
+                          {selectedRule.mapping.fixtures.map(f => (
+                            <span key={f} className="mapping-tag">{f}</span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="no-mapping">No fixtures mapped</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rule-detail-section">
+                <h4>Rule Configuration</h4>
+                <div className="rule-config-preview">
+                  {Object.keys(selectedRule.definition).length > 0 ? (
+                    Object.entries(selectedRule.definition).map(([ruleType, config]) => (
+                      <div key={ruleType} className="config-block">
+                        <div className="config-block-header">{ruleType}</div>
+                        <div className="config-block-content">
+                          {typeof config === 'object' && config !== null ? (
+                            Object.entries(config as Record<string, unknown>).map(([key, value]) => (
+                              <div key={key} className="config-row">
+                                <span className="config-key">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
+                                <span className="config-value">
+                                  {Array.isArray(value) ? value.join(', ') : String(value)}
+                                </span>
+                              </div>
+                            ))
+                          ) : (
+                            <span className="config-value">{String(config)}</span>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="no-config">No configuration defined yet</div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="rule-detail-footer">
+              <button className="btn-secondary" onClick={() => setSelectedRule(null)}>
+                Close
+              </button>
+              <button className="btn-primary" onClick={() => { setSelectedRule(null); handleEditRule(selectedRule); }}>
+                <Edit size={16} />
+                Edit Rule
+              </button>
+            </div>
           </div>
         </div>
       )}

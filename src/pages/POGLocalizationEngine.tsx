@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   CheckCircle, 
   Circle, 
@@ -28,9 +29,9 @@ import {
   Eye,
   Calendar,
   AlertCircle,
-  PieChart,
   TrendingUp
 } from 'lucide-react';
+import { useExecutionTasks, ExecutionTask } from '../context/ExecutionTasksContext';
 import './POGLocalizationEngine.css';
 
 // Types
@@ -54,7 +55,7 @@ interface CorporatePOG {
   image: string;
   insights: string[];
   categoryId: string;
-  rules: { name: string; type: string; status: 'Active' | 'Warning' }[];
+  rules: { name: string; type: string; status: 'Active' | 'Warning'; description?: string }[];
 }
 
 interface StoreGroup {
@@ -105,8 +106,8 @@ interface LocalizationResult {
 
 // Mock Data
 const categories: Category[] = [
-  { id: 'beverages', name: 'Beverages', icon: <Coffee size={24} />, pogCount: 12 },
-  { id: 'holiday', name: 'Holiday Decor', icon: <Home size={24} />, pogCount: 8 },
+  { id: 'beverages', name: 'Beverages', icon: <Coffee size={24} />, pogCount: 3 },
+  { id: 'holiday', name: 'Holiday Decor', icon: <Home size={24} />, pogCount: 2 },
 ];
 
 const allCorporatePOGs: CorporatePOG[] = [
@@ -116,14 +117,18 @@ const allCorporatePOGs: CorporatePOG[] = [
     version: 'v2.1',
     sectionSize: '8ft',
     shelfCount: 5,
-    image: '/planograms/beverage-cooler-standard.svg',
+    image: '/Assets/Beverage Cooler (Standard).png',
     insights: ['Energy at premium position', 'Cola-led core structure', 'Private label interspersed'],
     categoryId: 'beverages',
     rules: [
-      { name: 'Brand Blocking - Cola', type: 'Brand Blocking', status: 'Active' },
-      { name: 'Min Facing - Energy', type: 'Facing', status: 'Active' },
-      { name: 'Adjacency - Water/Sports', type: 'Adjacency', status: 'Active' },
-      { name: 'Eye-Level Premium', type: 'Priority', status: 'Warning' },
+      { name: 'Product Fit & Placement', type: 'Product Fit & Placement', status: 'Active', description: 'Place small single-serve drinks on top shelves, medium bottles in the middle, and large bottles or multipacks on bottom shelves or base.' },
+      { name: 'Facing Rules', type: 'Facing', status: 'Active', description: 'Ensure high-demand beverages have multiple front facings and shelves are fully stocked with no empty gaps.' },
+      { name: 'Priority Placement', type: 'Priority', status: 'Active', description: 'Keep top-selling drinks and core categories like soda and sports drinks at eye level.' },
+      { name: 'Space Allocation', type: 'Space Allocation', status: 'Active', description: 'Divide shelf space clearly between soda, water, and energy drinks based on demand.' },
+      { name: 'Capacity / Fit', type: 'Capacity / Fit', status: 'Active', description: 'Do not exceed shelf capacity. Products must fit within shelf space without overlapping.' },
+      { name: 'Price Tier Rules', type: 'Price Tier', status: 'Active', description: 'Place value drinks on lower shelves and premium drinks on upper or eye-level shelves.' },
+      { name: 'Temperature Compliance', type: 'Compliance', status: 'Active', description: 'Only chilled beverages should be placed in the cooler. Do not mix ambient products.' },
+      { name: 'Label Visibility', type: 'Visual', status: 'Active', description: 'Ensure all product labels face forward and are clearly visible to customers.' },
     ],
   },
   {
@@ -132,13 +137,17 @@ const allCorporatePOGs: CorporatePOG[] = [
     version: 'v1.5',
     sectionSize: '12ft',
     shelfCount: 6,
-    image: '/planograms/beverage-aisle-premium.svg',
+    image: '/Assets/Beverage Aisle - Premium.png',
     insights: ['Premium-first layout', 'Craft beverages highlighted', 'Impulse zone at checkout'],
     categoryId: 'beverages',
     rules: [
-      { name: 'Premium Positioning', type: 'Priority', status: 'Active' },
-      { name: 'Craft Brand Blocking', type: 'Brand Blocking', status: 'Active' },
-      { name: 'Min 3 Facings', type: 'Facing', status: 'Active' },
+      { name: 'Product Fit & Placement', type: 'Product Fit & Placement', status: 'Active', description: 'Arrange smaller bottles and premium drinks on upper shelves and larger packs on lower shelves.' },
+      { name: 'Facing Rules', type: 'Facing', status: 'Active', description: 'Maintain moderate spacing while ensuring key products have enough visibility.' },
+      { name: 'Brand Blocking', type: 'Brand Blocking', status: 'Active', description: 'Group products of the same brand together in a continuous block.' },
+      { name: 'Adjacency Rules', type: 'Adjacency', status: 'Active', description: 'Place similar beverage types together such as water with water and juice with juice.' },
+      { name: 'Price Tier Rules', type: 'Price Tier', status: 'Active', description: 'Ensure premium products are placed at eye level and value products are positioned lower.' },
+      { name: 'Visual Balance', type: 'Visual', status: 'Active', description: 'Maintain a clean and organized shelf with balanced spacing across all products.' },
+      { name: 'Shelf Alignment', type: 'Compliance', status: 'Active', description: 'All products must be aligned uniformly with no tilted or misaligned items.' },
     ],
   },
   {
@@ -147,40 +156,55 @@ const allCorporatePOGs: CorporatePOG[] = [
     version: 'v3.0',
     sectionSize: '4ft',
     shelfCount: 4,
-    image: '/planograms/beverage-end-cap.svg',
+    image: '/Assets/Beverage End Cap - Large Format.png',
     insights: ['High-velocity items', 'Promotional focus', 'Seasonal rotation'],
     categoryId: 'beverages',
     rules: [
-      { name: 'Promo SKU Priority', type: 'Priority', status: 'Active' },
-      { name: 'Max 2 Brands', type: 'Brand Blocking', status: 'Active' },
+      { name: 'Priority Placement', type: 'Priority', status: 'Active', description: 'Place promotional and top-selling beverages in top and eye-level shelves.' },
+      { name: 'Facing Rules', type: 'Facing', status: 'Active', description: 'Use high-density placement with multiple facings to create strong visual impact.' },
+      { name: 'Space Allocation', type: 'Space Allocation', status: 'Active', description: 'Allocate more space to high-demand or promotional products.' },
+      { name: 'Performance Rules', type: 'Performance', status: 'Active', description: 'Increase space for top-selling products and reduce space for slower-moving items.' },
+      { name: 'Capacity / Fit', type: 'Capacity / Fit', status: 'Active', description: 'Ensure bulk packs are placed on lower shelves or base without exceeding limits.' },
+      { name: 'Promotion Visibility', type: 'Visual', status: 'Active', description: 'Ensure promotional products are clearly visible and not blocked by other items.' },
+      { name: 'Symmetry', type: 'Visual', status: 'Active', description: 'Maintain a balanced layout across left and right sides for better visual appeal.' },
     ],
   },
   {
     id: 'hol-corp-001',
-    name: 'Holiday Display - Standard',
+    name: 'Holiday Decor - Compact',
     version: 'v1.3',
     sectionSize: '6ft',
     shelfCount: 4,
-    image: '/planograms/holiday-decor-display.svg',
+    image: '/Assets/Holiday Decor Display - Compact.png',
     insights: ['Seasonal items at eye-level', 'Gift sets prominently placed', 'Value items at bottom'],
     categoryId: 'holiday',
     rules: [
-      { name: 'Gift Set Positioning', type: 'Priority', status: 'Active' },
-      { name: 'Seasonal Rotation', type: 'Fixture-Specific', status: 'Active' },
+      { name: 'Product Fit & Placement', type: 'Product Fit & Placement', status: 'Active', description: 'Place small decor on top shelves, medium items in the middle, and larger items on bottom or base.' },
+      { name: 'Pack Behavior', type: 'Pack Behavior', status: 'Active', description: 'Hang ornaments and garlands on peg hooks and place boxed decor on shelves.' },
+      { name: 'Adjacency Rules', type: 'Adjacency', status: 'Active', description: 'Group similar decor items such as ornaments with lights and candles together.' },
+      { name: 'Assortment Rules', type: 'Assortment', status: 'Active', description: 'Ensure a mix of ornaments, lights, candles, and decor items without overcrowding.' },
+      { name: 'Visual Merchandising', type: 'Visual', status: 'Active', description: 'Maintain clean spacing and group items by color or theme.' },
+      { name: 'Theme Consistency', type: 'Visual', status: 'Active', description: 'Ensure decor items follow a consistent festive theme or color grouping.' },
+      { name: 'Accessibility', type: 'Compliance', status: 'Active', description: 'Ensure frequently picked items are placed within easy reach for customers.' },
     ],
   },
   {
     id: 'hol-corp-002',
-    name: 'Holiday End Cap - Premium',
+    name: 'Home Accent - End Cap',
     version: 'v2.0',
     sectionSize: '4ft',
     shelfCount: 3,
-    image: '/planograms/home-accent-shelf.svg',
+    image: '/Assets/Home Accent Shelf - End Cap.png',
     insights: ['Premium gift focus', 'Impulse purchase zone', 'Cross-category bundling'],
     categoryId: 'holiday',
     rules: [
-      { name: 'Premium Gift Priority', type: 'Priority', status: 'Active' },
-      { name: 'Bundle Adjacency', type: 'Adjacency', status: 'Warning' },
+      { name: 'Product Fit & Placement', type: 'Product Fit & Placement', status: 'Active', description: 'Place small decor items on upper shelves, medium items at eye level, and large items on the base.' },
+      { name: 'Adjacency Rules', type: 'Adjacency', status: 'Active', description: 'Place related items together such as frames with wall decor and candles with holders.' },
+      { name: 'Brand / Theme Blocking', type: 'Brand Blocking', status: 'Active', description: 'Group products by style or theme such as modern or rustic.' },
+      { name: 'Price Tier Rules', type: 'Price Tier', status: 'Active', description: 'Place premium items on top shelves and value items on lower shelves.' },
+      { name: 'Visual Merchandising', type: 'Visual', status: 'Active', description: 'Maintain clean spacing and avoid clutter.' },
+      { name: 'Stability', type: 'Compliance', status: 'Active', description: 'Ensure all items are placed securely and cannot easily fall or tip over.' },
+      { name: 'Visibility', type: 'Visual', status: 'Active', description: 'Ensure all products are clearly visible and not hidden behind others.' },
     ],
   },
 ];
@@ -189,33 +213,144 @@ const storeGroups: StoreGroup[] = [
   { 
     id: 'campus', 
     name: 'Campus Pulse', 
-    description: 'Urban locations near universities with high foot traffic', 
-    storeCount: 145, 
-    tags: ['High Impulse', 'Single-Serve Focus', 'Premium Preference'],
+    description: 'Younger shoppers. Impulse-driven trips. Single-serve and apartment-scale.', 
+    storeCount: 184, 
+    tags: ['High Impulse', 'Functional', 'Single-serve', 'Trend-driven'],
     assortment: { totalSKUs: 156, premium: 45, core: 78, value: 23, newItems: 10 }
   },
   { 
     id: 'family', 
     name: 'Family Stock-Up', 
-    description: 'Suburban stores with family-oriented shopping patterns', 
-    storeCount: 312, 
-    tags: ['Bulk Buyers', 'Value Seekers', 'Weekly Shoppers'],
+    description: 'Larger baskets. Replenishment missions. Household-led purchasing.', 
+    storeCount: 612, 
+    tags: ['Bulk-friendly', 'Value-led', 'Replenishment', 'Multi-format'],
     assortment: { totalSKUs: 198, premium: 32, core: 95, value: 56, newItems: 15 }
   },
   { 
     id: 'rural', 
     name: 'Rural Core', 
-    description: 'Rural locations with essential-focused inventory', 
-    storeCount: 89, 
-    tags: ['Essential Focus', 'Limited SKUs', 'Price Sensitive'],
+    description: 'Essentials-heavy. Simpler assortment. Value orientation.', 
+    storeCount: 452, 
+    tags: ['Essentials-first', 'Value dominant', 'Community-anchored', 'Steady demand'],
     assortment: { totalSKUs: 112, premium: 18, core: 62, value: 28, newItems: 4 }
   },
+  { 
+    id: 'transit', 
+    name: 'Value Transit', 
+    description: 'Quick-stop trips. High visual readability. Impulse missions.', 
+    storeCount: 148, 
+    tags: ['Quick-stop', 'Impulse', 'Fast-fill', 'High readability'],
+    assortment: { totalSKUs: 134, premium: 28, core: 72, value: 24, newItems: 10 }
+  },
 ];
+
+// POG to Store Group mapping - which clusters each POG is mapped to
+const pogClusterMapping: Record<string, string[]> = {
+  'bev-corp-001': ['campus', 'family', 'transit'],           // Beverage Cooler - 3 clusters
+  'bev-corp-002': ['campus', 'family'],                       // Beverage Aisle Premium - 2 clusters
+  'bev-corp-003': ['campus', 'transit', 'family', 'rural'],  // Beverage End Cap - 4 clusters
+  'hol-corp-001': ['family', 'rural'],                        // Holiday Decor - 2 clusters
+  'hol-corp-002': ['family', 'rural', 'transit'],            // Home Accent - 3 clusters
+};
 
 const storeGroupInsights: Record<string, string> = {
   campus: 'High impulse store → prioritize single-serve and premium beverages',
   family: 'Family-oriented → emphasize multi-packs and value bundles',
   rural: 'Essential-focused → optimize for core SKUs and everyday value',
+  transit: 'Quick-stop trips → focus on grab-and-go and impulse items',
+};
+
+// Category Demand Index data per category and cluster
+interface DemandIndexItem {
+  name: string;
+  value: number;
+}
+
+const categoryDemandIndex: Record<string, Record<string, DemandIndexItem[]>> = {
+  beverages: {
+    campus: [
+      { name: 'Energy', value: 145 },
+      { name: 'Sports', value: 125 },
+      { name: 'Functional', value: 115 },
+      { name: 'Cola', value: 100 },
+      { name: 'Water', value: 85 },
+      { name: 'Juice', value: 70 },
+      { name: 'Tea', value: 55 },
+    ],
+    family: [
+      { name: 'Cola', value: 130 },
+      { name: 'Water', value: 120 },
+      { name: 'Juice', value: 115 },
+      { name: 'Sports', value: 105 },
+      { name: 'Energy', value: 90 },
+      { name: 'Tea', value: 85 },
+      { name: 'Functional', value: 75 },
+    ],
+    rural: [
+      { name: 'Cola', value: 135 },
+      { name: 'Water', value: 125 },
+      { name: 'Tea', value: 110 },
+      { name: 'Juice', value: 100 },
+      { name: 'Sports', value: 80 },
+      { name: 'Energy', value: 65 },
+      { name: 'Functional', value: 50 },
+    ],
+    transit: [
+      { name: 'Energy', value: 155 },
+      { name: 'Functional', value: 130 },
+      { name: 'Sports', value: 120 },
+      { name: 'Water', value: 110 },
+      { name: 'Cola', value: 95 },
+      { name: 'Juice', value: 60 },
+      { name: 'Tea', value: 45 },
+    ],
+  },
+  holiday: {
+    campus: [
+      { name: 'Ornaments', value: 90 },
+      { name: 'Lights', value: 85 },
+      { name: 'Candles', value: 110 },
+      { name: 'Gift Sets', value: 120 },
+      { name: 'Decor', value: 95 },
+    ],
+    family: [
+      { name: 'Ornaments', value: 135 },
+      { name: 'Lights', value: 130 },
+      { name: 'Gift Sets', value: 125 },
+      { name: 'Decor', value: 115 },
+      { name: 'Candles', value: 100 },
+    ],
+    rural: [
+      { name: 'Lights', value: 125 },
+      { name: 'Ornaments', value: 120 },
+      { name: 'Candles', value: 110 },
+      { name: 'Decor', value: 95 },
+      { name: 'Gift Sets', value: 80 },
+    ],
+    transit: [
+      { name: 'Gift Sets', value: 140 },
+      { name: 'Candles', value: 125 },
+      { name: 'Ornaments', value: 100 },
+      { name: 'Lights', value: 85 },
+      { name: 'Decor', value: 70 },
+    ],
+  },
+};
+
+// Helper to get demand index color
+const getDemandIndexColor = (value: number): string => {
+  if (value >= 120) return 'high';
+  if (value >= 80) return 'neutral';
+  return 'low';
+};
+
+// Helper to generate implication from demand index
+const generateDemandImplication = (indexData: DemandIndexItem[]): string => {
+  if (!indexData || indexData.length === 0) return '';
+  const sorted = [...indexData].sort((a, b) => b.value - a.value);
+  const top = sorted.slice(0, 2).map(i => i.name.toLowerCase());
+  const low = sorted.slice(-2).map(i => i.name.toLowerCase());
+  return `Shift assortment toward ${top.join(' and ')}; reduce emphasis on ${low.join(' and ')}.`;
 };
 
 // Mock Published Results
@@ -280,6 +415,8 @@ const mockPublishedResults: LocalizationResult[] = [
 ];
 
 export const POGLocalizationEngine: React.FC = () => {
+  const navigate = useNavigate();
+  const { addTasks } = useExecutionTasks();
   const [activeTab, setActiveTab] = useState<'run' | 'results'>('run');
   const [currentStep, setCurrentStep] = useState<WorkflowStep>('category');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -294,7 +431,7 @@ export const POGLocalizationEngine: React.FC = () => {
     { id: 'execution', name: 'Execution Packaging', icon: <Package size={20} />, status: 'pending', reasoning: '' },
   ]);
   const [localizationResult, setLocalizationResult] = useState<LocalizationResult | null>(null);
-  const [publishedResults, setPublishedResults] = useState<LocalizationResult[]>(mockPublishedResults);
+  const [publishedResults, setPublishedResults] = useState<LocalizationResult[]>([]);
   const [showCorporateView, setShowCorporateView] = useState(false);
   const [expandedReasons, setExpandedReasons] = useState<string[]>([]);
   const [selectedResultId, setSelectedResultId] = useState<string | null>(null);
@@ -345,22 +482,79 @@ export const POGLocalizationEngine: React.FC = () => {
   const runLocalizationEngine = async () => {
     setIsEngineRunning(true);
     
-    const stageReasonings = {
+    // Get context for business-specific changes
+    const storeGroup = storeGroups.find(g => g.id === selectedStoreGroup);
+    const categoryName = categories.find(c => c.id === selectedCategory)?.name || 'Beverages';
+    const demandData = categoryDemandIndex[selectedCategory!]?.[selectedStoreGroup!] || [];
+    const topDemand = [...demandData].sort((a, b) => b.value - a.value)[0];
+    const lowDemand = [...demandData].sort((a, b) => a.value - b.value)[0];
+    
+    // Generate business-specific stage data based on context
+    const stageReasonings = selectedCategory === 'beverages' ? {
       geometry: {
-        reasoning: 'Adjusted shelf spacing for 6ft fixture constraint',
-        details: ['Reduced shelf depth by 2 inches', 'Optimized vertical spacing for product visibility', 'Configured end-cap integration points'],
+        reasoning: `Configured ${selectedPOG?.sectionSize} section for ${storeGroup?.name} store format`,
+        details: [
+          `Adjusted shelf depth to ${storeGroup?.id === 'campus' ? '14"' : '16"'} for ${storeGroup?.id === 'campus' ? 'grab-and-go' : 'family pack'} accessibility`,
+          `Set ${selectedPOG?.shelfCount} shelf heights for optimal ${storeGroup?.id === 'campus' ? 'single-serve' : 'multi-pack'} visibility`,
+          `Configured cooler door zones for ${storeGroup?.id === 'rural' ? 'bulk hydration' : 'impulse beverages'}`
+        ],
       },
       demand: {
-        reasoning: 'Increased energy drink facings by 12% due to high velocity',
-        details: ['Premium SKUs moved to eye-level (+8% visibility)', 'Single-serve expanded by 15%', 'Reduced bulk water allocation by 10%'],
+        reasoning: `Increased ${topDemand?.name || 'Energy'} facings by ${Math.round((topDemand?.value || 120) - 100)}% based on ${storeGroup?.name} velocity`,
+        details: [
+          `${topDemand?.name || 'Energy'} expanded to ${Math.round((topDemand?.value || 120) / 10)} facings (demand index: ${topDemand?.value || 120})`,
+          `${storeGroup?.id === 'campus' ? 'Single-serve premium' : 'Family-size value'} moved to eye-level shelf`,
+          `${lowDemand?.name || 'Water'} reduced by ${Math.round(100 - (lowDemand?.value || 85))}% to reallocate space`
+        ],
       },
       policy: {
-        reasoning: 'Validated against adjacency and facing rules',
-        details: ['Brand blocking rule: Compliant', 'Adjacency rule: Adjusted cola placement', 'Minimum facing rule: All SKUs compliant'],
+        reasoning: `Validated against ${selectedPOG?.rules.length || 5} category merchandising rules`,
+        details: [
+          `Brand blocking: ${storeGroup?.id === 'family' ? 'National brands grouped by segment' : 'Competitive brands separated'}`,
+          `Adjacency rule: ${storeGroup?.id === 'campus' ? 'Energy adjacent to sports drinks' : 'Cola brands blocked together'}`,
+          `Min facing rule: All SKUs meet ${storeGroup?.id === 'rural' ? '2-facing' : '1-facing'} minimum`
+        ],
       },
       execution: {
-        reasoning: 'Generated 22 store-level execution steps',
-        details: ['12 shelf resets required', '8 product relocations', '2 new fixture installations'],
+        reasoning: `Generated ${Math.round((storeGroup?.storeCount || 50) * 0.4)} store-level execution tasks`,
+        details: [
+          `${Math.round((storeGroup?.storeCount || 50) * 0.25)} shelf label updates required`,
+          `${Math.round((storeGroup?.storeCount || 50) * 0.1)} product relocations across sections`,
+          `${Math.round((storeGroup?.storeCount || 50) * 0.05)} cooler door reconfigurations`
+        ],
+      },
+    } : {
+      geometry: {
+        reasoning: `Adapted ${selectedPOG?.sectionSize} holiday display for ${storeGroup?.name} traffic patterns`,
+        details: [
+          `Configured ${storeGroup?.id === 'family' ? 'family browsing' : 'quick-shop'} aisle flow`,
+          `Set feature display heights for ${storeGroup?.id === 'rural' ? 'bulk seasonal' : 'curated gift'} presentation`,
+          `Allocated ${storeGroup?.id === 'campus' ? 'compact' : 'expanded'} endcap zones`
+        ],
+      },
+      demand: {
+        reasoning: `Prioritized ${topDemand?.name || 'Premium Decor'} based on ${storeGroup?.name} seasonal trends`,
+        details: [
+          `${topDemand?.name || 'Premium Decor'} featured at ${storeGroup?.id === 'family' ? 'family eye-level' : 'impulse zones'}`,
+          `${storeGroup?.id === 'value' ? 'Value bundles' : 'Gift sets'} positioned for ${storeGroup?.id === 'value' ? 'deal seekers' : 'convenience'}`,
+          `${lowDemand?.name || 'Basic Decor'} consolidated to ${storeGroup?.id === 'rural' ? 'bulk bins' : 'lower shelves'}`
+        ],
+      },
+      policy: {
+        reasoning: `Validated seasonal merchandising and safety compliance`,
+        details: [
+          `Height restriction: All displays under ${storeGroup?.id === 'campus' ? '5ft' : '6ft'} threshold`,
+          `Fire safety: Aisle clearance maintained at 36" minimum`,
+          `ADA compliance: Feature displays accessible from main aisle`
+        ],
+      },
+      execution: {
+        reasoning: `Generated ${Math.round((storeGroup?.storeCount || 50) * 0.5)} seasonal reset tasks`,
+        details: [
+          `${Math.round((storeGroup?.storeCount || 50) * 0.3)} feature display builds`,
+          `${Math.round((storeGroup?.storeCount || 50) * 0.15)} endcap resets`,
+          `${Math.round((storeGroup?.storeCount || 50) * 0.05)} signage installations`
+        ],
       },
     };
 
@@ -385,32 +579,80 @@ export const POGLocalizationEngine: React.FC = () => {
       ));
     }
 
-    const storeGroup = storeGroups.find(g => g.id === selectedStoreGroup);
+    // Calculate dynamic metrics based on context
+    const facingsChanged = Math.round((topDemand?.value || 120) / 8);
+    const tasksCount = Math.round((storeGroup?.storeCount || 50) * 0.4);
+    const premiumShiftPct = storeGroup?.id === 'campus' ? '+18%' : storeGroup?.id === 'family' ? '+8%' : '+12%';
+    const valueShiftPct = storeGroup?.id === 'value' ? '+5%' : '-8%';
+
     const result: LocalizationResult = {
       id: `loc-${Date.now()}`,
       cluster: storeGroup?.name || 'Unknown',
       version: 'v1.0',
       status: 'Ready',
-      confidenceScore: 94,
+      confidenceScore: Math.round(88 + Math.random() * 8),
       corporatePOG: selectedPOG?.name || '',
       corporatePOGId: selectedPOG?.id || '',
       storeGroup: storeGroup?.name || '',
       category: categories.find(c => c.id === selectedCategory)?.name || '',
       createdAt: new Date().toISOString().split('T')[0],
       changes: {
-        facingsAdjusted: 18,
-        premiumShift: '+12%',
-        valuePLShift: '-8%',
-        tasksGenerated: 22,
+        facingsAdjusted: facingsChanged,
+        premiumShift: premiumShiftPct,
+        valuePLShift: valueShiftPct,
+        tasksGenerated: tasksCount,
       },
-      whyChanged: [
-        { title: 'Energy drinks moved to top shelf', reason: 'High impulse behavior drives 23% higher conversion at eye-level' },
-        { title: 'Bulk water reduced', reason: 'Lower demand velocity (-15%) allows reallocation to premium single-serve' },
-        { title: 'Cola brand blocking adjusted', reason: 'Adjacency rule compliance required repositioning to maintain brand separation' },
-        { title: 'Private label interspersed', reason: 'Strategic placement next to national brands increases trial rate by 8%' },
+      whyChanged: selectedCategory === 'beverages' ? [
+        { 
+          title: `${topDemand?.name || 'Energy'} moved to eye-level`, 
+          reason: `${storeGroup?.name} shoppers show ${Math.round((topDemand?.value || 120) - 100)}% higher demand index for ${topDemand?.name || 'Energy'} vs. corporate average` 
+        },
+        { 
+          title: `${lowDemand?.name || 'Water'} allocation reduced`, 
+          reason: `Lower velocity (index: ${lowDemand?.value || 85}) allows space reallocation to higher-margin ${storeGroup?.id === 'campus' ? 'single-serve' : 'multi-pack'} SKUs` 
+        },
+        { 
+          title: `${storeGroup?.id === 'campus' ? 'Grab-and-go' : 'Family pack'} zone expanded`, 
+          reason: `${storeGroup?.name} trip mission data shows ${storeGroup?.id === 'campus' ? '73% impulse' : '62% stock-up'} purchase behavior` 
+        },
+        { 
+          title: 'Brand blocking optimized', 
+          reason: `Adjacency rules applied to maintain competitive separation while maximizing ${storeGroup?.id === 'family' ? 'brand loyalty' : 'trial rate'}` 
+        },
+      ] : [
+        { 
+          title: `${topDemand?.name || 'Premium Decor'} featured prominently`, 
+          reason: `${storeGroup?.name} seasonal trends show ${Math.round((topDemand?.value || 115) - 100)}% lift in ${topDemand?.name || 'Premium Decor'} category` 
+        },
+        { 
+          title: 'Gift-ready displays prioritized', 
+          reason: `${storeGroup?.id === 'family' ? 'Family gifting' : 'Convenience gifting'} behavior drives ${storeGroup?.id === 'family' ? '45%' : '28%'} of holiday purchases` 
+        },
+        { 
+          title: `${lowDemand?.name || 'Basic Decor'} consolidated`, 
+          reason: `Lower demand index (${lowDemand?.value || 80}) allows consolidation to ${storeGroup?.id === 'rural' ? 'bulk display' : 'value section'}` 
+        },
+        { 
+          title: 'Seasonal compliance verified', 
+          reason: 'All displays meet height, safety, and accessibility requirements for holiday traffic' 
+        },
       ],
-      agenticSummary: ['Policy validated', 'Execution ready', 'Demand optimized'],
-      diffHighlights: ['Energy +3 facings', 'Water -2 facings', 'Premium moved to shelf 2', 'Value tier consolidated'],
+      agenticSummary: [
+        `${selectedPOG?.rules.length || 5} policies validated`, 
+        `${tasksCount} execution tasks ready`, 
+        `${topDemand?.name || 'Top category'} optimized for ${storeGroup?.name}`
+      ],
+      diffHighlights: selectedCategory === 'beverages' ? [
+        `${topDemand?.name || 'Energy'} +${Math.round((topDemand?.value || 120) / 30)} facings`,
+        `${lowDemand?.name || 'Water'} -${Math.round((100 - (lowDemand?.value || 85)) / 10)} facings`,
+        `${storeGroup?.id === 'campus' ? 'Single-serve' : 'Multi-pack'} to shelf 2`,
+        `${storeGroup?.id === 'value' ? 'Value tier expanded' : 'Premium tier prioritized'}`
+      ] : [
+        `${topDemand?.name || 'Premium'} +${Math.round((topDemand?.value || 115) / 25)} displays`,
+        `${lowDemand?.name || 'Basic'} consolidated`,
+        `Gift section ${storeGroup?.id === 'family' ? 'expanded' : 'optimized'}`,
+        `Seasonal endcaps configured`
+      ],
     };
 
     setLocalizationResult(result);
@@ -425,9 +667,130 @@ export const POGLocalizationEngine: React.FC = () => {
   };
 
   const handlePublish = (resultId: string) => {
+    const result = publishedResults.find(r => r.id === resultId);
+    if (!result) return;
+
+    // Generate human-readable execution tasks based on the localization result
+    const generatedTasks: ExecutionTask[] = [];
+    const timestamp = new Date().toISOString();
+    const storeGroup = storeGroups.find(g => g.name === result.storeGroup);
+    const storeCount = storeGroup?.storeCount || 50;
+
+    // Task 1: Shelf Reset for high-demand subcategories
+    generatedTasks.push({
+      id: `task-${resultId}-1`,
+      type: 'Reset Shelf',
+      title: `Reset ${result.category} section for ${result.storeGroup} stores`,
+      description: `Complete shelf reset required to implement localized planogram. Remove all products from shelves 1-${Math.min(5, storeGroup?.storeCount ? 4 : 3)}, clean fixtures, and restock according to new layout specifications.`,
+      priority: 'High',
+      reason: `Localization engine identified ${result.changes.facingsAdjusted} facing adjustments needed to optimize for ${result.storeGroup} shopper behavior`,
+      impact: `Expected ${result.changes.premiumShift} improvement in premium tier visibility and sales conversion`,
+      status: 'Pending',
+      assignedTo: null,
+      dueDate: null,
+      storeName: `All ${result.storeGroup} stores`,
+      storeGroup: result.storeGroup,
+      pogName: result.corporatePOG,
+      category: result.category,
+      createdAt: timestamp,
+      localizationId: resultId,
+    });
+
+    // Task 2: Move high-velocity items to eye-level
+    const topChange = result.diffHighlights[0] || 'Premium items';
+    generatedTasks.push({
+      id: `task-${resultId}-2`,
+      type: 'Move',
+      title: `Relocate ${topChange.split(' ')[0]} products to eye-level shelf`,
+      description: `Move ${topChange.split(' ')[0]} category products from current position to Shelf 2 (eye-level, 48-60 inches from floor). Ensure brand blocking is maintained and price tags are updated.`,
+      fromPosition: 'Current shelf location',
+      toPosition: 'Shelf 2 (Eye-level)',
+      priority: 'High',
+      reason: `${result.storeGroup} demand index shows ${topChange.includes('+') ? 'higher' : 'adjusted'} velocity for this subcategory`,
+      impact: `Projected +12-18% sales lift from improved visibility and accessibility`,
+      status: 'Pending',
+      assignedTo: null,
+      dueDate: null,
+      storeName: `All ${result.storeGroup} stores`,
+      storeGroup: result.storeGroup,
+      pogName: result.corporatePOG,
+      category: result.category,
+      createdAt: timestamp,
+      localizationId: resultId,
+    });
+
+    // Task 3: Adjust facings based on demand
+    generatedTasks.push({
+      id: `task-${resultId}-3`,
+      type: 'Adjust Facing',
+      title: `Adjust product facings across ${result.category} section`,
+      description: `Increase facings for high-demand SKUs and reduce facings for slower-moving items. Total of ${result.changes.facingsAdjusted} facing changes required. Refer to localized planogram for specific SKU-level instructions.`,
+      fromFacings: Math.round(result.changes.facingsAdjusted * 0.6),
+      toFacings: result.changes.facingsAdjusted,
+      priority: 'Medium',
+      reason: `Demand rebalancing analysis identified space optimization opportunities for ${result.storeGroup} shopping patterns`,
+      impact: `Reduces out-of-stock risk by 25% while improving space productivity`,
+      status: 'Pending',
+      assignedTo: null,
+      dueDate: null,
+      storeName: `All ${result.storeGroup} stores`,
+      storeGroup: result.storeGroup,
+      pogName: result.corporatePOG,
+      category: result.category,
+      createdAt: timestamp,
+      localizationId: resultId,
+    });
+
+    // Task 4: Update shelf labels and price tags
+    generatedTasks.push({
+      id: `task-${resultId}-4`,
+      type: 'Update Label',
+      title: `Update shelf labels and price tags for relocated items`,
+      description: `Print and install new shelf labels for all relocated products. Ensure UPC codes are visible, prices are current, and promotional tags are properly positioned. Remove outdated labels from previous locations.`,
+      priority: 'Medium',
+      reason: `Product relocations require updated shelf labeling for customer navigation and checkout accuracy`,
+      impact: `Maintains pricing accuracy and reduces checkout errors by 15%`,
+      status: 'Pending',
+      assignedTo: null,
+      dueDate: null,
+      storeName: `All ${result.storeGroup} stores`,
+      storeGroup: result.storeGroup,
+      pogName: result.corporatePOG,
+      category: result.category,
+      createdAt: timestamp,
+      localizationId: resultId,
+    });
+
+    // Task 5: Verify compliance with planogram
+    generatedTasks.push({
+      id: `task-${resultId}-5`,
+      type: 'Add',
+      title: `Verify planogram compliance and capture photo evidence`,
+      description: `After completing all shelf changes, verify the section matches the localized planogram. Capture photos of each shelf and upload to the compliance system. Flag any discrepancies or missing products.`,
+      priority: 'Low',
+      reason: `Compliance verification ensures execution accuracy and enables performance tracking`,
+      impact: `Enables ${result.confidenceScore}% confidence score validation and continuous improvement`,
+      status: 'Pending',
+      assignedTo: null,
+      dueDate: null,
+      storeName: `All ${result.storeGroup} stores`,
+      storeGroup: result.storeGroup,
+      pogName: result.corporatePOG,
+      category: result.category,
+      createdAt: timestamp,
+      localizationId: resultId,
+    });
+
+    // Add tasks to the shared context
+    addTasks(generatedTasks);
+
+    // Update the result status to Published
     setPublishedResults(prev => prev.map(r => 
       r.id === resultId ? { ...r, status: 'Published' as const } : r
     ));
+
+    // Navigate to Store Execution Task List
+    navigate('/planogram/store-execution');
   };
 
   // Get unique values for filter dropdowns
@@ -580,20 +943,27 @@ export const POGLocalizationEngine: React.FC = () => {
               </div>
 
               {/* Rules Section */}
-              <div className="loc-rules-section">
+              <div className="loc-rules-section premium">
                 <div className="loc-rules-header">
                   <ShieldCheck size={16} />
-                  <span>Applicable Rules</span>
+                  <span>Applicable Rules ({selectedPOG.rules.length})</span>
                 </div>
-                <div className="loc-rules-list">
+                <div className="loc-rules-list-premium">
                   {selectedPOG.rules.map((rule, idx) => (
-                    <div key={idx} className={`loc-rule-item ${rule.status.toLowerCase()}`}>
-                      <span className="loc-rule-name">{rule.name}</span>
-                      <span className="loc-rule-type">{rule.type}</span>
-                      <span className={`loc-rule-status ${rule.status.toLowerCase()}`}>
-                        {rule.status === 'Warning' && <AlertCircle size={12} />}
-                        {rule.status}
-                      </span>
+                    <div key={idx} className="loc-rule-card">
+                      <div className="loc-rule-card-header">
+                        <span className="loc-rule-name">{rule.name}</span>
+                        <div className="loc-rule-badges">
+                          <span className="loc-rule-type-badge">{rule.type}</span>
+                          <span className={`loc-rule-status-badge ${rule.status.toLowerCase()}`}>
+                            {rule.status === 'Warning' && <AlertCircle size={10} />}
+                            {rule.status}
+                          </span>
+                        </div>
+                      </div>
+                      {rule.description && (
+                        <p className="loc-rule-description">{rule.description}</p>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -615,14 +985,18 @@ export const POGLocalizationEngine: React.FC = () => {
 
   const renderStoreGroupStep = () => {
     const selectedGroup = storeGroups.find(g => g.id === selectedStoreGroup);
+    // Filter store groups based on selected POG's cluster mapping
+    const availableGroups = selectedPOG 
+      ? storeGroups.filter(g => pogClusterMapping[selectedPOG.id]?.includes(g.id))
+      : storeGroups;
     
     return (
       <div className="loc-step-content">
         <h3 className="loc-step-title">Select Store Group</h3>
-        <p className="loc-step-description">Choose the store cluster for localization.</p>
+        <p className="loc-step-description">Select the store group this planogram should be localized for. Each group has a distinct shopper profile, basket behavior, and space footprint.</p>
         
         <div className="loc-store-group-grid">
-          {storeGroups.map(group => (
+          {availableGroups.map(group => (
             <div 
               key={group.id}
               className={`loc-store-group-card ${selectedStoreGroup === group.id ? 'selected' : ''}`}
@@ -647,44 +1021,50 @@ export const POGLocalizationEngine: React.FC = () => {
           ))}
         </div>
 
-        {/* Assortment Distribution */}
-        {selectedGroup && (
+        {/* Category Demand Index */}
+        {selectedGroup && selectedCategory && (
           <>
-            <div className="loc-assortment-panel">
-              <div className="loc-assortment-header">
-                <PieChart size={18} />
-                <h4>Assortment Distribution</h4>
+            <div className="loc-demand-index-panel">
+              <div className="loc-demand-index-header">
+                <div className="loc-demand-index-title">
+                  <BarChart3 size={18} />
+                  <h4>Category Demand Index</h4>
+                  <div className="loc-demand-index-tooltip" title="Index shows how strongly a category performs in this store group compared to average stores. Values above 100 indicate higher demand.">
+                    <Info size={14} />
+                  </div>
+                </div>
+                <span className="loc-demand-index-subtitle">Relative demand vs average store (100 = baseline)</span>
               </div>
-              <div className="loc-assortment-grid">
-                <div className="loc-assortment-item">
-                  <span className="loc-assortment-value">{selectedGroup.assortment.totalSKUs}</span>
-                  <span className="loc-assortment-label">Total SKUs</span>
-                </div>
-                <div className="loc-assortment-item premium">
-                  <span className="loc-assortment-value">{selectedGroup.assortment.premium}</span>
-                  <span className="loc-assortment-label">Premium</span>
-                  <span className="loc-assortment-pct">{Math.round(selectedGroup.assortment.premium / selectedGroup.assortment.totalSKUs * 100)}%</span>
-                </div>
-                <div className="loc-assortment-item core">
-                  <span className="loc-assortment-value">{selectedGroup.assortment.core}</span>
-                  <span className="loc-assortment-label">Core</span>
-                  <span className="loc-assortment-pct">{Math.round(selectedGroup.assortment.core / selectedGroup.assortment.totalSKUs * 100)}%</span>
-                </div>
-                <div className="loc-assortment-item value">
-                  <span className="loc-assortment-value">{selectedGroup.assortment.value}</span>
-                  <span className="loc-assortment-label">Value</span>
-                  <span className="loc-assortment-pct">{Math.round(selectedGroup.assortment.value / selectedGroup.assortment.totalSKUs * 100)}%</span>
-                </div>
-                <div className="loc-assortment-item new">
-                  <span className="loc-assortment-value">{selectedGroup.assortment.newItems}</span>
-                  <span className="loc-assortment-label">New Items</span>
-                </div>
+              <div className="loc-demand-index-bars">
+                {(categoryDemandIndex[selectedCategory]?.[selectedStoreGroup!] || [])
+                  .sort((a, b) => b.value - a.value)
+                  .map((item, idx) => {
+                    const maxValue = 160;
+                    const barWidth = Math.min((item.value / maxValue) * 100, 100);
+                    const colorClass = getDemandIndexColor(item.value);
+                    const isTop = idx < 2;
+                    return (
+                      <div key={item.name} className={`loc-demand-bar-row ${isTop ? 'highlight' : ''}`}>
+                        <span className="loc-demand-bar-label">{item.name}</span>
+                        <div className="loc-demand-bar-track">
+                          <div 
+                            className={`loc-demand-bar-fill ${colorClass}`} 
+                            style={{ width: `${barWidth}%` }}
+                          />
+                          <div className="loc-demand-bar-baseline" style={{ left: `${(100/maxValue)*100}%` }} />
+                        </div>
+                        <span className={`loc-demand-bar-value ${colorClass}`}>{item.value}</span>
+                      </div>
+                    );
+                  })}
               </div>
             </div>
 
             <div className="loc-agentic-insight-banner">
               <Zap size={18} />
-              <span>{storeGroupInsights[selectedStoreGroup!]}</span>
+              <span>
+                <strong>Implication:</strong> {generateDemandImplication(categoryDemandIndex[selectedCategory]?.[selectedStoreGroup!] || [])}
+              </span>
             </div>
 
             <button className="loc-continue-btn" onClick={() => transitionToStep('engine')}>
