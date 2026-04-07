@@ -14,11 +14,11 @@ interface POGItem {
 }
 
 const mockPOGData: POGItem[] = [
-  { id: '1', name: 'Beverage Cooler - Standard', category: 'Beverages', lastModified: '2024-03-15', status: 'active', version: 'v2.1', clusters: 12, planogramImage: '/assets/beverage-cooler-standard.png' },
-  { id: '2', name: 'Beverage Aisle - Premium', category: 'Beverages', lastModified: '2024-03-14', status: 'active', version: 'v1.5', clusters: 8, planogramImage: '/assets/beverage-aisle-premium.png' },
-  { id: '3', name: 'Holiday Decor Display - Compact', category: 'Holiday Decor & Home Accent', lastModified: '2024-03-12', status: 'draft', version: 'v3.0', clusters: 5, planogramImage: '/assets/holiday-decor-display-compact.png' },
-  { id: '4', name: 'Beverage End Cap - Large Format', category: 'Beverages', lastModified: '2024-03-10', status: 'active', version: 'v1.2', clusters: 15, planogramImage: '/assets/beverage-end-cap-large-format.png' },
-  { id: '5', name: 'Home Accent Shelf - End Cap', category: 'Holiday Decor & Home Accent', lastModified: '2024-03-08', status: 'archived', version: 'v2.0', clusters: 3, planogramImage: '/assets/home-accent-shelf-end-cap.png' },
+  { id: '1', name: 'Beverage Cooler - Standard', category: 'Beverages', lastModified: '2024-03-15', status: 'active', version: 'v2.1', clusters: 12, planogramImage: '/assets/beverage-cooler-standard.jpg' },
+  { id: '2', name: 'Beverage Aisle - Premium', category: 'Beverages', lastModified: '2024-03-14', status: 'active', version: 'v1.5', clusters: 8, planogramImage: '/assets/beverage-aisle-premium.jpg' },
+  { id: '3', name: 'Holiday Decor Display - Compact', category: 'Holiday Decor & Home Accent', lastModified: '2024-03-12', status: 'draft', version: 'v3.0', clusters: 5, planogramImage: '/assets/holiday-decor-display-compact.jpg' },
+  { id: '4', name: 'Beverage End Cap - Large Format', category: 'Beverages', lastModified: '2024-03-10', status: 'active', version: 'v1.2', clusters: 15, planogramImage: '/assets/beverage-end-cap-large-format.jpg' },
+  { id: '5', name: 'Home Accent Shelf - End Cap', category: 'Holiday Decor & Home Accent', lastModified: '2024-03-08', status: 'archived', version: 'v2.0', clusters: 3, planogramImage: '/assets/home-accent-shelf-end-cap.jpg' },
 ];
 
 interface Filters {

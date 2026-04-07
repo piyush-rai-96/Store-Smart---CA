@@ -240,6 +240,7 @@ export const StoreExecution: React.FC = () => {
   const [assigningTaskId, setAssigningTaskId] = useState<string | null>(null);
   const [expandedLocalizations, setExpandedLocalizations] = useState<string[]>([]);
   const [selectedLocalization, setSelectedLocalization] = useState<string | null>(null);
+  const [isLocDropdownOpen, setIsLocDropdownOpen] = useState(false);
 
   const workflowSteps = [
     { id: 'select' as WorkflowStep, label: 'Select Store & POG', number: 1 },
@@ -992,18 +993,56 @@ export const StoreExecution: React.FC = () => {
       {localizationGroups.length > 0 && (
         <div className="exec-localization-filter">
           <label>Filter by Localization:</label>
-          <select 
-            value={selectedLocalization || 'all'}
-            onChange={(e) => setSelectedLocalization(e.target.value === 'all' ? null : e.target.value)}
-            className="exec-loc-select"
-          >
-            <option value="all">All Localizations ({localizationGroups.length})</option>
-            {localizationGroups.map(loc => (
-              <option key={loc.id} value={loc.id}>
-                {loc.pogName} → {loc.storeGroup} ({loc.tasks.length} tasks)
-              </option>
-            ))}
-          </select>
+          <div className="exec-loc-dropdown">
+            <button 
+              className={`exec-loc-dropdown-trigger ${isLocDropdownOpen ? 'open' : ''}`}
+              onClick={() => setIsLocDropdownOpen(!isLocDropdownOpen)}
+            >
+              <span className="exec-loc-dropdown-value">
+                {selectedLocalization 
+                  ? `${localizationGroups.find(l => l.id === selectedLocalization)?.pogName} → ${localizationGroups.find(l => l.id === selectedLocalization)?.storeGroup}`
+                  : `All Localizations (${localizationGroups.length})`
+                }
+              </span>
+              <ChevronRight size={16} className={`exec-loc-dropdown-icon ${isLocDropdownOpen ? 'rotated' : ''}`} />
+            </button>
+            {isLocDropdownOpen && (
+              <div className="exec-loc-dropdown-menu">
+                <div 
+                  className={`exec-loc-dropdown-item ${!selectedLocalization ? 'selected' : ''}`}
+                  onClick={() => {
+                    setSelectedLocalization(null);
+                    setIsLocDropdownOpen(false);
+                  }}
+                >
+                  <div className="exec-loc-dropdown-item-content">
+                    <span className="exec-loc-dropdown-item-title">All Localizations</span>
+                    <span className="exec-loc-dropdown-item-count">{localizationGroups.length} groups</span>
+                  </div>
+                  {!selectedLocalization && <CheckCircle size={16} className="exec-loc-dropdown-check" />}
+                </div>
+                {localizationGroups.map(loc => (
+                  <div 
+                    key={loc.id}
+                    className={`exec-loc-dropdown-item ${selectedLocalization === loc.id ? 'selected' : ''}`}
+                    onClick={() => {
+                      setSelectedLocalization(loc.id);
+                      setIsLocDropdownOpen(false);
+                    }}
+                  >
+                    <div className="exec-loc-dropdown-item-content">
+                      <span className="exec-loc-dropdown-item-title">{loc.pogName} → {loc.storeGroup}</span>
+                      <div className="exec-loc-dropdown-item-meta">
+                        <span className="exec-loc-dropdown-tag">{loc.category}</span>
+                        <span className="exec-loc-dropdown-item-count">{loc.tasks.length} tasks</span>
+                      </div>
+                    </div>
+                    {selectedLocalization === loc.id && <CheckCircle size={16} className="exec-loc-dropdown-check" />}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
 

@@ -117,7 +117,7 @@ const allCorporatePOGs: CorporatePOG[] = [
     version: 'v2.1',
     sectionSize: '8ft',
     shelfCount: 5,
-    image: '/Assets/Beverage Cooler (Standard).png',
+    image: '/assets/beverage-cooler-standard.jpg',
     insights: ['Energy at premium position', 'Cola-led core structure', 'Private label interspersed'],
     categoryId: 'beverages',
     rules: [
@@ -137,7 +137,7 @@ const allCorporatePOGs: CorporatePOG[] = [
     version: 'v1.5',
     sectionSize: '12ft',
     shelfCount: 6,
-    image: '/Assets/Beverage Aisle - Premium.png',
+    image: '/assets/beverage-aisle-premium.jpg',
     insights: ['Premium-first layout', 'Craft beverages highlighted', 'Impulse zone at checkout'],
     categoryId: 'beverages',
     rules: [
@@ -156,7 +156,7 @@ const allCorporatePOGs: CorporatePOG[] = [
     version: 'v3.0',
     sectionSize: '4ft',
     shelfCount: 4,
-    image: '/Assets/Beverage End Cap - Large Format.png',
+    image: '/assets/beverage-end-cap-large-format.jpg',
     insights: ['High-velocity items', 'Promotional focus', 'Seasonal rotation'],
     categoryId: 'beverages',
     rules: [
@@ -175,7 +175,7 @@ const allCorporatePOGs: CorporatePOG[] = [
     version: 'v1.3',
     sectionSize: '6ft',
     shelfCount: 4,
-    image: '/Assets/Holiday Decor Display - Compact.png',
+    image: '/assets/holiday-decor-display-compact.jpg',
     insights: ['Seasonal items at eye-level', 'Gift sets prominently placed', 'Value items at bottom'],
     categoryId: 'holiday',
     rules: [
@@ -194,7 +194,7 @@ const allCorporatePOGs: CorporatePOG[] = [
     version: 'v2.0',
     sectionSize: '4ft',
     shelfCount: 3,
-    image: '/Assets/Home Accent Shelf - End Cap.png',
+    image: '/assets/home-accent-shelf-end-cap.jpg',
     insights: ['Premium gift focus', 'Impulse purchase zone', 'Cross-category bundling'],
     categoryId: 'holiday',
     rules: [
