@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   CheckCircle, 
   Circle, 
@@ -8,7 +8,6 @@ import {
   Upload,
   Store,
   Calendar,
-  // MessageSquare,
   AlertTriangle,
   ArrowRight,
   Plus,
@@ -18,7 +17,7 @@ import {
   TrendingUp,
   User,
   Loader2,
-  // Eye,
+  Eye,
   FileText,
   Package,
   AlertCircle,
@@ -26,7 +25,13 @@ import {
   RefreshCw,
   Tag,
   Wrench,
-  UserPlus
+  UserPlus,
+  Bot,
+  Send,
+  Brain,
+  Camera,
+  X,
+  BarChart3
 } from 'lucide-react';
 import { useExecutionTasks, ExecutionTask as SharedExecutionTask } from '../context/ExecutionTasksContext';
 import './StoreExecution.css';
@@ -94,6 +99,30 @@ interface TeamMember {
   name: string;
   role: string;
   avatar: string;
+}
+
+// Agent Chat Types
+type AgentMessageType = 'welcome' | 'user' | 'agent' | 'analysis' | 'oos-alert' | 'deviation' | 'task-created' | 'processing';
+
+interface AgentMessage {
+  id: string;
+  type: AgentMessageType;
+  content: string;
+  timestamp: Date;
+  image?: string;
+  analysisResult?: {
+    type: 'oos' | 'deviation';
+    highlights?: { x: number; y: number; width: number; height: number; label: string }[];
+    deviations?: { item: string; expected: string; actual: string; severity: 'critical' | 'warning' | 'info' }[];
+    oosItems?: { name: string; shelf: string; position: string }[];
+  };
+  processingSteps?: { step: string; status: 'pending' | 'active' | 'completed' }[];
+  task?: {
+    id: string;
+    title: string;
+    priority: 'Critical' | 'High' | 'Medium' | 'Low';
+    type: string;
+  };
 }
 
 // Mock Data
@@ -224,8 +253,8 @@ const mockTasks: ExecutionTask[] = [
 ];
 
 export const StoreExecution: React.FC = () => {
-  const { tasks: sharedTasks, assignTask, updateTaskStatus: updateSharedTaskStatus, teamMembers: sharedTeamMembers } = useExecutionTasks();
-  const [activeTab, setActiveTab] = useState<'execution' | 'taskList'>('taskList');
+  const { tasks: sharedTasks, assignTask, updateTaskStatus: updateSharedTaskStatus, teamMembers: sharedTeamMembers, addTasks } = useExecutionTasks();
+  const [activeTab, setActiveTab] = useState<'agent' | 'taskList'>('agent');
   const [currentStep, setCurrentStep] = useState<WorkflowStep>('select');
   const [selectedStore, setSelectedStore] = useState<string | null>(null);
   const [selectedPOG, setSelectedPOG] = useState<string | null>(null);
@@ -241,6 +270,39 @@ export const StoreExecution: React.FC = () => {
   const [expandedLocalizations, setExpandedLocalizations] = useState<string[]>([]);
   const [selectedLocalization, setSelectedLocalization] = useState<string | null>(null);
   const [isLocDropdownOpen, setIsLocDropdownOpen] = useState(false);
+  
+  // Agent Chat State
+  const [agentMessages, setAgentMessages] = useState<AgentMessage[]>([
+    {
+      id: 'welcome-1',
+      type: 'welcome',
+      content: '',
+      timestamp: new Date()
+    }
+  ]);
+  const [agentInput, setAgentInput] = useState('');
+  const [agentImage, setAgentImage] = useState<string | null>(null);
+  const [isAgentProcessing, setIsAgentProcessing] = useState(false);
+  const [, setProcessingSteps] = useState<{ step: string; status: 'pending' | 'active' | 'completed' }[]>([]);
+  const [expandedImage, setExpandedImage] = useState<string | null>(null);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-scroll to bottom of chat when messages change or image is uploaded
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [agentMessages]);
+
+  // Scroll input into view when image is uploaded
+  useEffect(() => {
+    if (agentImage) {
+      // Small delay to allow DOM to update with image preview
+      setTimeout(() => {
+        const inputArea = document.querySelector('.agent-input-area');
+        inputArea?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }, 100);
+    }
+  }, [agentImage]);
 
   const workflowSteps = [
     { id: 'select' as WorkflowStep, label: 'Select Store & POG', number: 1 },
@@ -1053,8 +1115,8 @@ export const StoreExecution: React.FC = () => {
           <Package size={48} />
           <h4>No Tasks Yet</h4>
           <p>Complete the execution workflow to generate tasks.</p>
-          <button className="exec-go-workflow-btn" onClick={() => setActiveTab('execution')}>
-            Go to Workflow
+          <button className="exec-go-workflow-btn" onClick={() => setActiveTab('agent')}>
+            Go to ShelfIQ Agent
           </button>
         </div>
       ) : (
@@ -1254,7 +1316,592 @@ export const StoreExecution: React.FC = () => {
     </div>
   );
 
-  const renderWorkflowContent = () => (
+  // Agent Chat Handlers
+  const handleAgentImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setAgentImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const simulateAgentProcessing = async (type: 'oos' | 'deviation', uploadedImage: string | null) => {
+    setIsAgentProcessing(true);
+    
+    const steps = type === 'oos' ? [
+      { step: 'Receiving shelf image...', status: 'active' as const },
+      { step: 'AI Agent reviewing image...', status: 'pending' as const },
+      { step: 'Scanning for empty shelf positions...', status: 'pending' as const },
+      { step: 'Cross-referencing with Holiday Decor planogram...', status: 'pending' as const },
+      { step: 'Identifying out-of-stock products...', status: 'pending' as const },
+      { step: 'Generating OOS detection overlay...', status: 'pending' as const },
+    ] : [
+      { step: 'Scanning uploaded planogram...', status: 'active' as const },
+      { step: 'Matching with localized POG library...', status: 'pending' as const },
+      { step: 'Analyzing product placement...', status: 'pending' as const },
+      { step: 'Detecting deviations...', status: 'pending' as const },
+      { step: 'Calculating compliance score...', status: 'pending' as const },
+    ];
+    
+    setProcessingSteps(steps);
+
+    // Add processing message
+    const processingMsg: AgentMessage = {
+      id: `proc-${Date.now()}`,
+      type: 'processing',
+      content: type === 'oos' ? '🤖 ShelfIQ Agent is analyzing your shelf image...' : 'Comparing with localized planogram...',
+      timestamp: new Date(),
+      processingSteps: steps
+    };
+    setAgentMessages(prev => [...prev, processingMsg]);
+
+    // Simulate step-by-step processing
+    for (let i = 0; i < steps.length; i++) {
+      await new Promise(resolve => setTimeout(resolve, 600 + Math.random() * 400));
+      setProcessingSteps(prev => prev.map((s, idx) => ({
+        ...s,
+        status: idx < i + 1 ? 'completed' : idx === i + 1 ? 'active' : 'pending'
+      })));
+      setAgentMessages(prev => prev.map(m => 
+        m.id === processingMsg.id ? {
+          ...m,
+          processingSteps: m.processingSteps?.map((s, idx) => ({
+            ...s,
+            status: idx <= i ? 'completed' : idx === i + 1 ? 'active' : 'pending'
+          }))
+        } : m
+      ));
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 500));
+    setIsAgentProcessing(false);
+
+    // Generate result based on type
+    if (type === 'oos') {
+      // Home Decor OOS Detection - use the detected image
+      const oosResult: AgentMessage = {
+        id: `oos-${Date.now()}`,
+        type: 'oos-alert',
+        content: '🚨 **Critical Out-of-Stock Alert!**\n\n**2026 Dollar General Holiday Decor Planogram**\n\nI detected **5 out-of-stock positions** requiring immediate replenishment:',
+        timestamp: new Date(),
+        image: '/home-decor-oos-detected.png', // Show the annotated OOS image
+        analysisResult: {
+          type: 'oos',
+          oosItems: [
+            { name: 'Red/Gold/Green Mini Ornaments', shelf: 'Shelf 2', position: 'Bay Section' },
+            { name: 'Green Stick Candles', shelf: 'Shelf 3', position: 'Center Position' },
+            { name: 'Red/Silver Mini Ornaments', shelf: 'Shelf 3', position: 'Left Section' },
+            { name: 'Multi-Color Mini Ornaments', shelf: 'Shelf 3', position: 'Right Section' },
+            { name: 'Entire Bay - Holiday Hooks', shelf: 'Shelf 1', position: 'Full Bay Empty' },
+          ],
+          highlights: []
+        },
+        task: {
+          id: `task-oos-${Date.now()}`,
+          title: 'Holiday Decor Critical OOS - Immediate Replenishment',
+          priority: 'Critical',
+          type: 'Replenish Stock'
+        }
+      };
+      setAgentMessages(prev => [...prev.filter(m => m.id !== processingMsg.id), oosResult]);
+    } else {
+      const deviationResult: AgentMessage = {
+        id: `dev-${Date.now()}`,
+        type: 'deviation',
+        content: '',
+        timestamp: new Date(),
+        image: uploadedImage || undefined,
+        analysisResult: {
+          type: 'deviation',
+          deviations: [
+            { item: 'Monster Energy (Green)', expected: 'Shelf 1, Position 1-4 (4 facings)', actual: 'Shelf 2, Position 3-4 (2 facings)', severity: 'critical' },
+            { item: 'Red Bull Original', expected: 'Shelf 1, Position 5-8 (4 facings)', actual: 'Shelf 1, Position 1-2 (2 facings)', severity: 'critical' },
+            { item: 'Coca-Cola Classic 20oz', expected: 'Shelf 2, Position 1-6 (6 facings)', actual: 'Shelf 3, Position 1-4 (4 facings)', severity: 'warning' },
+            { item: 'Pepsi 20oz', expected: 'Shelf 2, Position 7-10', actual: 'Missing from shelf', severity: 'critical' },
+            { item: 'Gatorade Fruit Punch', expected: 'Shelf 3, Position 1-4', actual: 'Shelf 3, Position 5-8 (Correct zone)', severity: 'info' },
+            { item: 'Dasani Water 20oz', expected: 'Shelf 4, Position 1-8', actual: 'Shelf 4, Position 1-6 (2 facings short)', severity: 'warning' },
+          ]
+        },
+        task: {
+          id: `task-dev-${Date.now()}`,
+          title: 'Beverage End Cap - Compliance Reset Required',
+          priority: 'High',
+          type: 'Reset Shelf'
+        }
+      };
+      setAgentMessages(prev => [...prev.filter(m => m.id !== processingMsg.id), deviationResult]);
+    }
+
+    setAgentImage(null);
+  };
+
+  const handleAgentSubmit = () => {
+    if (!agentInput.trim() && !agentImage) return;
+
+    // Add user message
+    const userMsg: AgentMessage = {
+      id: `user-${Date.now()}`,
+      type: 'user',
+      content: agentInput || 'Uploaded image for analysis',
+      timestamp: new Date(),
+      image: agentImage || undefined
+    };
+    setAgentMessages(prev => [...prev, userMsg]);
+
+    // Determine analysis type based on input
+    const input = agentInput.toLowerCase();
+    const currentImage = agentImage;
+    if (currentImage) {
+      // Default to OOS detection for any image upload
+      if (input.includes('deviation') || input.includes('compliance') || input.includes('compare')) {
+        simulateAgentProcessing('deviation', currentImage);
+      } else {
+        // Default to OOS detection
+        simulateAgentProcessing('oos', currentImage);
+      }
+    } else {
+      // Text-only response
+      const agentResponse: AgentMessage = {
+        id: `agent-${Date.now()}`,
+        type: 'agent',
+        content: 'I can help you analyze shelf images! Please upload a photo of your store shelf and I\'ll detect:\n\n• **Out-of-Stock items** - Empty shelf positions that need replenishment\n• **Planogram Deviations** - Products placed incorrectly vs. the localized POG\n\nJust upload an image and tell me what you\'d like me to check!',
+        timestamp: new Date()
+      };
+      setAgentMessages(prev => [...prev, agentResponse]);
+    }
+
+    setAgentInput('');
+    setAgentImage(null); // Clear image after sending
+  };
+
+  const handleCreateTask = (task: { id: string; title: string; priority: string; type: string }) => {
+    // Map agent task types to valid TaskType
+    const typeMap: Record<string, 'Add' | 'Remove' | 'Move' | 'Adjust Facing' | 'Reset Shelf' | 'Update Label' | 'Install Fixture'> = {
+      'Replenish Stock': 'Add',
+      'Reset Shelf': 'Reset Shelf',
+      'Move Products': 'Move',
+      'Adjust Facings': 'Adjust Facing',
+      'Update Labels': 'Update Label',
+    };
+    
+    // Map priority - Critical maps to High since Priority type doesn't include Critical
+    const priorityMap: Record<string, 'High' | 'Medium' | 'Low'> = {
+      'Critical': 'High',
+      'High': 'High',
+      'Medium': 'Medium',
+      'Low': 'Low',
+    };
+
+    // Determine if this is an OOS task
+    const isOOSTask = task.type === 'Replenish Stock' || task.title.includes('OOS');
+    const localizationId = isOOSTask ? 'oos-tasks' : `agent-${Date.now()}`;
+
+    const newTask: SharedExecutionTask = {
+      id: task.id,
+      type: typeMap[task.type] || 'Reset Shelf',
+      title: task.title,
+      description: isOOSTask 
+        ? 'Critical out-of-stock items detected by ShelfIQ Agent. Immediate replenishment required to prevent lost sales.'
+        : 'Auto-generated by ShelfIQ Agent based on shelf analysis',
+      priority: priorityMap[task.priority] || 'High',
+      reason: isOOSTask 
+        ? 'AI-detected empty shelf positions causing lost sales opportunity'
+        : 'Detected via AI-powered shelf analysis',
+      impact: isOOSTask
+        ? 'Critical: Empty shelves directly impact customer experience and revenue'
+        : 'Improves shelf compliance and reduces lost sales',
+      status: 'Pending' as const,
+      assignedTo: null,
+      dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      storeName: 'Dollar General #1247',
+      storeGroup: 'Holiday Seasonal',
+      pogName: '2026 Holiday Decor Planogram',
+      category: isOOSTask ? 'Out of Stock' : 'Compliance',
+      createdAt: new Date().toISOString(),
+      localizationId: localizationId
+    };
+    
+    addTasks([newTask]);
+    
+    // Add confirmation message
+    const confirmMsg: AgentMessage = {
+      id: `confirm-${Date.now()}`,
+      type: 'task-created',
+      content: isOOSTask 
+        ? `✅ **OOS Task Created!**\n\n"${task.title}" has been added to the **Out of Stock** bucket in your Task List.\n\n⚡ This task requires immediate attention to prevent lost sales.`
+        : `✅ **Task Created Successfully!**\n\n"${task.title}" has been added to your Task List with **${task.priority}** priority.`,
+      timestamp: new Date()
+    };
+    setAgentMessages(prev => [...prev, confirmMsg]);
+  };
+
+  // Check if chat has started (more than just welcome message)
+  const hasConversationStarted = agentMessages.length > 1 || agentMessages.some(m => m.type !== 'welcome');
+
+  const renderAgentChat = () => (
+    <div className={`agent-chat-container ${hasConversationStarted ? 'chat-active' : ''}`}>
+      <div className="agent-chat-messages">
+        {agentMessages.map(msg => (
+          <div key={msg.id} className={`agent-message ${msg.type}`}>
+            {msg.type === 'welcome' && !hasConversationStarted && (
+              <div className="agent-welcome-premium">
+                <div className="welcome-gradient-bg"></div>
+                <div className="welcome-content">
+                  <div className="agent-icon-container">
+                    <div className="agent-icon-glow"></div>
+                    <div className="agent-welcome-icon-premium">
+                      <Brain size={32} />
+                    </div>
+                    <div className="agent-status-badge">
+                      <span className="status-dot"></span>
+                      Ready
+                    </div>
+                  </div>
+                  
+                  <h2>ShelfIQ Agent</h2>
+                  <p className="welcome-subtitle">Your AI-powered retail intelligence partner</p>
+                  
+                  <p className="welcome-hint">Upload a shelf image to detect OOS, check compliance, or create tasks</p>
+                  
+                  <div className="suggestion-chips">
+                    <span className="suggestion-label">Try:</span>
+                    <button 
+                      className="suggestion-chip"
+                      onClick={() => setAgentInput('Detect out-of-stock items in my shelf image')}
+                    >
+                      🔍 Detect OOS items
+                    </button>
+                    <button 
+                      className="suggestion-chip"
+                      onClick={() => setAgentInput('Check POG compliance for this shelf')}
+                    >
+                      ✓ Check compliance
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {msg.type === 'user' && (
+              <div className="agent-user-message">
+                <div className="user-avatar">
+                  <User size={16} />
+                </div>
+                <div className="user-content">
+                  {msg.image && (
+                    <div 
+                      className="user-image-thumbnail"
+                      onClick={() => setExpandedImage(msg.image || null)}
+                    >
+                      <img src={msg.image} alt="Uploaded" />
+                      <div className="user-image-expand">
+                        <Eye size={14} />
+                      </div>
+                    </div>
+                  )}
+                  {msg.content && <p>{msg.content}</p>}
+                </div>
+              </div>
+            )}
+
+            {msg.type === 'agent' && (
+              <div className="agent-response">
+                <div className="agent-avatar">
+                  <Bot size={18} />
+                </div>
+                <div className="agent-content">
+                  <p style={{ whiteSpace: 'pre-line' }}>{msg.content}</p>
+                </div>
+              </div>
+            )}
+
+            {msg.type === 'processing' && (
+              <div className="agent-processing-premium">
+                <div className="processing-header">
+                  <div className="processing-spinner"></div>
+                  <span>Analyzing image...</span>
+                </div>
+                <div className="processing-steps-premium">
+                  {msg.processingSteps?.map((step, idx) => (
+                    <div key={idx} className={`processing-step-premium ${step.status}`}>
+                      <div className="step-indicator">
+                        {step.status === 'completed' && <span className="step-check">✓</span>}
+                        {step.status === 'active' && <span className="step-dot active"></span>}
+                        {step.status === 'pending' && <span className="step-dot"></span>}
+                      </div>
+                      <span className="step-text">{step.step}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {msg.type === 'oos-alert' && (
+              <div className="agent-oos-alert">
+                <div className="oos-content">
+                  <div className="oos-header">
+                    <div className="oos-alert-badge">
+                      <span className="oos-pulse"></span>
+                      Critical Alert
+                    </div>
+                    <span className="oos-count">{msg.analysisResult?.oosItems?.length || 0} Items Detected</span>
+                  </div>
+                  
+                  <h3 className="oos-title">Out-of-Stock Detection Complete</h3>
+                  <p className="oos-subtitle">2026 Dollar General Holiday Decor Planogram</p>
+                  
+                  {msg.image && (
+                    <div 
+                      className="oos-image-thumbnail"
+                      onClick={() => setExpandedImage(msg.image || null)}
+                    >
+                      <img src={msg.image} alt="Analyzed shelf" />
+                      <div className="oos-image-overlay">
+                        <Eye size={20} />
+                        <span>Click to expand</span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="oos-items-list">
+                    {msg.analysisResult?.oosItems?.map((item, idx) => (
+                      <div key={idx} className="oos-item">
+                        <div className="oos-item-number">{idx + 1}</div>
+                        <div className="oos-item-info">
+                          <strong>{item.name}</strong>
+                          <span>{item.shelf} • {item.position}</span>
+                        </div>
+                        <span className="oos-badge">OOS</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {msg.task && (
+                    <button 
+                      className="agent-create-task-btn-premium"
+                      onClick={() => handleCreateTask(msg.task!)}
+                    >
+                      <span className="btn-text">Create Replenishment Task</span>
+                      <span className="btn-arrow">→</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {msg.type === 'deviation' && (
+              <div className="compliance-report">
+                <div className="report-header">
+                  <div className="report-icon">
+                    <BarChart3 size={24} />
+                  </div>
+                  <div className="report-title-section">
+                    <h3>POG Compliance Analysis Report</h3>
+                    <p className="report-meta">Beverage End Cap - Large Format • Rural Core Cluster</p>
+                  </div>
+                </div>
+
+                <div className="report-comparison">
+                  <div className="comparison-images">
+                    <div className="comparison-image uploaded">
+                      <span className="image-label">Uploaded Image</span>
+                      {msg.image && <img src={msg.image} alt="Uploaded shelf" />}
+                    </div>
+                    <div className="comparison-arrow">→</div>
+                    <div className="comparison-image reference">
+                      <span className="image-label">Localized POG Reference</span>
+                      <img src="/assets/Localized - Beverage End Cap - Large Format.png" alt="Reference POG" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="report-summary-card">
+                  <div className="summary-score">
+                    <div className="score-circle">
+                      <span className="score-number">58%</span>
+                    </div>
+                    <span className="score-text">Compliance Score</span>
+                  </div>
+                  <div className="summary-stats">
+                    <div className="stat-item critical">
+                      <span className="stat-count">3</span>
+                      <span className="stat-label">Critical Issues</span>
+                    </div>
+                    <div className="stat-item warning">
+                      <span className="stat-count">2</span>
+                      <span className="stat-label">Warnings</span>
+                    </div>
+                    <div className="stat-item success">
+                      <span className="stat-count">1</span>
+                      <span className="stat-label">Compliant</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="report-section">
+                  <h4 className="section-title">
+                    <AlertCircle size={16} />
+                    Identified Deviations
+                  </h4>
+                  <div className="deviations-table">
+                    {msg.analysisResult?.deviations?.map((dev, idx) => (
+                      <div key={idx} className={`deviation-row ${dev.severity}`}>
+                        <div className="deviation-status">
+                          {dev.severity === 'critical' ? <X size={16} /> : 
+                           dev.severity === 'warning' ? <AlertTriangle size={16} /> : 
+                           <CheckCircle size={16} />}
+                        </div>
+                        <div className="deviation-product">
+                          <strong>{dev.item}</strong>
+                        </div>
+                        <div className="deviation-comparison">
+                          <div className="expected-value">
+                            <span className="label">POG Spec:</span>
+                            <span className="value">{dev.expected}</span>
+                          </div>
+                          <div className="actual-value">
+                            <span className="label">Current:</span>
+                            <span className="value">{dev.actual}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="report-section">
+                  <h4 className="section-title">
+                    <Wrench size={16} />
+                    Corrective Actions for Store Team
+                  </h4>
+                  <div className="action-steps">
+                    <div className="action-step">
+                      <span className="step-number">1</span>
+                      <div className="step-content">
+                        <strong>Relocate Monster Energy to Shelf 1</strong>
+                        <p>Move Monster Energy (Green) from current position to Shelf 1, Positions 1-4. Ensure 4 facings are visible with labels facing forward.</p>
+                      </div>
+                    </div>
+                    <div className="action-step">
+                      <span className="step-number">2</span>
+                      <div className="step-content">
+                        <strong>Adjust Red Bull Positioning</strong>
+                        <p>Shift Red Bull Original to Shelf 1, Positions 5-8. Increase facings from 2 to 4 as per localized POG specification.</p>
+                      </div>
+                    </div>
+                    <div className="action-step">
+                      <span className="step-number">3</span>
+                      <div className="step-content">
+                        <strong>Restock Pepsi 20oz</strong>
+                        <p>Product is missing from shelf. Retrieve from backstock and place on Shelf 2, Positions 7-10 with 4 facings.</p>
+                      </div>
+                    </div>
+                    <div className="action-step">
+                      <span className="step-number">4</span>
+                      <div className="step-content">
+                        <strong>Reposition Coca-Cola Classic</strong>
+                        <p>Move Coca-Cola 20oz from Shelf 3 to Shelf 2, Positions 1-6. Add 2 additional facings to meet 6-facing requirement.</p>
+                      </div>
+                    </div>
+                    <div className="action-step">
+                      <span className="step-number">5</span>
+                      <div className="step-content">
+                        <strong>Add Dasani Water Facings</strong>
+                        <p>Current display shows 6 facings. Add 2 more bottles to Positions 7-8 on Shelf 4 to complete the set.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {msg.task && (
+                  <div className="report-action">
+                    <button 
+                      className="create-compliance-task-btn"
+                      onClick={() => handleCreateTask(msg.task!)}
+                    >
+                      <Zap size={18} />
+                      <span>Create Compliance Reset Task</span>
+                      <ChevronRight size={18} />
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {msg.type === 'task-created' && (
+              <div className="agent-task-created-premium">
+                <div className="task-success-card">
+                  <div className="task-success-icon">
+                    <span>✓</span>
+                  </div>
+                  <div className="task-success-content">
+                    <h4>Task Created Successfully</h4>
+                    <p>Added to your Task List for immediate action</p>
+                  </div>
+                  <button 
+                    className="view-tasks-btn-premium"
+                    onClick={() => setActiveTab('taskList')}
+                  >
+                    View Tasks →
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+        <div ref={chatEndRef} />
+      </div>
+
+      <div className="agent-input-area">
+        {agentImage && (
+          <div className="agent-image-preview">
+            <img src={agentImage} alt="To upload" />
+            <button className="remove-image" onClick={() => setAgentImage(null)}>
+              <X size={14} />
+            </button>
+          </div>
+        )}
+        <div className="agent-input-row">
+          <input
+            type="file"
+            ref={fileInputRef}
+            accept="image/*"
+            onChange={handleAgentImageUpload}
+            style={{ display: 'none' }}
+          />
+          <button 
+            className="agent-upload-btn"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isAgentProcessing}
+          >
+            <Camera size={20} />
+          </button>
+          <input
+            type="text"
+            className="agent-text-input"
+            placeholder="Describe what you'd like me to analyze..."
+            value={agentInput}
+            onChange={(e) => setAgentInput(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleAgentSubmit()}
+            disabled={isAgentProcessing}
+          />
+          <button 
+            className="agent-send-btn"
+            onClick={handleAgentSubmit}
+            disabled={isAgentProcessing || (!agentInput.trim() && !agentImage)}
+          >
+            {isAgentProcessing ? <Loader2 size={20} className="spinning" /> : <Send size={20} />}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Workflow content - kept for potential future use
+  const _renderWorkflowContent = () => (
     <div className="exec-workflow-container">
       {renderWorkflowProgress()}
       <div className="exec-main-panel">
@@ -1276,9 +1923,22 @@ export const StoreExecution: React.FC = () => {
       </div>
     </div>
   );
+  void _renderWorkflowContent;
 
   return (
     <div className="exec-container">
+      {/* Image Modal */}
+      {expandedImage && (
+        <div className="image-modal-overlay" onClick={() => setExpandedImage(null)}>
+          <div className="image-modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="image-modal-close" onClick={() => setExpandedImage(null)}>
+              <X size={24} />
+            </button>
+            <img src={expandedImage} alt="Expanded view" />
+          </div>
+        </div>
+      )}
+      
       <div className="exec-header">
         <div>
           <h1 className="exec-title">Store Execution</h1>
@@ -1291,23 +1951,24 @@ export const StoreExecution: React.FC = () => {
       <div className="exec-tabs">
         <div className="exec-tabs-container">
           <button 
-            className={`exec-tab ${activeTab === 'execution' ? 'active' : ''}`}
-            onClick={() => setActiveTab('execution')}
+            className={`exec-tab ${activeTab === 'agent' ? 'active' : ''}`}
+            onClick={() => setActiveTab('agent')}
           >
-            Execution Workflow
+            <Bot size={16} />
+            ShelfIQ Agent
           </button>
           <button 
             className={`exec-tab ${activeTab === 'taskList' ? 'active' : ''}`}
             onClick={() => setActiveTab('taskList')}
           >
             Task List
-            {tasks.length > 0 && <span className="exec-tab-badge">{tasks.length}</span>}
+            {(sharedTasks.length + tasks.length) > 0 && <span className="exec-tab-badge">{sharedTasks.length + tasks.length}</span>}
           </button>
         </div>
       </div>
 
       <div className="exec-content">
-        {activeTab === 'execution' ? renderWorkflowContent() : renderTaskListTab()}
+        {activeTab === 'agent' ? renderAgentChat() : renderTaskListTab()}
       </div>
     </div>
   );

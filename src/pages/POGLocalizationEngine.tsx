@@ -110,6 +110,14 @@ const categories: Category[] = [
   { id: 'holiday', name: 'Holiday Decor', icon: <Home size={24} />, pogCount: 2 },
 ];
 
+// Mapping of corporate POG images to their localized versions
+const localizedImageMap: Record<string, string> = {
+  '/assets/Beverage Cooler (Standard).png': '/assets/Localized - Beverage Cooler (Standard).png',
+  '/assets/Beverage Aisle - Premium.png': '/assets/Localized -Beverage Aisle - Premium.png',
+  '/assets/Beverage End Cap - Large Format.png': '/assets/Localized - Beverage End Cap - Large Format.png',
+  '/assets/Home Accent Shelf - End Cap.png': '/assets/Localized - Home Accent Shelf - End Cap.png',
+};
+
 const allCorporatePOGs: CorporatePOG[] = [
   {
     id: 'bev-corp-001',
@@ -117,7 +125,7 @@ const allCorporatePOGs: CorporatePOG[] = [
     version: 'v2.1',
     sectionSize: '8ft',
     shelfCount: 5,
-    image: '/assets/beverage-cooler-standard.jpg',
+    image: '/assets/Beverage Cooler (Standard).png',
     insights: ['Energy at premium position', 'Cola-led core structure', 'Private label interspersed'],
     categoryId: 'beverages',
     rules: [
@@ -137,7 +145,7 @@ const allCorporatePOGs: CorporatePOG[] = [
     version: 'v1.5',
     sectionSize: '12ft',
     shelfCount: 6,
-    image: '/assets/beverage-aisle-premium.jpg',
+    image: '/assets/Beverage Aisle - Premium.png',
     insights: ['Premium-first layout', 'Craft beverages highlighted', 'Impulse zone at checkout'],
     categoryId: 'beverages',
     rules: [
@@ -156,7 +164,7 @@ const allCorporatePOGs: CorporatePOG[] = [
     version: 'v3.0',
     sectionSize: '4ft',
     shelfCount: 4,
-    image: '/assets/beverage-end-cap-large-format.jpg',
+    image: '/assets/Beverage End Cap - Large Format.png',
     insights: ['High-velocity items', 'Promotional focus', 'Seasonal rotation'],
     categoryId: 'beverages',
     rules: [
@@ -194,7 +202,7 @@ const allCorporatePOGs: CorporatePOG[] = [
     version: 'v2.0',
     sectionSize: '4ft',
     shelfCount: 3,
-    image: '/assets/home-accent-shelf-end-cap.jpg',
+    image: '/assets/Home Accent Shelf - End Cap.png',
     insights: ['Premium gift focus', 'Impulse purchase zone', 'Cross-category bundling'],
     categoryId: 'holiday',
     rules: [
@@ -1218,7 +1226,14 @@ export const POGLocalizationEngine: React.FC = () => {
                 </div>
               </div>
               <div className="loc-pog-viewer">
-                <img src={corpPOG?.image || '/planograms/beverage-cooler-standard.svg'} alt="Planogram" className={showCorporateView ? 'corporate' : 'localized'} />
+                <img 
+                  src={showCorporateView 
+                    ? (corpPOG?.image || '/planograms/beverage-cooler-standard.svg')
+                    : (localizedImageMap[corpPOG?.image || ''] || corpPOG?.image || '/planograms/beverage-cooler-standard.svg')
+                  } 
+                  alt="Planogram" 
+                  className={showCorporateView ? 'corporate' : 'localized'} 
+                />
                 {!showCorporateView && (
                   <div className="loc-pog-overlay-badge"><Sparkles size={14} /> Localized for {result.cluster}</div>
                 )}
