@@ -116,7 +116,7 @@ const localizedImageMap: Record<string, string> = {
   '/assets/Beverage Aisle - Premium.png': '/assets/Localized -Beverage Aisle - Premium.png',
   '/assets/Beverage End Cap - Large Format.png': '/assets/Localized - Beverage End Cap - Large Format.png',
   '/assets/Home Accent Shelf - End Cap.png': '/assets/Localized - Home Accent Shelf - End Cap.png',
-  '/assets/Holiday Decor Display - Compact.png': '/assets/Localized - Holiday Decor Display - Compact.png',
+  '/assets/holiday-decor-display-compact.png': '/assets/localized-holiday-decor-display-compact.png',
 };
 
 const allCorporatePOGs: CorporatePOG[] = [
@@ -184,7 +184,7 @@ const allCorporatePOGs: CorporatePOG[] = [
     version: 'v1.3',
     sectionSize: '6ft',
     shelfCount: 4,
-    image: '/assets/Holiday Decor Display - Compact.png',
+    image: '/assets/holiday-decor-display-compact.png',
     insights: ['Seasonal items at eye-level', 'Gift sets prominently placed', 'Value items at bottom'],
     categoryId: 'holiday',
     rules: [
