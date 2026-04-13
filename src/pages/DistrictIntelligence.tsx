@@ -780,9 +780,25 @@ export const DistrictIntelligence: React.FC = () => {
               </div>
               <div className="matrix-x-label">Current YoY Sales →</div>
             </div>
-            <div className="matrix-summary">
-              <div className="summary-item"><span className="summary-count">2</span> in Champions</div>
-              <div className="summary-item"><span className="summary-count warning">1</span> needs attention</div>
+            <div className="diagnostic-insights-section">
+              <div className="insights-header">
+                <span className="insights-icon">💡</span>
+                <span className="insights-title">Key Insights</span>
+              </div>
+              <div className="insights-list">
+                <div className="insight-item">
+                  <span className="insight-bullet success"></span>
+                  <span className="insight-text"><strong>2 stores</strong> in Champions quadrant driving 45% of district revenue</span>
+                </div>
+                <div className="insight-item">
+                  <span className="insight-bullet warning"></span>
+                  <span className="insight-text"><strong>Store #1234</strong> showing early turnaround signals — monitor closely</span>
+                </div>
+                <div className="insight-item">
+                  <span className="insight-bullet danger"></span>
+                  <span className="insight-text"><strong>1 store</strong> at risk of slipping to Crisis tier if trend continues</span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -793,42 +809,75 @@ export const DistrictIntelligence: React.FC = () => {
                 <h3>SEA Compliance Risk</h3>
                 <span className="header-subtitle">Last audit vs 12-month average</span>
               </div>
+              <div className="compliance-score-badge">
+                <span className="score-value">82%</span>
+                <span className="score-label">Avg Score</span>
+              </div>
             </div>
             <div className="compliance-grid-premium">
               <div className="compliance-tile healthy">
-                <div className="tile-icon">✓</div>
+                <div className="tile-icon-wrap healthy">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                </div>
                 <div className="tile-count">3</div>
                 <div className="tile-label">Healthy</div>
-                <div className="tile-bar"><div className="bar-fill" style={{width: '100%'}}></div></div>
+                <div className="tile-desc">Consistent high scores</div>
               </div>
               <div className="compliance-tile onetime">
-                <div className="tile-icon">↘</div>
+                <div className="tile-icon-wrap onetime">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <line x1="7" y1="7" x2="17" y2="17"></line>
+                  </svg>
+                </div>
                 <div className="tile-count">2</div>
                 <div className="tile-label">One-time Dip</div>
-                <div className="tile-bar"><div className="bar-fill" style={{width: '66%'}}></div></div>
+                <div className="tile-desc">Recent isolated failure</div>
               </div>
               <div className="compliance-tile recovering">
-                <div className="tile-icon">↗</div>
+                <div className="tile-icon-wrap recovering">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <line x1="7" y1="17" x2="17" y2="7"></line>
+                    <polyline points="7 7 17 7 17 17"></polyline>
+                  </svg>
+                </div>
                 <div className="tile-count">1</div>
                 <div className="tile-label">Recovering</div>
-                <div className="tile-bar"><div className="bar-fill" style={{width: '33%'}}></div></div>
+                <div className="tile-desc">Improving from low</div>
               </div>
               <div className="compliance-tile chronic">
-                <div className="tile-icon">!</div>
+                <div className="tile-icon-wrap chronic">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                  </svg>
+                </div>
                 <div className="tile-count">2</div>
                 <div className="tile-label">Chronic Risk</div>
-                <div className="tile-bar"><div className="bar-fill" style={{width: '66%'}}></div></div>
+                <div className="tile-desc">Persistent failures</div>
               </div>
             </div>
-            <div className="compliance-footer">
-              <div className="compliance-axis-info">
-                <span><strong>X:</strong> Last SEA Audit</span>
-                <span><strong>Y:</strong> 12-Month Avg</span>
+            <div className="diagnostic-insights-section">
+              <div className="insights-header">
+                <span className="insights-icon">🔍</span>
+                <span className="insights-title">Top Compliance Issues</span>
               </div>
-              <button className="view-details-btn">
-                View Audit Details
-                <ChevronRight size={14} />
-              </button>
+              <div className="insights-list">
+                <div className="insight-item">
+                  <span className="insight-bullet danger"></span>
+                  <span className="insight-text"><strong>Planogram adherence</strong> — 3 stores failed shelf arrangement audit</span>
+                </div>
+                <div className="insight-item">
+                  <span className="insight-bullet warning"></span>
+                  <span className="insight-text"><strong>Signage compliance</strong> — Missing promotional displays in 2 stores</span>
+                </div>
+                <div className="insight-item">
+                  <span className="insight-bullet info"></span>
+                  <span className="insight-text"><strong>Stock rotation</strong> — FIFO violations detected in backroom areas</span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -895,11 +944,24 @@ export const DistrictIntelligence: React.FC = () => {
                 </div>
               </div>
             </div>
-            <div className="sentiment-footer">
-              <div className="top-issues">
-                <span className="issues-label">Top Issues:</span>
-                <span className="issue-tag">Staff availability</span>
-                <span className="issue-tag">Wait times</span>
+            <div className="diagnostic-insights-section">
+              <div className="insights-header">
+                <span className="insights-icon">📊</span>
+                <span className="insights-title">Customer Feedback Themes</span>
+              </div>
+              <div className="insights-list">
+                <div className="insight-item">
+                  <span className="insight-bullet danger"></span>
+                  <span className="insight-text"><strong>Staff availability</strong> — 34% of negative reviews mention long wait for assistance</span>
+                </div>
+                <div className="insight-item">
+                  <span className="insight-bullet warning"></span>
+                  <span className="insight-text"><strong>Checkout wait times</strong> — Peak hour queues averaging 8+ minutes</span>
+                </div>
+                <div className="insight-item">
+                  <span className="insight-bullet success"></span>
+                  <span className="insight-text"><strong>Product quality</strong> — Positive sentiment up 12% after new apparel launch</span>
+                </div>
               </div>
             </div>
           </div>
