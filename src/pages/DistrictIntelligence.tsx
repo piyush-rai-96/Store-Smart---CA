@@ -1065,7 +1065,7 @@ export const DistrictIntelligence: React.FC = () => {
           {/* Cluster Summary Cards */}
           <div className="cluster-summary-cards">
             <div className="cluster-summary-card">
-              <span className="summary-value">4</span>
+              <span className="summary-value">3</span>
               <span className="summary-label">Active Clusters</span>
             </div>
             <div className="cluster-summary-card">
