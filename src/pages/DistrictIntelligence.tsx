@@ -757,16 +757,22 @@ export const DistrictIntelligence: React.FC = () => {
                       style={{
                         left: `${15 + (store.netSalesVar + 15) * 2.3}%`,
                         top: `${75 - (store.dpi - 50) * 1.3}%`,
-                        width: `${Math.max(40, store.netSales / 5000)}px`,
-                        height: `${Math.max(40, store.netSales / 5000)}px`,
                       }}
                     >
-                      <span className="bubble-label">{store.storeNumber}</span>
                       <div className="bubble-popup">
                         <div className="popup-title">Store #{store.storeNumber}</div>
-                        <div className="popup-row"><span>DPI Score</span><strong>{store.dpi}</strong></div>
-                        <div className="popup-row"><span>YoY Sales</span><strong className={store.netSalesVar >= 0 ? 'positive' : 'negative'}>{store.netSalesVar > 0 ? '+' : ''}{store.netSalesVar}%</strong></div>
-                        <div className="popup-row"><span>Volume</span><strong>${(store.netSales/1000).toFixed(0)}K</strong></div>
+                        <div className="popup-row">
+                          <span className="popup-label">DPI Score</span>
+                          <strong className="popup-value">{store.dpi}</strong>
+                        </div>
+                        <div className="popup-row">
+                          <span className="popup-label">YoY Sales</span>
+                          <strong className={`popup-value ${store.netSalesVar >= 0 ? 'positive' : 'negative'}`}>{store.netSalesVar > 0 ? '+' : ''}{store.netSalesVar}%</strong>
+                        </div>
+                        <div className="popup-row">
+                          <span className="popup-label">Volume</span>
+                          <strong className="popup-value">${(store.netSales/1000).toFixed(0)}K</strong>
+                        </div>
                       </div>
                     </div>
                   ))}
