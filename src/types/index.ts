@@ -35,4 +35,6 @@ export const ROUTES = {
   FORGOT_PASSWORD: '/forgot-password',
   HOME: '/home',
   MASTER_POG: '/planogram/master-pog',
+  // Store Operations Hub
+  STORE_OPS_HOME: '/store-operations/home',
 } as const;

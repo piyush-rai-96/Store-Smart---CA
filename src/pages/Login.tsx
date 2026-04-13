@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Input, Button, Card } from 'impact-ui/dist/components';
+import { Button, Card } from 'impact-ui/dist/components';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { ROUTES } from '../types';
@@ -51,7 +51,10 @@ export const Login: React.FC = () => {
       <div className="login-content">
         {/* Logo */}
         <div className="login-logo">
-          <img src={ASSETS.iaLogo} alt="Impact Analytics" />
+          <div className="login-logo-panel">
+            <img src={ASSETS.iaLogo} alt="Impact Analytics" />
+          </div>
+          <p className="login-tagline">Intelligent retail decisioning & execution cloud</p>
         </div>
 
         {/* Login Card */}
@@ -62,35 +65,40 @@ export const Login: React.FC = () => {
 
             <form onSubmit={handleSubmit} className="login-form">
               {/* Email Input */}
-              <div className="form-field">
-                <Input
+              <div className="form-field email-field">
+                <label className="email-label">Email / User ID</label>
+                <input
                   id="email"
                   name="email"
-                  label="Email / User ID"
-                  placeholder="Enter your email"
                   type="email"
+                  placeholder="Enter your email"
                   value={email}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-                  isError={!!error}
-                  size="large"
+                  className={`email-input ${error ? 'input-error' : ''}`}
                 />
               </div>
 
               {/* Password Input */}
-              <div className="form-field">
-                <Input
-                  id="password"
-                  name="password"
-                  label="Password"
-                  placeholder="Enter your password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
-                  isError={!!error}
-                  rightIcon={showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  rightIconClick={togglePasswordVisibility}
-                  size="large"
-                />
+              <div className="form-field password-field">
+                <label className="password-label">Password</label>
+                <div className="password-input-wrapper">
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
+                    className={`password-input ${error ? 'input-error' : ''}`}
+                  />
+                  <button 
+                    type="button"
+                    onClick={togglePasswordVisibility}
+                    className="password-toggle"
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
               </div>
 
               {/* Error Message */}

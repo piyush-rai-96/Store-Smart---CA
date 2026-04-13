@@ -7,7 +7,6 @@
 
 .main-layout-content {
   margin-left: 280px;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -18,13 +17,9 @@
 }
 
 .main-layout-main {
-  flex: 1;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   padding-top: 64px;
-  display: flex;
-  flex-direction: column;
-  height: calc(100vh - 64px);
-  min-height: 0;
 }
 
 /* Constrain Impact UI Header to content area only */

@@ -11,6 +11,9 @@ import { MasterPOGManagement } from './pages/MasterPOGManagement';
 import { POGRuleManagement } from './pages/POGRuleManagement';
 import { POGLocalizationEngine } from './pages/POGLocalizationEngine';
 import { StoreExecution } from './pages/StoreExecution';
+import { StoreOpsHome } from './pages/StoreOpsHome';
+import { DistrictIntelligence } from './pages/DistrictIntelligence';
+import { StoreDeepDive } from './pages/StoreDeepDive';
 import { ROUTES } from './types';
 import './App.css';
 
@@ -39,11 +42,15 @@ function App() {
           
           {/* Protected routes with MainLayout */}
           <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
-            <Route path={ROUTES.HOME} element={<div className="home-welcome"><h2>Welcome to StoreHub</h2><p>Select a module from the sidebar to get started.</p></div>} />
+            <Route path={ROUTES.HOME} element={<div className="home-welcome"><h2>Welcome to Store Smart</h2><p>Select a module from the sidebar to get started.</p></div>} />
             <Route path={ROUTES.MASTER_POG} element={<MasterPOGManagement />} />
             <Route path="/planogram/rule-management" element={<POGRuleManagement />} />
             <Route path="/planogram/localization-engine" element={<POGLocalizationEngine />} />
             <Route path="/planogram/store-execution" element={<StoreExecution />} />
+            {/* Store Operations Hub */}
+            <Route path={ROUTES.STORE_OPS_HOME} element={<StoreOpsHome />} />
+            <Route path="/store-operations/district-intelligence" element={<DistrictIntelligence />} />
+            <Route path="/store-operations/store-deep-dive" element={<StoreDeepDive />} />
           </Route>
           
           <Route path="*" element={<Navigate to={ROUTES.LOGIN} replace />} />

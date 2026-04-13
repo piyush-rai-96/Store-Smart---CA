@@ -102,18 +102,13 @@ const ruleTypeGroups = [
 
 // Category-based size presets
 const categorySizePresets: Record<string, { small: string; medium: string; large: string; unit?: string }> = {
-  'Beverages': { small: '≤ 500 ml', medium: '500 ml – 1L', large: '≥ 1L', unit: 'Volume' },
-  'Carbonated Drinks': { small: '≤ 500 ml', medium: '500 ml – 1L', large: '≥ 1L', unit: 'Volume' },
-  'Energy Drinks': { small: '≤ 250 ml', medium: '250 ml – 500 ml', large: '≥ 500 ml', unit: 'Volume' },
-  'Juices': { small: '≤ 500 ml', medium: '500 ml – 1L', large: '≥ 1L', unit: 'Volume' },
-  'Water': { small: '≤ 500 ml', medium: '500 ml – 1.5L', large: '≥ 1.5L', unit: 'Volume' },
-  'Snacks': { small: 'Single serve packs', medium: 'Standard packs', large: 'Family / multi-pack', unit: 'Pack Size' },
-  'Chips': { small: 'Single serve (1-2 oz)', medium: 'Standard (5-10 oz)', large: 'Party size (12+ oz)', unit: 'Pack Size' },
-  'Cookies': { small: 'Single serve', medium: 'Standard pack', large: 'Family pack', unit: 'Pack Size' },
-  'Crackers': { small: 'Snack pack', medium: 'Standard box', large: 'Family box', unit: 'Pack Size' },
-  'Holiday Decor & Home Accent': { small: 'Handheld / hanging decor', medium: 'Tabletop decor', large: 'Floor / bulky decor', unit: 'Physical Size' },
-  'Dairy': { small: 'Single serve', medium: 'Standard size', large: 'Family size', unit: 'Pack Size' },
-  'Frozen': { small: 'Single serve', medium: 'Standard pack', large: 'Family / bulk', unit: 'Pack Size' },
+  'Apparel': { small: 'XS-S', medium: 'M-L', large: 'XL-XXL', unit: 'Size Range' },
+  'Women\'s Apparel': { small: 'XS-S (0-4)', medium: 'M-L (6-10)', large: 'XL+ (12+)', unit: 'Size Range' },
+  'Men\'s Apparel': { small: 'S-M (28-32)', medium: 'L-XL (34-38)', large: 'XXL+ (40+)', unit: 'Size Range' },
+  'Kids Apparel': { small: 'Toddler (2T-4T)', medium: 'Kids (5-8)', large: 'Youth (10-16)', unit: 'Age Group' },
+  'Accessories': { small: 'Small items (jewelry, belts)', medium: 'Medium items (scarves, hats)', large: 'Large items (bags)', unit: 'Item Type' },
+  'Seasonal': { small: 'Single items', medium: 'Gift sets', large: 'Bundle packs', unit: 'Pack Type' },
+  'Denim': { small: 'Skinny/Slim fit', medium: 'Regular fit', large: 'Relaxed/Wide fit', unit: 'Fit Type' },
 };
 
 // Get size preset for a category (with fallback)
@@ -144,84 +139,111 @@ const ruleTypeOptions: { value: RuleType; label: string; description: string; cr
 ];
 
 const allCategories = [
-  'Beverages', 'Carbonated Drinks', 'Energy Drinks', 'Juices', 'Water',
-  'Holiday Decor & Home Accent', 'Snacks', 'Chips', 'Cookies', 'Crackers',
-  'Dairy', 'Milk', 'Cheese', 'Yogurt', 'Frozen', 'Ice Cream', 'Frozen Meals',
-  'Personal Care', 'Shampoo', 'Soap', 'Household', 'Cleaning', 'Paper Products'
+  'Apparel', 'Women\'s Apparel', 'Men\'s Apparel', 'Kids Apparel',
+  'Denim', 'Tops', 'Dresses', 'Outerwear', 'Basics', 'Activewear',
+  'Accessories', 'Bags', 'Jewelry', 'Scarves', 'Belts', 'Hats',
+  'Seasonal', 'New Arrivals', 'Sale Items', 'Limited Edition'
 ];
 
 const allSKUs = [
-  { id: 'SKU-001', name: 'Coca Cola 500ml', category: 'Beverages' },
-  { id: 'SKU-002', name: 'Pepsi 500ml', category: 'Beverages' },
-  { id: 'SKU-003', name: 'Sprite 500ml', category: 'Beverages' },
-  { id: 'SKU-004', name: 'Fanta 500ml', category: 'Beverages' },
-  { id: 'SKU-005', name: 'Mountain Dew 500ml', category: 'Beverages' },
-  { id: 'SKU-006', name: 'Store Brand Cola 500ml', category: 'Beverages' },
-  { id: 'SKU-007', name: 'Diet Coke 500ml', category: 'Beverages' },
-  { id: 'SKU-008', name: 'Pepsi Zero 500ml', category: 'Beverages' },
-  { id: 'SKU-009', name: 'Red Bull 250ml', category: 'Energy Drinks' },
-  { id: 'SKU-010', name: 'Monster Energy 500ml', category: 'Energy Drinks' },
-  { id: 'SKU-011', name: 'Lays Classic 150g', category: 'Snacks' },
-  { id: 'SKU-012', name: 'Doritos Nacho 180g', category: 'Snacks' },
-  { id: 'SKU-013', name: 'Oreo Original 150g', category: 'Cookies' },
-  { id: 'SKU-014', name: 'Whole Milk 1L', category: 'Dairy' },
-  { id: 'SKU-015', name: 'Greek Yogurt 500g', category: 'Dairy' },
+  { id: 'SKU-001', name: 'Classic Fit Tee - White', category: 'Tops' },
+  { id: 'SKU-002', name: 'Slim Fit Denim - Dark Wash', category: 'Denim' },
+  { id: 'SKU-003', name: 'Floral Print Dress', category: 'Dresses' },
+  { id: 'SKU-004', name: 'Kids Graphic Tee', category: 'Kids Apparel' },
+  { id: 'SKU-005', name: 'Leather Crossbody Bag', category: 'Bags' },
+  { id: 'SKU-006', name: 'Statement Necklace', category: 'Jewelry' },
+  { id: 'SKU-007', name: 'Wool Blend Scarf', category: 'Scarves' },
+  { id: 'SKU-008', name: 'Relaxed Fit Jeans', category: 'Denim' },
+  { id: 'SKU-009', name: 'Puffer Jacket', category: 'Outerwear' },
+  { id: 'SKU-010', name: 'Athletic Leggings', category: 'Activewear' },
+  { id: 'SKU-011', name: 'Basic V-Neck Tee', category: 'Basics' },
+  { id: 'SKU-012', name: 'Canvas Belt', category: 'Belts' },
+  { id: 'SKU-013', name: 'Bucket Hat', category: 'Hats' },
+  { id: 'SKU-014', name: 'Limited Edition Collab Hoodie', category: 'Limited Edition' },
+  { id: 'SKU-015', name: 'Sale Clearance Dress', category: 'Sale Items' },
 ];
 
-const clusterOptions = ['Urban Cluster', 'Suburban Cluster', 'Rural Cluster', 'Store #102', 'Store #105', 'Store #110', 'Premium Stores', 'Value Stores'];
-const fixtureOptions = ['4ft Shelf', '6ft Shelf', '8ft Shelf', 'Cooler', 'End Cap', 'Gondola', 'Checkout Display', 'Floor Stand'];
-const brandOptions = ['Coca-Cola', 'Pepsi', 'Nestle', 'Kraft', 'Unilever', 'P&G', 'Store Brand', 'Local Brand'];
+const clusterOptions = ['Urban Flagship', 'Family Center', 'Outlet Value', 'Mall Anchor'];
+const fixtureOptions = ['Wall Display', 'Table', 'End Cap', 'Hanging Rail', 'Folding Shelf'];
+const brandOptions = ['C&A Essentials', 'C&A Premium', 'C&A Kids', 'C&A Active', 'Partner Brand', 'Designer Collab'];
 
 const initialMockRules: Rule[] = [
   {
     id: 'RULE-001',
-    name: 'Minimum Facing - Beverages',
-    description: 'Ensure minimum product visibility for beverage category',
+    name: 'Size Sequencing - Women\'s Wall',
+    description: 'Arrange sizes from XS to XL, left to right on rails and shelves',
     types: ['Facing'],
-    mapping: { categories: ['Beverages'], clusters: ['Urban Cluster', 'Suburban Cluster'], fixtures: ['6ft Shelf', 'Cooler'] },
+    mapping: { categories: ['Women\'s Apparel'], clusters: ['Urban Flagship', 'Family Center'], fixtures: ['Wall Display'] },
     lastUpdated: '2024-03-15',
     status: 'Active',
-    definition: { Facing: { minFacings: 2, maxFacings: 6 } },
+    definition: { Facing: { minFacings: 2, maxFacings: 4 } },
     completedSteps: [1, 2, 3, 4],
   },
   {
     id: 'RULE-002',
-    name: 'Brand Blocking & Priority - Cola',
-    description: 'Group cola products and prioritize store brand',
+    name: 'Color Blocking & Priority - Denim',
+    description: 'Group denim by wash color and prioritize bestsellers at eye level',
     types: ['Brand Blocking', 'Priority'],
-    mapping: { categories: ['Beverages'], clusters: [], fixtures: ['6ft Shelf'] },
+    mapping: { categories: ['Denim'], clusters: [], fixtures: ['Wall Display'] },
     lastUpdated: '2024-03-14',
     status: 'Active',
     definition: { 
-      'Brand Blocking': { brand: 'Coca-Cola', blockingType: 'Vertical', minProducts: 3 },
-      'Priority': { target: 'Store Brand', placement: 'Eye-level', priority: 'High' }
+      'Brand Blocking': { brand: 'C&A Essentials', blockingType: 'Vertical', minProducts: 3 },
+      'Priority': { target: 'Bestsellers', placement: 'Eye-level', priority: 'High' }
     },
     completedSteps: [1, 2, 3, 4],
   },
   {
     id: 'RULE-003',
-    name: 'Mandatory & Prohibited SKUs',
-    description: 'Require Coca Cola, exclude competitor in premium stores',
+    name: 'Mandatory & Prohibited SKUs - Accessories',
+    description: 'Require trend items, exclude discontinued styles in flagship stores',
     types: ['Mandatory SKU', 'Prohibited SKU'],
-    mapping: { categories: ['Beverages'], clusters: ['Premium Stores'], fixtures: [] },
+    mapping: { categories: ['Accessories'], clusters: ['Urban Flagship'], fixtures: ['End Cap'] },
     lastUpdated: '2024-03-12',
     status: 'Active',
     definition: { 
-      'Mandatory SKU': { skus: ['SKU-001'], minQuantity: 2 },
-      'Prohibited SKU': { skus: ['SKU-002'], reason: 'Competitor exclusion' }
+      'Mandatory SKU': { skus: ['SKU-005', 'SKU-006'], minQuantity: 2 },
+      'Prohibited SKU': { skus: ['SKU-015'], reason: 'Discontinued style' }
     },
     completedSteps: [1, 2, 3, 4],
   },
   {
     id: 'RULE-004',
-    name: 'Draft - New Combined Rule',
-    description: 'Work in progress',
+    name: 'Draft - Kids Age Grouping',
+    description: 'Organize kids apparel by age group with toddler items at lower heights',
     types: ['Adjacency'],
-    mapping: { categories: [], clusters: [], fixtures: [] },
+    mapping: { categories: ['Kids Apparel'], clusters: ['Family Center'], fixtures: ['Wall Display'] },
     lastUpdated: '2024-03-18',
     status: 'Draft',
     definition: {},
     completedSteps: [1, 2],
+  },
+  {
+    id: 'RULE-005',
+    name: 'Seasonal Promo Placement',
+    description: 'Feature promotional items prominently with clear pricing on tables',
+    types: ['Priority', 'Space Allocation'],
+    mapping: { categories: ['Seasonal', 'Sale Items'], clusters: ['Mall Anchor', 'Outlet Value'], fixtures: ['Table'] },
+    lastUpdated: '2024-03-10',
+    status: 'Active',
+    definition: { 
+      'Priority': { target: 'New Arrivals', placement: 'Front-center', priority: 'High' },
+      'Space Allocation': { minPercent: 30, maxPercent: 50 }
+    },
+    completedSteps: [1, 2, 3, 4],
+  },
+  {
+    id: 'RULE-006',
+    name: 'Capacity Rules - Hanging Rails',
+    description: 'Maintain proper spacing between hangers for easy browsing',
+    types: ['Capacity'],
+    mapping: { categories: ['Apparel', 'Dresses', 'Outerwear'], clusters: [], fixtures: ['Hanging Rail'] },
+    lastUpdated: '2024-03-08',
+    status: 'Active',
+    definition: { 
+      'Capacity': { maxItemsPerRail: 25, minSpacing: '2 inches' }
+    },
+    completedSteps: [1, 2, 3, 4],
   },
 ];
 

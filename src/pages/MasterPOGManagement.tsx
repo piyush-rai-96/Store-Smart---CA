@@ -1,6 +1,11 @@
-import React, { useState } from 'react';
-import { Upload, Search, Eye, Edit, Trash2, Clock, CheckCircle } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Upload, Search, Eye, Edit, Trash2, Clock, CheckCircle, ChevronDown, ChevronUp, Check } from 'lucide-react';
 import './MasterPOGManagement.css';
+import WomensWallStandard from '../assets/C&A_WOMENS_WALL_STANDARD.png';
+import MensDenimWall from '../assets/C&A_MENS_DENIM_WALL.png';
+import KidsColorBlockWall from '../assets/C&A_KIDS_COLOR_BLOCK_WALL.png';
+import AccessoriesEndcap from '../assets/C&A_ACCESSORIES_ENDCAP.png';
+import SeasonalPromoTable from '../assets/C&A_SEASONAL_PROMO_TABLE.png';
 
 interface POGItem {
   id: string;
@@ -13,12 +18,65 @@ interface POGItem {
   planogramImage: string;
 }
 
+interface POGRule {
+  name: string;
+  type: string;
+  status: 'Active' | 'Warning';
+  description: string;
+  icon: string;
+}
+
+interface POGClusterMapping {
+  clusters: string[];
+  count: number;
+}
+
+const pogRulesMapping: Record<string, POGRule[]> = {
+  '1': [ // Women's Wall Display
+    { name: 'Product Fit & Placement', type: 'Placement', status: 'Active', description: 'Place folded items on shelves, hanging items on rails, and accessories on display hooks.', icon: '📍' },
+    { name: 'Size Sequencing', type: 'Priority', status: 'Active', description: 'Arrange sizes from small to large, left to right on each rail or shelf.', icon: '⭐' },
+    { name: 'Color Blocking', type: 'Visual', status: 'Active', description: 'Group items by color family for visual appeal and easy navigation.', icon: '🎨' },
+    { name: 'Capacity Rules', type: 'Capacity', status: 'Active', description: 'Do not overcrowd rails. Maintain spacing between hangers for easy browsing.', icon: '📊' },
+    { name: 'Seasonal Rotation', type: 'Compliance', status: 'Active', description: 'Feature current season items prominently and phase out previous season stock.', icon: '🔄' },
+  ],
+  '2': [ // Men's Denim Wall
+    { name: 'Fit Grouping', type: 'Placement', status: 'Active', description: 'Group by fit (slim, regular, relaxed) in distinct sections.', icon: '📍' },
+    { name: 'Wash Sequencing', type: 'Visual', status: 'Active', description: 'Arrange washes from light to dark within each fit section.', icon: '🎨' },
+    { name: 'Size Availability', type: 'Priority', status: 'Active', description: 'Ensure full size range is visible and accessible for each style.', icon: '⭐' },
+    { name: 'Visual Balance', type: 'Visual', status: 'Active', description: 'Maintain even stack heights and consistent folding across the display.', icon: '📐' },
+  ],
+  '3': [ // Kids Color Block Wall
+    { name: 'Age Grouping', type: 'Placement', status: 'Active', description: 'Organize by age group with toddler items at lower heights.', icon: '📍' },
+    { name: 'Color Blocking', type: 'Visual', status: 'Active', description: 'Create vibrant color blocks to attract attention and aid navigation.', icon: '🎨' },
+    { name: 'Safety Compliance', type: 'Compliance', status: 'Active', description: 'Ensure displays are stable and items are within safe reach for children.', icon: '🛡️' },
+  ],
+  '4': [ // Accessories End Cap
+    { name: 'Category Grouping', type: 'Placement', status: 'Active', description: 'Group by type: bags, belts, scarves, jewelry in distinct sections.', icon: '📍' },
+    { name: 'Trend Highlighting', type: 'Priority', status: 'Active', description: 'Feature current trend items at eye level with clear trend signage.', icon: '⭐' },
+    { name: 'Gift Presentation', type: 'Visual', status: 'Active', description: 'Display gift-ready items with packaging visible and price tags accessible.', icon: '🎁' },
+    { name: 'Impulse Optimization', type: 'Compliance', status: 'Active', description: 'Position grab-and-go items at checkout-adjacent locations.', icon: '⚡' },
+  ],
+  '5': [ // Seasonal Promo Table
+    { name: 'Promotional Focus', type: 'Placement', status: 'Active', description: 'Feature current promotional items prominently with clear pricing.', icon: '📍' },
+    { name: 'Bundle Display', type: 'Visual', status: 'Active', description: 'Create outfit or gift bundles to encourage multi-item purchases.', icon: '🎨' },
+    { name: 'Urgency Signage', type: 'Compliance', status: 'Active', description: 'Include limited-time messaging to drive immediate purchase decisions.', icon: '⏰' },
+  ],
+};
+
+const pogClusterMapping: Record<string, POGClusterMapping> = {
+  '1': { clusters: ['Urban Flagship', 'Family Center', 'Mall Anchor'], count: 3 },
+  '2': { clusters: ['Urban Flagship', 'Family Center', 'Outlet Value'], count: 3 },
+  '3': { clusters: ['Family Center', 'Mall Anchor', 'Outlet Value'], count: 3 },
+  '4': { clusters: ['Urban Flagship', 'Mall Anchor'], count: 2 },
+  '5': { clusters: ['Urban Flagship', 'Family Center', 'Mall Anchor', 'Outlet Value'], count: 4 },
+};
+
 const mockPOGData: POGItem[] = [
-  { id: '1', name: 'Beverage Cooler - Standard', category: 'Beverages', lastModified: '2024-03-15', status: 'active', version: 'v2.1', clusters: 12, planogramImage: '/assets/beverage-cooler-standard.jpg' },
-  { id: '2', name: 'Beverage Aisle - Premium', category: 'Beverages', lastModified: '2024-03-14', status: 'active', version: 'v1.5', clusters: 8, planogramImage: '/assets/beverage-aisle-premium.jpg' },
-  { id: '3', name: 'Holiday Decor Display - Compact', category: 'Holiday Decor & Home Accent', lastModified: '2024-03-12', status: 'draft', version: 'v3.0', clusters: 5, planogramImage: '/assets/holiday-decor-display-compact.jpg' },
-  { id: '4', name: 'Beverage End Cap - Large Format', category: 'Beverages', lastModified: '2024-03-10', status: 'active', version: 'v1.2', clusters: 15, planogramImage: '/assets/beverage-end-cap-large-format.jpg' },
-  { id: '5', name: 'Home Accent Shelf - End Cap', category: 'Holiday Decor & Home Accent', lastModified: '2024-03-08', status: 'archived', version: 'v2.0', clusters: 3, planogramImage: '/assets/home-accent-shelf-end-cap.jpg' },
+  { id: '1', name: "Women's Wall Display - Standard", category: 'Apparel', lastModified: '2024-03-15', status: 'active', version: 'v2.1', clusters: 12, planogramImage: WomensWallStandard },
+  { id: '2', name: "Men's Denim Wall Display", category: 'Apparel', lastModified: '2024-03-14', status: 'active', version: 'v1.5', clusters: 8, planogramImage: MensDenimWall },
+  { id: '3', name: "Kids Color Block Wall", category: 'Apparel', lastModified: '2024-03-12', status: 'draft', version: 'v3.0', clusters: 5, planogramImage: KidsColorBlockWall },
+  { id: '4', name: 'Accessories End Cap', category: 'Accessories', lastModified: '2024-03-10', status: 'active', version: 'v1.2', clusters: 15, planogramImage: AccessoriesEndcap },
+  { id: '5', name: 'Seasonal Promo Table', category: 'Seasonal', lastModified: '2024-03-08', status: 'archived', version: 'v2.0', clusters: 3, planogramImage: SeasonalPromoTable },
 ];
 
 interface Filters {
@@ -29,6 +87,70 @@ interface Filters {
   lastUpdated: string;
   createdBy: string;
 }
+
+// Custom Dropdown Component
+interface DropdownOption {
+  value: string;
+  label: string;
+}
+
+interface CustomDropdownProps {
+  label: string;
+  value: string;
+  options: DropdownOption[];
+  onChange: (value: string) => void;
+}
+
+const CustomDropdown: React.FC<CustomDropdownProps> = ({ label, value, options, onChange }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const selectedOption = options.find(opt => opt.value === value);
+
+  return (
+    <div className="pog-filter-item" ref={dropdownRef}>
+      <label className="pog-filter-label">{label}</label>
+      <div className="custom-dropdown">
+        <button 
+          className={`custom-dropdown-trigger ${isOpen ? 'open' : ''}`}
+          onClick={() => setIsOpen(!isOpen)}
+          type="button"
+        >
+          <span className={value ? 'has-value' : ''}>{selectedOption?.label || options[0]?.label}</span>
+          {isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+        </button>
+        {isOpen && (
+          <div className="custom-dropdown-menu">
+            {options.map((option) => (
+              <button
+                key={option.value}
+                className={`custom-dropdown-option ${value === option.value ? 'selected' : ''}`}
+                onClick={() => {
+                  onChange(option.value);
+                  setIsOpen(false);
+                }}
+                type="button"
+              >
+                <span>{option.label}</span>
+                {value === option.value && <Check size={16} className="check-icon" />}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 export const MasterPOGManagement: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'library' | 'workspace'>('library');
@@ -135,85 +257,73 @@ export const MasterPOGManagement: React.FC = () => {
 
             {/* Filter Stripe */}
             <div className="pog-filter-stripe">
-              <div className="pog-filter-item">
-                <label className="pog-filter-label">Category</label>
-                <select 
-                  className="pog-filter-select"
-                  value={filters.category}
-                  onChange={(e) => handleFilterChange('category', e.target.value)}
-                >
-                  <option value="">All Categories</option>
-                  <option value="Beverages">Beverages</option>
-                  <option value="Holiday Decor & Home Accent">Holiday Decor & Home Accent</option>
-                </select>
-              </div>
-              <div className="pog-filter-item">
-                <label className="pog-filter-label">Status</label>
-                <select 
-                  className="pog-filter-select"
-                  value={filters.status}
-                  onChange={(e) => handleFilterChange('status', e.target.value)}
-                >
-                  <option value="">All Status</option>
-                  <option value="active">Active</option>
-                  <option value="draft">Draft</option>
-                  <option value="archived">Archived</option>
-                </select>
-              </div>
-              <div className="pog-filter-item">
-                <label className="pog-filter-label">Fixture Type</label>
-                <select 
-                  className="pog-filter-select"
-                  value={filters.fixtureType}
-                  onChange={(e) => handleFilterChange('fixtureType', e.target.value)}
-                >
-                  <option value="">All Fixtures</option>
-                  <option value="cooler">Cooler</option>
-                  <option value="shelf">Shelf</option>
-                  <option value="endcap">End Cap</option>
-                  <option value="gondola">Gondola</option>
-                </select>
-              </div>
-              <div className="pog-filter-item">
-                <label className="pog-filter-label">Cluster</label>
-                <select 
-                  className="pog-filter-select"
-                  value={filters.cluster}
-                  onChange={(e) => handleFilterChange('cluster', e.target.value)}
-                >
-                  <option value="">All Clusters</option>
-                  <option value="1-5">1-5 Clusters</option>
-                  <option value="6-10">6-10 Clusters</option>
-                  <option value="11-15">11-15 Clusters</option>
-                  <option value="15+">15+ Clusters</option>
-                </select>
-              </div>
-              <div className="pog-filter-item">
-                <label className="pog-filter-label">Last Updated</label>
-                <select 
-                  className="pog-filter-select"
-                  value={filters.lastUpdated}
-                  onChange={(e) => handleFilterChange('lastUpdated', e.target.value)}
-                >
-                  <option value="">Any Time</option>
-                  <option value="today">Today</option>
-                  <option value="week">This Week</option>
-                  <option value="month">This Month</option>
-                  <option value="quarter">This Quarter</option>
-                </select>
-              </div>
-              <div className="pog-filter-item">
-                <label className="pog-filter-label">Created By</label>
-                <select 
-                  className="pog-filter-select"
-                  value={filters.createdBy}
-                  onChange={(e) => handleFilterChange('createdBy', e.target.value)}
-                >
-                  <option value="">All Users</option>
-                  <option value="me">Me</option>
-                  <option value="team">My Team</option>
-                </select>
-              </div>
+              <CustomDropdown
+                label="Category"
+                value={filters.category}
+                options={[
+                  { value: '', label: 'All Categories' },
+                  { value: 'Apparel', label: 'Apparel' },
+                  { value: 'Accessories', label: 'Accessories' },
+                  { value: 'Seasonal', label: 'Seasonal' },
+                ]}
+                onChange={(value) => handleFilterChange('category', value)}
+              />
+              <CustomDropdown
+                label="Status"
+                value={filters.status}
+                options={[
+                  { value: '', label: 'All Status' },
+                  { value: 'active', label: 'Active' },
+                  { value: 'draft', label: 'Draft' },
+                  { value: 'archived', label: 'Archived' },
+                ]}
+                onChange={(value) => handleFilterChange('status', value)}
+              />
+              <CustomDropdown
+                label="Fixture Type"
+                value={filters.fixtureType}
+                options={[
+                  { value: '', label: 'All Fixtures' },
+                  { value: 'wall', label: 'Wall Display' },
+                  { value: 'table', label: 'Table' },
+                  { value: 'endcap', label: 'End Cap' },
+                ]}
+                onChange={(value) => handleFilterChange('fixtureType', value)}
+              />
+              <CustomDropdown
+                label="Cluster"
+                value={filters.cluster}
+                options={[
+                  { value: '', label: 'All Clusters' },
+                  { value: 'urban', label: 'Urban Flagship' },
+                  { value: 'family', label: 'Family Center' },
+                  { value: 'outlet', label: 'Outlet Value' },
+                  { value: 'mall', label: 'Mall Anchor' },
+                ]}
+                onChange={(value) => handleFilterChange('cluster', value)}
+              />
+              <CustomDropdown
+                label="Last Updated"
+                value={filters.lastUpdated}
+                options={[
+                  { value: '', label: 'Any Time' },
+                  { value: 'today', label: 'Today' },
+                  { value: 'week', label: 'This Week' },
+                  { value: 'month', label: 'This Month' },
+                  { value: 'quarter', label: 'This Quarter' },
+                ]}
+                onChange={(value) => handleFilterChange('lastUpdated', value)}
+              />
+              <CustomDropdown
+                label="Created By"
+                value={filters.createdBy}
+                options={[
+                  { value: '', label: 'All Users' },
+                  { value: 'me', label: 'Me' },
+                  { value: 'team', label: 'My Team' },
+                ]}
+                onChange={(value) => handleFilterChange('createdBy', value)}
+              />
               <button className="pog-filter-clear" onClick={clearAllFilters}>
                 Clear All
               </button>
@@ -317,13 +427,13 @@ export const MasterPOGManagement: React.FC = () => {
                   <h4 className="pog-sidebar-title">Cluster Mapping</h4>
                   <div className="pog-cluster-info">
                     <div className="pog-cluster-stat">
-                      <span className="pog-cluster-number">3</span>
+                      <span className="pog-cluster-number">{pogClusterMapping[selectedPOG.id]?.count || 0}</span>
                       <span className="pog-cluster-label">Total Clusters</span>
                     </div>
                     <div className="pog-cluster-names">
-                      <span className="pog-cluster-tag">Campus Pulse</span>
-                      <span className="pog-cluster-tag">Family Stock-Up</span>
-                      <span className="pog-cluster-tag">Value Transit</span>
+                      {pogClusterMapping[selectedPOG.id]?.clusters.map((cluster, idx) => (
+                        <span key={idx} className="pog-cluster-tag">{cluster}</span>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -341,71 +451,21 @@ export const MasterPOGManagement: React.FC = () => {
                   <h4 className="pog-sidebar-title">Applied Rules</h4>
                   <p className="pog-rules-description">Rules dynamically applied based on category, cluster, and fixture mappings.</p>
                   <div className="pog-rules-list premium">
-                    <div className="pog-rule-card">
-                      <div className="pog-rule-card-header">
-                        <div className="pog-rule-icon-badge placement">
-                          <span>�</span>
+                    {pogRulesMapping[selectedPOG.id]?.map((rule, idx) => (
+                      <div key={idx} className="pog-rule-card">
+                        <div className="pog-rule-card-header">
+                          <div className={`pog-rule-icon-badge ${rule.type.toLowerCase()}`}>
+                            <span>{rule.icon}</span>
+                          </div>
+                          <div className="pog-rule-card-title">
+                            <span className="pog-rule-name">{rule.name}</span>
+                            <span className="pog-rule-type-tag">{rule.type}</span>
+                          </div>
+                          <span className={`pog-rule-status ${rule.status.toLowerCase()}`}>{rule.status}</span>
                         </div>
-                        <div className="pog-rule-card-title">
-                          <span className="pog-rule-name">Product Fit & Placement</span>
-                          <span className="pog-rule-type-tag">Placement</span>
-                        </div>
-                        <span className="pog-rule-status active">Active</span>
+                        <p className="pog-rule-description">{rule.description}</p>
                       </div>
-                      <p className="pog-rule-description">Place small single-serve drinks on top shelves, medium bottles in the middle, and large bottles on bottom shelves.</p>
-                    </div>
-                    <div className="pog-rule-card">
-                      <div className="pog-rule-card-header">
-                        <div className="pog-rule-icon-badge facing">
-                          <span>🔢</span>
-                        </div>
-                        <div className="pog-rule-card-title">
-                          <span className="pog-rule-name">Facing Rules</span>
-                          <span className="pog-rule-type-tag">Facing</span>
-                        </div>
-                        <span className="pog-rule-status active">Active</span>
-                      </div>
-                      <p className="pog-rule-description">Ensure high-demand beverages have multiple front facings and shelves are fully stocked with no empty gaps.</p>
-                    </div>
-                    <div className="pog-rule-card">
-                      <div className="pog-rule-card-header">
-                        <div className="pog-rule-icon-badge priority">
-                          <span>⭐</span>
-                        </div>
-                        <div className="pog-rule-card-title">
-                          <span className="pog-rule-name">Priority Placement</span>
-                          <span className="pog-rule-type-tag">Priority</span>
-                        </div>
-                        <span className="pog-rule-status active">Active</span>
-                      </div>
-                      <p className="pog-rule-description">Keep top-selling drinks and core categories like soda and sports drinks at eye level.</p>
-                    </div>
-                    <div className="pog-rule-card">
-                      <div className="pog-rule-card-header">
-                        <div className="pog-rule-icon-badge space">
-                          <span>📊</span>
-                        </div>
-                        <div className="pog-rule-card-title">
-                          <span className="pog-rule-name">Space Allocation</span>
-                          <span className="pog-rule-type-tag">Space</span>
-                        </div>
-                        <span className="pog-rule-status active">Active</span>
-                      </div>
-                      <p className="pog-rule-description">Divide shelf space clearly between soda, water, and energy drinks based on demand.</p>
-                    </div>
-                    <div className="pog-rule-card">
-                      <div className="pog-rule-card-header">
-                        <div className="pog-rule-icon-badge tier">
-                          <span>💰</span>
-                        </div>
-                        <div className="pog-rule-card-title">
-                          <span className="pog-rule-name">Price Tier Rules</span>
-                          <span className="pog-rule-type-tag">Price Tier</span>
-                        </div>
-                        <span className="pog-rule-status active">Active</span>
-                      </div>
-                      <p className="pog-rule-description">Place value drinks on lower shelves and premium drinks on upper or eye-level shelves.</p>
-                    </div>
+                    ))}
                   </div>
                 </div>
               </div>

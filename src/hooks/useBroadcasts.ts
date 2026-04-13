@@ -3,7 +3,7 @@ import { Broadcast, BroadcastFilters } from '../types/broadcast';
 import { User } from '../types';
 import { MOCK_BROADCASTS } from '../constants/broadcasts';
 
-const BROADCAST_STORAGE_KEY = 'ia_storehub_broadcasts';
+const BROADCAST_STORAGE_KEY = 'ia_storesmart_broadcasts';
 
 interface BroadcastState {
   [broadcastId: string]: {

@@ -6,7 +6,9 @@ import {
   ChevronDown,
   ChevronUp,
   Layers,
-  FolderKanban
+  FolderKanban,
+  Building2,
+  Home
 } from 'lucide-react';
 import { User } from '../../../types';
 import './SidebarNew.css';
@@ -37,6 +39,28 @@ export const SidebarNew: React.FC<SidebarNewProps> = ({ user, isCollapsed, onTog
   const [expandedModules, setExpandedModules] = useState<string[]>(['planogram']);
 
   const navigationModules: NavigationModule[] = [
+    {
+      id: 'store-operations',
+      label: 'Store Operations Hub',
+      icon: <Building2 size={20} />,
+      subModules: [
+        {
+          id: 'store-ops-home',
+          label: 'Home',
+          path: '/store-operations/home',
+        },
+        {
+          id: 'district-intelligence',
+          label: 'District Intelligence',
+          path: '/store-operations/district-intelligence',
+        },
+        {
+          id: 'store-deep-dive',
+          label: 'Store Deep Dive',
+          path: '/store-operations/store-deep-dive',
+        },
+      ],
+    },
     {
       id: 'planogram',
       label: 'Planogram Intelligence',

@@ -20,7 +20,6 @@ import {
   Layers,
   Store,
   Users,
-  Coffee,
   Home,
   Loader2,
   Search,
@@ -33,6 +32,20 @@ import {
 } from 'lucide-react';
 import { useExecutionTasks, ExecutionTask } from '../context/ExecutionTasksContext';
 import './POGLocalizationEngine.css';
+
+// Import corporate POG images
+import WomensWallStandard from '../assets/C&A_WOMENS_WALL_STANDARD.png';
+import MensDenimWall from '../assets/C&A_MENS_DENIM_WALL.png';
+import KidsColorBlockWall from '../assets/C&A_KIDS_COLOR_BLOCK_WALL.png';
+import AccessoriesEndcap from '../assets/C&A_ACCESSORIES_ENDCAP.png';
+import SeasonalPromoTable from '../assets/C&A_SEASONAL_PROMO_TABLE.png';
+
+// Import localized POG images
+import LocalizedWomensWall from '../assets/localized_C&A_WOMENS_WALL_STANDARD.png';
+import LocalizedMensDenim from '../assets/localized_C&A_MENS_DENIM_WALL.png';
+import LocalizedKidsColorBlock from '../assets/localized_C&A_KIDS_COLOR_BLOCK_WALL.png';
+import LocalizedAccessoriesEndcap from '../assets/localized_C&A_ACCESSORIES_ENDCAP.png';
+import LocalizedSeasonalPromo from '../assets/localized_C&A_SEASONAL_PROMO_TABLE.png';
 
 // Types
 type WorkflowStep = 'category' | 'corporate' | 'storeGroup' | 'engine';
@@ -106,168 +119,169 @@ interface LocalizationResult {
 
 // Mock Data
 const categories: Category[] = [
-  { id: 'beverages', name: 'Beverages', icon: <Coffee size={24} />, pogCount: 3 },
-  { id: 'holiday', name: 'Holiday Decor', icon: <Home size={24} />, pogCount: 2 },
+  { id: 'apparel', name: 'Apparel', icon: <Users size={24} />, pogCount: 3 },
+  { id: 'accessories', name: 'Accessories', icon: <Package size={24} />, pogCount: 1 },
+  { id: 'seasonal', name: 'Seasonal', icon: <Home size={24} />, pogCount: 1 },
 ];
 
 // Mapping of corporate POG images to their localized versions
 const localizedImageMap: Record<string, string> = {
-  '/assets/Beverage Cooler (Standard).png': '/assets/Localized - Beverage Cooler (Standard).png',
-  '/assets/Beverage Aisle - Premium.png': '/assets/Localized -Beverage Aisle - Premium.png',
-  '/assets/Beverage End Cap - Large Format.png': '/assets/Localized - Beverage End Cap - Large Format.png',
-  '/assets/Home Accent Shelf - End Cap.png': '/assets/Localized - Home Accent Shelf - End Cap.png',
-  '/assets/holiday-decor-display-compact.png': '/assets/localized-holiday-decor-display-compact.png',
+  [WomensWallStandard]: LocalizedWomensWall,
+  [MensDenimWall]: LocalizedMensDenim,
+  [KidsColorBlockWall]: LocalizedKidsColorBlock,
+  [AccessoriesEndcap]: LocalizedAccessoriesEndcap,
+  [SeasonalPromoTable]: LocalizedSeasonalPromo,
 };
 
 const allCorporatePOGs: CorporatePOG[] = [
   {
-    id: 'bev-corp-001',
-    name: 'Beverage Cooler - Standard',
+    id: 'app-corp-001',
+    name: "Women's Wall Display - Standard",
     version: 'v2.1',
-    sectionSize: '8ft',
-    shelfCount: 5,
-    image: '/assets/Beverage Cooler (Standard).png',
-    insights: ['Energy at premium position', 'Cola-led core structure', 'Private label interspersed'],
-    categoryId: 'beverages',
-    rules: [
-      { name: 'Product Fit & Placement', type: 'Product Fit & Placement', status: 'Active', description: 'Place small single-serve drinks on top shelves, medium bottles in the middle, and large bottles or multipacks on bottom shelves or base.' },
-      { name: 'Facing Rules', type: 'Facing', status: 'Active', description: 'Ensure high-demand beverages have multiple front facings and shelves are fully stocked with no empty gaps.' },
-      { name: 'Priority Placement', type: 'Priority', status: 'Active', description: 'Keep top-selling drinks and core categories like soda and sports drinks at eye level.' },
-      { name: 'Space Allocation', type: 'Space Allocation', status: 'Active', description: 'Divide shelf space clearly between soda, water, and energy drinks based on demand.' },
-      { name: 'Capacity / Fit', type: 'Capacity / Fit', status: 'Active', description: 'Do not exceed shelf capacity. Products must fit within shelf space without overlapping.' },
-      { name: 'Price Tier Rules', type: 'Price Tier', status: 'Active', description: 'Place value drinks on lower shelves and premium drinks on upper or eye-level shelves.' },
-      { name: 'Temperature Compliance', type: 'Compliance', status: 'Active', description: 'Only chilled beverages should be placed in the cooler. Do not mix ambient products.' },
-      { name: 'Label Visibility', type: 'Visual', status: 'Active', description: 'Ensure all product labels face forward and are clearly visible to customers.' },
-    ],
-  },
-  {
-    id: 'bev-corp-002',
-    name: 'Beverage Aisle - Premium',
-    version: 'v1.5',
     sectionSize: '12ft',
+    shelfCount: 5,
+    image: WomensWallStandard,
+    insights: ['Premium placement at eye level', 'Color-coordinated sections', 'Seasonal highlights featured'],
+    categoryId: 'apparel',
+    rules: [
+      { name: 'Product Fit & Placement', type: 'Product Fit & Placement', status: 'Active', description: 'Place folded items on shelves, hanging items on rails, and accessories on display hooks.' },
+      { name: 'Facing Rules', type: 'Facing', status: 'Active', description: 'Ensure all garments face the same direction with labels visible.' },
+      { name: 'Size Sequencing', type: 'Priority', status: 'Active', description: 'Arrange sizes from small to large, left to right on each rail or shelf.' },
+      { name: 'Color Blocking', type: 'Visual', status: 'Active', description: 'Group items by color family for visual appeal and easy navigation.' },
+      { name: 'Capacity Rules', type: 'Capacity / Fit', status: 'Active', description: 'Do not overcrowd rails. Maintain spacing between hangers for easy browsing.' },
+      { name: 'Price Tier Rules', type: 'Price Tier', status: 'Active', description: 'Place premium items at eye level and value items on lower shelves.' },
+      { name: 'Seasonal Rotation', type: 'Compliance', status: 'Active', description: 'Feature current season items prominently and phase out previous season stock.' },
+      { name: 'Mannequin Styling', type: 'Visual', status: 'Active', description: 'Style mannequins with complete outfits from the current collection.' },
+    ],
+  },
+  {
+    id: 'app-corp-002',
+    name: "Men's Denim Wall Display",
+    version: 'v1.5',
+    sectionSize: '10ft',
     shelfCount: 6,
-    image: '/assets/Beverage Aisle - Premium.png',
-    insights: ['Premium-first layout', 'Craft beverages highlighted', 'Impulse zone at checkout'],
-    categoryId: 'beverages',
+    image: MensDenimWall,
+    insights: ['Fit-focused organization', 'Wash gradients displayed', 'Size availability highlighted'],
+    categoryId: 'apparel',
     rules: [
-      { name: 'Product Fit & Placement', type: 'Product Fit & Placement', status: 'Active', description: 'Arrange smaller bottles and premium drinks on upper shelves and larger packs on lower shelves.' },
-      { name: 'Facing Rules', type: 'Facing', status: 'Active', description: 'Maintain moderate spacing while ensuring key products have enough visibility.' },
-      { name: 'Brand Blocking', type: 'Brand Blocking', status: 'Active', description: 'Group products of the same brand together in a continuous block.' },
-      { name: 'Adjacency Rules', type: 'Adjacency', status: 'Active', description: 'Place similar beverage types together such as water with water and juice with juice.' },
-      { name: 'Price Tier Rules', type: 'Price Tier', status: 'Active', description: 'Ensure premium products are placed at eye level and value products are positioned lower.' },
-      { name: 'Visual Balance', type: 'Visual', status: 'Active', description: 'Maintain a clean and organized shelf with balanced spacing across all products.' },
-      { name: 'Shelf Alignment', type: 'Compliance', status: 'Active', description: 'All products must be aligned uniformly with no tilted or misaligned items.' },
+      { name: 'Product Fit & Placement', type: 'Product Fit & Placement', status: 'Active', description: 'Stack folded denim by fit type with clear signage for each style.' },
+      { name: 'Facing Rules', type: 'Facing', status: 'Active', description: 'Fold denim consistently with waistband visible and size tags accessible.' },
+      { name: 'Fit Grouping', type: 'Brand Blocking', status: 'Active', description: 'Group by fit (slim, regular, relaxed) in distinct sections.' },
+      { name: 'Wash Sequencing', type: 'Adjacency', status: 'Active', description: 'Arrange washes from light to dark within each fit section.' },
+      { name: 'Size Availability', type: 'Price Tier', status: 'Active', description: 'Ensure full size range is visible and accessible for each style.' },
+      { name: 'Visual Balance', type: 'Visual', status: 'Active', description: 'Maintain even stack heights and consistent folding across the display.' },
+      { name: 'Stock Depth', type: 'Compliance', status: 'Active', description: 'Keep backup stock organized and easily accessible for replenishment.' },
     ],
   },
   {
-    id: 'bev-corp-003',
-    name: 'Beverage End Cap',
+    id: 'app-corp-003',
+    name: 'Kids Color Block Wall',
     version: 'v3.0',
-    sectionSize: '4ft',
+    sectionSize: '8ft',
     shelfCount: 4,
-    image: '/assets/Beverage End Cap - Large Format.png',
-    insights: ['High-velocity items', 'Promotional focus', 'Seasonal rotation'],
-    categoryId: 'beverages',
+    image: KidsColorBlockWall,
+    insights: ['Bright color groupings', 'Age-appropriate heights', 'Character merchandise featured'],
+    categoryId: 'apparel',
     rules: [
-      { name: 'Priority Placement', type: 'Priority', status: 'Active', description: 'Place promotional and top-selling beverages in top and eye-level shelves.' },
-      { name: 'Facing Rules', type: 'Facing', status: 'Active', description: 'Use high-density placement with multiple facings to create strong visual impact.' },
-      { name: 'Space Allocation', type: 'Space Allocation', status: 'Active', description: 'Allocate more space to high-demand or promotional products.' },
-      { name: 'Performance Rules', type: 'Performance', status: 'Active', description: 'Increase space for top-selling products and reduce space for slower-moving items.' },
-      { name: 'Capacity / Fit', type: 'Capacity / Fit', status: 'Active', description: 'Ensure bulk packs are placed on lower shelves or base without exceeding limits.' },
-      { name: 'Promotion Visibility', type: 'Visual', status: 'Active', description: 'Ensure promotional products are clearly visible and not blocked by other items.' },
-      { name: 'Symmetry', type: 'Visual', status: 'Active', description: 'Maintain a balanced layout across left and right sides for better visual appeal.' },
+      { name: 'Age Grouping', type: 'Priority', status: 'Active', description: 'Organize by age group with toddler items at lower heights and older kids items higher.' },
+      { name: 'Color Blocking', type: 'Facing', status: 'Active', description: 'Create vibrant color blocks to attract attention and aid navigation.' },
+      { name: 'Character Placement', type: 'Space Allocation', status: 'Active', description: 'Feature licensed character items at eye level for target age groups.' },
+      { name: 'Size Organization', type: 'Performance', status: 'Active', description: 'Arrange sizes logically within each color or character section.' },
+      { name: 'Safety Compliance', type: 'Capacity / Fit', status: 'Active', description: 'Ensure displays are stable and items are within safe reach for children.' },
+      { name: 'Parent Accessibility', type: 'Visual', status: 'Active', description: 'Place size and price information at adult eye level for easy reference.' },
+      { name: 'Play Zone Integration', type: 'Visual', status: 'Active', description: 'Create engaging displays that encourage interaction while maintaining organization.' },
     ],
   },
   {
-    id: 'hol-corp-001',
-    name: 'Holiday Decor - Compact',
+    id: 'acc-corp-001',
+    name: 'Accessories End Cap',
     version: 'v1.3',
-    sectionSize: '6ft',
+    sectionSize: '4ft',
     shelfCount: 4,
-    image: '/assets/holiday-decor-display-compact.png',
-    insights: ['Seasonal items at eye-level', 'Gift sets prominently placed', 'Value items at bottom'],
-    categoryId: 'holiday',
+    image: AccessoriesEndcap,
+    insights: ['Impulse purchase focus', 'Gift-ready presentation', 'Trend items highlighted'],
+    categoryId: 'accessories',
     rules: [
-      { name: 'Product Fit & Placement', type: 'Product Fit & Placement', status: 'Active', description: 'Place small decor on top shelves, medium items in the middle, and larger items on bottom or base.' },
-      { name: 'Pack Behavior', type: 'Pack Behavior', status: 'Active', description: 'Hang ornaments and garlands on peg hooks and place boxed decor on shelves.' },
-      { name: 'Adjacency Rules', type: 'Adjacency', status: 'Active', description: 'Group similar decor items such as ornaments with lights and candles together.' },
-      { name: 'Assortment Rules', type: 'Assortment', status: 'Active', description: 'Ensure a mix of ornaments, lights, candles, and decor items without overcrowding.' },
-      { name: 'Visual Merchandising', type: 'Visual', status: 'Active', description: 'Maintain clean spacing and group items by color or theme.' },
-      { name: 'Theme Consistency', type: 'Visual', status: 'Active', description: 'Ensure decor items follow a consistent festive theme or color grouping.' },
-      { name: 'Accessibility', type: 'Compliance', status: 'Active', description: 'Ensure frequently picked items are placed within easy reach for customers.' },
+      { name: 'Product Fit & Placement', type: 'Product Fit & Placement', status: 'Active', description: 'Place small accessories on hooks, medium items on shelves, and bags on display stands.' },
+      { name: 'Category Grouping', type: 'Pack Behavior', status: 'Active', description: 'Group by type: bags, belts, scarves, jewelry in distinct sections.' },
+      { name: 'Adjacency Rules', type: 'Adjacency', status: 'Active', description: 'Place complementary items together for outfit completion suggestions.' },
+      { name: 'Trend Highlighting', type: 'Assortment', status: 'Active', description: 'Feature current trend items at eye level with clear trend signage.' },
+      { name: 'Gift Presentation', type: 'Visual', status: 'Active', description: 'Display gift-ready items with packaging visible and price tags accessible.' },
+      { name: 'Security Compliance', type: 'Visual', status: 'Active', description: 'Ensure high-value items have appropriate security measures in place.' },
+      { name: 'Impulse Optimization', type: 'Compliance', status: 'Active', description: 'Position grab-and-go items at checkout-adjacent locations.' },
     ],
   },
   {
-    id: 'hol-corp-002',
-    name: 'Home Accent - End Cap',
+    id: 'sea-corp-001',
+    name: 'Seasonal Promo Table',
     version: 'v2.0',
-    sectionSize: '4ft',
+    sectionSize: '6ft',
     shelfCount: 3,
-    image: '/assets/Home Accent Shelf - End Cap.png',
-    insights: ['Premium gift focus', 'Impulse purchase zone', 'Cross-category bundling'],
-    categoryId: 'holiday',
+    image: SeasonalPromoTable,
+    insights: ['High-impact promotional display', 'Limited-time offers featured', 'Cross-category bundling'],
+    categoryId: 'seasonal',
     rules: [
-      { name: 'Product Fit & Placement', type: 'Product Fit & Placement', status: 'Active', description: 'Place small decor items on upper shelves, medium items at eye level, and large items on the base.' },
-      { name: 'Adjacency Rules', type: 'Adjacency', status: 'Active', description: 'Place related items together such as frames with wall decor and candles with holders.' },
-      { name: 'Brand / Theme Blocking', type: 'Brand Blocking', status: 'Active', description: 'Group products by style or theme such as modern or rustic.' },
-      { name: 'Price Tier Rules', type: 'Price Tier', status: 'Active', description: 'Place premium items on top shelves and value items on lower shelves.' },
-      { name: 'Visual Merchandising', type: 'Visual', status: 'Active', description: 'Maintain clean spacing and avoid clutter.' },
-      { name: 'Stability', type: 'Compliance', status: 'Active', description: 'Ensure all items are placed securely and cannot easily fall or tip over.' },
-      { name: 'Visibility', type: 'Visual', status: 'Active', description: 'Ensure all products are clearly visible and not hidden behind others.' },
+      { name: 'Promotional Focus', type: 'Product Fit & Placement', status: 'Active', description: 'Feature current promotional items prominently with clear pricing and offer details.' },
+      { name: 'Theme Consistency', type: 'Adjacency', status: 'Active', description: 'Maintain consistent seasonal theme across all displayed items.' },
+      { name: 'Bundle Display', type: 'Brand Blocking', status: 'Active', description: 'Create outfit or gift bundles to encourage multi-item purchases.' },
+      { name: 'Price Communication', type: 'Price Tier', status: 'Active', description: 'Display original and promotional prices clearly with savings highlighted.' },
+      { name: 'Stock Rotation', type: 'Visual', status: 'Active', description: 'Rotate stock regularly to maintain fresh appearance and full presentation.' },
+      { name: 'Urgency Signage', type: 'Compliance', status: 'Active', description: 'Include limited-time messaging to drive immediate purchase decisions.' },
+      { name: 'Traffic Flow', type: 'Visual', status: 'Active', description: 'Position table to maximize visibility and encourage customer engagement.' },
     ],
   },
 ];
 
 const storeGroups: StoreGroup[] = [
   { 
-    id: 'campus', 
-    name: 'Campus Pulse', 
-    description: 'Younger shoppers. Impulse-driven trips. Single-serve and apartment-scale.', 
-    storeCount: 184, 
-    tags: ['High Impulse', 'Functional', 'Single-serve', 'Trend-driven'],
-    assortment: { totalSKUs: 156, premium: 45, core: 78, value: 23, newItems: 10 }
+    id: 'urban', 
+    name: 'Urban Flagship', 
+    description: 'High-traffic city centers. Fashion-forward shoppers. Premium focus.', 
+    storeCount: 124, 
+    tags: ['Trend-driven', 'Premium', 'High footfall', 'Fashion-forward'],
+    assortment: { totalSKUs: 186, premium: 65, core: 82, value: 28, newItems: 11 }
   },
   { 
     id: 'family', 
-    name: 'Family Stock-Up', 
-    description: 'Larger baskets. Replenishment missions. Household-led purchasing.', 
-    storeCount: 612, 
-    tags: ['Bulk-friendly', 'Value-led', 'Replenishment', 'Multi-format'],
-    assortment: { totalSKUs: 198, premium: 32, core: 95, value: 56, newItems: 15 }
+    name: 'Family Center', 
+    description: 'Suburban locations. Family shopping trips. Full size range priority.', 
+    storeCount: 312, 
+    tags: ['Family-focused', 'Size-inclusive', 'Value-conscious', 'Multi-category'],
+    assortment: { totalSKUs: 224, premium: 42, core: 115, value: 52, newItems: 15 }
   },
   { 
-    id: 'rural', 
-    name: 'Rural Core', 
-    description: 'Essentials-heavy. Simpler assortment. Value orientation.', 
-    storeCount: 452, 
-    tags: ['Essentials-first', 'Value dominant', 'Community-anchored', 'Steady demand'],
-    assortment: { totalSKUs: 112, premium: 18, core: 62, value: 28, newItems: 4 }
+    id: 'outlet', 
+    name: 'Outlet Value', 
+    description: 'Value-driven shoppers. Clearance and deals focus. High volume.', 
+    storeCount: 186, 
+    tags: ['Value-first', 'Deal-seekers', 'High volume', 'Clearance'],
+    assortment: { totalSKUs: 142, premium: 18, core: 72, value: 48, newItems: 4 }
   },
   { 
-    id: 'transit', 
-    name: 'Value Transit', 
-    description: 'Quick-stop trips. High visual readability. Impulse missions.', 
-    storeCount: 148, 
-    tags: ['Quick-stop', 'Impulse', 'Fast-fill', 'High readability'],
-    assortment: { totalSKUs: 134, premium: 28, core: 72, value: 24, newItems: 10 }
+    id: 'mall', 
+    name: 'Mall Anchor', 
+    description: 'Shopping mall locations. Impulse and planned purchases. Trend-sensitive.', 
+    storeCount: 98, 
+    tags: ['Impulse', 'Trend-sensitive', 'Accessory-heavy', 'Gift-ready'],
+    assortment: { totalSKUs: 168, premium: 48, core: 86, value: 24, newItems: 10 }
   },
 ];
 
 // POG to Store Group mapping - which clusters each POG is mapped to
 const pogClusterMapping: Record<string, string[]> = {
-  'bev-corp-001': ['campus', 'family', 'transit'],           // Beverage Cooler - 3 clusters
-  'bev-corp-002': ['campus', 'family'],                       // Beverage Aisle Premium - 2 clusters
-  'bev-corp-003': ['campus', 'transit', 'family', 'rural'],  // Beverage End Cap - 4 clusters
-  'hol-corp-001': ['family', 'rural'],                        // Holiday Decor - 2 clusters
-  'hol-corp-002': ['family', 'rural', 'transit'],            // Home Accent - 3 clusters
+  'app-corp-001': ['urban', 'family', 'mall'],               // Women's Wall - 3 clusters
+  'app-corp-002': ['urban', 'family', 'outlet'],             // Men's Denim - 3 clusters
+  'app-corp-003': ['family', 'mall', 'outlet'],              // Kids Color Block - 3 clusters
+  'acc-corp-001': ['urban', 'mall'],                         // Accessories End Cap - 2 clusters
+  'sea-corp-001': ['urban', 'family', 'mall', 'outlet'],     // Seasonal Promo - 4 clusters
 };
 
 // Store group insights for business context
 const _storeGroupInsights: Record<string, string> = {
-  campus: 'High impulse store → prioritize single-serve and premium beverages',
-  family: 'Family-oriented → emphasize multi-packs and value bundles',
-  rural: 'Essential-focused → optimize for core SKUs and everyday value',
-  transit: 'Quick-stop trips → focus on grab-and-go and impulse items',
+  urban: 'Fashion-forward → prioritize trend items and premium placement',
+  family: 'Family-focused → emphasize size range and value options',
+  outlet: 'Value-driven → optimize for clearance and deal visibility',
+  mall: 'Impulse-heavy → focus on accessories and gift-ready displays',
 };
 void _storeGroupInsights; // Reserved for future use
 
@@ -278,72 +292,94 @@ interface DemandIndexItem {
 }
 
 const categoryDemandIndex: Record<string, Record<string, DemandIndexItem[]>> = {
-  beverages: {
-    campus: [
-      { name: 'Energy', value: 145 },
-      { name: 'Sports', value: 125 },
-      { name: 'Functional', value: 115 },
-      { name: 'Cola', value: 100 },
-      { name: 'Water', value: 85 },
-      { name: 'Juice', value: 70 },
-      { name: 'Tea', value: 55 },
+  apparel: {
+    urban: [
+      { name: 'Dresses', value: 145 },
+      { name: 'Tops', value: 135 },
+      { name: 'Denim', value: 125 },
+      { name: 'Outerwear', value: 115 },
+      { name: 'Basics', value: 95 },
+      { name: 'Activewear', value: 85 },
     ],
     family: [
-      { name: 'Cola', value: 130 },
-      { name: 'Water', value: 120 },
-      { name: 'Juice', value: 115 },
-      { name: 'Sports', value: 105 },
-      { name: 'Energy', value: 90 },
-      { name: 'Tea', value: 85 },
-      { name: 'Functional', value: 75 },
+      { name: 'Kids', value: 140 },
+      { name: 'Basics', value: 130 },
+      { name: 'Denim', value: 120 },
+      { name: 'Tops', value: 110 },
+      { name: 'Outerwear', value: 100 },
+      { name: 'Dresses', value: 85 },
     ],
-    rural: [
-      { name: 'Cola', value: 135 },
-      { name: 'Water', value: 125 },
-      { name: 'Tea', value: 110 },
-      { name: 'Juice', value: 100 },
-      { name: 'Sports', value: 80 },
-      { name: 'Energy', value: 65 },
-      { name: 'Functional', value: 50 },
+    outlet: [
+      { name: 'Basics', value: 145 },
+      { name: 'Denim', value: 130 },
+      { name: 'Kids', value: 115 },
+      { name: 'Tops', value: 100 },
+      { name: 'Outerwear', value: 80 },
+      { name: 'Dresses', value: 65 },
     ],
-    transit: [
-      { name: 'Energy', value: 155 },
-      { name: 'Functional', value: 130 },
-      { name: 'Sports', value: 120 },
-      { name: 'Water', value: 110 },
-      { name: 'Cola', value: 95 },
-      { name: 'Juice', value: 60 },
-      { name: 'Tea', value: 45 },
+    mall: [
+      { name: 'Dresses', value: 150 },
+      { name: 'Tops', value: 140 },
+      { name: 'Accessories', value: 130 },
+      { name: 'Denim', value: 110 },
+      { name: 'Outerwear', value: 95 },
+      { name: 'Basics', value: 75 },
     ],
   },
-  holiday: {
-    campus: [
-      { name: 'Ornaments', value: 90 },
-      { name: 'Lights', value: 85 },
-      { name: 'Candles', value: 110 },
-      { name: 'Gift Sets', value: 120 },
-      { name: 'Decor', value: 95 },
+  accessories: {
+    urban: [
+      { name: 'Bags', value: 140 },
+      { name: 'Jewelry', value: 130 },
+      { name: 'Scarves', value: 115 },
+      { name: 'Belts', value: 100 },
+      { name: 'Hats', value: 85 },
     ],
     family: [
-      { name: 'Ornaments', value: 135 },
-      { name: 'Lights', value: 130 },
+      { name: 'Bags', value: 125 },
+      { name: 'Belts', value: 115 },
+      { name: 'Hats', value: 105 },
+      { name: 'Scarves', value: 95 },
+      { name: 'Jewelry', value: 80 },
+    ],
+    outlet: [
+      { name: 'Bags', value: 135 },
+      { name: 'Belts', value: 120 },
+      { name: 'Hats', value: 100 },
+      { name: 'Scarves', value: 85 },
+      { name: 'Jewelry', value: 70 },
+    ],
+    mall: [
+      { name: 'Jewelry', value: 145 },
+      { name: 'Bags', value: 135 },
+      { name: 'Scarves', value: 120 },
+      { name: 'Belts', value: 100 },
+      { name: 'Hats', value: 90 },
+    ],
+  },
+  seasonal: {
+    urban: [
+      { name: 'New Arrivals', value: 150 },
+      { name: 'Limited Edition', value: 140 },
+      { name: 'Collaborations', value: 125 },
+      { name: 'Sale Items', value: 90 },
+    ],
+    family: [
+      { name: 'Sale Items', value: 145 },
+      { name: 'New Arrivals', value: 120 },
+      { name: 'Bundles', value: 115 },
+      { name: 'Limited Edition', value: 85 },
+    ],
+    outlet: [
+      { name: 'Sale Items', value: 160 },
+      { name: 'Clearance', value: 145 },
+      { name: 'Bundles', value: 120 },
+      { name: 'New Arrivals', value: 75 },
+    ],
+    mall: [
+      { name: 'New Arrivals', value: 145 },
+      { name: 'Limited Edition', value: 135 },
       { name: 'Gift Sets', value: 125 },
-      { name: 'Decor', value: 115 },
-      { name: 'Candles', value: 100 },
-    ],
-    rural: [
-      { name: 'Lights', value: 125 },
-      { name: 'Ornaments', value: 120 },
-      { name: 'Candles', value: 110 },
-      { name: 'Decor', value: 95 },
-      { name: 'Gift Sets', value: 80 },
-    ],
-    transit: [
-      { name: 'Gift Sets', value: 140 },
-      { name: 'Candles', value: 125 },
-      { name: 'Ornaments', value: 100 },
-      { name: 'Lights', value: 85 },
-      { name: 'Decor', value: 70 },
+      { name: 'Sale Items', value: 100 },
     ],
   },
 };
@@ -503,70 +539,103 @@ export const POGLocalizationEngine: React.FC = () => {
     const lowDemand = [...demandData].sort((a, b) => a.value - b.value)[0];
     
     // Generate business-specific stage data based on context
-    const stageReasonings = selectedCategory === 'beverages' ? {
+    const stageReasonings = selectedCategory === 'apparel' ? {
       geometry: {
-        reasoning: `Configured ${selectedPOG?.sectionSize} section for ${storeGroup?.name} store format`,
+        reasoning: `Configured ${selectedPOG?.sectionSize} wall display for ${storeGroup?.name} store format`,
         details: [
-          `Adjusted shelf depth to ${storeGroup?.id === 'campus' ? '14"' : '16"'} for ${storeGroup?.id === 'campus' ? 'grab-and-go' : 'family pack'} accessibility`,
-          `Set ${selectedPOG?.shelfCount} shelf heights for optimal ${storeGroup?.id === 'campus' ? 'single-serve' : 'multi-pack'} visibility`,
-          `Configured cooler door zones for ${storeGroup?.id === 'rural' ? 'bulk hydration' : 'impulse beverages'}`
+          `Adjusted rail heights to ${storeGroup?.id === 'urban' ? '5 levels' : '4 levels'} for ${storeGroup?.id === 'urban' ? 'premium browsing' : 'family accessibility'}`,
+          `Set ${selectedPOG?.shelfCount} folding shelf zones for ${storeGroup?.id === 'urban' ? 'curated presentation' : 'size-run visibility'}`,
+          `Configured hanging rail spacing for ${storeGroup?.id === 'outlet' ? 'high-density display' : 'easy browsing'}`
         ],
       },
       demand: {
-        reasoning: `Increased ${topDemand?.name || 'Energy'} facings by ${Math.round((topDemand?.value || 120) - 100)}% based on ${storeGroup?.name} velocity`,
+        reasoning: `Increased ${topDemand?.name || 'Dresses'} facings by ${Math.round((topDemand?.value || 120) - 100)}% based on ${storeGroup?.name} velocity`,
         details: [
-          `${topDemand?.name || 'Energy'} expanded to ${Math.round((topDemand?.value || 120) / 10)} facings (demand index: ${topDemand?.value || 120})`,
-          `${storeGroup?.id === 'campus' ? 'Single-serve premium' : 'Family-size value'} moved to eye-level shelf`,
-          `${lowDemand?.name || 'Water'} reduced by ${Math.round(100 - (lowDemand?.value || 85))}% to reallocate space`
+          `${topDemand?.name || 'Dresses'} expanded to ${Math.round((topDemand?.value || 120) / 10)} facings (demand index: ${topDemand?.value || 120})`,
+          `${storeGroup?.id === 'urban' ? 'Trend items' : 'Basics'} moved to eye-level rail`,
+          `${lowDemand?.name || 'Outerwear'} reduced by ${Math.round(100 - (lowDemand?.value || 85))}% to reallocate space`
         ],
       },
       policy: {
         reasoning: `Validated against ${selectedPOG?.rules.length || 5} category merchandising rules`,
         details: [
-          `Brand blocking: ${storeGroup?.id === 'family' ? 'National brands grouped by segment' : 'Competitive brands separated'}`,
-          `Adjacency rule: ${storeGroup?.id === 'campus' ? 'Energy adjacent to sports drinks' : 'Cola brands blocked together'}`,
-          `Min facing rule: All SKUs meet ${storeGroup?.id === 'rural' ? '2-facing' : '1-facing'} minimum`
+          `Size sequencing: ${storeGroup?.id === 'family' ? 'Full size range XS-XXL displayed' : 'Core sizes S-XL prioritized'}`,
+          `Color blocking: ${storeGroup?.id === 'urban' ? 'Trend colors grouped at front' : 'Neutral basics at eye level'}`,
+          `Capacity rule: All rails meet ${storeGroup?.id === 'outlet' ? '80%' : '70%'} max density`
         ],
       },
       execution: {
         reasoning: `Generated ${Math.round((storeGroup?.storeCount || 50) * 0.4)} store-level execution tasks`,
         details: [
-          `${Math.round((storeGroup?.storeCount || 50) * 0.25)} shelf label updates required`,
-          `${Math.round((storeGroup?.storeCount || 50) * 0.1)} product relocations across sections`,
-          `${Math.round((storeGroup?.storeCount || 50) * 0.05)} cooler door reconfigurations`
+          `${Math.round((storeGroup?.storeCount || 50) * 0.25)} size label updates required`,
+          `${Math.round((storeGroup?.storeCount || 50) * 0.1)} garment relocations across rails`,
+          `${Math.round((storeGroup?.storeCount || 50) * 0.05)} mannequin styling updates`
+        ],
+      },
+    } : selectedCategory === 'accessories' ? {
+      geometry: {
+        reasoning: `Configured ${selectedPOG?.sectionSize} end cap for ${storeGroup?.name} impulse zones`,
+        details: [
+          `Set hook density for ${storeGroup?.id === 'urban' ? 'curated accessory display' : 'grab-and-go convenience'}`,
+          `Configured shelf heights for ${storeGroup?.id === 'mall' ? 'gift presentation' : 'everyday essentials'}`,
+          `Allocated ${storeGroup?.id === 'outlet' ? 'value bin' : 'premium display'} zones`
+        ],
+      },
+      demand: {
+        reasoning: `Prioritized ${topDemand?.name || 'Bags'} based on ${storeGroup?.name} accessory trends`,
+        details: [
+          `${topDemand?.name || 'Bags'} featured at ${storeGroup?.id === 'urban' ? 'eye-level hooks' : 'shelf displays'}`,
+          `${storeGroup?.id === 'outlet' ? 'Value accessories' : 'Trend jewelry'} positioned for ${storeGroup?.id === 'outlet' ? 'deal seekers' : 'impulse purchase'}`,
+          `${lowDemand?.name || 'Belts'} consolidated to ${storeGroup?.id === 'family' ? 'lower hooks' : 'side sections'}`
+        ],
+      },
+      policy: {
+        reasoning: `Validated accessory merchandising and security compliance`,
+        details: [
+          `Security tagging: High-value items over $25 tagged`,
+          `Gift presentation: ${storeGroup?.id === 'mall' ? 'Gift-ready packaging visible' : 'Price tags accessible'}`,
+          `Impulse placement: Checkout-adjacent items under $15`
+        ],
+      },
+      execution: {
+        reasoning: `Generated ${Math.round((storeGroup?.storeCount || 50) * 0.5)} accessory reset tasks`,
+        details: [
+          `${Math.round((storeGroup?.storeCount || 50) * 0.3)} hook reconfigurations`,
+          `${Math.round((storeGroup?.storeCount || 50) * 0.15)} display refreshes`,
+          `${Math.round((storeGroup?.storeCount || 50) * 0.05)} security tag updates`
         ],
       },
     } : {
       geometry: {
-        reasoning: `Adapted ${selectedPOG?.sectionSize} holiday display for ${storeGroup?.name} traffic patterns`,
+        reasoning: `Adapted ${selectedPOG?.sectionSize} promo table for ${storeGroup?.name} traffic patterns`,
         details: [
-          `Configured ${storeGroup?.id === 'family' ? 'family browsing' : 'quick-shop'} aisle flow`,
-          `Set feature display heights for ${storeGroup?.id === 'rural' ? 'bulk seasonal' : 'curated gift'} presentation`,
-          `Allocated ${storeGroup?.id === 'campus' ? 'compact' : 'expanded'} endcap zones`
+          `Configured ${storeGroup?.id === 'family' ? 'family browsing' : 'quick-shop'} table layout`,
+          `Set feature display heights for ${storeGroup?.id === 'outlet' ? 'value stacks' : 'curated presentation'}`,
+          `Allocated ${storeGroup?.id === 'urban' ? 'trend highlight' : 'clearance'} zones`
         ],
       },
       demand: {
-        reasoning: `Prioritized ${topDemand?.name || 'Premium Decor'} based on ${storeGroup?.name} seasonal trends`,
+        reasoning: `Prioritized ${topDemand?.name || 'New Arrivals'} based on ${storeGroup?.name} seasonal trends`,
         details: [
-          `${topDemand?.name || 'Premium Decor'} featured at ${storeGroup?.id === 'family' ? 'family eye-level' : 'impulse zones'}`,
-          `${storeGroup?.id === 'value' ? 'Value bundles' : 'Gift sets'} positioned for ${storeGroup?.id === 'value' ? 'deal seekers' : 'convenience'}`,
-          `${lowDemand?.name || 'Basic Decor'} consolidated to ${storeGroup?.id === 'rural' ? 'bulk bins' : 'lower shelves'}`
+          `${topDemand?.name || 'New Arrivals'} featured at ${storeGroup?.id === 'urban' ? 'front-center position' : 'high-traffic zones'}`,
+          `${storeGroup?.id === 'outlet' ? 'Clearance bundles' : 'Gift sets'} positioned for ${storeGroup?.id === 'outlet' ? 'deal seekers' : 'convenience'}`,
+          `${lowDemand?.name || 'Last Season'} consolidated to ${storeGroup?.id === 'outlet' ? 'value bins' : 'back tables'}`
         ],
       },
       policy: {
-        reasoning: `Validated seasonal merchandising and safety compliance`,
+        reasoning: `Validated seasonal merchandising and promotional compliance`,
         details: [
-          `Height restriction: All displays under ${storeGroup?.id === 'campus' ? '5ft' : '6ft'} threshold`,
-          `Fire safety: Aisle clearance maintained at 36" minimum`,
-          `ADA compliance: Feature displays accessible from main aisle`
+          `Price signage: ${storeGroup?.id === 'outlet' ? 'Original + sale price displayed' : 'Promotional pricing highlighted'}`,
+          `Stock rotation: Current season items at front, clearance at back`,
+          `Bundle compliance: Multi-buy offers clearly signed`
         ],
       },
       execution: {
         reasoning: `Generated ${Math.round((storeGroup?.storeCount || 50) * 0.5)} seasonal reset tasks`,
         details: [
-          `${Math.round((storeGroup?.storeCount || 50) * 0.3)} feature display builds`,
-          `${Math.round((storeGroup?.storeCount || 50) * 0.15)} endcap resets`,
-          `${Math.round((storeGroup?.storeCount || 50) * 0.05)} signage installations`
+          `${Math.round((storeGroup?.storeCount || 50) * 0.3)} table resets required`,
+          `${Math.round((storeGroup?.storeCount || 50) * 0.15)} signage installations`,
+          `${Math.round((storeGroup?.storeCount || 50) * 0.05)} promotional display builds`
         ],
       },
     };
@@ -615,39 +684,56 @@ export const POGLocalizationEngine: React.FC = () => {
         valuePLShift: valueShiftPct,
         tasksGenerated: tasksCount,
       },
-      whyChanged: selectedCategory === 'beverages' ? [
+      whyChanged: selectedCategory === 'apparel' ? [
         { 
-          title: `${topDemand?.name || 'Energy'} moved to eye-level`, 
-          reason: `${storeGroup?.name} shoppers show ${Math.round((topDemand?.value || 120) - 100)}% higher demand index for ${topDemand?.name || 'Energy'} vs. corporate average` 
+          title: `${topDemand?.name || 'Dresses'} moved to eye-level rail`, 
+          reason: `${storeGroup?.name} shoppers show ${Math.round((topDemand?.value || 120) - 100)}% higher demand index for ${topDemand?.name || 'Dresses'} vs. corporate average` 
         },
         { 
-          title: `${lowDemand?.name || 'Water'} allocation reduced`, 
-          reason: `Lower velocity (index: ${lowDemand?.value || 85}) allows space reallocation to higher-margin ${storeGroup?.id === 'campus' ? 'single-serve' : 'multi-pack'} SKUs` 
+          title: `${lowDemand?.name || 'Outerwear'} allocation reduced`, 
+          reason: `Lower velocity (index: ${lowDemand?.value || 85}) allows space reallocation to higher-margin ${storeGroup?.id === 'urban' ? 'trend items' : 'basics'}` 
         },
         { 
-          title: `${storeGroup?.id === 'campus' ? 'Grab-and-go' : 'Family pack'} zone expanded`, 
-          reason: `${storeGroup?.name} trip mission data shows ${storeGroup?.id === 'campus' ? '73% impulse' : '62% stock-up'} purchase behavior` 
+          title: `${storeGroup?.id === 'urban' ? 'Trend display' : 'Size-run'} zone expanded`, 
+          reason: `${storeGroup?.name} shopping data shows ${storeGroup?.id === 'urban' ? '68% trend-driven' : '55% basics-focused'} purchase behavior` 
         },
         { 
-          title: 'Brand blocking optimized', 
-          reason: `Adjacency rules applied to maintain competitive separation while maximizing ${storeGroup?.id === 'family' ? 'brand loyalty' : 'trial rate'}` 
+          title: 'Color blocking optimized', 
+          reason: `Visual merchandising rules applied to maximize ${storeGroup?.id === 'family' ? 'easy navigation' : 'trend discovery'}` 
+        },
+      ] : selectedCategory === 'accessories' ? [
+        { 
+          title: `${topDemand?.name || 'Bags'} featured at eye-level`, 
+          reason: `${storeGroup?.name} accessory trends show ${Math.round((topDemand?.value || 115) - 100)}% lift in ${topDemand?.name || 'Bags'} category` 
+        },
+        { 
+          title: 'Impulse zone prioritized', 
+          reason: `${storeGroup?.id === 'mall' ? 'Gift-ready presentation' : 'Grab-and-go convenience'} drives ${storeGroup?.id === 'mall' ? '42%' : '35%'} of accessory purchases` 
+        },
+        { 
+          title: `${lowDemand?.name || 'Belts'} consolidated`, 
+          reason: `Lower demand index (${lowDemand?.value || 80}) allows consolidation to ${storeGroup?.id === 'outlet' ? 'value section' : 'lower hooks'}` 
+        },
+        { 
+          title: 'Security compliance verified', 
+          reason: 'All high-value items properly tagged and displayed per security guidelines' 
         },
       ] : [
         { 
-          title: `${topDemand?.name || 'Premium Decor'} featured prominently`, 
-          reason: `${storeGroup?.name} seasonal trends show ${Math.round((topDemand?.value || 115) - 100)}% lift in ${topDemand?.name || 'Premium Decor'} category` 
+          title: `${topDemand?.name || 'New Arrivals'} featured prominently`, 
+          reason: `${storeGroup?.name} seasonal trends show ${Math.round((topDemand?.value || 115) - 100)}% lift in ${topDemand?.name || 'New Arrivals'} category` 
         },
         { 
-          title: 'Gift-ready displays prioritized', 
-          reason: `${storeGroup?.id === 'family' ? 'Family gifting' : 'Convenience gifting'} behavior drives ${storeGroup?.id === 'family' ? '45%' : '28%'} of holiday purchases` 
+          title: 'Promotional displays prioritized', 
+          reason: `${storeGroup?.id === 'outlet' ? 'Clearance bundles' : 'Gift sets'} drive ${storeGroup?.id === 'outlet' ? '52%' : '38%'} of seasonal purchases` 
         },
         { 
-          title: `${lowDemand?.name || 'Basic Decor'} consolidated`, 
-          reason: `Lower demand index (${lowDemand?.value || 80}) allows consolidation to ${storeGroup?.id === 'rural' ? 'bulk display' : 'value section'}` 
+          title: `${lowDemand?.name || 'Last Season'} consolidated`, 
+          reason: `Lower demand index (${lowDemand?.value || 80}) allows consolidation to ${storeGroup?.id === 'outlet' ? 'value bins' : 'back tables'}` 
         },
         { 
           title: 'Seasonal compliance verified', 
-          reason: 'All displays meet height, safety, and accessibility requirements for holiday traffic' 
+          reason: 'All displays meet promotional signage and pricing requirements' 
         },
       ],
       agenticSummary: [
@@ -655,16 +741,21 @@ export const POGLocalizationEngine: React.FC = () => {
         `${tasksCount} execution tasks ready`, 
         `${topDemand?.name || 'Top category'} optimized for ${storeGroup?.name}`
       ],
-      diffHighlights: selectedCategory === 'beverages' ? [
-        `${topDemand?.name || 'Energy'} +${Math.round((topDemand?.value || 120) / 30)} facings`,
-        `${lowDemand?.name || 'Water'} -${Math.round((100 - (lowDemand?.value || 85)) / 10)} facings`,
-        `${storeGroup?.id === 'campus' ? 'Single-serve' : 'Multi-pack'} to shelf 2`,
-        `${storeGroup?.id === 'value' ? 'Value tier expanded' : 'Premium tier prioritized'}`
+      diffHighlights: selectedCategory === 'apparel' ? [
+        `${topDemand?.name || 'Dresses'} +${Math.round((topDemand?.value || 120) / 30)} facings`,
+        `${lowDemand?.name || 'Outerwear'} -${Math.round((100 - (lowDemand?.value || 85)) / 10)} facings`,
+        `${storeGroup?.id === 'urban' ? 'Trend items' : 'Basics'} to eye-level`,
+        `${storeGroup?.id === 'outlet' ? 'Value range expanded' : 'Premium tier prioritized'}`
+      ] : selectedCategory === 'accessories' ? [
+        `${topDemand?.name || 'Bags'} +${Math.round((topDemand?.value || 115) / 25)} hooks`,
+        `${lowDemand?.name || 'Belts'} consolidated`,
+        `Impulse zone ${storeGroup?.id === 'mall' ? 'expanded' : 'optimized'}`,
+        `Gift presentation enhanced`
       ] : [
-        `${topDemand?.name || 'Premium'} +${Math.round((topDemand?.value || 115) / 25)} displays`,
-        `${lowDemand?.name || 'Basic'} consolidated`,
-        `Gift section ${storeGroup?.id === 'family' ? 'expanded' : 'optimized'}`,
-        `Seasonal endcaps configured`
+        `${topDemand?.name || 'New Arrivals'} +${Math.round((topDemand?.value || 115) / 25)} displays`,
+        `${lowDemand?.name || 'Last Season'} consolidated`,
+        `Promo section ${storeGroup?.id === 'outlet' ? 'expanded' : 'optimized'}`,
+        `Seasonal signage configured`
       ],
     };
 
@@ -1229,11 +1320,15 @@ export const POGLocalizationEngine: React.FC = () => {
               <div className="loc-pog-viewer">
                 <img 
                   src={showCorporateView 
-                    ? (corpPOG?.image || '/planograms/beverage-cooler-standard.svg')
-                    : (localizedImageMap[corpPOG?.image || ''] || corpPOG?.image || '/planograms/beverage-cooler-standard.svg')
+                    ? (corpPOG?.image || WomensWallStandard)
+                    : (localizedImageMap[corpPOG?.image || ''] || corpPOG?.image || LocalizedWomensWall)
                   } 
                   alt="Planogram" 
-                  className={showCorporateView ? 'corporate' : 'localized'} 
+                  className={showCorporateView ? 'corporate' : 'localized'}
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = showCorporateView ? WomensWallStandard : LocalizedWomensWall;
+                  }}
                 />
                 {!showCorporateView && (
                   <div className="loc-pog-overlay-badge"><Sparkles size={14} /> Localized for {result.cluster}</div>

@@ -20,7 +20,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   return (
     <header className="app-header">
       <div className="app-header-left">
-        <h1 className="app-header-title">StoreHub</h1>
+        <h1 className="app-header-title">Store Smart</h1>
       </div>
 
       <div className="app-header-right">

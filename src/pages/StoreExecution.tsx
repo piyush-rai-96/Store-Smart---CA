@@ -102,7 +102,34 @@ interface TeamMember {
 }
 
 // Agent Chat Types
-type AgentMessageType = 'welcome' | 'user' | 'agent' | 'analysis' | 'oos-alert' | 'deviation' | 'task-created' | 'processing';
+type AgentMessageType = 'welcome' | 'user' | 'agent' | 'analysis' | 'oos-alert' | 'deviation' | 'compliance-report' | 'task-created' | 'processing';
+
+interface ComplianceAuditReport {
+  overallScore: number;
+  grade: 'A' | 'B' | 'C' | 'D' | 'F';
+  planogramName: string;
+  storeInfo: string;
+  auditDate: string;
+  categories: {
+    name: string;
+    score: number;
+    maxScore: number;
+    status: 'pass' | 'warning' | 'fail';
+    findings: string[];
+  }[];
+  deviations: {
+    item: string;
+    expected: string;
+    actual: string;
+    severity: 'critical' | 'warning' | 'info';
+    impact: string;
+  }[];
+  recommendations: string[];
+  comparisonImages: {
+    expected: string;
+    actual: string;
+  };
+}
 
 interface AgentMessage {
   id: string;
@@ -116,6 +143,7 @@ interface AgentMessage {
     deviations?: { item: string; expected: string; actual: string; severity: 'critical' | 'warning' | 'info' }[];
     oosItems?: { name: string; shelf: string; position: string }[];
   };
+  complianceReport?: ComplianceAuditReport;
   processingSteps?: { step: string; status: 'pending' | 'active' | 'completed' }[];
   task?: {
     id: string;
@@ -1328,16 +1356,25 @@ export const StoreExecution: React.FC = () => {
     }
   };
 
-  const simulateAgentProcessing = async (type: 'oos' | 'deviation', uploadedImage: string | null) => {
+  const simulateAgentProcessing = async (type: 'oos' | 'deviation' | 'compliance', uploadedImage: string | null) => {
     setIsAgentProcessing(true);
     
     const steps = type === 'oos' ? [
       { step: 'Receiving shelf image...', status: 'active' as const },
       { step: 'AI Agent reviewing image...', status: 'pending' as const },
       { step: 'Scanning for empty shelf positions...', status: 'pending' as const },
-      { step: 'Cross-referencing with Holiday Decor planogram...', status: 'pending' as const },
+      { step: "Cross-referencing with Women's Wall Display planogram...", status: 'pending' as const },
       { step: 'Identifying out-of-stock products...', status: 'pending' as const },
       { step: 'Generating OOS detection overlay...', status: 'pending' as const },
+    ] : type === 'compliance' ? [
+      { step: 'Receiving store shelf capture...', status: 'active' as const },
+      { step: 'Loading reference planogram (C&A Accessories Endcap)...', status: 'pending' as const },
+      { step: 'AI Vision analyzing product positions...', status: 'pending' as const },
+      { step: 'Comparing facings and placement accuracy...', status: 'pending' as const },
+      { step: 'Evaluating category adjacency rules...', status: 'pending' as const },
+      { step: 'Checking price label alignment...', status: 'pending' as const },
+      { step: 'Calculating compliance metrics...', status: 'pending' as const },
+      { step: 'Generating audit report...', status: 'pending' as const },
     ] : [
       { step: 'Scanning uploaded planogram...', status: 'active' as const },
       { step: 'Matching with localized POG library...', status: 'pending' as const },
@@ -1381,32 +1418,134 @@ export const StoreExecution: React.FC = () => {
 
     // Generate result based on type
     if (type === 'oos') {
-      // Home Decor OOS Detection - use the detected image
+      // Women's Apparel OOS Detection - use the detected image
       const oosResult: AgentMessage = {
         id: `oos-${Date.now()}`,
         type: 'oos-alert',
-        content: '🚨 **Critical Out-of-Stock Alert!**\n\n**2026 Dollar General Holiday Decor Planogram**\n\nI detected **5 out-of-stock positions** requiring immediate replenishment:',
+        content: "🚨 **Critical Out-of-Stock Alert!**\n\n**Women's Wall Display — Urban Flagship Cluster**\n\nI detected **4 out-of-stock positions** requiring immediate replenishment:",
         timestamp: new Date(),
-        image: '/home-decor-oos-detected.png', // Show the annotated OOS image
+        image: '/oos-case-1-detected.png', // Show the annotated OOS image
         analysisResult: {
           type: 'oos',
           oosItems: [
-            { name: 'Red/Gold/Green Mini Ornaments', shelf: 'Shelf 2', position: 'Bay Section' },
-            { name: 'Green Stick Candles', shelf: 'Shelf 3', position: 'Center Position' },
-            { name: 'Red/Silver Mini Ornaments', shelf: 'Shelf 3', position: 'Left Section' },
-            { name: 'Multi-Color Mini Ornaments', shelf: 'Shelf 3', position: 'Right Section' },
-            { name: 'Entire Bay - Holiday Hooks', shelf: 'Shelf 1', position: 'Full Bay Empty' },
+            { name: 'V-Neck Basic Tee — White (M)', shelf: 'Section A', position: 'Rail 2, Position 3-4' },
+            { name: 'Floral Print Dress — Navy (S)', shelf: 'Section B', position: 'Rail 1, Position 5-6' },
+            { name: 'Slim Fit Denim — Dark Wash (L)', shelf: 'Section C', position: 'Rail 3, Position 1-2' },
+            { name: 'Classic Fit Blouse — Cream (M)', shelf: 'Section A', position: 'Rail 1, Position 7-8' },
           ],
           highlights: []
         },
         task: {
           id: `task-oos-${Date.now()}`,
-          title: 'Holiday Decor Critical OOS - Immediate Replenishment',
+          title: "Women's Wall Display Critical OOS — Immediate Replenishment",
           priority: 'Critical',
           type: 'Replenish Stock'
         }
       };
       setAgentMessages(prev => [...prev.filter(m => m.id !== processingMsg.id), oosResult]);
+    } else if (type === 'compliance') {
+      // Generate comprehensive compliance audit report
+      const complianceReport: ComplianceAuditReport = {
+        overallScore: 76.4,
+        grade: 'C',
+        planogramName: 'C&A Accessories Endcap — Localized v2.1',
+        storeInfo: 'Downtown Plaza #2034 — Urban Flagship Cluster',
+        auditDate: new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+        categories: [
+          {
+            name: 'Product Placement Accuracy',
+            score: 18,
+            maxScore: 25,
+            status: 'warning',
+            findings: [
+              'Scarves section shifted 2 positions left from planogram',
+              'Sunglasses display rotated incorrectly',
+              'Belt rack missing from designated hook position'
+            ]
+          },
+          {
+            name: 'Facing Count Compliance',
+            score: 15,
+            maxScore: 20,
+            status: 'warning',
+            findings: [
+              'Hair accessories: 4 facings vs. required 6 (-33%)',
+              'Jewelry display: 8 facings vs. required 10 (-20%)',
+              'Watch section: Compliant at 4 facings'
+            ]
+          },
+          {
+            name: 'Category Adjacency',
+            score: 20,
+            maxScore: 20,
+            status: 'pass',
+            findings: [
+              'All category groupings follow planogram sequence',
+              'Premium items correctly positioned at eye level',
+              'Impulse items properly placed near checkout zone'
+            ]
+          },
+          {
+            name: 'Price Label Alignment',
+            score: 12,
+            maxScore: 15,
+            status: 'warning',
+            findings: [
+              '3 missing price labels in jewelry section',
+              '2 labels misaligned with product position',
+              'Promotional tags correctly displayed'
+            ]
+          },
+          {
+            name: 'Fixture & Signage',
+            score: 11.4,
+            maxScore: 20,
+            status: 'fail',
+            findings: [
+              'Header signage partially obscured',
+              'One shelf bracket needs replacement',
+              'Endcap topper missing promotional insert',
+              'LED strip lighting non-functional on shelf 2'
+            ]
+          }
+        ],
+        deviations: [
+          { item: 'Silk Scarves Collection', expected: 'Shelf 1, Position 1-4 (4 facings)', actual: 'Shelf 1, Position 3-6 (shifted right)', severity: 'warning', impact: 'Reduces visual flow, -5% category sales risk' },
+          { item: 'Designer Sunglasses', expected: 'Shelf 2, Eye-level center', actual: 'Shelf 2, Left side (rotated 15°)', severity: 'critical', impact: 'Premium visibility reduced, -12% conversion risk' },
+          { item: 'Leather Belt Display', expected: 'Hook Panel A, Position 1-8', actual: 'Missing from fixture', severity: 'critical', impact: 'Complete category gap, estimated $340/week lost sales' },
+          { item: 'Hair Accessories Rack', expected: '6 facings minimum', actual: '4 facings displayed', severity: 'warning', impact: 'Reduced selection visibility, -8% category performance' },
+          { item: 'Statement Jewelry', expected: 'Shelf 3, Positions 1-10', actual: 'Shelf 3, Positions 1-8 (2 short)', severity: 'warning', impact: 'Incomplete assortment display' },
+          { item: 'Watch Display Case', expected: 'Locked case, 4 facings', actual: 'Compliant', severity: 'info', impact: 'No action required' }
+        ],
+        recommendations: [
+          'IMMEDIATE: Reinstall leather belt display on Hook Panel A — Critical revenue impact',
+          'HIGH: Reposition sunglasses to center eye-level per planogram — Premium category at risk',
+          'HIGH: Add 2 facings to hair accessories rack — Stock from backroom',
+          'MEDIUM: Realign scarves section 2 positions left to match planogram',
+          'MEDIUM: Replace missing price labels in jewelry section (3 labels)',
+          'LOW: Submit maintenance ticket for LED strip repair on shelf 2',
+          'LOW: Request replacement shelf bracket from facilities'
+        ],
+        comparisonImages: {
+          expected: '/localized-accessories-endcap.png',
+          actual: '/compliance-usecase.png'
+        }
+      };
+
+      const complianceResult: AgentMessage = {
+        id: `compliance-${Date.now()}`,
+        type: 'compliance-report',
+        content: '📋 **Compliance Audit Report Generated**',
+        timestamp: new Date(),
+        complianceReport: complianceReport,
+        task: {
+          id: `task-compliance-${Date.now()}`,
+          title: 'C&A Accessories Endcap — Compliance Reset Required',
+          priority: 'High',
+          type: 'Reset Shelf'
+        }
+      };
+      setAgentMessages(prev => [...prev.filter(m => m.id !== processingMsg.id), complianceResult]);
     } else {
       const deviationResult: AgentMessage = {
         id: `dev-${Date.now()}`,
@@ -1417,17 +1556,17 @@ export const StoreExecution: React.FC = () => {
         analysisResult: {
           type: 'deviation',
           deviations: [
-            { item: 'Monster Energy (Green)', expected: 'Shelf 1, Position 1-4 (4 facings)', actual: 'Shelf 2, Position 3-4 (2 facings)', severity: 'critical' },
-            { item: 'Red Bull Original', expected: 'Shelf 1, Position 5-8 (4 facings)', actual: 'Shelf 1, Position 1-2 (2 facings)', severity: 'critical' },
-            { item: 'Coca-Cola Classic 20oz', expected: 'Shelf 2, Position 1-6 (6 facings)', actual: 'Shelf 3, Position 1-4 (4 facings)', severity: 'warning' },
-            { item: 'Pepsi 20oz', expected: 'Shelf 2, Position 7-10', actual: 'Missing from shelf', severity: 'critical' },
-            { item: 'Gatorade Fruit Punch', expected: 'Shelf 3, Position 1-4', actual: 'Shelf 3, Position 5-8 (Correct zone)', severity: 'info' },
-            { item: 'Dasani Water 20oz', expected: 'Shelf 4, Position 1-8', actual: 'Shelf 4, Position 1-6 (2 facings short)', severity: 'warning' },
+            { item: 'Floral Print Dress — Navy', expected: 'Section B, Rail 1, Position 1-4 (4 facings)', actual: 'Section B, Rail 2, Position 3-4 (2 facings)', severity: 'critical' },
+            { item: 'V-Neck Basic Tee — White', expected: 'Section A, Rail 2, Position 1-6 (6 facings)', actual: 'Section A, Rail 1, Position 1-3 (3 facings)', severity: 'critical' },
+            { item: 'Slim Fit Denim — Dark Wash', expected: 'Section C, Rail 3, Position 1-4 (4 facings)', actual: 'Section C, Rail 2, Position 5-6 (2 facings)', severity: 'warning' },
+            { item: 'Classic Fit Blouse — Cream', expected: 'Section A, Rail 1, Position 7-10', actual: 'Missing from display', severity: 'critical' },
+            { item: 'Knit Cardigan — Heather Gray', expected: 'Section D, Rail 1, Position 1-4', actual: 'Section D, Rail 1, Position 3-6 (Shifted)', severity: 'info' },
+            { item: 'Wide Leg Pants — Black', expected: 'Section C, Rail 4, Position 1-6', actual: 'Section C, Rail 4, Position 1-4 (2 facings short)', severity: 'warning' },
           ]
         },
         task: {
           id: `task-dev-${Date.now()}`,
-          title: 'Beverage End Cap - Compliance Reset Required',
+          title: "Women's Wall Display — Compliance Reset Required",
           priority: 'High',
           type: 'Reset Shelf'
         }
@@ -1455,8 +1594,10 @@ export const StoreExecution: React.FC = () => {
     const input = agentInput.toLowerCase();
     const currentImage = agentImage;
     if (currentImage) {
-      // Default to OOS detection for any image upload
-      if (input.includes('deviation') || input.includes('compliance') || input.includes('compare')) {
+      // Check for compliance/audit keywords
+      if (input.includes('compliance') || input.includes('audit') || input.includes('check compliance')) {
+        simulateAgentProcessing('compliance', currentImage);
+      } else if (input.includes('deviation') || input.includes('compare')) {
         simulateAgentProcessing('deviation', currentImage);
       } else {
         // Default to OOS detection
@@ -1505,20 +1646,20 @@ export const StoreExecution: React.FC = () => {
       title: task.title,
       description: isOOSTask 
         ? 'Critical out-of-stock items detected by ShelfIQ Agent. Immediate replenishment required to prevent lost sales.'
-        : 'Auto-generated by ShelfIQ Agent based on shelf analysis',
+        : 'Auto-generated by ShelfIQ Agent based on visual analysis',
       priority: priorityMap[task.priority] || 'High',
       reason: isOOSTask 
-        ? 'AI-detected empty shelf positions causing lost sales opportunity'
-        : 'Detected via AI-powered shelf analysis',
+        ? 'AI-detected empty display positions causing lost sales opportunity'
+        : 'Detected via AI-powered visual analysis',
       impact: isOOSTask
-        ? 'Critical: Empty shelves directly impact customer experience and revenue'
-        : 'Improves shelf compliance and reduces lost sales',
+        ? 'Critical: Empty displays directly impact customer experience and revenue'
+        : 'Improves display compliance and reduces lost sales',
       status: 'Pending' as const,
       assignedTo: null,
       dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      storeName: 'Dollar General #1247',
-      storeGroup: 'Holiday Seasonal',
-      pogName: '2026 Holiday Decor Planogram',
+      storeName: 'Downtown Plaza #2034',
+      storeGroup: 'Urban Flagship',
+      pogName: "Women's Wall Display v2.1",
       category: isOOSTask ? 'Out of Stock' : 'Compliance',
       createdAt: new Date().toISOString(),
       localizationId: localizationId
@@ -1692,6 +1833,180 @@ export const StoreExecution: React.FC = () => {
               </div>
             )}
 
+            {msg.type === 'compliance-report' && msg.complianceReport && (
+              <div className="compliance-audit-report">
+                {/* Report Header */}
+                <div className="audit-report-header">
+                  <div className="audit-header-top">
+                    <div className="audit-badge">
+                      <FileText size={18} />
+                      <span>Compliance Audit Report</span>
+                    </div>
+                    <span className="audit-date">{msg.complianceReport.auditDate}</span>
+                  </div>
+                  <h2 className="audit-planogram-name">{msg.complianceReport.planogramName}</h2>
+                  <p className="audit-store-info">{msg.complianceReport.storeInfo}</p>
+                </div>
+
+                {/* Score Card */}
+                <div className="audit-score-card">
+                  <div className="audit-score-main">
+                    <div className={`audit-score-circle grade-${msg.complianceReport.grade.toLowerCase()}`}>
+                      <span className="score-value">{msg.complianceReport.overallScore}</span>
+                      <span className="score-max">/100</span>
+                    </div>
+                    <div className="audit-grade-info">
+                      <span className={`grade-badge grade-${msg.complianceReport.grade.toLowerCase()}`}>
+                        Grade {msg.complianceReport.grade}
+                      </span>
+                      <span className="grade-label">
+                        {msg.complianceReport.grade === 'A' ? 'Excellent' : 
+                         msg.complianceReport.grade === 'B' ? 'Good' :
+                         msg.complianceReport.grade === 'C' ? 'Needs Improvement' :
+                         msg.complianceReport.grade === 'D' ? 'Poor' : 'Critical'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="audit-score-breakdown">
+                    {msg.complianceReport.categories.map((cat, idx) => (
+                      <div key={idx} className={`category-score-item ${cat.status}`}>
+                        <div className="category-info">
+                          <span className="category-name">{cat.name}</span>
+                          <span className="category-score">{cat.score}/{cat.maxScore}</span>
+                        </div>
+                        <div className="category-bar">
+                          <div 
+                            className="category-bar-fill" 
+                            style={{ width: `${(cat.score / cat.maxScore) * 100}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Image Comparison */}
+                <div className="audit-comparison-section">
+                  <h3 className="audit-section-title">
+                    <Eye size={16} />
+                    Visual Comparison
+                  </h3>
+                  <div className="audit-comparison-grid">
+                    <div className="audit-comparison-item">
+                      <span className="comparison-label">Reference Planogram</span>
+                      <div className="comparison-image-wrapper">
+                        <img src={msg.complianceReport.comparisonImages.expected} alt="Expected planogram" />
+                      </div>
+                    </div>
+                    <div className="audit-comparison-arrow">
+                      <ChevronRight size={24} />
+                    </div>
+                    <div className="audit-comparison-item">
+                      <span className="comparison-label">Actual Store Capture</span>
+                      <div className="comparison-image-wrapper">
+                        <img src={msg.complianceReport.comparisonImages.actual} alt="Actual store" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Category Details */}
+                <div className="audit-categories-section">
+                  <h3 className="audit-section-title">
+                    <BarChart3 size={16} />
+                    Category Breakdown
+                  </h3>
+                  <div className="audit-categories-grid">
+                    {msg.complianceReport.categories.map((cat, idx) => (
+                      <div key={idx} className={`audit-category-card ${cat.status}`}>
+                        <div className="category-card-header">
+                          <span className="category-card-name">{cat.name}</span>
+                          <span className={`category-status-badge ${cat.status}`}>
+                            {cat.status === 'pass' ? '✓ Pass' : cat.status === 'warning' ? '⚠ Warning' : '✗ Fail'}
+                          </span>
+                        </div>
+                        <div className="category-card-score">
+                          <span className="score-num">{cat.score}</span>
+                          <span className="score-denom">/{cat.maxScore} pts</span>
+                        </div>
+                        <ul className="category-findings">
+                          {cat.findings.map((finding, fIdx) => (
+                            <li key={fIdx}>{finding}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Deviations Table */}
+                <div className="audit-deviations-section">
+                  <h3 className="audit-section-title">
+                    <AlertCircle size={16} />
+                    Identified Deviations
+                  </h3>
+                  <div className="audit-deviations-table">
+                    <div className="deviations-table-header">
+                      <span>Item</span>
+                      <span>Expected</span>
+                      <span>Actual</span>
+                      <span>Impact</span>
+                    </div>
+                    {msg.complianceReport.deviations.map((dev, idx) => (
+                      <div key={idx} className={`audit-deviation-row ${dev.severity}`}>
+                        <div className="deviation-item-cell">
+                          <span className={`severity-indicator ${dev.severity}`}>
+                            {dev.severity === 'critical' ? <X size={14} /> : 
+                             dev.severity === 'warning' ? <AlertTriangle size={14} /> : 
+                             <CheckCircle size={14} />}
+                          </span>
+                          <span className="item-name">{dev.item}</span>
+                        </div>
+                        <div className="deviation-expected-cell">{dev.expected}</div>
+                        <div className="deviation-actual-cell">{dev.actual}</div>
+                        <div className="deviation-impact-cell">{dev.impact}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Recommendations */}
+                <div className="audit-recommendations-section">
+                  <h3 className="audit-section-title">
+                    <Wrench size={16} />
+                    Recommended Actions
+                  </h3>
+                  <div className="audit-recommendations-list">
+                    {msg.complianceReport.recommendations.map((rec, idx) => {
+                      const priority = rec.startsWith('IMMEDIATE') ? 'critical' : 
+                                       rec.startsWith('HIGH') ? 'high' : 
+                                       rec.startsWith('MEDIUM') ? 'medium' : 'low';
+                      return (
+                        <div key={idx} className={`audit-recommendation-item ${priority}`}>
+                          <span className="rec-number">{idx + 1}</span>
+                          <span className="rec-text">{rec}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Action Button */}
+                {msg.task && (
+                  <div className="audit-action-footer">
+                    <button 
+                      className="audit-create-task-btn"
+                      onClick={() => handleCreateTask(msg.task!)}
+                    >
+                      <Zap size={18} />
+                      <span>Create Compliance Reset Task</span>
+                      <ChevronRight size={18} />
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
             {msg.type === 'deviation' && (
               <div className="compliance-report">
                 <div className="report-header">
@@ -1700,7 +2015,7 @@ export const StoreExecution: React.FC = () => {
                   </div>
                   <div className="report-title-section">
                     <h3>POG Compliance Analysis Report</h3>
-                    <p className="report-meta">Beverage End Cap - Large Format • Rural Core Cluster</p>
+                    <p className="report-meta">Women's Wall Display • Urban Flagship Cluster</p>
                   </div>
                 </div>
 
@@ -1713,7 +2028,7 @@ export const StoreExecution: React.FC = () => {
                     <div className="comparison-arrow">→</div>
                     <div className="comparison-image reference">
                       <span className="image-label">Localized POG Reference</span>
-                      <img src="/assets/Localized - Beverage End Cap - Large Format.png" alt="Reference POG" />
+                      <img src="/localized-accessories-endcap.png" alt="Reference POG" />
                     </div>
                   </div>
                 </div>
@@ -1781,36 +2096,36 @@ export const StoreExecution: React.FC = () => {
                     <div className="action-step">
                       <span className="step-number">1</span>
                       <div className="step-content">
-                        <strong>Relocate Monster Energy to Shelf 1</strong>
-                        <p>Move Monster Energy (Green) from current position to Shelf 1, Positions 1-4. Ensure 4 facings are visible with labels facing forward.</p>
+                        <strong>Relocate Floral Print Dress</strong>
+                        <p>Move Floral Print Dress — Navy from current position to Section B, Rail 1, Positions 1-4. Ensure 4 facings are visible.</p>
                       </div>
                     </div>
                     <div className="action-step">
                       <span className="step-number">2</span>
                       <div className="step-content">
-                        <strong>Adjust Red Bull Positioning</strong>
-                        <p>Shift Red Bull Original to Shelf 1, Positions 5-8. Increase facings from 2 to 4 as per localized POG specification.</p>
+                        <strong>Adjust V-Neck Basic Tee Positioning</strong>
+                        <p>Shift V-Neck Basic Tee — White to Section A, Rail 2, Positions 1-6. Increase facings from 3 to 6 as per localized POG.</p>
                       </div>
                     </div>
                     <div className="action-step">
                       <span className="step-number">3</span>
                       <div className="step-content">
-                        <strong>Restock Pepsi 20oz</strong>
-                        <p>Product is missing from shelf. Retrieve from backstock and place on Shelf 2, Positions 7-10 with 4 facings.</p>
+                        <strong>Restock Classic Fit Blouse</strong>
+                        <p>Product is missing from display. Retrieve from backstock and place on Section A, Rail 1, Positions 7-10.</p>
                       </div>
                     </div>
                     <div className="action-step">
                       <span className="step-number">4</span>
                       <div className="step-content">
-                        <strong>Reposition Coca-Cola Classic</strong>
-                        <p>Move Coca-Cola 20oz from Shelf 3 to Shelf 2, Positions 1-6. Add 2 additional facings to meet 6-facing requirement.</p>
+                        <strong>Reposition Slim Fit Denim</strong>
+                        <p>Move Slim Fit Denim — Dark Wash from Section C, Rail 2 to Rail 3, Positions 1-4. Add 2 additional facings.</p>
                       </div>
                     </div>
                     <div className="action-step">
                       <span className="step-number">5</span>
                       <div className="step-content">
-                        <strong>Add Dasani Water Facings</strong>
-                        <p>Current display shows 6 facings. Add 2 more bottles to Positions 7-8 on Shelf 4 to complete the set.</p>
+                        <strong>Add Wide Leg Pants Facings</strong>
+                        <p>Current display shows 4 facings. Add 2 more to Positions 5-6 on Section C, Rail 4 to complete the set.</p>
                       </div>
                     </div>
                   </div>
