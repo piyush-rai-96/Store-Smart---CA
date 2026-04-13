@@ -7,8 +7,7 @@ import {
   ChevronUp,
   Layers,
   FolderKanban,
-  Building2,
-  Home
+  Building2
 } from 'lucide-react';
 import { User } from '../../../types';
 import './SidebarNew.css';

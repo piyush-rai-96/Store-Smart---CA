@@ -6,11 +6,8 @@ import {
   Minus,
   AlertTriangle,
   AlertCircle,
-  Users,
   Store,
   DollarSign,
-  ShieldCheck,
-  MessageSquare,
   ChevronRight,
   ChevronDown,
   ArrowUpRight,
@@ -24,23 +21,14 @@ import {
   MapPin,
   Megaphone,
   Sparkles,
-  BarChart3,
   Eye,
   X,
-  ExternalLink,
-  Zap,
   Award,
   ThumbsUp,
-  Smile,
-  Meh,
-  Frown,
-  PieChart,
   Grid3X3,
   Send,
   FileText,
-  CheckCircle2,
   Layers,
-  Settings,
   Plus,
   Edit3,
   Package
@@ -66,6 +54,9 @@ interface StoreData {
   status: 'critical' | 'warning' | 'stable' | 'excellent';
 }
 
+type DistrictTier = 'Excellence' | 'Stable' | 'AtRisk' | 'Crisis';
+type MomentumType = 'Improving' | 'Slipping' | 'Flat';
+
 interface DistrictAlert {
   id: string;
   severity: 'critical' | 'high' | 'medium';
@@ -75,16 +66,6 @@ interface DistrictAlert {
   storeCount: number;
   cta: string;
   ctaAction: string;
-}
-
-interface ActionItem {
-  id: string;
-  title: string;
-  reason: string;
-  stores: string[];
-  impactType: 'revenue' | 'compliance' | 'customer' | 'communication';
-  priority: 'urgent' | 'high' | 'medium';
-  cta: string;
 }
 
 interface KPIData {
@@ -116,22 +97,6 @@ const mockAlerts: (DistrictAlert & { category: string })[] = [
   { id: '4', severity: 'medium', category: 'Broadcast', title: 'Broadcast Non-Compliance', reason: '5 stores have not acknowledged critical safety broadcast', impact: 'Compliance gap', storeCount: 5, cta: 'Follow Up', ctaAction: 'broadcast' },
 ];
 
-const mockActions: ActionItem[] = [
-  { id: '1', title: 'Visit Store #5678 — High priority intervention needed', reason: 'DPI dropped 15 points in 4 weeks, multiple SEA failures', stores: ['5678'], impactType: 'revenue', priority: 'urgent', cta: 'Add to Visit Plan' },
-  { id: '2', title: 'Investigate VoC dissatisfaction spike', reason: 'Staff availability complaints increased 40% this week', stores: ['1234', '4532', '9012'], impactType: 'customer', priority: 'urgent', cta: 'View Details' },
-  { id: '3', title: 'Address planogram audit failures in Cluster B', reason: 'Recurring compliance issues affecting sales performance', stores: ['2198', '1234', '5678'], impactType: 'compliance', priority: 'high', cta: 'Open Cluster' },
-  { id: '4', title: 'Follow up on broadcast acknowledgment', reason: '5 stores missed critical safety broadcast deadline', stores: ['1234', '4532', '5678', '9012', '2198'], impactType: 'communication', priority: 'high', cta: 'Send Reminder' },
-  { id: '5', title: 'Review inbound risk before shelf gap expands', reason: 'OOS risk detected for 12 high-velocity SKUs', stores: ['2034', '1876', '3421'], impactType: 'revenue', priority: 'medium', cta: 'View Risk' },
-];
-
-const mockKPIs: KPIData[] = [
-  { id: 'sales', label: 'Net Sales Comp', value: '$1.26M', variance: '+4.2%', varianceType: 'positive', secondaryVariance: 'vs LY', trend: [65, 72, 68, 75, 82, 78, 85] },
-  { id: 'voc', label: 'VoC % Satisfied', value: '78%', variance: '-2.1%', varianceType: 'negative', secondaryVariance: 'vs LM', trend: [82, 80, 78, 76, 75, 77, 78] },
-  { id: 'sea', label: 'SEA Score Avg', value: '82.4', variance: '+1.8', varianceType: 'positive', secondaryVariance: 'vs LM', trend: [78, 79, 80, 81, 80, 82, 82] },
-  { id: 'salesVar', label: 'Sales $ % Var', value: '+3.8%', variance: '+1.2pp', varianceType: 'positive', secondaryVariance: 'vs LY', trend: [2, 2.5, 3, 2.8, 3.2, 3.5, 3.8] },
-  { id: 'gm', label: 'GM% bps Var', value: '+45 bps', variance: '+12 bps', varianceType: 'positive', secondaryVariance: 'vs LY', trend: [30, 32, 35, 38, 40, 42, 45] },
-];
-
 // Helper functions
 const getDPIColor = (tier: string) => {
   switch (tier) {
@@ -140,26 +105,6 @@ const getDPIColor = (tier: string) => {
     case 'AtRisk': return '#f59e0b';
     case 'Crisis': return '#ef4444';
     default: return '#64748b';
-  }
-};
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'excellent': return 'status-excellent';
-    case 'stable': return 'status-stable';
-    case 'warning': return 'status-warning';
-    case 'critical': return 'status-critical';
-    default: return '';
-  }
-};
-
-const getImpactIcon = (type: string) => {
-  switch (type) {
-    case 'revenue': return <DollarSign size={14} />;
-    case 'compliance': return <ShieldCheck size={14} />;
-    case 'customer': return <Users size={14} />;
-    case 'communication': return <MessageSquare size={14} />;
-    default: return <AlertCircle size={14} />;
   }
 };
 
@@ -206,12 +151,6 @@ const isDateInFuture = (date: Date) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   return date > today;
-};
-
-const getWeekNumber = (date: Date) => {
-  const startOfWeek = new Date(date);
-  startOfWeek.setDate(date.getDate() - date.getDay());
-  return startOfWeek.toISOString();
 };
 
 export const DistrictIntelligence: React.FC = () => {
@@ -264,17 +203,6 @@ export const DistrictIntelligence: React.FC = () => {
     }
   };
   
-  const handleMonthSelect = () => {
-    const today = new Date();
-    // Can't select current month
-    if (viewingYear === today.getFullYear() && viewingMonth === today.getMonth()) return;
-    // Can't select future months
-    if (viewingYear > today.getFullYear() || (viewingYear === today.getFullYear() && viewingMonth > today.getMonth())) return;
-    
-    setSelectedMonth(new Date(viewingYear, viewingMonth, 1));
-    setShowCalendar(false);
-  };
-  
   const isInSelectedWeek = (day: number | null) => {
     if (!day || !selectedWeekStart || calendarMode !== 'week') return false;
     const date = new Date(viewingYear, viewingMonth, day);
@@ -295,33 +223,33 @@ export const DistrictIntelligence: React.FC = () => {
   };
 
   // District metrics - different values for Week vs Month
-  const weekData = {
+  const weekData: { dpi: number; tier: DistrictTier; rank: number; dpiChange: number; momentum: MomentumType; momentumDelta: number; chainAvg: number } = {
     dpi: 87,
-    tier: 'Excellence' as const,
+    tier: 'Excellence',
     rank: 3,
     dpiChange: +2.4,
-    momentum: 'Improving' as const,
+    momentum: 'Improving',
     momentumDelta: +3.2,
     chainAvg: 79
   };
   
-  const monthData = {
+  const monthData: { dpi: number; tier: DistrictTier; rank: number; dpiChange: number; momentum: MomentumType; momentumDelta: number; chainAvg: number } = {
     dpi: 82,
-    tier: 'Stable' as const,
+    tier: 'Stable',
     rank: 5,
     dpiChange: +1.8,
-    momentum: 'Improving' as const,
+    momentum: 'Improving',
     momentumDelta: +2.1,
     chainAvg: 79
   };
   
   const currentData = calendarMode === 'week' ? weekData : monthData;
   const districtDPI = currentData.dpi;
-  const districtTier = currentData.tier;
+  const districtTier: DistrictTier = currentData.tier;
   const districtRank = currentData.rank;
   const totalDistricts = 24;
   const dpiChange = currentData.dpiChange;
-  const momentumIndex = currentData.momentum;
+  const momentumIndex: MomentumType = currentData.momentum;
   const momentumDelta = currentData.momentumDelta;
   const chainAvgDPI = currentData.chainAvg;
 
@@ -661,11 +589,11 @@ export const DistrictIntelligence: React.FC = () => {
                 <span className="stat-label">Stores</span>
               </div>
               <div className="stat-pill success">
-                <span className="stat-value">{mockStores.filter(s => s.status === 'Excellent').length}</span>
+                <span className="stat-value">{mockStores.filter(s => s.status === 'excellent').length}</span>
                 <span className="stat-label">Excellent</span>
               </div>
               <div className="stat-pill warning">
-                <span className="stat-value">{mockStores.filter(s => s.status === 'Warning' || s.status === 'Critical').length}</span>
+                <span className="stat-value">{mockStores.filter(s => s.status === 'warning' || s.status === 'critical').length}</span>
                 <span className="stat-label">Needs Attention</span>
               </div>
             </div>

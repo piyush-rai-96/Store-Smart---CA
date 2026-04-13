@@ -8,25 +8,18 @@ import {
   TrendingUp,
   TrendingDown,
   AlertTriangle,
-  Shield,
   Users,
   ChevronRight,
   ChevronDown,
   Clock,
   CheckCircle2,
-  Circle,
   AlertCircle,
   Zap,
   Package,
-  ClipboardList,
   Store,
   Bell,
   Check,
-  FileText,
-  Target,
   BarChart3,
-  ShoppingCart,
-  Truck,
   ArrowRight,
   Info,
   Minus,
@@ -275,67 +268,6 @@ const getGreeting = (): { text: string; icon: React.ReactNode } => {
   return { text: 'Good evening', icon: <Moon size={20} /> };
 };
 
-const getTaskTypeLabel = (type: string) => {
-  switch (type) {
-    case 'AI':
-      return 'AI Suggestion';
-    case 'ASSIGNED':
-      return 'Mandatory';
-    case 'FOLLOW_UP':
-      return 'Follow-up';
-    default:
-      return type;
-  }
-};
-
-const getTaskTypeIcon = (type: string) => {
-  switch (type) {
-    case 'AI':
-      return <Zap size={14} />;
-    case 'ASSIGNED':
-      return <ClipboardList size={14} />;
-    case 'FOLLOW_UP':
-      return <RefreshCw size={14} />;
-    default:
-      return <Circle size={14} />;
-  }
-};
-
-const getStatusIcon = (status: string) => {
-  switch (status) {
-    case 'completed':
-      return <CheckCircle2 size={14} />;
-    case 'overdue':
-      return <AlertCircle size={14} />;
-    case 'in_progress':
-      return <Clock size={14} />;
-    default:
-      return <Circle size={14} />;
-  }
-};
-
-const getModuleIcon = (module: string) => {
-  switch (module.toLowerCase()) {
-    case 'inventory':
-      return <Package size={16} />;
-    case 'planogram':
-      return <Target size={16} />;
-    case 'compliance':
-      return <Shield size={16} />;
-    case 'receiving':
-      return <Truck size={16} />;
-    case 'customer':
-    case 'voc':
-      return <Users size={16} />;
-    case 'merchandising':
-      return <ShoppingCart size={16} />;
-    case 'hr':
-      return <FileText size={16} />;
-    default:
-      return <Store size={16} />;
-  }
-};
-
 const getPriorityColor = (priority: Priority | 'HIGH' | 'MEDIUM' | 'LOW') => {
   switch (priority) {
     case 'CRITICAL':
@@ -476,15 +408,6 @@ export const StoreOpsHome: React.FC = () => {
     }
   };
   
-  const handleMonthSelect = () => {
-    const today = new Date();
-    if (viewingYear === today.getFullYear() && viewingMonth === today.getMonth()) return;
-    if (viewingYear > today.getFullYear() || (viewingYear === today.getFullYear() && viewingMonth > today.getMonth())) return;
-    
-    setSelectedMonth(new Date(viewingYear, viewingMonth, 1));
-    setShowCalendar(false);
-  };
-  
   const isInSelectedWeek = (day: number | null) => {
     if (!day || !selectedWeekStart || calendarMode !== 'week') return false;
     const date = new Date(viewingYear, viewingMonth, day);
@@ -580,8 +503,6 @@ export const StoreOpsHome: React.FC = () => {
   const overdueCount = actionItems.filter(a => a.status === 'overdue').length;
   const pendingCount = actionItems.filter(a => a.status === 'pending').length;
   const riskInsights = insights.filter(i => i.type === 'risk').length;
-  const positiveInsights = insights.filter(i => i.type === 'positive').length;
-  
   const getSystemSummary = () => {
     if (criticalBroadcast) return `1 critical alert needs attention`;
     if (overdueCount > 0) return `${overdueCount} overdue task${overdueCount > 1 ? 's' : ''} need attention`;
@@ -590,16 +511,6 @@ export const StoreOpsHome: React.FC = () => {
     return 'Operations running smoothly';
   };
   
-  // Dynamic section header
-  const getInsightsSummary = () => {
-    if (riskInsights > 0 && positiveInsights > 0) {
-      return `${riskInsights} Risk${riskInsights > 1 ? 's' : ''} • ${positiveInsights} Opportunit${positiveInsights > 1 ? 'ies' : 'y'}`;
-    }
-    if (riskInsights > 0) return `${riskInsights} Risk${riskInsights > 1 ? 's' : ''} Today`;
-    if (positiveInsights > 0) return `${positiveInsights} Positive Signal${positiveInsights > 1 ? 's' : ''}`;
-    return 'What changed today';
-  };
-
   const unreadBroadcastCount = broadcasts.filter((b) => !b.isRead).length;
   
   // Sort actions: overdue first, then by priority score
