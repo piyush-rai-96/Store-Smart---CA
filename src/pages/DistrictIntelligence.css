@@ -2431,12 +2431,15 @@
 
 .matrix-y-label {
   position: absolute;
-  left: 8px;
+  left: -8px;
   top: 50%;
   transform: rotate(-90deg) translateX(-50%);
+  transform-origin: center center;
   font-size: 9px;
   color: var(--di-text-muted);
   white-space: nowrap;
+  background: transparent;
+  z-index: 0;
 }
 
 .matrix-x-label {
