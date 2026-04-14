@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   Store,
   MapPin,
@@ -158,14 +159,14 @@ interface DistrictStore {
 }
 
 const districtStores: DistrictStore[] = [
-  { id: '1', storeNumber: '2034', storeName: 'Downtown Plaza', format: 'Urban Flagship', cluster: 'Urban Flagship', spi: 78, spiTier: 'AtRisk' },
-  { id: '2', storeNumber: '2041', storeName: 'Riverside Mall', format: 'Mall Anchor', cluster: 'Mall Anchor', spi: 92, spiTier: 'Excellence' },
-  { id: '3', storeNumber: '2056', storeName: 'Oak Street Market', format: 'Family Center', cluster: 'Family Center', spi: 85, spiTier: 'Stable' },
-  { id: '4', storeNumber: '2078', storeName: 'Westfield Center', format: 'Urban Flagship', cluster: 'Urban Flagship', spi: 71, spiTier: 'AtRisk' },
-  { id: '5', storeNumber: '2089', storeName: 'Lakeside Commons', format: 'Family Center', cluster: 'Family Center', spi: 88, spiTier: 'Stable' },
-  { id: '6', storeNumber: '2095', storeName: 'Metro Junction', format: 'Outlet Value', cluster: 'Outlet Value', spi: 65, spiTier: 'Crisis' },
-  { id: '7', storeNumber: '2102', storeName: 'Hillcrest Village', format: 'Family Center', cluster: 'Family Center', spi: 82, spiTier: 'Stable' },
-  { id: '8', storeNumber: '2118', storeName: 'Parkway Plaza', format: 'Mall Anchor', cluster: 'Mall Anchor', spi: 76, spiTier: 'AtRisk' },
+  { id: '1', storeNumber: '2034', storeName: 'Downtown Plaza', format: 'Urban Flagship', cluster: 'Urban Flagship', spi: 94, spiTier: 'Excellence' },
+  { id: '2', storeNumber: '1876', storeName: 'Riverside Mall', format: 'Mall Anchor', cluster: 'Mall Anchor', spi: 91, spiTier: 'Excellence' },
+  { id: '3', storeNumber: '3421', storeName: 'Central Station', format: 'Family Center', cluster: 'Family Center', spi: 85, spiTier: 'Stable' },
+  { id: '4', storeNumber: '2198', storeName: 'Westfield Center', format: 'Urban Flagship', cluster: 'Urban Flagship', spi: 82, spiTier: 'Stable' },
+  { id: '5', storeNumber: '4532', storeName: 'Harbor View', format: 'Family Center', cluster: 'Family Center', spi: 78, spiTier: 'Stable' },
+  { id: '6', storeNumber: '1234', storeName: 'Oak Street', format: 'Outlet Value', cluster: 'Outlet Value', spi: 72, spiTier: 'AtRisk' },
+  { id: '7', storeNumber: '5678', storeName: 'Pine Grove', format: 'Family Center', cluster: 'Family Center', spi: 65, spiTier: 'AtRisk' },
+  { id: '8', storeNumber: '9012', storeName: 'Maple Heights', format: 'Mall Anchor', cluster: 'Mall Anchor', spi: 58, spiTier: 'Crisis' },
 ];
 
 // Mock Data
@@ -258,6 +259,7 @@ const getDiscrepancyColor = (cls: DiscrepancyClass) => {
 };
 
 export const StoreDeepDive: React.FC = () => {
+  const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overall');
   const [selectedKPI, setSelectedKPI] = useState<KPIData | null>(null);
@@ -271,6 +273,17 @@ export const StoreDeepDive: React.FC = () => {
     store.storeName.toLowerCase().includes(storeSearchQuery.toLowerCase()) ||
     store.storeNumber.includes(storeSearchQuery)
   );
+
+  // Read store from URL parameters and set selected store
+  useEffect(() => {
+    const storeParam = searchParams.get('store');
+    if (storeParam) {
+      const foundStore = districtStores.find(s => s.storeNumber === storeParam);
+      if (foundStore) {
+        setSelectedStore(foundStore);
+      }
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 800);

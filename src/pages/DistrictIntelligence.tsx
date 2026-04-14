@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Activity,
   TrendingUp,
@@ -7,11 +8,8 @@ import {
   AlertTriangle,
   AlertCircle,
   Store,
-  DollarSign,
   ChevronRight,
   ChevronDown,
-  ArrowUpRight,
-  ArrowDownRight,
   Clock,
   Calendar,
   RefreshCw,
@@ -21,17 +19,17 @@ import {
   MapPin,
   Megaphone,
   Sparkles,
-  Eye,
   X,
-  Award,
-  ThumbsUp,
   Grid3X3,
   Send,
-  FileText,
   Layers,
   Plus,
   Edit3,
-  Package
+  Package,
+  MessageSquare,
+  ExternalLink,
+  Users,
+  Check
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './DistrictIntelligence.css';
@@ -97,6 +95,15 @@ const mockAlerts: (DistrictAlert & { category: string })[] = [
   { id: '4', severity: 'medium', category: 'Broadcast', title: 'Broadcast Non-Compliance', reason: '5 stores have not acknowledged critical safety broadcast', impact: 'Compliance gap', storeCount: 5, cta: 'Follow Up', ctaAction: 'broadcast' },
 ];
 
+// Team members for chat/broadcast (same as Home Screen)
+const teamMembers = [
+  { id: 'sm1', name: 'Sarah Mitchell', role: 'Store Manager - Hamburg South', avatar: 'SM', status: 'online' },
+  { id: 'sm2', name: 'Marcus Chen', role: 'Store Manager - Cologne East', avatar: 'MC', status: 'online' },
+  { id: 'sm3', name: 'Lisa Weber', role: 'Store Manager - Berlin Mitte', avatar: 'LW', status: 'away' },
+  { id: 'am1', name: 'Thomas Müller', role: 'Area Manager - North', avatar: 'TM', status: 'online' },
+  { id: 'am2', name: 'Anna Schmidt', role: 'Area Manager - South', avatar: 'AS', status: 'offline' },
+];
+
 // Helper functions
 const getDPIColor = (tier: string) => {
   switch (tier) {
@@ -155,7 +162,10 @@ const isDateInFuture = (date: Date) => {
 
 export const DistrictIntelligence: React.FC = () => {
   useAuth();
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [navigatingStore, setNavigatingStore] = useState<string | null>(null);
   const [selectedKPI, setSelectedKPI] = useState<KPIData | null>(null);
   const [leaderboardFilter, setLeaderboardFilter] = useState<'all' | 'risk' | 'top' | 'revenue'>('all');
   const [lastRefresh, setLastRefresh] = useState(new Date());
@@ -167,6 +177,35 @@ export const DistrictIntelligence: React.FC = () => {
   const [viewingYear, setViewingYear] = useState(new Date().getFullYear());
   const [selectedWeekStart, setSelectedWeekStart] = useState<Date | null>(null);
   const [selectedMonth, setSelectedMonth] = useState<Date | null>(null);
+  
+  // Chat Window States (same as Home Screen)
+  const [showChatWindow, setShowChatWindow] = useState(false);
+  const [chatExpanded, setChatExpanded] = useState(false);
+  const [selectedChatContact, setSelectedChatContact] = useState<string | null>(null);
+  const [chatMessage, setChatMessage] = useState('');
+  const [showBroadcastComposer, setShowBroadcastComposer] = useState(false);
+  const [broadcastRecipients, setBroadcastRecipients] = useState<string[]>([]);
+  const [broadcastMessage, setBroadcastMessage] = useState('');
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [showVocPanel, setShowVocPanel] = useState(false);
+  const [showSeaPanel, setShowSeaPanel] = useState(false);
+  
+  // Toast notification helper
+  const showToast = (message: string) => {
+    setToastMessage(message);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+  
+  // Navigate to Store Deep Dive with loading
+  const handleStoreClick = (store: typeof mockStores[0]) => {
+    setIsNavigating(true);
+    setNavigatingStore(store.storeNumber);
+    
+    // Simulate 1.5 second loading for realistic feel
+    setTimeout(() => {
+      navigate(`/store-operations/store-deep-dive?store=${store.storeNumber}&name=${encodeURIComponent(store.storeName)}`);
+    }, 1500);
+  };
   
   const calendarDays = getCalendarDays(viewingYear, viewingMonth);
   const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -249,8 +288,6 @@ export const DistrictIntelligence: React.FC = () => {
   const districtRank = currentData.rank;
   const totalDistricts = 24;
   const dpiChange = currentData.dpiChange;
-  const momentumIndex: MomentumType = currentData.momentum;
-  const momentumDelta = currentData.momentumDelta;
   const chainAvgDPI = currentData.chainAvg;
 
   useEffect(() => {
@@ -392,10 +429,6 @@ export const DistrictIntelligence: React.FC = () => {
             <Search size={16} />
             <input type="text" placeholder="Search stores, metrics..." />
           </div>
-          <button className="header-action-btn">
-            <Megaphone size={16} />
-            Create Broadcast
-          </button>
           <button className="header-action-btn secondary">
             <Download size={16} />
             Export
@@ -403,76 +436,110 @@ export const DistrictIntelligence: React.FC = () => {
           <button className="header-icon-btn" onClick={handleRefresh}>
             <RefreshCw size={18} />
           </button>
-          <button className="header-icon-btn">
-            <Bell size={18} />
-            <span className="notification-dot" />
-          </button>
         </div>
       </div>
 
-      {/* Executive Pulse Hero Section */}
+      {/* Executive Pulse Hero Section - Matching Home Screen DPI Card */}
       <div className="executive-pulse">
-        {/* DPI Gauge */}
-        <div className="pulse-card dpi-card-large">
-          <div className="dpi-gauge-large">
-            <svg viewBox="0 0 140 140">
-              <circle cx="70" cy="70" r="60" fill="none" stroke="#e2e8f0" strokeWidth="10" />
-              <circle
-                cx="70"
-                cy="70"
-                r="60"
-                fill="none"
-                stroke={getDPIColor(districtTier)}
-                strokeWidth="10"
-                strokeLinecap="round"
-                strokeDasharray={`${(districtDPI / 100) * 377} 377`}
-                transform="rotate(-90 70 70)"
-                className="dpi-progress-ring"
-              />
-            </svg>
-            <div className="dpi-center">
-              <span className="dpi-value">{districtDPI}</span>
-              <span className="dpi-label">DPI</span>
+        {/* DPI Card - Home Screen Style */}
+        <div className="dpi-card-v2">
+          {/* Hero Score Section */}
+          <div className="dpi-hero-section">
+            <div className="dpi-gauge-wrapper-v2">
+              <svg className="dpi-gauge-v2" viewBox="0 0 160 160">
+                {/* Background track */}
+                <circle
+                  cx="80"
+                  cy="80"
+                  r="68"
+                  fill="none"
+                  stroke="#f1f5f9"
+                  strokeWidth="10"
+                />
+                {/* Progress arc with gradient */}
+                <defs>
+                  <linearGradient id="dpiGradientDI" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#10b981" />
+                    <stop offset="50%" stopColor="#059669" />
+                    <stop offset="100%" stopColor="#047857" />
+                  </linearGradient>
+                </defs>
+                <circle
+                  cx="80"
+                  cy="80"
+                  r="68"
+                  fill="none"
+                  stroke="url(#dpiGradientDI)"
+                  strokeWidth="10"
+                  strokeLinecap="round"
+                  strokeDasharray={`${(districtDPI / 100) * 427} 427`}
+                  transform="rotate(-90 80 80)"
+                  className="dpi-progress-v2"
+                />
+              </svg>
+              <div className="dpi-score-center-v2">
+                <span className="dpi-score-value-v2">{districtDPI}</span>
+                <span className="dpi-score-label-v2">Performance Index</span>
+              </div>
             </div>
           </div>
-          <div className={`dpi-tier-badge tier-${districtTier.toLowerCase()}`}>
-            {districtTier === 'Excellence' && <Award size={14} />}
-            {districtTier === 'Stable' && <ThumbsUp size={14} />}
-            {districtTier === 'AtRisk' && <AlertTriangle size={14} />}
-            {districtTier === 'Crisis' && <AlertCircle size={14} />}
-            {districtTier}
-          </div>
-          <div className="dpi-meta">
-            <span>Rank #{districtRank} of {totalDistricts}</span>
-            <span className={dpiChange >= 0 ? 'positive' : 'negative'}>
-              {dpiChange >= 0 ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
-              {dpiChange >= 0 ? '+' : ''}{dpiChange}% {calendarMode === 'week' ? 'vs LW' : 'vs LM'}
-            </span>
+
+          {/* Performance Story */}
+          <div className="dpi-story-section">
+            {/* Excellence Badge */}
+            <div className="dpi-tier-badge-v2">
+              <div className="tier-text">
+                <span className="tier-title">{districtTier} Tier</span>
+                <span className="tier-subtitle">Top 10% of all districts</span>
+              </div>
+            </div>
+
+            {/* Rank & Change Stats */}
+            <div className="dpi-rank-stats">
+              <div className="dpi-rank-card">
+                <span className="dpi-rank-value">#{districtRank}</span>
+                <span className="dpi-rank-label">of {totalDistricts}</span>
+              </div>
+              <div className="dpi-change-card">
+                <div className={`dpi-change-value ${dpiChange < 0 ? 'negative' : ''}`}>
+                  <TrendingUp size={18} />
+                  <span>{dpiChange >= 0 ? '+' : ''}{dpiChange}%</span>
+                </div>
+                <span className="dpi-change-label">{calendarMode === 'week' ? 'this week' : 'this month'}</span>
+              </div>
+            </div>
+
+            {/* Score Breakdown - Card Grid */}
+            <div className="dpi-breakdown-header">
+              <span className="breakdown-title">Score Breakdown</span>
+            </div>
+            <div className="dpi-breakdown-grid">
+              <div className="breakdown-card">
+                <div className="breakdown-value">92</div>
+                <div className="breakdown-label">Sales</div>
+                <div className="breakdown-bar">
+                  <div className="breakdown-fill" style={{ width: '92%' }}></div>
+                </div>
+              </div>
+              <div className="breakdown-card">
+                <div className="breakdown-value">85</div>
+                <div className="breakdown-label">Execution</div>
+                <div className="breakdown-bar">
+                  <div className="breakdown-fill" style={{ width: '85%' }}></div>
+                </div>
+              </div>
+              <div className="breakdown-card">
+                <div className="breakdown-value">84</div>
+                <div className="breakdown-label">VoC</div>
+                <div className="breakdown-bar">
+                  <div className="breakdown-fill" style={{ width: '84%' }}></div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Momentum Index */}
-        <div className="pulse-card momentum-card">
-          <div className="pulse-card-header">
-            <span className="pulse-card-label">Momentum Index</span>
-          </div>
-          <div className="momentum-indicator">
-            <div className={`momentum-arrow ${momentumIndex.toLowerCase()}`}>
-              {momentumIndex === 'Improving' && <TrendingUp size={32} />}
-              {momentumIndex === 'Slipping' && <TrendingDown size={32} />}
-              {momentumIndex === 'Flat' && <Minus size={32} />}
-            </div>
-            <span className="momentum-label">{momentumIndex}</span>
-          </div>
-          <div className="momentum-delta">
-            <span className={momentumDelta >= 0 ? 'positive' : 'negative'}>
-              {momentumDelta >= 0 ? '+' : ''}{momentumDelta}%
-            </span>
-            <span className="delta-period">{calendarMode === 'week' ? 'vs LW' : 'vs LM'}</span>
-          </div>
-        </div>
-
-        {/* Chain Comparison */}
+        {/* Chain Comparison Card */}
         <div className="pulse-card comparison-card">
           <div className="pulse-card-header">
             <span className="pulse-card-label">vs Chain Average</span>
@@ -492,37 +559,100 @@ export const DistrictIntelligence: React.FC = () => {
           </div>
         </div>
 
-        {/* AI Executive Narrative */}
-        <div className="pulse-card narrative-card">
+        {/* Triage Summary */}
+        <div className="pulse-card triage-card">
           <div className="pulse-card-header">
-            <Sparkles size={16} />
-            <span className="pulse-card-label">AI Executive Summary</span>
+            <AlertCircle size={16} className="triage-icon" />
+            <span className="pulse-card-label">Triage Summary</span>
           </div>
-          {calendarMode === 'week' ? (
-            <p className="narrative-text">
-              <strong>District performing at Excellence level (DPI {districtDPI})</strong> with {districtRank === 1 ? 'top' : `#${districtRank}`} ranking across {totalDistricts} districts. 
-              <span className="narrative-positive"> Weekly momentum up {momentumDelta}%</span> driven by strong execution in priority stores. 
-              <span className="narrative-action"> Focus on maintaining SEA compliance to sustain trajectory.</span>
+          <div className="triage-items">
+            <div className="triage-item">
+              <div className="triage-item-header">
+                <span className="triage-item-title">VoC: Messy Aisles</span>
+              </div>
+              <p className="triage-item-stores">Hamburg South · Cologne East · Berlin Mitte</p>
+              <span className="triage-item-metric">+22% theme spike</span>
+            </div>
+            
+            <div className="triage-item">
+              <div className="triage-item-header">
+                <span className="triage-item-title">SEA Auto-Fail: Fire Exit</span>
+              </div>
+              <p className="triage-item-stores">Hamburg South — Display blocking exit</p>
+              <span className="triage-item-metric">Escalated to DM · Pending</span>
+            </div>
+            
+            <div className="triage-item">
+              <div className="triage-item-header">
+                <span className="triage-item-title">Inbound OOS Risk</span>
+              </div>
+              <p className="triage-item-stores">Cologne East — 3 SKUs delayed 48h</p>
+              <span className="triage-item-metric">Adaptation pending approval</span>
+            </div>
+          </div>
+          
+          <div className="ai-summary-section">
+            <div className="ai-summary-label">
+              <Sparkles size={12} />
+              <span>AI Summary</span>
+            </div>
+            <p className="ai-summary-text">
+              3 active triage items require attention. VoC theme spike indicates potential staffing or process issue across multiple stores. SEA fire exit violation is critical priority. Recommend immediate store manager follow-up.
             </p>
-          ) : (
-            <p className="narrative-text">
-              <strong>Monthly DPI at {districtDPI} ({districtTier} tier)</strong> with consistent improvement trend of +{dpiChange}% vs prior month. 
-              <span className="narrative-warning"> VoC scores require attention</span> in 2 cluster locations. 
-              <span className="narrative-action"> Recommend staff scheduling optimization to address availability gaps.</span>
-            </p>
-          )}
-          <div className="narrative-chips">
-            <button className="chip-btn">
-              <Eye size={12} />
-              View {calendarMode === 'week' ? 'weekly' : 'monthly'} trends
-            </button>
-            <button className="chip-btn">
-              <DollarSign size={12} />
-              Revenue analysis
-            </button>
-            <button className="chip-btn">
-              <Megaphone size={12} />
-              Send broadcast
+          </div>
+        </div>
+
+        {/* District Broadcasting */}
+        <div className="pulse-card broadcast-card">
+          <div className="pulse-card-header">
+            <Megaphone size={16} className="broadcast-icon" />
+            <span className="pulse-card-label">District Broadcasting</span>
+          </div>
+          <div className="broadcast-content">
+            <div className="broadcast-stats">
+              <div className="broadcast-stat">
+                <span className="stat-number">3</span>
+                <span className="stat-label">Active</span>
+              </div>
+              <div className="broadcast-stat">
+                <span className="stat-number">12</span>
+                <span className="stat-label">This Week</span>
+              </div>
+              <div className="broadcast-stat">
+                <span className="stat-number">94%</span>
+                <span className="stat-label">Acknowledged</span>
+              </div>
+            </div>
+            
+            <div className="recent-broadcasts">
+              <div className="broadcast-item">
+                <div className="broadcast-item-header">
+                  <span className="broadcast-priority high">HIGH</span>
+                  <span className="broadcast-time">2h ago</span>
+                </div>
+                <p className="broadcast-title">Safety Protocol Update</p>
+                <span className="broadcast-ack">8/8 stores acknowledged</span>
+              </div>
+              <div className="broadcast-item">
+                <div className="broadcast-item-header">
+                  <span className="broadcast-priority medium">MEDIUM</span>
+                  <span className="broadcast-time">Yesterday</span>
+                </div>
+                <p className="broadcast-title">Weekend Staffing Reminder</p>
+                <span className="broadcast-ack">6/8 stores acknowledged</span>
+              </div>
+            </div>
+            
+            <button 
+              className="create-broadcast-btn"
+              onClick={() => {
+                setShowChatWindow(true);
+                setChatExpanded(true);
+                setShowBroadcastComposer(true);
+              }}
+            >
+              <Megaphone size={14} />
+              Create Broadcast
             </button>
           </div>
         </div>
@@ -563,7 +693,27 @@ export const DistrictIntelligence: React.FC = () => {
                 </div>
               </div>
               <div className="alert-card-footer">
-                <button className={`alert-card-btn ${alert.severity}`}>
+                <button 
+                  className="alert-card-btn"
+                  onClick={() => {
+                    if (alert.ctaAction === 'stores') {
+                      // Scroll to store leaderboard
+                      document.querySelector('.leaderboard-section-premium')?.scrollIntoView({ behavior: 'smooth' });
+                      setLeaderboardFilter('risk');
+                    } else if (alert.ctaAction === 'voc') {
+                      // Open VoC investigation panel
+                      setShowVocPanel(true);
+                    } else if (alert.ctaAction === 'sea') {
+                      // Open SEA audit panel
+                      setShowSeaPanel(true);
+                    } else if (alert.ctaAction === 'broadcast') {
+                      // Open broadcast composer
+                      setShowChatWindow(true);
+                      setChatExpanded(true);
+                      setShowBroadcastComposer(true);
+                    }
+                  }}
+                >
                   {alert.cta}
                   <ChevronRight size={14} />
                 </button>
@@ -692,8 +842,16 @@ export const DistrictIntelligence: React.FC = () => {
                     <span className={`status-pill ${store.status.toLowerCase()}`}>{store.status}</span>
                   </td>
                   <td className="td-action">
-                    <button className="action-btn">
-                      <ChevronRight size={16} />
+                    <button 
+                      className={`action-btn ${navigatingStore === store.storeNumber ? 'loading' : ''}`}
+                      onClick={() => handleStoreClick(store)}
+                      disabled={isNavigating}
+                    >
+                      {navigatingStore === store.storeNumber ? (
+                        <RefreshCw size={16} className="spinning" />
+                      ) : (
+                        <ChevronRight size={16} />
+                      )}
                     </button>
                   </td>
                 </tr>
@@ -961,87 +1119,6 @@ export const DistrictIntelligence: React.FC = () => {
                 <div className="insight-item">
                   <span className="insight-bullet success"></span>
                   <span className="insight-text"><strong>Product quality</strong> — Positive sentiment up 12% after new apparel launch</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Broadcasting Section */}
-      <div className="broadcast-section">
-        <div className="section-header">
-          <h2>
-            <Megaphone size={18} />
-            District Broadcasting
-          </h2>
-          <button className="compose-broadcast-btn">
-            <Send size={14} />
-            Compose Broadcast
-          </button>
-        </div>
-        <div className="broadcast-content">
-          {/* Broadcast Summary Strip */}
-          <div className="broadcast-summary-strip">
-            <div className="broadcast-stat">
-              <span className="stat-value">3</span>
-              <span className="stat-label">Active</span>
-            </div>
-            <div className="broadcast-stat">
-              <span className="stat-value">2</span>
-              <span className="stat-label">Scheduled</span>
-            </div>
-            <div className="broadcast-stat warning">
-              <span className="stat-value">5</span>
-              <span className="stat-label">Pending Ack</span>
-            </div>
-            <div className="broadcast-stat critical">
-              <span className="stat-value">2</span>
-              <span className="stat-label">Overdue</span>
-            </div>
-          </div>
-
-          {/* Broadcast Analytics */}
-          <div className="broadcast-analytics">
-            <div className="analytics-card">
-              <div className="analytics-header">
-                <FileText size={16} />
-                <span>Recent Broadcasts</span>
-              </div>
-              <div className="broadcast-list">
-                <div className="broadcast-item">
-                  <span className="broadcast-title">Safety Protocol Update</span>
-                  <div className="broadcast-metrics">
-                    <span className="metric delivered">100% delivered</span>
-                    <span className="metric read">85% read</span>
-                    <span className="metric ack">72% acknowledged</span>
-                  </div>
-                </div>
-                <div className="broadcast-item">
-                  <span className="broadcast-title">Holiday Schedule Changes</span>
-                  <div className="broadcast-metrics">
-                    <span className="metric delivered">100% delivered</span>
-                    <span className="metric read">92% read</span>
-                    <span className="metric ack">88% acknowledged</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="analytics-card">
-              <div className="analytics-header">
-                <AlertCircle size={16} />
-                <span>Non-Compliant Stores</span>
-              </div>
-              <div className="non-compliant-list">
-                <div className="nc-store">
-                  <span className="nc-store-name">#5678 Pine Grove</span>
-                  <span className="nc-issue">2 unacknowledged</span>
-                  <button className="nc-action">Follow Up</button>
-                </div>
-                <div className="nc-store">
-                  <span className="nc-store-name">#9012 Maple Heights</span>
-                  <span className="nc-issue">1 overdue</span>
-                  <button className="nc-action">Follow Up</button>
                 </div>
               </div>
             </div>
@@ -1338,6 +1415,351 @@ export const DistrictIntelligence: React.FC = () => {
                 </button>
                 <button className="panel-btn secondary">
                   Add Annotation
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Chat Button */}
+      <button 
+        className="floating-chat-btn"
+        onClick={() => setShowChatWindow(!showChatWindow)}
+      >
+        <MessageSquare size={24} />
+      </button>
+
+      {/* Floating Chat Window - Same as Home Screen */}
+      {showChatWindow && (
+        <div className={`chat-window ${chatExpanded ? 'expanded' : ''}`}>
+          <div className="chat-window-header">
+            <div className="chat-header-title">
+              <MessageSquare size={18} />
+              <h3>Messages & Broadcasts</h3>
+            </div>
+            <div className="chat-header-actions">
+              <button 
+                className="chat-expand-btn" 
+                onClick={() => setChatExpanded(!chatExpanded)}
+                title={chatExpanded ? 'Collapse' : 'Expand'}
+              >
+                {chatExpanded ? <Minus size={16} /> : <ExternalLink size={16} />}
+              </button>
+              <button className="chat-close-btn" onClick={() => {
+                setShowChatWindow(false);
+                setChatExpanded(false);
+                setShowBroadcastComposer(false);
+              }}>
+                <X size={18} />
+              </button>
+            </div>
+          </div>
+          
+          <div className={`chat-window-body ${chatExpanded ? 'split-view' : ''}`}>
+            {/* Left Panel - Messages & Create Broadcast */}
+            <div className="chat-left-panel">
+              {showBroadcastComposer ? (
+                /* Broadcast Composer */
+                <div className="broadcast-composer">
+                  <div className="broadcast-composer-header">
+                    <button 
+                      className="chat-back-btn"
+                      onClick={() => {
+                        setShowBroadcastComposer(false);
+                        setBroadcastRecipients([]);
+                        setBroadcastMessage('');
+                      }}
+                    >
+                      <ChevronRight size={18} style={{ transform: 'rotate(180deg)' }} />
+                    </button>
+                    <div className="broadcast-composer-title">
+                      <Bell size={18} />
+                      <span>New Broadcast</span>
+                    </div>
+                  </div>
+                  
+                  <div className="broadcast-recipients-section">
+                    <div className="broadcast-section-label">
+                      <Users size={14} />
+                      <span>Select Recipients ({broadcastRecipients.length} selected)</span>
+                    </div>
+                    <div className="broadcast-recipients-list">
+                      {teamMembers.map((member) => (
+                        <div 
+                          key={member.id}
+                          className={`broadcast-recipient-item ${broadcastRecipients.includes(member.id) ? 'selected' : ''}`}
+                          onClick={() => {
+                            if (broadcastRecipients.includes(member.id)) {
+                              setBroadcastRecipients(prev => prev.filter(id => id !== member.id));
+                            } else {
+                              setBroadcastRecipients(prev => [...prev, member.id]);
+                            }
+                          }}
+                        >
+                          <div className={`recipient-checkbox ${broadcastRecipients.includes(member.id) ? 'checked' : ''}`}>
+                            {broadcastRecipients.includes(member.id) && <Check size={12} />}
+                          </div>
+                          <div className="chat-contact-avatar small">{member.avatar}</div>
+                          <div className="recipient-info">
+                            <span className="recipient-name">{member.name}</span>
+                            <span className="recipient-role">{member.role}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <button 
+                      className="select-all-recipients-btn"
+                      onClick={() => {
+                        if (broadcastRecipients.length === teamMembers.length) {
+                          setBroadcastRecipients([]);
+                        } else {
+                          setBroadcastRecipients(teamMembers.map(m => m.id));
+                        }
+                      }}
+                    >
+                      {broadcastRecipients.length === teamMembers.length ? 'Deselect All' : 'Select All'}
+                    </button>
+                  </div>
+                  
+                  <div className="broadcast-message-section">
+                    <div className="broadcast-section-label">
+                      <MessageSquare size={14} />
+                      <span>Broadcast Message</span>
+                    </div>
+                    <textarea 
+                      placeholder="Type your broadcast message..."
+                      value={broadcastMessage}
+                      onChange={(e) => setBroadcastMessage(e.target.value)}
+                      rows={4}
+                    />
+                  </div>
+                  
+                  <div className="broadcast-actions">
+                    <button 
+                      className="broadcast-send-btn"
+                      disabled={!broadcastMessage.trim() || broadcastRecipients.length === 0}
+                      onClick={() => {
+                        const recipientCount = broadcastRecipients.length;
+                        showToast(`✓ Broadcast sent to ${recipientCount} recipient${recipientCount > 1 ? 's' : ''}`);
+                        setBroadcastMessage('');
+                        setBroadcastRecipients([]);
+                        setShowBroadcastComposer(false);
+                      }}
+                    >
+                      <Send size={16} />
+                      Send Broadcast ({broadcastRecipients.length})
+                    </button>
+                  </div>
+                </div>
+              ) : !selectedChatContact ? (
+                /* Contacts List */
+                <div className="chat-contacts-list">
+                  <button 
+                    className={`new-broadcast-btn ${chatExpanded ? 'compact' : ''}`}
+                    onClick={() => setShowBroadcastComposer(true)}
+                  >
+                    {chatExpanded ? (
+                      <>
+                        <span className="plus-icon">+</span>
+                        <span>Create Broadcast</span>
+                      </>
+                    ) : (
+                      <>
+                        <Bell size={16} />
+                        <span>New Broadcast</span>
+                        <ChevronRight size={16} />
+                      </>
+                    )}
+                  </button>
+                  {teamMembers.map((member) => (
+                    <div 
+                      key={member.id} 
+                      className="chat-contact-item"
+                      onClick={() => setSelectedChatContact(member.id)}
+                    >
+                      <div className="chat-contact-avatar">{member.avatar}</div>
+                      <div className="chat-contact-info">
+                        <span className="chat-contact-name">{member.name}</span>
+                        <span className="chat-contact-role">{member.role}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                /* Conversation View */
+                <div className="chat-conversation">
+                  <div className="chat-conversation-header">
+                    <button 
+                      className="chat-back-btn"
+                      onClick={() => setSelectedChatContact(null)}
+                    >
+                      <ChevronRight size={18} style={{ transform: 'rotate(180deg)' }} />
+                    </button>
+                    <div className="chat-contact-avatar small">
+                      {teamMembers.find(m => m.id === selectedChatContact)?.avatar}
+                    </div>
+                    <div className="chat-conversation-info">
+                      <span className="chat-conversation-name">
+                        {teamMembers.find(m => m.id === selectedChatContact)?.name}
+                      </span>
+                      <span className="chat-conversation-status">Online</span>
+                    </div>
+                  </div>
+                  
+                  <div className="chat-messages">
+                    <div className="chat-message incoming">
+                      <div className="message-content">
+                        <p>Hi! How can I help you today?</p>
+                        <span className="message-time">2:30 PM</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="chat-input-area">
+                    <input 
+                      type="text" 
+                      placeholder="Type a message..."
+                      value={chatMessage}
+                      onChange={(e) => setChatMessage(e.target.value)}
+                    />
+                    <button className="chat-send-btn">
+                      <Send size={16} />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="toast-notification">
+          {toastMessage}
+        </div>
+      )}
+
+      {/* VoC Investigation Panel */}
+      {showVocPanel && (
+        <div className="investigation-panel-overlay" onClick={() => setShowVocPanel(false)}>
+          <div className="investigation-panel" onClick={(e) => e.stopPropagation()}>
+            <div className="investigation-panel-header">
+              <div className="panel-header-title">
+                <AlertCircle size={20} />
+                <h3>VoC Crisis Investigation</h3>
+              </div>
+              <button className="panel-close-btn" onClick={() => setShowVocPanel(false)}>
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="investigation-panel-content">
+              <div className="investigation-summary">
+                <div className="summary-badge high">HIGH PRIORITY</div>
+                <h4>Staff Availability Complaints +40%</h4>
+                <p>Cluster B stores showing significant increase in customer complaints related to staff availability and service wait times.</p>
+              </div>
+              
+              <div className="investigation-stores">
+                <div className="section-label">Affected Stores (4)</div>
+                <div className="store-list">
+                  <div className="store-item">
+                    <span className="store-name">Hamburg South</span>
+                    <span className="store-metric negative">+52% complaints</span>
+                  </div>
+                  <div className="store-item">
+                    <span className="store-name">Cologne East</span>
+                    <span className="store-metric negative">+45% complaints</span>
+                  </div>
+                  <div className="store-item">
+                    <span className="store-name">Berlin Mitte</span>
+                    <span className="store-metric negative">+38% complaints</span>
+                  </div>
+                  <div className="store-item">
+                    <span className="store-name">Munich Central</span>
+                    <span className="store-metric negative">+31% complaints</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="investigation-actions">
+                <button className="action-btn primary" onClick={() => {
+                  setShowVocPanel(false);
+                  showToast('Scheduling review meeting with store managers...');
+                }}>
+                  Schedule Review
+                  <ChevronRight size={14} />
+                </button>
+                <button className="action-btn secondary" onClick={() => {
+                  setShowVocPanel(false);
+                  setShowChatWindow(true);
+                  setChatExpanded(true);
+                  setShowBroadcastComposer(true);
+                }}>
+                  Send Broadcast
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SEA Audit Panel */}
+      {showSeaPanel && (
+        <div className="investigation-panel-overlay" onClick={() => setShowSeaPanel(false)}>
+          <div className="investigation-panel" onClick={(e) => e.stopPropagation()}>
+            <div className="investigation-panel-header">
+              <div className="panel-header-title">
+                <AlertCircle size={20} />
+                <h3>SEA Compliance Audit</h3>
+              </div>
+              <button className="panel-close-btn" onClick={() => setShowSeaPanel(false)}>
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="investigation-panel-content">
+              <div className="investigation-summary">
+                <div className="summary-badge high">HIGH PRIORITY</div>
+                <h4>Planogram Audit Failures</h4>
+                <p>Recurring planogram compliance failures detected in 3 stores. Merchandising effectiveness is compromised.</p>
+              </div>
+              
+              <div className="investigation-stores">
+                <div className="section-label">Failing Stores (3)</div>
+                <div className="store-list">
+                  <div className="store-item">
+                    <span className="store-name">Hamburg South</span>
+                    <span className="store-metric negative">3 failures</span>
+                  </div>
+                  <div className="store-item">
+                    <span className="store-name">Cologne East</span>
+                    <span className="store-metric negative">2 failures</span>
+                  </div>
+                  <div className="store-item">
+                    <span className="store-name">Berlin Mitte</span>
+                    <span className="store-metric negative">2 failures</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="investigation-actions">
+                <button className="action-btn primary" onClick={() => {
+                  setShowSeaPanel(false);
+                  showToast('Opening full SEA audit report...');
+                }}>
+                  View Full Audit
+                  <ChevronRight size={14} />
+                </button>
+                <button className="action-btn secondary" onClick={() => {
+                  setShowSeaPanel(false);
+                  showToast('Assigning corrective actions to store managers...');
+                }}>
+                  Assign Actions
+                  <ChevronRight size={14} />
                 </button>
               </div>
             </div>
