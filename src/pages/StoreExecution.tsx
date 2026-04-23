@@ -282,7 +282,6 @@ const mockTasks: ExecutionTask[] = [
 
 export const StoreExecution: React.FC = () => {
   const { tasks: sharedTasks, assignTask, updateTaskStatus: updateSharedTaskStatus, teamMembers: sharedTeamMembers, addTasks } = useExecutionTasks();
-  const [activeTab, setActiveTab] = useState<'agent' | 'taskList'>('agent');
   const [currentStep, setCurrentStep] = useState<WorkflowStep>('select');
   const [selectedStore, setSelectedStore] = useState<string | null>(null);
   const [selectedPOG, setSelectedPOG] = useState<string | null>(null);
@@ -985,7 +984,6 @@ export const StoreExecution: React.FC = () => {
         disabled={!overallAssignee}
         onClick={() => {
           applyOverallAssignment();
-          setActiveTab('taskList');
         }}
       >
         Assign & Go to Task List <ChevronRight size={18} />
@@ -1142,10 +1140,7 @@ export const StoreExecution: React.FC = () => {
         <div className="exec-no-tasks">
           <Package size={48} />
           <h4>No Tasks Yet</h4>
-          <p>Complete the execution workflow to generate tasks.</p>
-          <button className="exec-go-workflow-btn" onClick={() => setActiveTab('agent')}>
-            Go to ShelfIQ Agent
-          </button>
+          <p>Use AI Copilot to audit shelves and generate execution tasks, or create tasks directly in Operations Queue.</p>
         </div>
       ) : (
         <div className="exec-localization-groups">
@@ -2158,7 +2153,7 @@ export const StoreExecution: React.FC = () => {
                   </div>
                   <button 
                     className="view-tasks-btn-premium"
-                    onClick={() => setActiveTab('taskList')}
+                    onClick={() => {}}
                   >
                     View Tasks →
                   </button>
@@ -2263,27 +2258,8 @@ export const StoreExecution: React.FC = () => {
         </div>
       </div>
 
-      <div className="exec-tabs">
-        <div className="exec-tabs-container">
-          <button 
-            className={`exec-tab ${activeTab === 'agent' ? 'active' : ''}`}
-            onClick={() => setActiveTab('agent')}
-          >
-            <Bot size={16} />
-            ShelfIQ Agent
-          </button>
-          <button 
-            className={`exec-tab ${activeTab === 'taskList' ? 'active' : ''}`}
-            onClick={() => setActiveTab('taskList')}
-          >
-            Task List
-            {(sharedTasks.length + tasks.length) > 0 && <span className="exec-tab-badge">{sharedTasks.length + tasks.length}</span>}
-          </button>
-        </div>
-      </div>
-
       <div className="exec-content">
-        {activeTab === 'agent' ? renderAgentChat() : renderTaskListTab()}
+        {renderTaskListTab()}
       </div>
     </div>
   );

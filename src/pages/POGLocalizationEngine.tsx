@@ -895,7 +895,7 @@ export const POGLocalizationEngine: React.FC = () => {
     ));
 
     // Navigate to Store Execution Task List
-    navigate('/planogram/store-execution');
+    navigate('/command-center/operations-queue');
   };
 
   // Get unique values for filter dropdowns

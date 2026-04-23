@@ -7,7 +7,9 @@ import {
   ChevronUp,
   Layers,
   FolderKanban,
-  Building2
+  Building2,
+  Radio,
+  Settings
 } from 'lucide-react';
 import { User } from '../../../types';
 import './SidebarNew.css';
@@ -35,7 +37,7 @@ interface SidebarNewProps {
 export const SidebarNew: React.FC<SidebarNewProps> = ({ user, isCollapsed, onToggle }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [expandedModules, setExpandedModules] = useState<string[]>(['planogram']);
+  const [expandedModules, setExpandedModules] = useState<string[]>(['store-operations', 'planogram', 'command-center', 'app-config']);
 
   const navigationModules: NavigationModule[] = [
     {
@@ -80,10 +82,39 @@ export const SidebarNew: React.FC<SidebarNewProps> = ({ user, isCollapsed, onTog
           label: 'POG Localization Engine',
           path: '/planogram/localization-engine',
         },
+      ],
+    },
+    {
+      id: 'command-center',
+      label: 'Command Center',
+      icon: <Radio size={20} />,
+      subModules: [
         {
-          id: 'store-execution',
-          label: 'Store POG Executor',
-          path: '/planogram/store-execution',
+          id: 'ai-copilot',
+          label: 'AI Copilot',
+          path: '/command-center/ai-copilot',
+        },
+        {
+          id: 'operations-queue',
+          label: 'Operations Queue',
+          path: '/command-center/operations-queue',
+        },
+        {
+          id: 'communications',
+          label: 'Communications',
+          path: '/command-center/communications',
+        },
+      ],
+    },
+    {
+      id: 'app-config',
+      label: 'Application Configuration',
+      icon: <Settings size={20} />,
+      subModules: [
+        {
+          id: 'user-access',
+          label: 'User Access Management',
+          path: '/app-config/user-access',
         },
       ],
     },

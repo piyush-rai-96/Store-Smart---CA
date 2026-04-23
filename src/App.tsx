@@ -10,10 +10,13 @@ import { MainLayout } from './components/layout/MainLayout/MainLayout';
 import { MasterPOGManagement } from './pages/MasterPOGManagement';
 import { POGRuleManagement } from './pages/POGRuleManagement';
 import { POGLocalizationEngine } from './pages/POGLocalizationEngine';
-import { StoreExecution } from './pages/StoreExecution';
 import { StoreOpsHome } from './pages/StoreOpsHome';
 import { DistrictIntelligence } from './pages/DistrictIntelligence';
-import { StoreDeepDive } from './pages/StoreDeepDive';
+import { StoreCenter as StoreDeepDive } from './pages/StoreCenter';
+import { AICopilot } from './pages/AICopilot';
+import { TaskCenter } from './pages/TaskCenter';
+import { MessageCenter } from './pages/MessageCenter';
+import { UserAccessManagement } from './pages/UserAccessManagement';
 import { ROUTES } from './types';
 import './App.css';
 
@@ -46,11 +49,19 @@ function App() {
             <Route path={ROUTES.MASTER_POG} element={<MasterPOGManagement />} />
             <Route path="/planogram/rule-management" element={<POGRuleManagement />} />
             <Route path="/planogram/localization-engine" element={<POGLocalizationEngine />} />
-            <Route path="/planogram/store-execution" element={<StoreExecution />} />
+            <Route path="/planogram/store-execution" element={<Navigate to="/command-center/operations-queue" replace />} />
             {/* Store Operations Hub */}
             <Route path={ROUTES.STORE_OPS_HOME} element={<StoreOpsHome />} />
             <Route path="/store-operations/district-intelligence" element={<DistrictIntelligence />} />
             <Route path="/store-operations/store-deep-dive" element={<StoreDeepDive />} />
+            {/* Command Center */}
+            <Route path="/command-center/ai-copilot" element={<AICopilot />} />
+            <Route path="/command-center/operations-queue" element={<TaskCenter />} />
+            <Route path="/command-center/task-center" element={<Navigate to="/command-center/operations-queue" replace />} />
+            <Route path="/command-center/communications" element={<MessageCenter />} />
+            <Route path="/command-center/message-center" element={<Navigate to="/command-center/communications" replace />} />
+            {/* Application Configuration */}
+            <Route path="/app-config/user-access" element={<UserAccessManagement />} />
           </Route>
           
           <Route path="*" element={<Navigate to={ROUTES.LOGIN} replace />} />

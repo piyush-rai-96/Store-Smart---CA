@@ -979,7 +979,7 @@ export const DistrictIntelligence: React.FC = () => {
                   key={store.storeNumber}
                   className={`esc-store-row esc-stage--${store.stage}`}
                   onClick={() => {
-                    navigate('/store-operations/store-deep-dive');
+                    navigate(`/store-operations/store-deep-dive?store=${store.storeNumber}`);
                   }}
                 >
                   <div className="esc-store-indicator">
@@ -1040,7 +1040,7 @@ export const DistrictIntelligence: React.FC = () => {
 
         {/* Action Bar */}
         <div className="esc-actions">
-          <button className="esc-action-btn esc-action-primary" onClick={() => navigate('/planogram/store-execution')}>
+          <button className="esc-action-btn esc-action-primary" onClick={() => navigate('/command-center/operations-queue')}>
             <Target size={14} />
             View DM Action Queue
             <ArrowRight size={14} />
@@ -1532,7 +1532,7 @@ export const DistrictIntelligence: React.FC = () => {
                 const avg = Math.round(auditCategories.reduce((sum, cat) => sum + (scores?.[cat] || 0), 0) / auditCategories.length);
                 return (
                   <tr key={store.id}>
-                    <td className="heatmap-store-cell">
+                    <td className="heatmap-store-cell heatmap-store-clickable" onClick={() => handleStoreClick(store)}>
                       <span className="heatmap-store-number">#{store.storeNumber}</span>
                       <span className="heatmap-store-name">{store.storeName}</span>
                     </td>

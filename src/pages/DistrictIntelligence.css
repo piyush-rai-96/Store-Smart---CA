@@ -3852,6 +3852,20 @@
   padding: 8px 12px;
 }
 
+.heatmap-store-clickable {
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+}
+
+.heatmap-store-clickable:hover {
+  background: #f5f3ff;
+}
+
+.heatmap-store-clickable:hover .heatmap-store-number {
+  color: #4f46e5;
+}
+
 .heatmap-store-number {
   font-size: 12px;
   font-weight: 600;

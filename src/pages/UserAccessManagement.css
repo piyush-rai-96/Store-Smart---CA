@@ -1,0 +1,94 @@
+/* User Access Management — Coming Soon */
+
+.uam-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(100vh - 64px);
+  background: #f8fafc;
+  padding: 40px;
+}
+
+.uam-content {
+  max-width: 520px;
+  text-align: center;
+}
+
+.uam-icon {
+  width: 88px;
+  height: 88px;
+  border-radius: 20px;
+  background: #eef2ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6366f1;
+  margin: 0 auto 24px;
+}
+
+.uam-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1d21;
+  margin: 0 0 6px;
+  letter-spacing: -0.02em;
+}
+
+.uam-subtitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #6366f1;
+  background: #eef2ff;
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 6px;
+  margin: 0 0 16px;
+}
+
+.uam-desc {
+  font-size: 14px;
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0 0 32px;
+}
+
+.uam-features {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  text-align: left;
+}
+
+.uam-feature {
+  display: flex;
+  gap: 14px;
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid #e8ecf0;
+  border-radius: 10px;
+  transition: border-color 0.2s ease;
+}
+
+.uam-feature:hover {
+  border-color: #c7d2fe;
+}
+
+.uam-feature svg {
+  color: #6366f1;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.uam-feature h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1d21;
+  margin: 0 0 4px;
+}
+
+.uam-feature p {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.5;
+}
