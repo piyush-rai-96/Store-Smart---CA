@@ -59,15 +59,6 @@ interface Chat {
 }
 
 // ── Mock Data ──
-const currentUser: Contact = {
-  id: 'me',
-  name: 'John Doe',
-  avatar: 'JD',
-  role: 'Store Manager',
-  store: 'Store #142',
-  online: true,
-};
-
 const contacts: Contact[] = [
   { id: 'u1', name: 'Sarah Chen', avatar: 'SC', role: 'District Manager', online: true },
   { id: 'u2', name: 'Mike Rodriguez', avatar: 'MR', role: 'Regional VP', online: false, lastSeen: '2h ago' },
