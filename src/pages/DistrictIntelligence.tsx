@@ -20,16 +20,23 @@ import {
   Megaphone,
   Sparkles,
   X,
-  Grid3X3,
   Send,
-  Layers,
-  Plus,
-  Edit3,
   Package,
   MessageSquare,
   ExternalLink,
   Users,
-  Check
+  Check,
+  DollarSign,
+  Heart,
+  ClipboardCheck,
+  BarChart3,
+  Target,
+  ArrowUpRight,
+  ArrowDownRight,
+  Shield,
+  FileText,
+  Zap,
+  ArrowRight
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './DistrictIntelligence.css';
@@ -55,26 +62,6 @@ interface StoreData {
 type DistrictTier = 'Excellence' | 'Stable' | 'AtRisk' | 'Crisis';
 type MomentumType = 'Improving' | 'Slipping' | 'Flat';
 
-interface DistrictAlert {
-  id: string;
-  severity: 'critical' | 'high' | 'medium';
-  title: string;
-  reason: string;
-  impact: string;
-  storeCount: number;
-  cta: string;
-  ctaAction: string;
-}
-
-interface KPIData {
-  id: string;
-  label: string;
-  value: string;
-  variance: string;
-  varianceType: 'positive' | 'negative' | 'neutral';
-  secondaryVariance?: string;
-  trend: number[];
-}
 
 // Mock Data
 const mockStores: StoreData[] = [
@@ -88,11 +75,223 @@ const mockStores: StoreData[] = [
   { id: '8', rank: 8, storeNumber: '9012', storeName: 'Maple Heights', dpi: 58, dpiTier: 'Crisis', netSales: 95000, netSalesVar: -12.4, seaScore: 62, vocSatisfied: 58, topVocIssue: 'Overall experience', topSeaIssue: 'Multiple', trend: 'down', status: 'critical' },
 ];
 
-const mockAlerts: (DistrictAlert & { category: string })[] = [
-  { id: '1', severity: 'critical', category: 'Revenue', title: 'Revenue Leakage Alert', reason: '3 high-volume stores showing consecutive weekly decline', impact: '$45K potential monthly loss', storeCount: 3, cta: 'View Stores', ctaAction: 'stores' },
-  { id: '2', severity: 'high', category: 'VoC', title: 'VoC Crisis Pattern Detected', reason: 'Staff availability complaints up 40% in cluster B', impact: 'Customer satisfaction at risk', storeCount: 4, cta: 'Investigate', ctaAction: 'voc' },
-  { id: '3', severity: 'high', category: 'SEA', title: 'SEA Compliance Failure', reason: 'Planogram audit failures recurring in 3 stores', impact: 'Merchandising effectiveness compromised', storeCount: 3, cta: 'Open Audit', ctaAction: 'sea' },
-  { id: '4', severity: 'medium', category: 'Broadcast', title: 'Broadcast Non-Compliance', reason: '5 stores have not acknowledged critical safety broadcast', impact: 'Compliance gap', storeCount: 5, cta: 'Follow Up', ctaAction: 'broadcast' },
+// Audit Compliance Heatmap Data
+const auditCategories = [
+  'Planogram',
+  'Signage',
+  'Cleanliness',
+  'Safety',
+  'Stock Rotation',
+  'Pricing',
+  'Backroom',
+  'Customer Area',
+];
+
+const auditComplianceData: Record<string, Record<string, number>> = {
+  '2034': { Planogram: 98, Signage: 95, Cleanliness: 100, Safety: 97, 'Stock Rotation': 92, Pricing: 96, Backroom: 94, 'Customer Area': 99 },
+  '1876': { Planogram: 95, Signage: 92, Cleanliness: 96, Safety: 94, 'Stock Rotation': 88, Pricing: 93, Backroom: 90, 'Customer Area': 97 },
+  '3421': { Planogram: 82, Signage: 75, Cleanliness: 90, Safety: 88, 'Stock Rotation': 85, Pricing: 87, Backroom: 78, 'Customer Area': 91 },
+  '2198': { Planogram: 68, Signage: 85, Cleanliness: 88, Safety: 82, 'Stock Rotation': 79, Pricing: 84, Backroom: 72, 'Customer Area': 86 },
+  '4532': { Planogram: 72, Signage: 78, Cleanliness: 65, Safety: 80, 'Stock Rotation': 70, Pricing: 75, Backroom: 68, 'Customer Area': 74 },
+  '1234': { Planogram: 55, Signage: 62, Cleanliness: 70, Safety: 58, 'Stock Rotation': 48, Pricing: 65, Backroom: 52, 'Customer Area': 60 },
+  '5678': { Planogram: 42, Signage: 50, Cleanliness: 55, Safety: 38, 'Stock Rotation': 35, Pricing: 48, Backroom: 40, 'Customer Area': 45 },
+  '9012': { Planogram: 28, Signage: 35, Cleanliness: 40, Safety: 22, 'Stock Rotation': 18, Pricing: 32, Backroom: 25, 'Customer Area': 30 },
+};
+
+const getComplianceColor = (value: number): string => {
+  if (value >= 90) return '#c6f0d4';
+  if (value >= 75) return '#d9f2e0';
+  if (value >= 50) return '#fef3c7';
+  if (value >= 25) return '#fde2e2';
+  return '#fcc';
+};
+
+const getComplianceTextColor = (value: number): string => {
+  if (value >= 90) return '#15803d';
+  if (value >= 75) return '#166534';
+  if (value >= 50) return '#92400e';
+  if (value >= 25) return '#991b1b';
+  return '#7f1d1d';
+};
+
+// Escalation Command Center Data
+interface EscalatedStore {
+  storeNumber: string;
+  storeName: string;
+  stage: 'early-warning' | 'escalated' | 'critical';
+  reason: string;
+  missStreak: number;
+  lastAuditDate: string;
+  dpiImpact: number;
+  categories: string[];
+}
+
+const escalatedStores: EscalatedStore[] = [
+  { storeNumber: '5678', storeName: 'Pine Grove', stage: 'critical', reason: 'Safety audit failed 3 consecutive weeks', missStreak: 3, lastAuditDate: '2 days ago', dpiImpact: -4.2, categories: ['Safety', 'Planogram'] },
+  { storeNumber: '9012', storeName: 'Maple Heights', stage: 'escalated', reason: 'Multiple compliance categories below 40%', missStreak: 2, lastAuditDate: '4 days ago', dpiImpact: -3.1, categories: ['Cleanliness', 'Stock Rotation', 'Backroom'] },
+  { storeNumber: '1234', storeName: 'Oak Street', stage: 'early-warning', reason: 'Planogram compliance dropped below 60% this week', missStreak: 1, lastAuditDate: '1 day ago', dpiImpact: -1.5, categories: ['Planogram'] },
+];
+
+const escalationRules = [
+  { week: 'Week 1', trigger: 'Compliance < 60% in any category', action: 'Early warning flagged', stage: 'early-warning' as const },
+  { week: 'Week 2', trigger: 'No improvement or additional miss', action: 'Auto-escalated to DM', stage: 'escalated' as const },
+  { week: 'Week 3+', trigger: 'Consecutive misses across categories', action: 'Critical — DM action required', stage: 'critical' as const },
+];
+
+// KPI Cards Data
+interface DistrictKPI {
+  id: string;
+  category: 'commercial' | 'customer' | 'execution' | 'profitability' | 'operations';
+  label: string;
+  primaryValue: string;
+  primaryUnit?: string;
+  secondaryLabel?: string;
+  secondaryValue?: string;
+  delta?: string;
+  deltaDirection?: 'up' | 'down' | 'flat';
+  deltaContext?: string;
+  status: 'positive' | 'negative' | 'neutral' | 'warning';
+  clickable: boolean;
+  trendData?: number[];
+  trendInsight?: string;
+  panelTitle?: string;
+  panelDetails?: { label: string; value: string; status?: string }[];
+}
+
+const districtKPIs: DistrictKPI[] = [
+  // 1. Commercial (Combined)
+  {
+    id: 'sales-performance',
+    category: 'commercial',
+    label: 'Sales Performance',
+    primaryValue: '$1.26M',
+    primaryUnit: 'MTD',
+    secondaryLabel: 'YoY Growth',
+    secondaryValue: '+4.2%',
+    delta: '+4.2%',
+    deltaDirection: 'up',
+    deltaContext: 'vs LY',
+    status: 'positive',
+    clickable: true,
+    trendData: [980, 1020, 1050, 1010, 1080, 1120, 1060, 1100, 1150, 1180, 1200, 1260],
+    trendInsight: 'Consistent upward trend. Q4 seasonality effect visible. Rolling 4-week avg: $1.19M.',
+    panelTitle: 'Sales $ — 52-Week Trend',
+    panelDetails: [
+      { label: 'Best Week', value: '$1.32M (W48)', status: 'positive' },
+      { label: 'Worst Week', value: '$940K (W08)', status: 'negative' },
+      { label: 'Rolling 4W Avg', value: '$1.19M', status: 'neutral' },
+      { label: 'YoY Δ', value: '+4.2%', status: 'positive' },
+    ]
+  },
+  // 2. Customer — VoC Satisfaction
+  {
+    id: 'voc-satisfaction',
+    category: 'customer',
+    label: 'VoC Satisfaction',
+    primaryValue: '82%',
+    delta: '-1.4%',
+    deltaDirection: 'down',
+    deltaContext: 'WoW',
+    status: 'warning',
+    clickable: true,
+    trendData: [88, 87, 86, 85, 84, 85, 83, 84, 82, 83, 82, 82],
+    trendInsight: 'Gradual decline over 12 weeks. "Messy Aisles" and "Staff Availability" are top negative themes.',
+    panelTitle: 'VoC Satisfaction — 52-Week Trend',
+    panelDetails: [
+      { label: 'Peak', value: '91% (W12)', status: 'positive' },
+      { label: 'Low', value: '80% (W36)', status: 'negative' },
+      { label: 'Top Theme (↑)', value: 'Messy Aisles (+34%)', status: 'negative' },
+      { label: 'Top Theme (↓)', value: 'Checkout Speed (improved)', status: 'positive' },
+    ]
+  },
+  // 2. Customer — VoC Issue Rate
+  {
+    id: 'voc-issue-rate',
+    category: 'customer',
+    label: 'VoC Issue Rate',
+    primaryValue: '3.8',
+    primaryUnit: '/ 100 visits',
+    delta: '+0.6',
+    deltaDirection: 'up',
+    deltaContext: 'WoW',
+    status: 'negative',
+    clickable: true,
+    trendData: [2.8, 2.9, 3.0, 3.1, 2.9, 3.2, 3.4, 3.2, 3.5, 3.6, 3.4, 3.8],
+    trendInsight: 'Spike detected in last 2 weeks. Driven primarily by "Messy Aisles" theme across 3 stores.',
+    panelTitle: 'VoC Issue Rate — 52-Week Trend',
+    panelDetails: [
+      { label: 'Best', value: '2.1 / 100 (W05)', status: 'positive' },
+      { label: 'Worst', value: '4.2 / 100 (W41)', status: 'negative' },
+      { label: 'Spike Driver', value: 'Messy Aisles (+34%)', status: 'negative' },
+      { label: 'Stores Affected', value: '3 of 8', status: 'warning' },
+    ]
+  },
+  // 3. Execution — Shelf Audit Compliance
+  {
+    id: 'shelf-audit',
+    category: 'execution',
+    label: 'Shelf Audit Compliance',
+    primaryValue: '89%',
+    delta: '-3%',
+    deltaDirection: 'down',
+    deltaContext: 'vs Target 95%',
+    status: 'warning',
+    clickable: true,
+    trendData: [92, 93, 91, 90, 92, 91, 89, 90, 88, 89, 90, 89],
+    trendInsight: 'Below target for 6 consecutive weeks. Store variance: 78% (Pine Grove) to 97% (Brussels Nord).',
+    panelTitle: 'Shelf Audit Compliance — 52-Week Trend',
+    panelDetails: [
+      { label: 'Target', value: '95%', status: 'neutral' },
+      { label: 'Gap', value: '-6pts', status: 'negative' },
+      { label: 'Best Store', value: 'Brussels Nord (97%)', status: 'positive' },
+      { label: 'Worst Store', value: 'Pine Grove (78%)', status: 'negative' },
+    ]
+  },
+  // 3. Execution — OOS Rate
+  {
+    id: 'oos-rate',
+    category: 'execution',
+    label: 'OOS Rate',
+    primaryValue: '4.1%',
+    delta: '+0.8%',
+    deltaDirection: 'up',
+    deltaContext: 'WoW',
+    status: 'negative',
+    clickable: true,
+    trendData: [3.0, 2.8, 3.1, 3.3, 3.0, 3.2, 3.5, 3.3, 3.6, 3.8, 3.5, 4.1],
+    trendInsight: 'Rising trend over 8 weeks. Apparel category driving 60% of OOS. Cologne East shipment delay a key factor.',
+    panelTitle: 'OOS Rate — 52-Week Trend',
+    panelDetails: [
+      { label: 'Best', value: '2.1% (W09)', status: 'positive' },
+      { label: 'Worst', value: '4.5% (W44)', status: 'negative' },
+      { label: 'Top Category', value: 'Apparel (60% of OOS)', status: 'negative' },
+      { label: 'Key Driver', value: 'Cologne East delay', status: 'warning' },
+    ]
+  },
+  // 4. Profitability (Combined)
+  {
+    id: 'margin-health',
+    category: 'profitability',
+    label: 'Margin Health',
+    primaryValue: '34.2%',
+    primaryUnit: 'GM',
+    secondaryLabel: 'GM Δ vs LY',
+    secondaryValue: '-40 bps',
+    delta: '-40 bps',
+    deltaDirection: 'down',
+    deltaContext: 'vs LY',
+    status: 'warning',
+    clickable: true,
+    trendData: [35.1, 35.0, 34.8, 34.9, 34.6, 34.7, 34.5, 34.4, 34.3, 34.2, 34.3, 34.2],
+    trendInsight: 'Margin pressure from increased markdowns in Apparel. Promotional mix shift impacting blended margin.',
+    panelTitle: 'Gross Margin — 52-Week Trend',
+    panelDetails: [
+      { label: 'Peak', value: '36.1% (W14)', status: 'positive' },
+      { label: 'Low', value: '33.8% (W38)', status: 'negative' },
+      { label: 'Pressure Source', value: 'Apparel markdowns', status: 'negative' },
+      { label: 'YoY Δ', value: '-40 bps', status: 'warning' },
+    ]
+  },
 ];
 
 // Team members for chat/broadcast (same as Home Screen)
@@ -166,7 +365,6 @@ export const DistrictIntelligence: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isNavigating, setIsNavigating] = useState(false);
   const [navigatingStore, setNavigatingStore] = useState<string | null>(null);
-  const [selectedKPI, setSelectedKPI] = useState<KPIData | null>(null);
   const [leaderboardFilter, setLeaderboardFilter] = useState<'all' | 'risk' | 'top' | 'revenue'>('all');
   const [lastRefresh, setLastRefresh] = useState(new Date());
   
@@ -178,6 +376,12 @@ export const DistrictIntelligence: React.FC = () => {
   const [selectedWeekStart, setSelectedWeekStart] = useState<Date | null>(null);
   const [selectedMonth, setSelectedMonth] = useState<Date | null>(null);
   
+  // Escalation policy modal
+  const [showEscPolicy, setShowEscPolicy] = useState(false);
+
+  // Heatmap tooltip state
+  const [heatmapTip, setHeatmapTip] = useState<{ x: number; y: number; store: string; cat: string; val: number } | null>(null);
+
   // Chat Window States (same as Home Screen)
   const [showChatWindow, setShowChatWindow] = useState(false);
   const [chatExpanded, setChatExpanded] = useState(false);
@@ -189,6 +393,8 @@ export const DistrictIntelligence: React.FC = () => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showVocPanel, setShowVocPanel] = useState(false);
   const [showSeaPanel, setShowSeaPanel] = useState(false);
+  const [showTriageDetail, setShowTriageDetail] = useState<string | null>(null);
+  const [activeKPIPanel, setActiveKPIPanel] = useState<DistrictKPI | null>(null);
   
   // Toast notification helper
   const showToast = (message: string) => {
@@ -536,26 +742,22 @@ export const DistrictIntelligence: React.FC = () => {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Chain Comparison Card */}
-        <div className="pulse-card comparison-card">
-          <div className="pulse-card-header">
-            <span className="pulse-card-label">vs Chain Average</span>
-          </div>
-          <div className="comparison-visual">
-            <div className="comparison-bar">
-              <div className="bar-district" style={{ width: `${(districtDPI / 100) * 100}%` }}>
-                <span>{districtDPI}</span>
+            {/* Chain Comparison - Integrated */}
+            <div className="dpi-chain-comparison">
+              <div className="chain-comparison-header">
+                <span className="chain-label-title">vs Chain Average</span>
+                <span className="chain-delta positive">+{districtDPI - chainAvgDPI} pts</span>
               </div>
-              <div className="bar-chain-marker" style={{ left: `${(chainAvgDPI / 100) * 100}%` }}>
-                <span className="chain-label">Chain: {chainAvgDPI}</span>
+              <div className="chain-comparison-bar">
+                <div className="chain-bar-track">
+                  <div className="chain-bar-fill" style={{ width: `${(districtDPI / 100) * 100}%` }}></div>
+                  <div className="chain-marker" style={{ left: `${(chainAvgDPI / 100) * 100}%` }}>
+                    <div className="chain-marker-line"></div>
+                    <span className="chain-marker-label">Chain: {chainAvgDPI}</span>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="comparison-delta">
-            <span className="positive">+{districtDPI - chainAvgDPI} pts above chain</span>
           </div>
         </div>
 
@@ -566,28 +768,55 @@ export const DistrictIntelligence: React.FC = () => {
             <span className="pulse-card-label">Triage Summary</span>
           </div>
           <div className="triage-items">
-            <div className="triage-item">
-              <div className="triage-item-header">
-                <span className="triage-item-title">VoC: Messy Aisles</span>
+            <div className="triage-item" onClick={() => setShowTriageDetail('voc-messy')}>
+              <div className="triage-item-content">
+                <div className="triage-item-header">
+                  <span className="triage-item-title">VoC: Messy Aisles</span>
+                  <span className="triage-item-priority high">High</span>
+                </div>
+                <p className="triage-item-stores">Hamburg South · Cologne East · Berlin Mitte</p>
+                <div className="triage-item-footer">
+                  <span className="triage-item-metric">+22% theme spike</span>
+                  <button className="triage-action-btn" onClick={(e) => { e.stopPropagation(); setShowTriageDetail('voc-messy'); }}>
+                    View Details
+                    <ChevronRight size={14} />
+                  </button>
+                </div>
               </div>
-              <p className="triage-item-stores">Hamburg South · Cologne East · Berlin Mitte</p>
-              <span className="triage-item-metric">+22% theme spike</span>
             </div>
             
-            <div className="triage-item">
-              <div className="triage-item-header">
-                <span className="triage-item-title">SEA Auto-Fail: Fire Exit</span>
+            <div className="triage-item" onClick={() => setShowTriageDetail('sea-fire')}>
+              <div className="triage-item-content">
+                <div className="triage-item-header">
+                  <span className="triage-item-title">SEA Auto-Fail: Fire Exit</span>
+                  <span className="triage-item-priority critical">Critical</span>
+                </div>
+                <p className="triage-item-stores">Hamburg South — Display blocking exit</p>
+                <div className="triage-item-footer">
+                  <span className="triage-item-metric">Escalated to DM · Pending</span>
+                  <button className="triage-action-btn" onClick={(e) => { e.stopPropagation(); setShowTriageDetail('sea-fire'); }}>
+                    View Details
+                    <ChevronRight size={14} />
+                  </button>
+                </div>
               </div>
-              <p className="triage-item-stores">Hamburg South — Display blocking exit</p>
-              <span className="triage-item-metric">Escalated to DM · Pending</span>
             </div>
             
-            <div className="triage-item">
-              <div className="triage-item-header">
-                <span className="triage-item-title">Inbound OOS Risk</span>
+            <div className="triage-item" onClick={() => setShowTriageDetail('oos-risk')}>
+              <div className="triage-item-content">
+                <div className="triage-item-header">
+                  <span className="triage-item-title">Inbound OOS Risk</span>
+                  <span className="triage-item-priority medium">Medium</span>
+                </div>
+                <p className="triage-item-stores">Cologne East — 3 SKUs delayed 48h</p>
+                <div className="triage-item-footer">
+                  <span className="triage-item-metric">Adaptation pending approval</span>
+                  <button className="triage-action-btn" onClick={(e) => { e.stopPropagation(); setShowTriageDetail('oos-risk'); }}>
+                    View Details
+                    <ChevronRight size={14} />
+                  </button>
+                </div>
               </div>
-              <p className="triage-item-stores">Cologne East — 3 SKUs delayed 48h</p>
-              <span className="triage-item-metric">Adaptation pending approval</span>
             </div>
           </div>
           
@@ -596,9 +825,24 @@ export const DistrictIntelligence: React.FC = () => {
               <Sparkles size={12} />
               <span>AI Summary</span>
             </div>
-            <p className="ai-summary-text">
-              3 active triage items require attention. VoC theme spike indicates potential staffing or process issue across multiple stores. SEA fire exit violation is critical priority. Recommend immediate store manager follow-up.
-            </p>
+            <div className="ai-summary-points">
+              <div className="ai-summary-point">
+                <span className="point-label">Overall situation</span>
+                <span className="point-text">Three concurrent triage issues across Hamburg South, Cologne East, and Berlin Mitte show execution stability slipping this week.</span>
+              </div>
+              <div className="ai-summary-point">
+                <span className="point-label">Pattern spotted</span>
+                <span className="point-text">VoC complaints and the SEA violation both originate at Hamburg South, pointing to a shared root cause—messy aisles blocking emergency paths during peak hours.</span>
+              </div>
+              <div className="ai-summary-point">
+                <span className="point-label">Biggest risk</span>
+                <span className="point-text">The SEA fire-exit block is a regulatory and safety exposure; any delay risks store closure and penalties.</span>
+              </div>
+              <div className="ai-summary-point">
+                <span className="point-label">Manager’s first move</span>
+                <span className="point-text">Deploy Hamburg South team now to clear the exit, confirm compliance, then approve Cologne East adaptation plan to protect sales.</span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -641,6 +885,46 @@ export const DistrictIntelligence: React.FC = () => {
                 <p className="broadcast-title">Weekend Staffing Reminder</p>
                 <span className="broadcast-ack">6/8 stores acknowledged</span>
               </div>
+              <div className="broadcast-item">
+                <div className="broadcast-item-header">
+                  <span className="broadcast-priority low">LOW</span>
+                  <span className="broadcast-time">3d ago</span>
+                </div>
+                <p className="broadcast-title">Planogram Refresh Checklist</p>
+                <span className="broadcast-ack">5/8 stores acknowledged</span>
+              </div>
+            </div>
+
+            <div className="broadcast-insights">
+              <div className="broadcast-insight risk">
+                <AlertTriangle size={16} />
+                <div className="insight-copy">
+                  <span className="insight-label">Biggest gap</span>
+                  <p>Cologne East has 3 broadcasts pending acknowledgment.</p>
+                </div>
+                <button className="insight-action" onClick={() => {
+                  setShowChatWindow(true);
+                  setChatExpanded(true);
+                  setShowBroadcastComposer(true);
+                }}>
+                  Send Nudge
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+              <div className="broadcast-insight engagement">
+                <Users size={16} />
+                <div className="insight-copy">
+                  <span className="insight-label">Audience focus</span>
+                  <p>Ops teams responded fastest (avg 32 min) vs Merch (59 min).</p>
+                </div>
+              </div>
+              <div className="broadcast-insight planning">
+                <Megaphone size={16} />
+                <div className="insight-copy">
+                  <span className="insight-label">Next broadcast</span>
+                  <p>Schedule safety refresher follow-up for Friday morning.</p>
+                </div>
+              </div>
             </div>
             
             <button 
@@ -658,69 +942,414 @@ export const DistrictIntelligence: React.FC = () => {
         </div>
       </div>
 
-      {/* District Alerts Rail */}
-      <div className="alerts-rail">
-        <div className="alerts-header">
-          <h2>
-            <AlertTriangle size={18} />
-            Priority Alerts
-          </h2>
-          <span className="alerts-count">{mockAlerts.length} active</span>
+      {/* Escalation Command Center */}
+      <div className="esc-command-center">
+        <div className="esc-header">
+          <div className="esc-header-left">
+            <div className="esc-title-row">
+              <Shield size={20} />
+              <h2>Escalation Command Center</h2>
+            </div>
+            <p className="esc-subtitle">System-detected compliance escalations requiring DM action</p>
+          </div>
+          <div className="esc-header-right">
+            <div className="esc-impact-badge">
+              <Zap size={14} />
+              <span className="esc-impact-count">{escalatedStores.length} stores</span>
+              <span className="esc-impact-label">escalated</span>
+            </div>
+            <div className="esc-impact-badge esc-impact-dpi">
+              <TrendingDown size={14} />
+              <span className="esc-impact-count">{escalatedStores.reduce((s, e) => s + e.dpiImpact, 0).toFixed(1)} pts</span>
+              <span className="esc-impact-label">potential drag</span>
+            </div>
+          </div>
         </div>
-        <div className="alerts-cards-grid">
-          {mockAlerts.map((alert) => (
-            <div key={alert.id} className={`alert-card-new severity-${alert.severity}`}>
-              <div className="alert-card-top">
-                <div className="alert-card-badges">
-                  <span className={`category-tag ${alert.category.toLowerCase()}`}>
-                    {alert.category}
-                  </span>
-                  <span className={`severity-tag ${alert.severity}`}>
-                    {alert.severity.toUpperCase()}
-                  </span>
-                </div>
-                <div className="alert-stores-pill">
-                  <Store size={12} />
-                  <span>{alert.storeCount} stores</span>
-                </div>
-              </div>
-              <div className="alert-card-content">
-                <h4 className="alert-card-title">{alert.title}</h4>
-                <p className="alert-card-desc">{alert.reason}</p>
-                <div className="alert-card-impact">
-                  <AlertCircle size={14} />
-                  <span>{alert.impact}</span>
-                </div>
-              </div>
-              <div className="alert-card-footer">
-                <button 
-                  className="alert-card-btn"
+        <div className="esc-context-strip">
+          <Sparkles size={13} />
+          <span>Despite +2.4% overall growth, escalations are limiting performance — execution issues reducing DPI by {Math.abs(escalatedStores.reduce((s, e) => s + e.dpiImpact, 0)).toFixed(1)} pts</span>
+        </div>
+
+        <div className="esc-body">
+          {/* Store Escalation Snapshot */}
+          <div className="esc-snapshot">
+            <div className="esc-snapshot-list">
+              {escalatedStores.map(store => (
+                <div
+                  key={store.storeNumber}
+                  className={`esc-store-row esc-stage--${store.stage}`}
                   onClick={() => {
-                    if (alert.ctaAction === 'stores') {
-                      // Scroll to store leaderboard
-                      document.querySelector('.leaderboard-section-premium')?.scrollIntoView({ behavior: 'smooth' });
-                      setLeaderboardFilter('risk');
-                    } else if (alert.ctaAction === 'voc') {
-                      // Open VoC investigation panel
-                      setShowVocPanel(true);
-                    } else if (alert.ctaAction === 'sea') {
-                      // Open SEA audit panel
-                      setShowSeaPanel(true);
-                    } else if (alert.ctaAction === 'broadcast') {
-                      // Open broadcast composer
-                      setShowChatWindow(true);
-                      setChatExpanded(true);
-                      setShowBroadcastComposer(true);
-                    }
+                    navigate('/store-operations/store-deep-dive');
                   }}
                 >
-                  {alert.cta}
-                  <ChevronRight size={14} />
-                </button>
+                  <div className="esc-store-indicator">
+                    <div className="esc-stage-dot" />
+                    <div className="esc-streak-line">
+                      {Array.from({ length: store.missStreak }).map((_, i) => (
+                        <span key={i} className="esc-streak-mark" />
+                      ))}
+                    </div>
+                  </div>
+                  <div className="esc-store-info">
+                    <div className="esc-store-name-row">
+                      <span className="esc-store-name">{store.storeName}</span>
+                      <span className="esc-store-id">#{store.storeNumber}</span>
+                    </div>
+                    <p className="esc-store-reason">{store.reason}</p>
+                    <div className="esc-store-meta">
+                      <span className="esc-meta-tag">{store.lastAuditDate}</span>
+                      {store.categories.map(cat => (
+                        <span key={cat} className="esc-meta-cat">{cat}</span>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="esc-store-right">
+                    <span className={`esc-stage-label esc-stage-label--${store.stage}`}>
+                      {store.stage === 'early-warning' ? 'Early Warning' : store.stage === 'escalated' ? 'Escalated' : 'Critical'}
+                    </span>
+                    <span className="esc-dpi-impact">{store.dpiImpact} DPI</span>
+                    <ChevronRight size={14} className="esc-row-arrow" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Escalation Logic */}
+          <div className="esc-logic">
+            <div className="esc-logic-header">
+              <span className="esc-logic-title">Escalation Logic</span>
+              <span className="esc-logic-desc">How the system progresses stores through stages</span>
+            </div>
+            <div className="esc-logic-steps">
+              {escalationRules.map((rule, i) => (
+                <div key={rule.week} className={`esc-logic-step esc-stage--${rule.stage}`}>
+                  <div className="esc-logic-step-marker">
+                    <span className="esc-logic-week">{rule.week}</span>
+                    {i < escalationRules.length - 1 && <div className="esc-logic-connector" />}
+                  </div>
+                  <div className="esc-logic-step-content">
+                    <span className="esc-logic-trigger">{rule.trigger}</span>
+                    <span className="esc-logic-action">{rule.action}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Action Bar */}
+        <div className="esc-actions">
+          <button className="esc-action-btn esc-action-primary" onClick={() => navigate('/planogram/store-execution')}>
+            <Target size={14} />
+            View DM Action Queue
+            <ArrowRight size={14} />
+          </button>
+          <button className="esc-action-btn esc-action-secondary" onClick={() => {
+            setShowChatWindow(true);
+            setChatExpanded(true);
+            setShowBroadcastComposer(true);
+          }}>
+            <Send size={14} />
+            Send Reminder
+          </button>
+          <button className="esc-action-btn esc-action-tertiary" onClick={() => setShowEscPolicy(true)}>
+            <FileText size={14} />
+            View Policy
+          </button>
+        </div>
+      </div>
+
+      {/* District KPI Cards */}
+      <div className="kpi-cards-section">
+        <div className="kpi-cards-header">
+          <div className="kpi-header-title-row">
+            <div className="kpi-title-group">
+              <h2><BarChart3 size={20} /> District KPIs</h2>
+              <span className="kpi-header-subtitle">Click any metric to explore 52-week trend</span>
+            </div>
+            <div className="kpi-header-stats">
+              <div className="kpi-stat-pill kpi-stat-positive">
+                <span className="kpi-stat-value">{districtKPIs.filter(k => k.status === 'positive').length}</span>
+                <span className="kpi-stat-label">On Track</span>
+              </div>
+              <div className="kpi-stat-pill kpi-stat-warning">
+                <span className="kpi-stat-value">{districtKPIs.filter(k => k.status === 'warning').length}</span>
+                <span className="kpi-stat-label">Watch</span>
+              </div>
+              <div className="kpi-stat-pill kpi-stat-negative">
+                <span className="kpi-stat-value">{districtKPIs.filter(k => k.status === 'negative').length}</span>
+                <span className="kpi-stat-label">Needs Attention</span>
               </div>
             </div>
-          ))}
+          </div>
         </div>
+        <div className="kpi-cards-grid">
+          {/* 1. Commercial */}
+          {districtKPIs.filter(k => k.category === 'commercial').map(kpi => (
+            <div
+              key={kpi.id}
+              className={`kpi-tile kpi-tile--${kpi.status} ${kpi.clickable ? 'kpi-tile--clickable' : ''} ${activeKPIPanel?.id === kpi.id ? 'kpi-tile--active' : ''}`}
+              onClick={() => kpi.clickable && setActiveKPIPanel(activeKPIPanel?.id === kpi.id ? null : kpi)}
+            >
+              <div className="kpi-tile-category kpi-tile-category--commercial">
+                <DollarSign size={12} />
+                <span>Commercial</span>
+              </div>
+              <div className="kpi-tile-value-row">
+                <span className="kpi-tile-primary">{kpi.primaryValue}</span>
+                {kpi.primaryUnit && <span className="kpi-tile-unit">{kpi.primaryUnit}</span>}
+              </div>
+              <span className="kpi-tile-label">{kpi.label}</span>
+              {kpi.secondaryLabel && (
+                <div className="kpi-tile-secondary">
+                  <span className="kpi-secondary-label">{kpi.secondaryLabel}</span>
+                  <span className={`kpi-secondary-value status-${kpi.status}`}>{kpi.secondaryValue}</span>
+                </div>
+              )}
+              <div className={`kpi-tile-delta delta-${kpi.deltaDirection}`}>
+                {kpi.deltaDirection === 'up' && <ArrowUpRight size={12} />}
+                {kpi.deltaDirection === 'down' && <ArrowDownRight size={12} />}
+                <span>{kpi.delta}</span>
+                {kpi.deltaContext && <span className="kpi-delta-ctx">{kpi.deltaContext}</span>}
+              </div>
+              {kpi.trendData && (() => {
+                const min = Math.min(...kpi.trendData);
+                const max = Math.max(...kpi.trendData);
+                const range = max - min || 1;
+                const pts = kpi.trendData.map((v, i) => `${(i / (kpi.trendData!.length - 1)) * 100},${28 - ((v - min) / range) * 24}`).join(' ');
+                const color = kpi.status === 'positive' ? '#22c55e' : kpi.status === 'negative' ? '#ef4444' : '#f59e0b';
+                return (
+                  <div className="kpi-tile-sparkline">
+                    <svg viewBox="0 0 100 28" preserveAspectRatio="none">
+                      <defs>
+                        <linearGradient id={`spark-${kpi.id}`} x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor={color} stopOpacity="0.2" />
+                          <stop offset="100%" stopColor={color} stopOpacity="0" />
+                        </linearGradient>
+                      </defs>
+                      <polygon fill={`url(#spark-${kpi.id})`} points={`0,28 ${pts} 100,28`} />
+                      <polyline fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" points={pts} />
+                    </svg>
+                  </div>
+                );
+              })()}
+              {kpi.clickable && <ChevronRight size={14} className="kpi-tile-arrow" />}
+            </div>
+          ))}
+
+          {/* 2. Customer */}
+          {districtKPIs.filter(k => k.category === 'customer').map(kpi => (
+            <div
+              key={kpi.id}
+              className={`kpi-tile kpi-tile--${kpi.status} ${kpi.clickable ? 'kpi-tile--clickable' : ''} ${activeKPIPanel?.id === kpi.id ? 'kpi-tile--active' : ''}`}
+              onClick={() => kpi.clickable && setActiveKPIPanel(activeKPIPanel?.id === kpi.id ? null : kpi)}
+            >
+              <div className="kpi-tile-category kpi-tile-category--customer">
+                <Heart size={12} />
+                <span>Customer</span>
+              </div>
+              <div className="kpi-tile-value-row">
+                <span className="kpi-tile-primary">{kpi.primaryValue}</span>
+                {kpi.primaryUnit && <span className="kpi-tile-unit">{kpi.primaryUnit}</span>}
+              </div>
+              <span className="kpi-tile-label">{kpi.label}</span>
+              <div className={`kpi-tile-delta delta-${kpi.deltaDirection}`}>
+                {kpi.deltaDirection === 'up' && <ArrowUpRight size={12} />}
+                {kpi.deltaDirection === 'down' && <ArrowDownRight size={12} />}
+                <span>{kpi.delta}</span>
+                {kpi.deltaContext && <span className="kpi-delta-ctx">{kpi.deltaContext}</span>}
+              </div>
+              {kpi.trendData && (() => {
+                const min = Math.min(...kpi.trendData);
+                const max = Math.max(...kpi.trendData);
+                const range = max - min || 1;
+                const pts = kpi.trendData.map((v, i) => `${(i / (kpi.trendData!.length - 1)) * 100},${28 - ((v - min) / range) * 24}`).join(' ');
+                const color = kpi.status === 'positive' ? '#22c55e' : kpi.status === 'negative' ? '#ef4444' : '#f59e0b';
+                return (
+                  <div className="kpi-tile-sparkline">
+                    <svg viewBox="0 0 100 28" preserveAspectRatio="none">
+                      <defs>
+                        <linearGradient id={`spark-${kpi.id}`} x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor={color} stopOpacity="0.2" />
+                          <stop offset="100%" stopColor={color} stopOpacity="0" />
+                        </linearGradient>
+                      </defs>
+                      <polygon fill={`url(#spark-${kpi.id})`} points={`0,28 ${pts} 100,28`} />
+                      <polyline fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" points={pts} />
+                    </svg>
+                  </div>
+                );
+              })()}
+              {kpi.clickable && <ChevronRight size={14} className="kpi-tile-arrow" />}
+            </div>
+          ))}
+
+          {/* 3. Execution */}
+          {districtKPIs.filter(k => k.category === 'execution').map(kpi => (
+            <div
+              key={kpi.id}
+              className={`kpi-tile kpi-tile--${kpi.status} ${kpi.clickable ? 'kpi-tile--clickable' : ''} ${activeKPIPanel?.id === kpi.id ? 'kpi-tile--active' : ''}`}
+              onClick={() => kpi.clickable && setActiveKPIPanel(activeKPIPanel?.id === kpi.id ? null : kpi)}
+            >
+              <div className="kpi-tile-category kpi-tile-category--execution">
+                <ClipboardCheck size={12} />
+                <span>Execution</span>
+              </div>
+              <div className="kpi-tile-value-row">
+                <span className="kpi-tile-primary">{kpi.primaryValue}</span>
+                {kpi.primaryUnit && <span className="kpi-tile-unit">{kpi.primaryUnit}</span>}
+              </div>
+              <span className="kpi-tile-label">{kpi.label}</span>
+              <div className={`kpi-tile-delta delta-${kpi.deltaDirection}`}>
+                {kpi.deltaDirection === 'up' && <ArrowUpRight size={12} />}
+                {kpi.deltaDirection === 'down' && <ArrowDownRight size={12} />}
+                <span>{kpi.delta}</span>
+                {kpi.deltaContext && <span className="kpi-delta-ctx">{kpi.deltaContext}</span>}
+              </div>
+              {kpi.trendData && (() => {
+                const min = Math.min(...kpi.trendData);
+                const max = Math.max(...kpi.trendData);
+                const range = max - min || 1;
+                const pts = kpi.trendData.map((v, i) => `${(i / (kpi.trendData!.length - 1)) * 100},${28 - ((v - min) / range) * 24}`).join(' ');
+                const color = kpi.status === 'positive' ? '#22c55e' : kpi.status === 'negative' ? '#ef4444' : '#f59e0b';
+                return (
+                  <div className="kpi-tile-sparkline">
+                    <svg viewBox="0 0 100 28" preserveAspectRatio="none">
+                      <defs>
+                        <linearGradient id={`spark-${kpi.id}`} x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor={color} stopOpacity="0.2" />
+                          <stop offset="100%" stopColor={color} stopOpacity="0" />
+                        </linearGradient>
+                      </defs>
+                      <polygon fill={`url(#spark-${kpi.id})`} points={`0,28 ${pts} 100,28`} />
+                      <polyline fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" points={pts} />
+                    </svg>
+                  </div>
+                );
+              })()}
+              {kpi.clickable && <ChevronRight size={14} className="kpi-tile-arrow" />}
+            </div>
+          ))}
+
+          {/* 4. Profitability */}
+          {districtKPIs.filter(k => k.category === 'profitability').map(kpi => (
+            <div
+              key={kpi.id}
+              className={`kpi-tile kpi-tile--${kpi.status} ${kpi.clickable ? 'kpi-tile--clickable' : ''} ${activeKPIPanel?.id === kpi.id ? 'kpi-tile--active' : ''}`}
+              onClick={() => kpi.clickable && setActiveKPIPanel(activeKPIPanel?.id === kpi.id ? null : kpi)}
+            >
+              <div className="kpi-tile-category kpi-tile-category--profitability">
+                <Target size={12} />
+                <span>Profitability</span>
+              </div>
+              <div className="kpi-tile-value-row">
+                <span className="kpi-tile-primary">{kpi.primaryValue}</span>
+                {kpi.primaryUnit && <span className="kpi-tile-unit">{kpi.primaryUnit}</span>}
+              </div>
+              <span className="kpi-tile-label">{kpi.label}</span>
+              {kpi.secondaryLabel && (
+                <div className="kpi-tile-secondary">
+                  <span className="kpi-secondary-label">{kpi.secondaryLabel}</span>
+                  <span className={`kpi-secondary-value status-${kpi.status}`}>{kpi.secondaryValue}</span>
+                </div>
+              )}
+              <div className={`kpi-tile-delta delta-${kpi.deltaDirection}`}>
+                {kpi.deltaDirection === 'up' && <ArrowUpRight size={12} />}
+                {kpi.deltaDirection === 'down' && <ArrowDownRight size={12} />}
+                <span>{kpi.delta}</span>
+                {kpi.deltaContext && <span className="kpi-delta-ctx">{kpi.deltaContext}</span>}
+              </div>
+              {kpi.trendData && (() => {
+                const min = Math.min(...kpi.trendData);
+                const max = Math.max(...kpi.trendData);
+                const range = max - min || 1;
+                const pts = kpi.trendData.map((v, i) => `${(i / (kpi.trendData!.length - 1)) * 100},${28 - ((v - min) / range) * 24}`).join(' ');
+                const color = kpi.status === 'positive' ? '#22c55e' : kpi.status === 'negative' ? '#ef4444' : '#f59e0b';
+                return (
+                  <div className="kpi-tile-sparkline">
+                    <svg viewBox="0 0 100 28" preserveAspectRatio="none">
+                      <defs>
+                        <linearGradient id={`spark-${kpi.id}`} x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor={color} stopOpacity="0.2" />
+                          <stop offset="100%" stopColor={color} stopOpacity="0" />
+                        </linearGradient>
+                      </defs>
+                      <polygon fill={`url(#spark-${kpi.id})`} points={`0,28 ${pts} 100,28`} />
+                      <polyline fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" points={pts} />
+                    </svg>
+                  </div>
+                );
+              })()}
+              {kpi.clickable && <ChevronRight size={14} className="kpi-tile-arrow" />}
+            </div>
+          ))}
+
+        </div>
+
+        {/* KPI Trend Panel (slide-open) */}
+        {activeKPIPanel && (
+          <div className="kpi-trend-panel">
+            <div className="kpi-trend-panel-header">
+              <h3>{activeKPIPanel.panelTitle}</h3>
+              <button className="kpi-trend-close" onClick={() => setActiveKPIPanel(null)}>
+                <X size={16} />
+              </button>
+            </div>
+            <div className="kpi-trend-chart">
+              <svg viewBox="0 0 400 120" preserveAspectRatio="none" className="kpi-trend-svg">
+                <defs>
+                  <linearGradient id={`grad-${activeKPIPanel.id}`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={activeKPIPanel.status === 'positive' ? '#22c55e' : activeKPIPanel.status === 'negative' ? '#ef4444' : '#f59e0b'} stopOpacity="0.15" />
+                    <stop offset="100%" stopColor={activeKPIPanel.status === 'positive' ? '#22c55e' : activeKPIPanel.status === 'negative' ? '#ef4444' : '#f59e0b'} stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+                {activeKPIPanel.trendData && (
+                  <>
+                    <polygon
+                      fill={`url(#grad-${activeKPIPanel.id})`}
+                      points={`0,120 ${activeKPIPanel.trendData.map((v, i) => {
+                        const min = Math.min(...activeKPIPanel.trendData!);
+                        const max = Math.max(...activeKPIPanel.trendData!);
+                        const range = max - min || 1;
+                        return `${(i / (activeKPIPanel.trendData!.length - 1)) * 400},${120 - ((v - min) / range) * 100}`;
+                      }).join(' ')} 400,120`}
+                    />
+                    <polyline
+                      fill="none"
+                      stroke={activeKPIPanel.status === 'positive' ? '#22c55e' : activeKPIPanel.status === 'negative' ? '#ef4444' : '#f59e0b'}
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      points={activeKPIPanel.trendData.map((v, i) => {
+                        const min = Math.min(...activeKPIPanel.trendData!);
+                        const max = Math.max(...activeKPIPanel.trendData!);
+                        const range = max - min || 1;
+                        return `${(i / (activeKPIPanel.trendData!.length - 1)) * 400},${120 - ((v - min) / range) * 100}`;
+                      }).join(' ')}
+                    />
+                  </>
+                )}
+              </svg>
+            </div>
+            {activeKPIPanel.trendInsight && (
+              <div className="kpi-trend-insight">
+                <Sparkles size={13} />
+                <p>{activeKPIPanel.trendInsight}</p>
+              </div>
+            )}
+            {activeKPIPanel.panelDetails && (
+              <div className="kpi-trend-details">
+                {activeKPIPanel.panelDetails.map((detail, i) => (
+                  <div key={i} className={`kpi-trend-detail-row status-${detail.status}`}>
+                    <span className="kpi-detail-label">{detail.label}</span>
+                    <span className="kpi-detail-value">{detail.value}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
 
@@ -861,566 +1490,105 @@ export const DistrictIntelligence: React.FC = () => {
         </div>
       </div>
 
-      {/* District Diagnostic Visual Zone */}
-      <div className="diagnostic-zone">
-        <div className="section-header">
-          <h2>
-            <Grid3X3 size={18} />
-            District Diagnostics
-          </h2>
-          <span className="section-subtitle">Why the district looks this way</span>
-        </div>
-        <div className="diagnostic-grid">
-          {/* Sales Performance 2x2 Matrix - Premium */}
-          <div className="diagnostic-card-premium matrix-premium">
-            <div className="card-header-premium">
-              <div className="header-left">
-                <h3>Sales Performance Matrix</h3>
-                <span className="header-subtitle">Store positioning by momentum & performance</span>
-              </div>
-              <div className="header-legend">
-                <span className="legend-item"><span className="dot excellence"></span>Excellence</span>
-                <span className="legend-item"><span className="dot stable"></span>Stable</span>
-                <span className="legend-item"><span className="dot atrisk"></span>At Risk</span>
+      {/* Audit Compliance Heatmap */}
+      <div className="heatmap-section">
+        <div className="heatmap-header">
+          <div className="header-title-row">
+            <div className="title-group">
+              <h2><ClipboardCheck size={20} /> Audit Compliance Heatmap</h2>
+              <span className="header-subtitle">Store-level compliance across audit categories</span>
+            </div>
+            <div className="heatmap-legend">
+              <span className="heatmap-legend-label">Compliance:</span>
+              <div className="heatmap-legend-scale">
+                <div className="legend-swatch" style={{ background: '#fcc' }}></div>
+                <span className="legend-text">0%</span>
+                <div className="legend-swatch" style={{ background: '#fde2e2' }}></div>
+                <span className="legend-text">25%</span>
+                <div className="legend-swatch" style={{ background: '#fef3c7' }}></div>
+                <span className="legend-text">50%</span>
+                <div className="legend-swatch" style={{ background: '#d9f2e0' }}></div>
+                <span className="legend-text">75%</span>
+                <div className="legend-swatch" style={{ background: '#c6f0d4' }}></div>
+                <span className="legend-text">100%</span>
               </div>
             </div>
-            <div className="matrix-premium-chart">
-              <div className="matrix-y-label">← L12M YoY Sales</div>
-              <div className="matrix-grid-premium">
-                <div className="quadrant-premium stars">
-                  <div className="quad-header">Stars</div>
-                  <div className="quad-desc">High growth, improving trend</div>
-                </div>
-                <div className="quadrant-premium champions">
-                  <div className="quad-header">Champions</div>
-                  <div className="quad-desc">Consistent top performers</div>
-                </div>
-                <div className="quadrant-premium turnaround">
-                  <div className="quad-header">Turnaround</div>
-                  <div className="quad-desc">Recent recovery signals</div>
-                </div>
-                <div className="quadrant-premium atrisk">
-                  <div className="quad-header">At Risk</div>
-                  <div className="quad-desc">Declining performance</div>
-                </div>
-                <div className="matrix-center-lines">
-                  <div className="center-h"></div>
-                  <div className="center-v"></div>
-                </div>
-                <div className="bubbles-container">
-                  {mockStores.slice(0, 6).map((store) => (
-                    <div
-                      key={store.id}
-                      className={`bubble-node tier-${store.dpiTier.toLowerCase()}`}
-                      style={{
-                        left: `${15 + (store.netSalesVar + 15) * 2.3}%`,
-                        top: `${75 - (store.dpi - 50) * 1.3}%`,
-                      }}
-                    >
-                      <div className="bubble-popup">
-                        <div className="popup-title">Store #{store.storeNumber}</div>
-                        <div className="popup-row">
-                          <span className="popup-label">DPI Score</span>
-                          <strong className="popup-value">{store.dpi}</strong>
-                        </div>
-                        <div className="popup-row">
-                          <span className="popup-label">YoY Sales</span>
-                          <strong className={`popup-value ${store.netSalesVar >= 0 ? 'positive' : 'negative'}`}>{store.netSalesVar > 0 ? '+' : ''}{store.netSalesVar}%</strong>
-                        </div>
-                        <div className="popup-row">
-                          <span className="popup-label">Volume</span>
-                          <strong className="popup-value">${(store.netSales/1000).toFixed(0)}K</strong>
-                        </div>
+          </div>
+        </div>
+        <div className="heatmap-table-wrapper">
+          <table className="heatmap-table">
+            <thead>
+              <tr>
+                <th className="heatmap-th-store">Store</th>
+                {auditCategories.map(cat => (
+                  <th key={cat} className="heatmap-th-cat">{cat}</th>
+                ))}
+                <th className="heatmap-th-cat">Avg</th>
+              </tr>
+            </thead>
+            <tbody>
+              {mockStores.map(store => {
+                const scores = auditComplianceData[store.storeNumber];
+                const avg = Math.round(auditCategories.reduce((sum, cat) => sum + (scores?.[cat] || 0), 0) / auditCategories.length);
+                return (
+                  <tr key={store.id}>
+                    <td className="heatmap-store-cell">
+                      <span className="heatmap-store-number">#{store.storeNumber}</span>
+                      <span className="heatmap-store-name">{store.storeName}</span>
+                    </td>
+                    {auditCategories.map(cat => {
+                      const val = scores?.[cat] || 0;
+                      return (
+                        <td key={cat} className="heatmap-cell">
+                          <div
+                            className="heatmap-cell-inner"
+                            style={{
+                              background: getComplianceColor(val),
+                              color: getComplianceTextColor(val),
+                            }}
+                            onMouseEnter={(e) => {
+                              const rect = e.currentTarget.getBoundingClientRect();
+                              setHeatmapTip({ x: rect.left + rect.width / 2, y: rect.top, store: store.storeName, cat, val });
+                            }}
+                            onMouseLeave={() => setHeatmapTip(null)}
+                          >
+                            <span className="heatmap-value">{val}%</span>
+                          </div>
+                        </td>
+                      );
+                    })}
+                    <td className="heatmap-cell">
+                      <div
+                        className="heatmap-cell-inner heatmap-avg"
+                        style={{
+                          background: getComplianceColor(avg),
+                          color: getComplianceTextColor(avg),
+                        }}
+                        onMouseEnter={(e) => {
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          setHeatmapTip({ x: rect.left + rect.width / 2, y: rect.top, store: store.storeName, cat: 'Average', val: avg });
+                        }}
+                        onMouseLeave={() => setHeatmapTip(null)}
+                      >
+                        <span className="heatmap-value">{avg}%</span>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="matrix-x-label">Current YoY Sales →</div>
-            </div>
-            <div className="diagnostic-insights-section">
-              <div className="insights-header">
-                <span className="insights-icon">💡</span>
-                <span className="insights-title">Key Insights</span>
-              </div>
-              <div className="insights-list">
-                <div className="insight-item">
-                  <span className="insight-bullet success"></span>
-                  <span className="insight-text"><strong>2 stores</strong> in Champions quadrant driving 45% of district revenue</span>
-                </div>
-                <div className="insight-item">
-                  <span className="insight-bullet warning"></span>
-                  <span className="insight-text"><strong>Store #1234</strong> showing early turnaround signals — monitor closely</span>
-                </div>
-                <div className="insight-item">
-                  <span className="insight-bullet danger"></span>
-                  <span className="insight-text"><strong>1 store</strong> at risk of slipping to Crisis tier if trend continues</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* SEA Compliance Risk Grid - Premium */}
-          <div className="diagnostic-card-premium compliance-premium">
-            <div className="card-header-premium">
-              <div className="header-left">
-                <h3>SEA Compliance Risk</h3>
-                <span className="header-subtitle">Last audit vs 12-month average</span>
-              </div>
-              <div className="compliance-score-badge">
-                <span className="score-value">82%</span>
-                <span className="score-label">Avg Score</span>
-              </div>
-            </div>
-            <div className="compliance-grid-premium">
-              <div className="compliance-tile healthy">
-                <div className="tile-icon-wrap healthy">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                </div>
-                <div className="tile-count">3</div>
-                <div className="tile-label">Healthy</div>
-                <div className="tile-desc">Consistent high scores</div>
-              </div>
-              <div className="compliance-tile onetime">
-                <div className="tile-icon-wrap onetime">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <line x1="7" y1="7" x2="17" y2="17"></line>
-                  </svg>
-                </div>
-                <div className="tile-count">2</div>
-                <div className="tile-label">One-time Dip</div>
-                <div className="tile-desc">Recent isolated failure</div>
-              </div>
-              <div className="compliance-tile recovering">
-                <div className="tile-icon-wrap recovering">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <line x1="7" y1="17" x2="17" y2="7"></line>
-                    <polyline points="7 7 17 7 17 17"></polyline>
-                  </svg>
-                </div>
-                <div className="tile-count">1</div>
-                <div className="tile-label">Recovering</div>
-                <div className="tile-desc">Improving from low</div>
-              </div>
-              <div className="compliance-tile chronic">
-                <div className="tile-icon-wrap chronic">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="8" x2="12" y2="12"></line>
-                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                  </svg>
-                </div>
-                <div className="tile-count">2</div>
-                <div className="tile-label">Chronic Risk</div>
-                <div className="tile-desc">Persistent failures</div>
-              </div>
-            </div>
-            <div className="diagnostic-insights-section">
-              <div className="insights-header">
-                <span className="insights-icon">🔍</span>
-                <span className="insights-title">Top Compliance Issues</span>
-              </div>
-              <div className="insights-list">
-                <div className="insight-item">
-                  <span className="insight-bullet danger"></span>
-                  <span className="insight-text"><strong>Planogram adherence</strong> — 3 stores failed shelf arrangement audit</span>
-                </div>
-                <div className="insight-item">
-                  <span className="insight-bullet warning"></span>
-                  <span className="insight-text"><strong>Signage compliance</strong> — Missing promotional displays in 2 stores</span>
-                </div>
-                <div className="insight-item">
-                  <span className="insight-bullet info"></span>
-                  <span className="insight-text"><strong>Stock rotation</strong> — FIFO violations detected in backroom areas</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* VoC Sentiment Distribution - Premium */}
-          <div className="diagnostic-card-premium sentiment-premium">
-            <div className="card-header-premium">
-              <div className="header-left">
-                <h3>VoC Sentiment Distribution</h3>
-                <span className="header-subtitle">District-wide customer experience</span>
-              </div>
-              <div className="sentiment-score-badge">
-                <span className="score-value">78%</span>
-                <span className="score-label">Satisfaction</span>
-              </div>
-            </div>
-            <div className="sentiment-content-premium">
-              <div className="donut-section">
-                <div className="donut-premium">
-                  <svg viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="38" fill="none" stroke="#f1f5f9" strokeWidth="10" />
-                    <circle cx="50" cy="50" r="38" fill="none" stroke="#10b981" strokeWidth="10"
-                      strokeDasharray="143.3 238.8" strokeDashoffset="0" transform="rotate(-90 50 50)" 
-                      style={{filter: 'drop-shadow(0 2px 4px rgba(16, 185, 129, 0.3))'}} />
-                    <circle cx="50" cy="50" r="38" fill="none" stroke="#f59e0b" strokeWidth="10"
-                      strokeDasharray="47.8 238.8" strokeDashoffset="-143.3" transform="rotate(-90 50 50)" />
-                    <circle cx="50" cy="50" r="38" fill="none" stroke="#ef4444" strokeWidth="10"
-                      strokeDasharray="47.8 238.8" strokeDashoffset="-191.1" transform="rotate(-90 50 50)" />
-                  </svg>
-                  <div className="donut-center-premium">
-                    <span className="center-score">78%</span>
-                  </div>
-                </div>
-              </div>
-              <div className="sentiment-details">
-                <div className="sentiment-item satisfied">
-                  <div className="item-header">
-                    <span className="item-dot"></span>
-                    <span className="item-label">Satisfied</span>
-                  </div>
-                  <div className="item-bar-wrap">
-                    <div className="item-bar"><div className="bar-fill" style={{width: '60%'}}></div></div>
-                    <span className="item-value">60%</span>
-                  </div>
-                </div>
-                <div className="sentiment-item neutral">
-                  <div className="item-header">
-                    <span className="item-dot"></span>
-                    <span className="item-label">Neutral</span>
-                  </div>
-                  <div className="item-bar-wrap">
-                    <div className="item-bar"><div className="bar-fill" style={{width: '20%'}}></div></div>
-                    <span className="item-value">20%</span>
-                  </div>
-                </div>
-                <div className="sentiment-item dissatisfied">
-                  <div className="item-header">
-                    <span className="item-dot"></span>
-                    <span className="item-label">Dissatisfied</span>
-                  </div>
-                  <div className="item-bar-wrap">
-                    <div className="item-bar"><div className="bar-fill" style={{width: '20%'}}></div></div>
-                    <span className="item-value">20%</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="diagnostic-insights-section">
-              <div className="insights-header">
-                <span className="insights-icon">📊</span>
-                <span className="insights-title">Customer Feedback Themes</span>
-              </div>
-              <div className="insights-list">
-                <div className="insight-item">
-                  <span className="insight-bullet danger"></span>
-                  <span className="insight-text"><strong>Staff availability</strong> — 34% of negative reviews mention long wait for assistance</span>
-                </div>
-                <div className="insight-item">
-                  <span className="insight-bullet warning"></span>
-                  <span className="insight-text"><strong>Checkout wait times</strong> — Peak hour queues averaging 8+ minutes</span>
-                </div>
-                <div className="insight-item">
-                  <span className="insight-bullet success"></span>
-                  <span className="insight-text"><strong>Product quality</strong> — Positive sentiment up 12% after new apparel launch</span>
-                </div>
-              </div>
-            </div>
-          </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
+        {heatmapTip && (
+          <div
+            className="heatmap-tooltip heatmap-tooltip--visible"
+            style={{ left: heatmapTip.x, top: heatmapTip.y }}
+          >
+            <strong>{heatmapTip.store}</strong>
+            <span>{heatmapTip.cat}: {heatmapTip.val}%</span>
+          </div>
+        )}
       </div>
-
-      {/* POG Cluster Manager Section */}
-      <div className="cluster-section">
-        <div className="section-header">
-          <h2>
-            <Layers size={18} />
-            POG Cluster Manager
-          </h2>
-          <button className="create-cluster-btn">
-            <Plus size={14} />
-            Create Cluster
-          </button>
-        </div>
-        <div className="cluster-content">
-          {/* Cluster Summary Cards */}
-          <div className="cluster-summary-cards">
-            <div className="cluster-summary-card">
-              <span className="summary-value">3</span>
-              <span className="summary-label">Active Clusters</span>
-            </div>
-            <div className="cluster-summary-card">
-              <span className="summary-value">1</span>
-              <span className="summary-label">Draft</span>
-            </div>
-            <div className="cluster-summary-card">
-              <span className="summary-value">8</span>
-              <span className="summary-label">Stores Assigned</span>
-            </div>
-            <div className="cluster-summary-card warning">
-              <span className="summary-value">2</span>
-              <span className="summary-label">POG Reviews Due</span>
-            </div>
-          </div>
-
-          {/* Cluster List Table */}
-          <div className="cluster-table-wrapper">
-            <table className="cluster-table">
-              <thead>
-                <tr>
-                  <th>Cluster Name</th>
-                  <th>Stores</th>
-                  <th>Base POG</th>
-                  <th>Last Updated</th>
-                  <th>Status</th>
-                  <th>Avg DPI</th>
-                  <th>Avg SEA</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="cluster-name-cell">
-                    <Package size={14} />
-                    <span>High Volume Urban</span>
-                  </td>
-                  <td>3</td>
-                  <td>POG-2024-A</td>
-                  <td>Apr 10, 2026</td>
-                  <td><span className="cluster-status active">Active</span></td>
-                  <td className="dpi-cell"><span style={{color: '#10b981'}}>91</span></td>
-                  <td>94</td>
-                  <td>
-                    <button className="cluster-action-btn">
-                      <Edit3 size={14} />
-                    </button>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="cluster-name-cell">
-                    <Package size={14} />
-                    <span>Suburban Standard</span>
-                  </td>
-                  <td>3</td>
-                  <td>POG-2024-B</td>
-                  <td>Apr 8, 2026</td>
-                  <td><span className="cluster-status active">Active</span></td>
-                  <td className="dpi-cell"><span style={{color: '#0ea5e9'}}>82</span></td>
-                  <td>85</td>
-                  <td>
-                    <button className="cluster-action-btn">
-                      <Edit3 size={14} />
-                    </button>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="cluster-name-cell">
-                    <Package size={14} />
-                    <span>Low Traffic Rural</span>
-                  </td>
-                  <td>2</td>
-                  <td>POG-2024-C</td>
-                  <td>Apr 5, 2026</td>
-                  <td><span className="cluster-status review">Review Due</span></td>
-                  <td className="dpi-cell"><span style={{color: '#f59e0b'}}>68</span></td>
-                  <td>72</td>
-                  <td>
-                    <button className="cluster-action-btn">
-                      <Edit3 size={14} />
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          {/* Cluster Analytics */}
-          <div className="cluster-analytics">
-            <div className="cluster-analytics-card perf-card">
-              <h4>Performance by Cluster</h4>
-              <div className="cluster-perf-grid">
-                <div className="perf-ring-item excellence">
-                  <div className="perf-ring">
-                    <svg viewBox="0 0 100 100">
-                      <circle className="ring-bg" cx="50" cy="50" r="42" />
-                      <circle className="ring-fill" cx="50" cy="50" r="42" 
-                        strokeDasharray={`${91 * 2.64} 264`} />
-                    </svg>
-                    <div className="ring-value">
-                      <span className="ring-number">91</span>
-                      <span className="ring-label">DPI</span>
-                    </div>
-                  </div>
-                  <div className="perf-ring-info">
-                    <span className="ring-title">High Volume Urban</span>
-                    <span className="ring-stores">3 stores</span>
-                    <span className="ring-trend positive">+4.2%</span>
-                  </div>
-                </div>
-                <div className="perf-ring-item stable">
-                  <div className="perf-ring">
-                    <svg viewBox="0 0 100 100">
-                      <circle className="ring-bg" cx="50" cy="50" r="42" />
-                      <circle className="ring-fill" cx="50" cy="50" r="42" 
-                        strokeDasharray={`${82 * 2.64} 264`} />
-                    </svg>
-                    <div className="ring-value">
-                      <span className="ring-number">82</span>
-                      <span className="ring-label">DPI</span>
-                    </div>
-                  </div>
-                  <div className="perf-ring-info">
-                    <span className="ring-title">Suburban Standard</span>
-                    <span className="ring-stores">3 stores</span>
-                    <span className="ring-trend positive">+1.8%</span>
-                  </div>
-                </div>
-                <div className="perf-ring-item atrisk">
-                  <div className="perf-ring">
-                    <svg viewBox="0 0 100 100">
-                      <circle className="ring-bg" cx="50" cy="50" r="42" />
-                      <circle className="ring-fill" cx="50" cy="50" r="42" 
-                        strokeDasharray={`${68 * 2.64} 264`} />
-                    </svg>
-                    <div className="ring-value">
-                      <span className="ring-number">68</span>
-                      <span className="ring-label">DPI</span>
-                    </div>
-                  </div>
-                  <div className="perf-ring-info">
-                    <span className="ring-title">Low Traffic Rural</span>
-                    <span className="ring-stores">2 stores</span>
-                    <span className="ring-trend negative">-2.1%</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="cluster-analytics-card trend-card">
-              <h4>POG Compliance Trend</h4>
-              <div className="trend-stats-row">
-                <div className="trend-stat">
-                  <span className="trend-stat-value">94%</span>
-                  <span className="trend-stat-label">Current</span>
-                </div>
-                <div className="trend-stat">
-                  <span className="trend-stat-value">86%</span>
-                  <span className="trend-stat-label">Q1 Start</span>
-                </div>
-                <div className="trend-stat highlight">
-                  <span className="trend-stat-value positive">+8%</span>
-                  <span className="trend-stat-label">Change</span>
-                </div>
-              </div>
-              <div className="compliance-trend-chart-enhanced">
-                <div className="chart-y-axis">
-                  <span>100%</span>
-                  <span>90%</span>
-                  <span>80%</span>
-                </div>
-                <div className="chart-area">
-                  <svg viewBox="0 0 240 100" preserveAspectRatio="none">
-                    <defs>
-                      <linearGradient id="trendGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" stopColor="#10b981" stopOpacity="0.3"/>
-                        <stop offset="100%" stopColor="#10b981" stopOpacity="0"/>
-                      </linearGradient>
-                    </defs>
-                    <polygon fill="url(#trendGradient)" 
-                      points="0,100 0,70 40,65 80,55 120,50 160,40 200,35 240,30 240,100" />
-                    <polyline fill="none" stroke="#94a3b8" strokeWidth="1" strokeDasharray="4"
-                      points="0,50 240,50" />
-                    <polyline fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-                      points="0,70 40,65 80,55 120,50 160,40 200,35 240,30" />
-                    <circle cx="0" cy="70" r="4" fill="#10b981" />
-                    <circle cx="40" cy="65" r="4" fill="#10b981" />
-                    <circle cx="80" cy="55" r="4" fill="#10b981" />
-                    <circle cx="120" cy="50" r="4" fill="#10b981" />
-                    <circle cx="160" cy="40" r="4" fill="#10b981" />
-                    <circle cx="200" cy="35" r="4" fill="#10b981" />
-                    <circle cx="240" cy="30" r="5" fill="#059669" stroke="#fff" strokeWidth="2" />
-                  </svg>
-                  <div className="chart-x-axis">
-                    <span>Jan</span>
-                    <span>Feb</span>
-                    <span>Mar</span>
-                    <span>Apr</span>
-                  </div>
-                </div>
-              </div>
-              <div className="trend-insight">
-                <span className="insight-icon">💡</span>
-                <span className="insight-text">Consistent improvement driven by High Volume Urban cluster (+12%)</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* KPI Detail Side Panel */}
-      {selectedKPI && (
-        <div className="kpi-panel-overlay" onClick={() => setSelectedKPI(null)}>
-          <div className="kpi-detail-panel" onClick={(e) => e.stopPropagation()}>
-            <div className="panel-header">
-              <h3>{selectedKPI.label}</h3>
-              <button className="panel-close" onClick={() => setSelectedKPI(null)}>
-                <X size={20} />
-              </button>
-            </div>
-            <div className="panel-content">
-              <div className="panel-value-section">
-                <span className="panel-current-value">{selectedKPI.value}</span>
-                <span className={`panel-variance ${selectedKPI.varianceType}`}>
-                  {selectedKPI.variance} {selectedKPI.secondaryVariance}
-                </span>
-              </div>
-              <div className="panel-comparison">
-                <div className="comparison-row">
-                  <span>MoM Change</span>
-                  <span className="positive">+2.1%</span>
-                </div>
-                <div className="comparison-row">
-                  <span>YoY Change</span>
-                  <span className="positive">+4.2%</span>
-                </div>
-                <div className="comparison-row">
-                  <span>Chain Average</span>
-                  <span>$1.18M</span>
-                </div>
-              </div>
-              <div className="panel-chart">
-                <h4>Trend (Last 12 Weeks)</h4>
-                <div className="chart-placeholder">
-                  <svg viewBox="0 0 300 100" preserveAspectRatio="none">
-                    <polyline
-                      fill="none"
-                      stroke={selectedKPI.varianceType === 'positive' ? '#10b981' : '#ef4444'}
-                      strokeWidth="2"
-                      points="0,80 30,75 60,70 90,65 120,68 150,60 180,55 210,50 240,45 270,40 300,35"
-                    />
-                    <polyline
-                      fill="none"
-                      stroke="#94a3b8"
-                      strokeWidth="1"
-                      strokeDasharray="4"
-                      points="0,70 300,70"
-                    />
-                  </svg>
-                  <span className="chart-legend">— District — Chain Avg</span>
-                </div>
-              </div>
-              <div className="panel-ai-summary">
-                <Sparkles size={14} />
-                <p>Strong upward trend over the past 6 weeks. Performance is 6.8% above chain average. Recommend maintaining current strategies.</p>
-              </div>
-              <div className="panel-actions">
-                <button className="panel-btn primary">
-                  View Store Breakdown
-                  <ChevronRight size={14} />
-                </button>
-                <button className="panel-btn secondary">
-                  Add Annotation
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Floating Chat Button */}
       <button 
@@ -1634,6 +1802,101 @@ export const DistrictIntelligence: React.FC = () => {
         </div>
       )}
 
+      {/* Escalation Policy Modal */}
+      {showEscPolicy && (
+        <div className="esc-policy-overlay" onClick={() => setShowEscPolicy(false)}>
+          <div className="esc-policy-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="esc-policy-modal-header">
+              <div className="esc-policy-modal-title">
+                <Shield size={20} />
+                <div>
+                  <h3>Escalation Policy</h3>
+                  <span className="esc-policy-modal-sub">Progressive compliance enforcement framework</span>
+                </div>
+              </div>
+              <button className="esc-policy-close" onClick={() => setShowEscPolicy(false)}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="esc-policy-modal-body">
+              <div className="esc-policy-timeline">
+                <div className="esc-policy-stage esc-policy-stage--warning">
+                  <div className="esc-policy-stage-bar" />
+                  <div className="esc-policy-stage-header">
+                    <span className="esc-policy-stage-badge warning">Week 1</span>
+                    <span className="esc-policy-stage-name">Early Warning</span>
+                  </div>
+                  <div className="esc-policy-stage-details">
+                    <div className="esc-policy-rule">
+                      <span className="esc-policy-rule-label">Trigger</span>
+                      <span className="esc-policy-rule-value">Any audit category drops below 60% compliance</span>
+                    </div>
+                    <div className="esc-policy-rule">
+                      <span className="esc-policy-rule-label">System Action</span>
+                      <span className="esc-policy-rule-value">Flag raised in DM dashboard, store tagged for monitoring</span>
+                    </div>
+                    <div className="esc-policy-rule">
+                      <span className="esc-policy-rule-label">DM Expectation</span>
+                      <span className="esc-policy-rule-value">Acknowledge flag, review store audit details within 48 hours</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="esc-policy-stage esc-policy-stage--escalated">
+                  <div className="esc-policy-stage-bar" />
+                  <div className="esc-policy-stage-header">
+                    <span className="esc-policy-stage-badge escalated">Week 2</span>
+                    <span className="esc-policy-stage-name">Auto-Escalated</span>
+                  </div>
+                  <div className="esc-policy-stage-details">
+                    <div className="esc-policy-rule">
+                      <span className="esc-policy-rule-label">Trigger</span>
+                      <span className="esc-policy-rule-value">No improvement or additional category miss in second consecutive week</span>
+                    </div>
+                    <div className="esc-policy-rule">
+                      <span className="esc-policy-rule-label">System Action</span>
+                      <span className="esc-policy-rule-value">Auto-escalated to DM action queue, reminder sent to store manager</span>
+                    </div>
+                    <div className="esc-policy-rule">
+                      <span className="esc-policy-rule-label">DM Expectation</span>
+                      <span className="esc-policy-rule-value">Direct intervention required — assign corrective task within 24 hours</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="esc-policy-stage esc-policy-stage--critical">
+                  <div className="esc-policy-stage-bar" />
+                  <div className="esc-policy-stage-header">
+                    <span className="esc-policy-stage-badge critical">Week 3+</span>
+                    <span className="esc-policy-stage-name">Critical</span>
+                  </div>
+                  <div className="esc-policy-stage-details">
+                    <div className="esc-policy-rule">
+                      <span className="esc-policy-rule-label">Trigger</span>
+                      <span className="esc-policy-rule-value">Consecutive misses across multiple categories, no corrective action logged</span>
+                    </div>
+                    <div className="esc-policy-rule">
+                      <span className="esc-policy-rule-label">System Action</span>
+                      <span className="esc-policy-rule-value">Critical flag, regional visibility enabled, DPI impact tracked</span>
+                    </div>
+                    <div className="esc-policy-rule">
+                      <span className="esc-policy-rule-label">DM Expectation</span>
+                      <span className="esc-policy-rule-value">Immediate store visit, documented action plan, regional review scheduled</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="esc-policy-footer-note">
+                <Sparkles size={13} />
+                <span>Escalation stages reset automatically when a store achieves two consecutive weeks of 75%+ compliance across all categories.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Toast Notification */}
       {toastMessage && (
         <div className="toast-notification">
@@ -1762,6 +2025,193 @@ export const DistrictIntelligence: React.FC = () => {
                   <ChevronRight size={14} />
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Triage Detail Modal */}
+      {showTriageDetail && (
+        <div className="investigation-panel-overlay" onClick={() => setShowTriageDetail(null)}>
+          <div className="investigation-panel triage-detail-panel" onClick={(e) => e.stopPropagation()}>
+            <div className="investigation-panel-header">
+              <div className="panel-header-title">
+                <AlertTriangle size={20} />
+                <h3>
+                  {showTriageDetail === 'voc-messy' && 'VoC: Messy Aisles'}
+                  {showTriageDetail === 'sea-fire' && 'SEA Auto-Fail: Fire Exit'}
+                  {showTriageDetail === 'oos-risk' && 'Inbound OOS Risk'}
+                </h3>
+              </div>
+              <button className="panel-close-btn" onClick={() => setShowTriageDetail(null)}>
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="investigation-panel-content">
+              {showTriageDetail === 'voc-messy' && (
+                <>
+                  <div className="investigation-summary">
+                    <div className="summary-badge high">HIGH PRIORITY</div>
+                    <h4>Customer Feedback Spike Detected</h4>
+                    <p>+22% increase in "messy aisles" complaints across 3 stores this week. Pattern suggests staffing or process issue during peak hours.</p>
+                  </div>
+                  
+                  <div className="investigation-stores">
+                    <div className="section-label">Affected Stores (3)</div>
+                    <div className="store-list">
+                      <div className="store-item">
+                        <span className="store-name">Hamburg South</span>
+                        <span className="store-metric negative">+45% complaints</span>
+                      </div>
+                      <div className="store-item">
+                        <span className="store-name">Cologne East</span>
+                        <span className="store-metric negative">+38% complaints</span>
+                      </div>
+                      <div className="store-item">
+                        <span className="store-name">Berlin Mitte</span>
+                        <span className="store-metric negative">+31% complaints</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="investigation-actions">
+                    <button className="action-btn primary" onClick={() => {
+                      setShowTriageDetail(null);
+                      showToast('Assigning task to store managers...');
+                    }}>
+                      <Store size={14} />
+                      Assign to Store
+                    </button>
+                    <button className="action-btn secondary" onClick={() => {
+                      setShowTriageDetail(null);
+                      showToast('Escalating to Regional Manager...');
+                    }}>
+                      <AlertTriangle size={14} />
+                      Escalate
+                    </button>
+                    <button className="action-btn tertiary" onClick={() => {
+                      setShowTriageDetail(null);
+                      setShowChatWindow(true);
+                      setChatExpanded(true);
+                      setShowBroadcastComposer(true);
+                    }}>
+                      <Megaphone size={14} />
+                      Send Broadcast
+                    </button>
+                  </div>
+                </>
+              )}
+              
+              {showTriageDetail === 'sea-fire' && (
+                <>
+                  <div className="investigation-summary">
+                    <div className="summary-badge critical">CRITICAL</div>
+                    <h4>Fire Exit Blocked - Safety Violation</h4>
+                    <p>Display fixture blocking emergency exit at Hamburg South. Immediate action required. Auto-escalated to District Manager.</p>
+                  </div>
+                  
+                  <div className="investigation-stores">
+                    <div className="section-label">Violation Details</div>
+                    <div className="store-list">
+                      <div className="store-item">
+                        <span className="store-name">Hamburg South</span>
+                        <span className="store-metric negative">Fire Exit B - Blocked</span>
+                      </div>
+                    </div>
+                    <div className="violation-timeline">
+                      <div className="timeline-item">
+                        <span className="timeline-time">2h ago</span>
+                        <span className="timeline-event">Violation detected by SEA audit</span>
+                      </div>
+                      <div className="timeline-item">
+                        <span className="timeline-time">1h ago</span>
+                        <span className="timeline-event">Auto-escalated to DM</span>
+                      </div>
+                      <div className="timeline-item pending">
+                        <span className="timeline-time">Pending</span>
+                        <span className="timeline-event">Store manager acknowledgment</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="investigation-actions">
+                    <button className="action-btn primary" onClick={() => {
+                      setShowTriageDetail(null);
+                      showToast('Calling store manager...');
+                    }}>
+                      <MessageSquare size={14} />
+                      Contact Store
+                    </button>
+                    <button className="action-btn secondary" onClick={() => {
+                      setShowTriageDetail(null);
+                      showToast('Escalating to Regional Safety Officer...');
+                    }}>
+                      <AlertTriangle size={14} />
+                      Escalate Further
+                    </button>
+                    <button className="action-btn tertiary" onClick={() => {
+                      setShowTriageDetail(null);
+                      showToast('Opening full audit report...');
+                    }}>
+                      <ExternalLink size={14} />
+                      View Full Audit
+                    </button>
+                  </div>
+                </>
+              )}
+              
+              {showTriageDetail === 'oos-risk' && (
+                <>
+                  <div className="investigation-summary">
+                    <div className="summary-badge medium">MEDIUM PRIORITY</div>
+                    <h4>Inbound Shipment Delay</h4>
+                    <p>3 SKUs delayed 48 hours affecting Cologne East. Adaptation plan pending approval. Estimated revenue impact: €2,400.</p>
+                  </div>
+                  
+                  <div className="investigation-stores">
+                    <div className="section-label">Affected SKUs (3)</div>
+                    <div className="store-list">
+                      <div className="store-item">
+                        <span className="store-name">SKU-4521 - Summer Dress</span>
+                        <span className="store-metric negative">48h delay</span>
+                      </div>
+                      <div className="store-item">
+                        <span className="store-name">SKU-4522 - Linen Pants</span>
+                        <span className="store-metric negative">48h delay</span>
+                      </div>
+                      <div className="store-item">
+                        <span className="store-name">SKU-4523 - Cotton Blouse</span>
+                        <span className="store-metric negative">48h delay</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="investigation-actions">
+                    <button className="action-btn primary" onClick={() => {
+                      setShowTriageDetail(null);
+                      showToast('Approving adaptation plan...');
+                    }}>
+                      <Check size={14} />
+                      Approve Adaptation
+                    </button>
+                    <button className="action-btn secondary" onClick={() => {
+                      setShowTriageDetail(null);
+                      showToast('Assigning to store for local sourcing...');
+                    }}>
+                      <Store size={14} />
+                      Assign to Store
+                    </button>
+                    <button className="action-btn tertiary" onClick={() => {
+                      setShowTriageDetail(null);
+                      showToast('Opening supply chain details...');
+                    }}>
+                      <Package size={14} />
+                      View Supply Chain
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>

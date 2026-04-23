@@ -827,39 +827,222 @@
   margin: 0 0 20px 0;
 }
 
-.ai-brief-insights-clean {
+/* VoC Trending Theme Spotlight */
+.voc-trending-spotlight {
   display: flex;
-  flex-direction: column;
-  gap: 14px;
+  background: #ffffff;
+  border-radius: 10px;
+  border: 1px solid #fca5a5;
+  overflow: hidden;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 4px rgba(239, 68, 68, 0.08);
 }
 
-.ai-insight-item-clean {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-}
-
-.insight-bullet {
-  font-size: 18px;
-  color: #64748b;
-  line-height: 1.4;
+.voc-trending-accent {
+  width: 4px;
+  background: linear-gradient(180deg, #ef4444, #f97316);
   flex-shrink: 0;
 }
 
-.insight-content-clean {
+.voc-trending-body {
+  padding: 16px 18px;
   flex: 1;
-  font-size: 14px;
-  line-height: 1.6;
-  color: #475569;
 }
 
-.insight-title-clean {
+.voc-trending-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.voc-trending-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #dc2626;
+  letter-spacing: 0.5px;
+}
+
+.voc-trending-badge svg {
+  color: #dc2626;
+}
+
+.voc-trending-severity {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
   font-weight: 600;
-  color: #1e293b;
+  color: #f97316;
 }
 
-.insight-text-clean {
+.voc-trending-severity svg {
+  color: #f97316;
+}
+
+.voc-trending-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 6px 0;
+}
+
+.voc-trending-desc {
+  font-size: 13px;
   color: #475569;
+  line-height: 1.5;
+  margin: 0 0 12px 0;
+}
+
+.voc-trending-stores {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.voc-store-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #334155;
+}
+
+.voc-store-chip svg {
+  color: #94a3b8;
+}
+
+.voc-chip-delta {
+  font-weight: 700;
+  color: #dc2626;
+  font-size: 11px;
+}
+
+.voc-trending-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.voc-copilot-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: #6366f1;
+  font-weight: 500;
+}
+
+.voc-copilot-hint svg {
+  color: #6366f1;
+}
+
+.voc-trending-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.voc-trending-cta:hover {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+
+.voc-trending-cta svg {
+  color: #ffffff;
+}
+
+/* AI Insight Signal Cards */
+.ai-brief-signal-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ai-signal-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ai-signal-card:hover {
+  border-color: #c7d2fe;
+  box-shadow: 0 1px 4px rgba(99, 102, 241, 0.08);
+}
+
+.ai-signal-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.signal-risk .ai-signal-icon {
+  background: #fef2f2;
+  color: #ef4444;
+}
+
+.signal-positive .ai-signal-icon {
+  background: #f0fdf4;
+  color: #22c55e;
+}
+
+.ai-signal-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.ai-signal-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.ai-signal-text {
+  font-size: 13px;
+  color: #334155;
+  line-height: 1.45;
+  margin: 2px 0 0 0;
+}
+
+.ai-signal-arrow {
+  color: #cbd5e1;
+  flex-shrink: 0;
 }
 
 /* ZONE 3: Today's Key Insights - Premium Card */

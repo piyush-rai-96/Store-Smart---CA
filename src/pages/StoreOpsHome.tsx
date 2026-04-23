@@ -983,34 +983,62 @@ export const StoreOpsHome: React.FC = () => {
         <div className="ai-brief-greeting">
           <h2>Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening'}, {user?.name || 'Sarah'}. Here's what changed overnight in your district.</h2>
         </div>
-        <div className="ai-brief-insights-clean">
-          <div className="ai-insight-item-clean">
-            <span className="insight-bullet">•</span>
-            <div className="insight-content-clean">
-              <span className="insight-title-clean">Hamburg South (Store #2041):</span>
-              <span className="insight-text-clean"> VoC theme "Messy Aisles" spiked +22% this week while SEA Cleanliness score dropped to 64 — a Silent Risk forming. Sales still healthy, but trajectory is negative.</span>
+        {/* VoC Trending Theme Spotlight */}
+        <div className="voc-trending-spotlight">
+          <div className="voc-trending-accent"></div>
+          <div className="voc-trending-body">
+            <div className="voc-trending-header">
+              <div className="voc-trending-badge">
+                <TrendingUp size={12} />
+                <span>VOC THEME TRENDING</span>
+              </div>
+              <div className="voc-trending-severity">
+                <AlertTriangle size={12} />
+                <span>Rising Risk</span>
+              </div>
+            </div>
+            <h3 className="voc-trending-title">"Messy Aisles" — Top Rising Theme</h3>
+            <p className="voc-trending-desc">Mentions up <strong>+34%</strong> over last 2 weeks across <strong>3 stores</strong>. Correlates with declining SEA Cleanliness scores and negative sales trajectory.</p>
+            <div className="voc-trending-stores">
+              <div className="voc-store-chip"><Store size={11} /><span>Hamburg South #2041</span><span className="voc-chip-delta">+22%</span></div>
+              <div className="voc-store-chip"><Store size={11} /><span>Cologne East #2034</span><span className="voc-chip-delta">+18%</span></div>
+              <div className="voc-store-chip"><Store size={11} /><span>Brussels Nord #2038</span><span className="voc-chip-delta">+12%</span></div>
+            </div>
+            <div className="voc-trending-action">
+              <span className="voc-copilot-hint"><Sparkles size={12} /> Co-Pilot has prepared an action plan for this theme</span>
+              <button className="voc-trending-cta">
+                <span>Open in Co-Pilot</span>
+                <ChevronRight size={14} />
+              </button>
             </div>
           </div>
-          <div className="ai-insight-item-clean">
-            <span className="insight-bullet">•</span>
-            <div className="insight-content-clean">
-              <span className="insight-title-clean">Inbound delay alert:</span>
-              <span className="insight-text-clean"> Store #2034 (Cologne East) has a 48-hr shipment delay on 3 high-velocity SKUs — Nike Fleece Jacket, Levi's 501, H&M Basics Bundle. OOS risk flagged.</span>
+        </div>
+
+        {/* AI Insight Signal Cards */}
+        <div className="ai-brief-signal-grid">
+          <div className="ai-signal-card signal-risk">
+            <div className="ai-signal-icon"><Truck size={15} /></div>
+            <div className="ai-signal-content">
+              <span className="ai-signal-label">Supply Chain</span>
+              <p className="ai-signal-text"><strong>Cologne East #2034</strong> — 48-hr shipment delay on 3 high-velocity SKUs. OOS risk flagged.</p>
             </div>
+            <ChevronRight size={14} className="ai-signal-arrow" />
           </div>
-          <div className="ai-insight-item-clean">
-            <span className="insight-bullet">•</span>
-            <div className="insight-content-clean">
-              <span className="insight-title-clean">District DPI:</span>
-              <span className="insight-text-clean"> Moved from 76 → 78 (+2pts MoM). Amsterdam Central continues top performer at 91. Driven by SEA compliance improvement across 4 stores post-audit cycle.</span>
+          <div className="ai-signal-card signal-positive">
+            <div className="ai-signal-icon"><TrendingUp size={15} /></div>
+            <div className="ai-signal-content">
+              <span className="ai-signal-label">District DPI</span>
+              <p className="ai-signal-text">Moved <strong>76 → 78</strong> (+2pts MoM). Amsterdam Central top performer at 91. SEA compliance driving gains.</p>
             </div>
+            <ChevronRight size={14} className="ai-signal-arrow" />
           </div>
-          <div className="ai-insight-item-clean">
-            <span className="insight-bullet">•</span>
-            <div className="insight-content-clean">
-              <span className="insight-title-clean">Brussels Nord</span>
-              <span className="insight-text-clean"> achieved 100% Camera Shelf Audit compliance for 3rd consecutive week. POG adherence now at 97% — best in district.</span>
+          <div className="ai-signal-card signal-positive">
+            <div className="ai-signal-icon"><CheckCircle2 size={15} /></div>
+            <div className="ai-signal-content">
+              <span className="ai-signal-label">Compliance Win</span>
+              <p className="ai-signal-text"><strong>Brussels Nord</strong> — 100% Camera Shelf Audit compliance for 3rd straight week. POG adherence at 97%.</p>
             </div>
+            <ChevronRight size={14} className="ai-signal-arrow" />
           </div>
         </div>
       </div>
