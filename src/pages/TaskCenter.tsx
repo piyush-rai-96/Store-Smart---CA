@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   Plus,
   Search,
@@ -131,19 +132,136 @@ const seedTasks: ExecutionTask[] = [
     createdAt: '2026-04-21T14:30:00Z',
     localizationId: 'loc-acc-01',
   },
+  // Broadcast-linked tasks
+  {
+    id: 'tc-bc-001-1',
+    type: 'Reset Shelf',
+    title: '[RECALL] Remove Organic Baby Lotion Batch #7742 from shelf',
+    description: 'Remove all units of Organic Baby Lotion Batch #7742 from sales floor shelves. Check all aisle locations and endcaps.',
+    priority: 'High',
+    reason: 'Product Recall — Compliance Office directive',
+    impact: 'Regulatory compliance — immediate action required',
+    status: 'Pending',
+    assignedTo: 'user-2',
+    assignedToName: 'Sarah Johnson',
+    dueDate: '2026-04-24',
+    storeName: 'Downtown Plaza #2034',
+    storeGroup: 'Urban Flagship Cluster',
+    pogName: 'Health & Beauty Aisle v1.2',
+    category: 'Health & Beauty',
+    createdAt: '2026-04-24T10:00:00Z',
+    localizationId: 'bc-001',
+  },
+  {
+    id: 'tc-bc-001-2',
+    type: 'Move',
+    title: '[RECALL] Remove Organic Baby Lotion Batch #7742 from backroom',
+    description: 'Locate and quarantine all backroom inventory of Organic Baby Lotion Batch #7742. Tag for return shipment.',
+    priority: 'High',
+    reason: 'Product Recall — Compliance Office directive',
+    impact: 'Regulatory compliance — immediate action required',
+    status: 'Pending',
+    assignedTo: 'user-3',
+    assignedToName: 'Mike Chen',
+    dueDate: '2026-04-24',
+    storeName: 'Downtown Plaza #2034',
+    storeGroup: 'Urban Flagship Cluster',
+    pogName: 'Health & Beauty Aisle v1.2',
+    category: 'Health & Beauty',
+    createdAt: '2026-04-24T10:00:00Z',
+    localizationId: 'bc-001',
+  },
+  {
+    id: 'tc-bc-001-3',
+    type: 'Update Label',
+    title: '[RECALL] Confirm recalled item count and submit report',
+    description: 'Count total units removed from shelf and backroom. Submit confirmation report to Regional HQ via compliance portal.',
+    priority: 'High',
+    reason: 'Product Recall — audit trail required',
+    impact: 'Compliance documentation',
+    status: 'Pending',
+    assignedTo: null,
+    assignedToName: undefined,
+    dueDate: '2026-04-24',
+    storeName: 'Downtown Plaza #2034',
+    storeGroup: 'Urban Flagship Cluster',
+    pogName: 'Health & Beauty Aisle v1.2',
+    category: 'Health & Beauty',
+    createdAt: '2026-04-24T10:00:00Z',
+    localizationId: 'bc-001',
+  },
+  {
+    id: 'tc-bc-002-1',
+    type: 'Reset Shelf',
+    title: '[PLANOGRAM] Implement Summer Collection Endcap layout',
+    description: 'Set up new endcap display per visual guide v2.3. Remove winter clearance items and install summer fixtures.',
+    priority: 'Medium',
+    reason: 'Planogram Refresh — Visual Merchandising directive',
+    impact: 'Seasonal transition — revenue impact on featured items',
+    status: 'In Progress',
+    assignedTo: 'user-2',
+    assignedToName: 'Sarah Johnson',
+    dueDate: '2026-04-25',
+    storeName: 'Downtown Plaza #2034',
+    storeGroup: 'Urban Flagship Cluster',
+    pogName: 'Summer Collection Endcap v2.3',
+    category: 'Seasonal',
+    createdAt: '2026-04-23T08:00:00Z',
+    localizationId: 'bc-002',
+  },
+  {
+    id: 'tc-bc-003-1',
+    type: 'Install Fixture',
+    title: '[SAFETY] Complete fire safety checklist — Zone A & B',
+    description: 'Walk through Zone A and B, verify fire extinguisher access, exit signage, and clear pathways. Submit photo evidence.',
+    priority: 'High',
+    reason: 'Fire Safety Audit Prep — Q2 Compliance Check',
+    impact: 'Regulatory compliance — overdue',
+    status: 'Completed',
+    assignedTo: 'user-2',
+    assignedToName: 'Sarah Johnson',
+    dueDate: '2026-04-22',
+    storeName: 'Downtown Plaza #2034',
+    storeGroup: 'Urban Flagship Cluster',
+    pogName: 'Store Safety Compliance',
+    category: 'Safety',
+    createdAt: '2026-04-21T09:00:00Z',
+    localizationId: 'bc-003',
+  },
 ];
+
+// Map broadcast IDs to search terms for filtering
+const broadcastSearchMap: Record<string, string> = {
+  'bc-001': '[RECALL]',
+  'bc-002': '[PLANOGRAM]',
+  'bc-003': '[SAFETY]',
+};
 
 type ViewMode = 'board' | 'list';
 type FilterStatus = 'all' | 'Pending' | 'In Progress' | 'Completed';
 
 export const TaskCenter: React.FC = () => {
   const { tasks: contextTasks, addTasks, updateTaskStatus, assignTask, teamMembers } = useExecutionTasks();
+  const [tcSearchParams, setTcSearchParams] = useSearchParams();
   const [view, setView] = useState<ViewMode>('board');
   const [filter, setFilter] = useState<FilterStatus>('all');
   const [search, setSearch] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState<ExecutionTask | null>(null);
   const [seeded, setSeeded] = useState(false);
+  const [broadcastHighlight, setBroadcastHighlight] = useState<string | null>(null);
+
+  // Handle broadcast deep-link from OCV
+  useEffect(() => {
+    const bcId = tcSearchParams.get('broadcast');
+    if (bcId && broadcastSearchMap[bcId]) {
+      setSearch(broadcastSearchMap[bcId]);
+      setBroadcastHighlight(bcId);
+      setFilter('all');
+      setView('list');
+      setTcSearchParams({}, { replace: true });
+    }
+  }, [tcSearchParams, setTcSearchParams]);
 
   // Seed tasks once
   useEffect(() => {
@@ -299,7 +417,7 @@ export const TaskCenter: React.FC = () => {
         </div>
       ) : (
         filteredTasks.map(task => (
-          <div key={task.id} className="tc-list-row" onClick={() => setSelectedTask(task)}>
+          <div key={task.id} className={`tc-list-row${broadcastHighlight && task.localizationId === broadcastHighlight ? ' tc-list-row--highlighted' : ''}`} onClick={() => setSelectedTask(task)}>
             <div className="tc-list-title">
               <span className="tc-list-title-text">{task.title}</span>
               <span className="tc-list-title-desc">{task.description}</span>

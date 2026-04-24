@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   Store,
   ChevronDown,
@@ -25,7 +25,17 @@ import {
   Clock,
   Eye,
   CheckCircle,
-  Info
+  CheckCircle2,
+  Info,
+  Megaphone,
+  Send,
+  ListChecks,
+  CircleCheck,
+  Timer,
+  CircleAlert,
+  FileText,
+  Zap,
+  Users
 } from 'lucide-react';
 import './StoreCenter.css';
 
@@ -219,6 +229,102 @@ const compBenchmarks = [
   { metric: 'Gross Margin', unit: '%', clusterAvg: 40.2, chainAvg: 39.5 },
 ];
 
+// ── Operational Compliance View Data ────────────────────
+interface BroadcastAction {
+  broadcastId: string;
+  broadcastTitle: string;
+  priority: 'critical' | 'high' | 'medium';
+  sentAt: string;
+  sender: string;
+  source: string;
+  actionTitle: string;
+  actionCount: number;
+  slaDue: string;
+  storeStatus: 'completed' | 'in-progress' | 'pending' | 'overdue';
+  completionPct: number;
+  pendingStores: number;
+  overdueStores: number;
+  storeBreakdown: { storeNumber: string; storeName: string; status: 'completed' | 'in-progress' | 'pending' | 'overdue'; completedBy?: string; completionTs?: string }[];
+}
+
+const broadcastActions: BroadcastAction[] = [
+  {
+    broadcastId: 'bc-001',
+    broadcastTitle: 'Product Recall — Organic Baby Lotion Batch #7742',
+    priority: 'critical',
+    sentAt: '2 hours ago',
+    sender: 'Regional HQ',
+    source: 'Compliance Office',
+    actionTitle: 'Remove recalled items from shelf & backroom, confirm count',
+    actionCount: 8,
+    slaDue: 'Today, 5:00 PM',
+    storeStatus: 'in-progress',
+    completionPct: 62,
+    pendingStores: 3,
+    overdueStores: 0,
+    storeBreakdown: [
+      { storeNumber: '2034', storeName: 'Downtown Plaza', status: 'completed', completedBy: 'Sarah M.', completionTs: '1h ago' },
+      { storeNumber: '1876', storeName: 'Riverside Mall', status: 'completed', completedBy: 'Marcus C.', completionTs: '45m ago' },
+      { storeNumber: '3421', storeName: 'Central Station', status: 'completed', completedBy: 'Lisa W.', completionTs: '30m ago' },
+      { storeNumber: '2198', storeName: 'Westfield Center', status: 'completed', completedBy: 'Tom B.', completionTs: '20m ago' },
+      { storeNumber: '4532', storeName: 'Harbor View', status: 'completed', completedBy: 'Amy R.', completionTs: '15m ago' },
+      { storeNumber: '1234', storeName: 'Oak Street', status: 'in-progress' },
+      { storeNumber: '5678', storeName: 'Pine Grove', status: 'pending' },
+      { storeNumber: '9012', storeName: 'Maple Heights', status: 'pending' },
+    ],
+  },
+  {
+    broadcastId: 'bc-002',
+    broadcastTitle: 'Planogram Refresh — Summer Collection Endcaps',
+    priority: 'high',
+    sentAt: '1 day ago',
+    sender: 'Visual Merchandising',
+    source: 'VM Team',
+    actionTitle: 'Implement new endcap planogram per visual guide v2.3',
+    actionCount: 8,
+    slaDue: 'Tomorrow, 12:00 PM',
+    storeStatus: 'pending',
+    completionPct: 38,
+    pendingStores: 5,
+    overdueStores: 0,
+    storeBreakdown: [
+      { storeNumber: '2034', storeName: 'Downtown Plaza', status: 'completed', completedBy: 'Sarah M.', completionTs: '6h ago' },
+      { storeNumber: '1876', storeName: 'Riverside Mall', status: 'completed', completedBy: 'Marcus C.', completionTs: '4h ago' },
+      { storeNumber: '3421', storeName: 'Central Station', status: 'completed', completedBy: 'Lisa W.', completionTs: '2h ago' },
+      { storeNumber: '2198', storeName: 'Westfield Center', status: 'in-progress' },
+      { storeNumber: '4532', storeName: 'Harbor View', status: 'pending' },
+      { storeNumber: '1234', storeName: 'Oak Street', status: 'pending' },
+      { storeNumber: '5678', storeName: 'Pine Grove', status: 'pending' },
+      { storeNumber: '9012', storeName: 'Maple Heights', status: 'pending' },
+    ],
+  },
+  {
+    broadcastId: 'bc-003',
+    broadcastTitle: 'Fire Safety Audit Prep — Q2 Compliance Check',
+    priority: 'high',
+    sentAt: '3 days ago',
+    sender: 'Safety & Compliance',
+    source: 'District Manager',
+    actionTitle: 'Complete fire safety checklist & photo evidence submission',
+    actionCount: 8,
+    slaDue: 'Overdue (was 2 days ago)',
+    storeStatus: 'overdue',
+    completionPct: 75,
+    pendingStores: 2,
+    overdueStores: 2,
+    storeBreakdown: [
+      { storeNumber: '2034', storeName: 'Downtown Plaza', status: 'completed', completedBy: 'Sarah M.', completionTs: '2d ago' },
+      { storeNumber: '1876', storeName: 'Riverside Mall', status: 'completed', completedBy: 'Marcus C.', completionTs: '2d ago' },
+      { storeNumber: '3421', storeName: 'Central Station', status: 'completed', completedBy: 'Lisa W.', completionTs: '1d ago' },
+      { storeNumber: '2198', storeName: 'Westfield Center', status: 'completed', completedBy: 'Tom B.', completionTs: '1d ago' },
+      { storeNumber: '4532', storeName: 'Harbor View', status: 'completed', completedBy: 'Amy R.', completionTs: '1d ago' },
+      { storeNumber: '1234', storeName: 'Oak Street', status: 'completed', completedBy: 'Dan K.', completionTs: '12h ago' },
+      { storeNumber: '5678', storeName: 'Pine Grove', status: 'overdue' },
+      { storeNumber: '9012', storeName: 'Maple Heights', status: 'overdue' },
+    ],
+  },
+];
+
 // ── Helpers ────────────────────────────────────────────
 const getComplianceColor = (val: number) => {
   if (val >= 90) return '#dcfce7';
@@ -238,6 +344,7 @@ const getComplianceTextColor = (val: number) => {
 // ── Component ──────────────────────────────────────────
 export const StoreCenter: React.FC = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [selectedStoreId, setSelectedStoreId] = useState(storesData[0].id);
   const [showStoreSelector, setShowStoreSelector] = useState(false);
   const [storeSearch, setStoreSearch] = useState('');
@@ -247,6 +354,10 @@ export const StoreCenter: React.FC = () => {
   const [showCausalChain, setShowCausalChain] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  // OCV state
+  const [activeBroadcast, setActiveBroadcast] = useState<BroadcastAction>(broadcastActions[0]);
+  const [ocvCompletedActions, setOcvCompletedActions] = useState<Set<string>>(new Set());
+  const [ocvExpandedRow, setOcvExpandedRow] = useState<string | null>(null);
 
   // Handle incoming store selection via URL query param
   useEffect(() => {
@@ -431,6 +542,207 @@ export const StoreCenter: React.FC = () => {
                 </div>
               </button>
             ))}
+          </div>
+        </div>
+
+        {/* ── Operational Compliance View ──────────────────── */}
+        <div className="ocv-section">
+          <div className="ocv-header">
+            <div className="ocv-title-row">
+              <div className="ocv-icon-wrap">
+                <ClipboardCheck size={18} />
+              </div>
+              <div className="ocv-title-text">
+                <h3>Operational Compliance View</h3>
+                <span className="ocv-subtitle">Broadcast → Action → Execution tracking</span>
+              </div>
+            </div>
+            <div className="ocv-kpi-pills">
+              <div className="ocv-kpi-pill">
+                <span className="ocv-kpi-val">{activeBroadcast.completionPct}%</span>
+                <span className="ocv-kpi-lbl">Completion</span>
+              </div>
+              <div className="ocv-kpi-pill ocv-kpi--pending">
+                <span className="ocv-kpi-val">{activeBroadcast.pendingStores}</span>
+                <span className="ocv-kpi-lbl">Pending</span>
+              </div>
+              <div className="ocv-kpi-pill ocv-kpi--overdue">
+                <span className="ocv-kpi-val">{activeBroadcast.overdueStores}</span>
+                <span className="ocv-kpi-lbl">Overdue</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="ocv-broadcast-tabs">
+            {broadcastActions.map(bc => (
+              <button
+                key={bc.broadcastId}
+                className={`ocv-bc-tab ${activeBroadcast.broadcastId === bc.broadcastId ? 'active' : ''}`}
+                onClick={() => setActiveBroadcast(bc)}
+              >
+                <span className={`ocv-bc-tab-dot ocv-status--${bc.storeStatus}`} />
+                <span className="ocv-bc-tab-title">{bc.broadcastTitle.length > 40 ? bc.broadcastTitle.slice(0, 40) + '…' : bc.broadcastTitle}</span>
+                <span className={`ocv-bc-tab-priority ocv-pri--${bc.priority}`}>{bc.priority}</span>
+              </button>
+            ))}
+          </div>
+
+          <div className="ocv-zones">
+            {/* LEFT: Broadcast Feed */}
+            <div className="ocv-zone ocv-zone-broadcast">
+              <div className="ocv-zone-label">
+                <Megaphone size={14} />
+                <span>Broadcast Feed</span>
+              </div>
+              <div className="ocv-broadcast-card">
+                <div className="ocv-bc-title">{activeBroadcast.broadcastTitle}</div>
+                <div className="ocv-bc-meta">
+                  <span className={`ocv-bc-priority ocv-pri--${activeBroadcast.priority}`}>
+                    {activeBroadcast.priority === 'critical' && <CircleAlert size={11} />}
+                    {activeBroadcast.priority === 'high' && <AlertTriangle size={11} />}
+                    {activeBroadcast.priority === 'medium' && <Bell size={11} />}
+                    {activeBroadcast.priority}
+                  </span>
+                  <span className="ocv-bc-time">
+                    <Clock size={11} />
+                    {activeBroadcast.sentAt}
+                  </span>
+                </div>
+                <div className="ocv-bc-sender">
+                  <Send size={11} />
+                  <span>{activeBroadcast.sender}</span>
+                  <span className="ocv-bc-source">· {activeBroadcast.source}</span>
+                </div>
+                <button className="ocv-cta-btn" onClick={() => setOcvExpandedRow(ocvExpandedRow === 'instructions' ? null : 'instructions')}>
+                  <FileText size={13} />
+                  View Instructions
+                  <ChevronRight size={13} />
+                </button>
+                {ocvExpandedRow === 'instructions' && (
+                  <div className="ocv-instructions-panel">
+                    <p className="ocv-instr-heading">Broadcast Instructions</p>
+                    <p><strong>Action Required:</strong> {activeBroadcast.actionTitle}</p>
+                    <p><strong>Priority:</strong> {activeBroadcast.priority.charAt(0).toUpperCase() + activeBroadcast.priority.slice(1)}</p>
+                    <p><strong>SLA / Due:</strong> {activeBroadcast.slaDue}</p>
+                    <p><strong>Issued By:</strong> {activeBroadcast.sender} — {activeBroadcast.source}</p>
+                    <p><strong>Scope:</strong> {activeBroadcast.actionCount} stores assigned</p>
+                    <p><strong>Sent:</strong> {activeBroadcast.sentAt}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* CENTER: Action Mapping */}
+            <div className="ocv-zone ocv-zone-actions">
+              <div className="ocv-zone-label">
+                <ListChecks size={14} />
+                <span>Action Mapping</span>
+              </div>
+              <div className="ocv-action-card">
+                <div className="ocv-action-flow">
+                  <div className="ocv-flow-step">
+                    <Megaphone size={13} />
+                    <span>Broadcast</span>
+                  </div>
+                  <div className="ocv-flow-arrow">→</div>
+                  <div className="ocv-flow-step">
+                    <ListChecks size={13} />
+                    <span>Action Created</span>
+                  </div>
+                  <div className="ocv-flow-arrow">→</div>
+                  <div className="ocv-flow-step">
+                    <CircleCheck size={13} />
+                    <span>Execution</span>
+                  </div>
+                </div>
+                <div className="ocv-action-detail">
+                  <div className="ocv-action-title">{activeBroadcast.actionTitle}</div>
+                  <div className="ocv-action-meta-row">
+                    <div className="ocv-action-meta-item">
+                      <Store size={12} />
+                      <span>{activeBroadcast.actionCount} store actions</span>
+                    </div>
+                    <div className="ocv-action-meta-item">
+                      <Timer size={12} />
+                      <span>SLA: {activeBroadcast.slaDue}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="ocv-progress-bar-wrap">
+                  <div className="ocv-progress-label">
+                    <span>Progress</span>
+                    <span className="ocv-progress-pct">{activeBroadcast.completionPct}%</span>
+                  </div>
+                  <div className="ocv-progress-bar">
+                    <div
+                      className={`ocv-progress-fill ocv-status--${activeBroadcast.storeStatus}`}
+                      style={{ width: `${activeBroadcast.completionPct}%` }}
+                    />
+                  </div>
+                </div>
+                <button className="ocv-cta-btn" onClick={() => navigate(`/command-center/operations-queue?broadcast=${activeBroadcast.broadcastId}`)}>
+                  <Zap size={13} />
+                  View Operation Queue
+                  <ChevronRight size={13} />
+                </button>
+              </div>
+            </div>
+
+            {/* RIGHT: Execution Status */}
+            <div className="ocv-zone ocv-zone-execution">
+              <div className="ocv-zone-label">
+                <CircleCheck size={14} />
+                <span>Execution Status</span>
+              </div>
+              <div className="ocv-execution-card">
+                {(() => {
+                  const storeRow = activeBroadcast.storeBreakdown.find(s => s.storeNumber === store.number);
+                  const isMarkedDone = ocvCompletedActions.has(`${activeBroadcast.broadcastId}-${store.number}`);
+                  const effectiveStatus = isMarkedDone ? 'completed' : storeRow?.status || 'pending';
+                  return (
+                    <div className="ocv-store-status">
+                      <div className="ocv-store-status-header">
+                        <span className="ocv-store-label">Store #{store.number} — {store.name}</span>
+                        <span className={`ocv-status-badge ocv-status--${effectiveStatus}`}>
+                          {effectiveStatus === 'completed' && <CircleCheck size={12} />}
+                          {effectiveStatus === 'in-progress' && <Timer size={12} />}
+                          {effectiveStatus === 'pending' && <Clock size={12} />}
+                          {effectiveStatus === 'overdue' && <CircleAlert size={12} />}
+                          {effectiveStatus.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                        </span>
+                      </div>
+                      {(effectiveStatus === 'completed' || isMarkedDone) && (
+                        <div className="ocv-completed-info">
+                          <div className="ocv-completed-row">
+                            <Users size={12} />
+                            <span>Completed by: {isMarkedDone ? 'You (just now)' : storeRow?.completedBy || '—'}</span>
+                          </div>
+                          <div className="ocv-completed-row">
+                            <Clock size={12} />
+                            <span>{isMarkedDone ? 'Just now' : storeRow?.completionTs || '—'}</span>
+                          </div>
+                        </div>
+                      )}
+                      {effectiveStatus !== 'completed' && !isMarkedDone && (
+                        <button
+                          className="ocv-mark-done-btn"
+                          onClick={() => {
+                            setOcvCompletedActions(prev => {
+                              const next = new Set(prev);
+                              next.add(`${activeBroadcast.broadcastId}-${store.number}`);
+                              return next;
+                            });
+                          }}
+                        >
+                          <CheckCircle2 size={14} />
+                          Mark Done
+                        </button>
+                      )}
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
           </div>
         </div>
 

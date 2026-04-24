@@ -42,12 +42,12 @@ import {
   MessageCircle,
   Star
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   SystemState,
   ActionItem,
   BroadcastMessage,
-  CriticalBroadcast,
   Priority
 } from '../types/storeOperations';
 import './StoreOpsHome.css';
@@ -355,13 +355,26 @@ const generateMockActionItems = (): ActionItemV2[] => [
   },
 ];
 
-// Broadcasts - excluding critical (shown in ribbon)
+// Broadcasts - all priorities including critical
 const generateMockBroadcasts = (): BroadcastMessage[] => [
+  {
+    id: '1',
+    priority: 'CRITICAL',
+    title: 'Product Recall — SKU #12345',
+    description: 'SKU #12345 must be removed immediately. FDA safety alert issued 2 hours ago. 3 stores impacted.',
+    sender: 'Regional Safety',
+    senderRole: 'HQ',
+    timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+    category: 'Safety',
+    isRead: false,
+    isAcknowledged: false,
+    requiresAcknowledgement: true,
+  },
   {
     id: '2',
     priority: 'HIGH',
     title: 'Holiday Schedule Update',
-    description: 'Updated store hours for upcoming holiday weekend.',
+    description: 'Updated store hours for upcoming holiday weekend. Please review and confirm your availability by Friday.',
     sender: 'District Manager',
     senderRole: 'DM',
     timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
@@ -374,7 +387,7 @@ const generateMockBroadcasts = (): BroadcastMessage[] => [
     id: '3',
     priority: 'MEDIUM',
     title: 'New Planogram Guidelines',
-    description: 'Updated merchandising standards for Q2.',
+    description: 'New planogram guidelines released. Review updated shelf layouts for seasonal products.',
     sender: 'Merchandising Team',
     senderRole: 'HQ',
     timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
@@ -387,7 +400,7 @@ const generateMockBroadcasts = (): BroadcastMessage[] => [
     id: '4',
     priority: 'LOW',
     title: 'Training Module Available',
-    description: 'New customer service training in learning portal.',
+    description: 'New training module available for team members. Confirm staffing assignments.',
     sender: 'HR Department',
     senderRole: 'HQ',
     timestamp: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
@@ -397,18 +410,6 @@ const generateMockBroadcasts = (): BroadcastMessage[] => [
     requiresAcknowledgement: false,
   },
 ];
-
-// Critical broadcast data (separate) - Enhanced with impact context
-const getCriticalBroadcast = (): CriticalBroadcast | null => ({
-  id: '1',
-  title: 'Product Recall',
-  message: 'SKU #12345 must be removed immediately',
-  context: 'FDA safety alert issued 2 hours ago. Customer complaints reported in Region North.',
-  timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-  isAcknowledged: false,
-  impactCount: 3,
-  impactLabel: 'stores impacted',
-});
 
 const getGreeting = (): { text: string; icon: React.ReactNode } => {
   const hour = new Date().getHours();
@@ -463,6 +464,7 @@ const formatDueTime = (timestamp: string) => {
 
 export const StoreOpsHome: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const greeting = getGreeting();
 
   const [isLoading, setIsLoading] = useState(true);
@@ -471,9 +473,9 @@ export const StoreOpsHome: React.FC = () => {
   const [insights, setInsights] = useState<EnhancedInsightItem[]>([]);
   const [actionItems, setActionItems] = useState<ActionItemV2[]>([]);
   const [broadcasts, setBroadcasts] = useState<BroadcastMessage[]>([]);
-  const [criticalBroadcast, setCriticalBroadcast] = useState<CriticalBroadcast | null>(null);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
   const [broadcastsExpanded, setBroadcastsExpanded] = useState(true);
+  const [isBriefCollapsed, setIsBriefCollapsed] = useState(false);
   const [selectedBroadcast, setSelectedBroadcast] = useState<BroadcastMessage | null>(null);
   
   // Action Modal States
@@ -622,25 +624,6 @@ export const StoreOpsHome: React.FC = () => {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  // District Performance Index mock data - Enhanced with story elements
-  const dpiData = {
-    score: 87,
-    tier: 'Excellence' as 'Excellence' | 'Stable' | 'AtRisk' | 'Crisis',
-    rank: 3,
-    totalDistricts: 24,
-    change: +2.4,
-    changePeriod: 'this week',
-    percentile: 'Top 10%',
-    narrative: 'Performing at Excellence Level',
-    subNarrative: 'Consistently above benchmark',
-    segments: {
-      sales: 92,
-      execution: 85,
-      voc: 84
-    },
-    actionHint: 'View performance drivers'
-  };
-
   // Simulate data loading
   useEffect(() => {
     const loadData = async () => {
@@ -650,7 +633,6 @@ export const StoreOpsHome: React.FC = () => {
       setInsights(generateMockInsights());
       setActionItems(generateMockActionItems());
       setBroadcasts(generateMockBroadcasts());
-      setCriticalBroadcast(getCriticalBroadcast());
       setSystemState('HIGH_ACTIVITY');
       setLastRefresh(new Date());
       setIsLoading(false);
@@ -664,15 +646,6 @@ export const StoreOpsHome: React.FC = () => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
     setLastRefresh(new Date());
     setIsRefreshing(false);
-  };
-
-  const handleAcknowledgeCritical = () => {
-    setCriticalBroadcast(null);
-    setBroadcasts((prev) =>
-      prev.map((b) =>
-        b.priority === 'CRITICAL' ? { ...b, isAcknowledged: true, isRead: true } : b
-      )
-    );
   };
 
   const handleActionClick = (item: ActionItemV2) => {
@@ -752,10 +725,6 @@ export const StoreOpsHome: React.FC = () => {
 
   const handleViewStores = () => {
     setShowViewStoresModal(true);
-  };
-
-  const handleAssign = () => {
-    setShowAssignModal(true);
   };
 
   const handleAssignSubmit = () => {
@@ -898,8 +867,9 @@ export const StoreOpsHome: React.FC = () => {
   const overdueCount = actionItems.filter(a => a.status === 'overdue').length;
   const pendingCount = actionItems.filter(a => a.status === 'pending').length;
   const riskInsights = insights.filter(i => i.type === 'risk').length;
+  const hasCriticalBroadcast = broadcasts.some(b => b.priority === 'CRITICAL' && !b.isAcknowledged);
   const getSystemSummary = () => {
-    if (criticalBroadcast) return `1 critical alert needs attention`;
+    if (hasCriticalBroadcast) return `1 critical alert needs attention`;
     if (overdueCount > 0) return `${overdueCount} overdue task${overdueCount > 1 ? 's' : ''} need attention`;
     if (riskInsights > 0) return `${riskInsights} risk${riskInsights > 1 ? 's' : ''} detected today`;
     if (pendingCount > 0) return `${pendingCount} task${pendingCount > 1 ? 's' : ''} pending today`;
@@ -961,520 +931,145 @@ export const StoreOpsHome: React.FC = () => {
           </div>
         </div>
         {/* System State Awareness */}
-        <div className={`system-state-summary ${criticalBroadcast ? 'critical' : overdueCount > 0 ? 'warning' : 'normal'}`}>
+        <div className={`system-state-summary ${hasCriticalBroadcast ? 'critical' : overdueCount > 0 ? 'warning' : 'normal'}`}>
           <Info size={14} />
           <span>{getSystemSummary()}</span>
         </div>
       </div>
 
-      {/* AI Daily Brief Section */}
-      <div className="ai-daily-brief">
-        <div className="ai-brief-header">
-          <div className="ai-brief-badge-clean">
-            <Sparkles size={14} />
-            <span>AI DAILY BRIEF</span>
-          </div>
-          <div className="ai-brief-meta">
-            <span>Today, {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
-            <span className="meta-separator">•</span>
-            <span>5 data streams analysed</span>
-          </div>
-        </div>
-        <div className="ai-brief-greeting">
-          <h2>Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening'}, {user?.name || 'Sarah'}. Here's what changed overnight in your district.</h2>
-        </div>
-        {/* VoC Trending Theme Spotlight */}
-        <div className="voc-trending-spotlight">
-          <div className="voc-trending-accent"></div>
-          <div className="voc-trending-body">
-            <div className="voc-trending-header">
-              <div className="voc-trending-badge">
-                <TrendingUp size={12} />
-                <span>VOC THEME TRENDING</span>
+      {/* TOP ROW: AI Daily Brief + HQ Broadcasts side by side */}
+      <div className={`home-top-row ${isBriefCollapsed ? 'brief-collapsed' : ''}`}>
+        {/* AI Daily Brief Section */}
+        <div className="ai-daily-brief">
+          <div className="ai-brief-header-bar" onClick={() => setIsBriefCollapsed(!isBriefCollapsed)}>
+            <div className="ai-brief-header-left">
+              <div className={`ai-brief-toggle ${isBriefCollapsed ? 'collapsed' : ''}`}>
+                <ChevronDown size={14} />
               </div>
-              <div className="voc-trending-severity">
-                <AlertTriangle size={12} />
-                <span>Rising Risk</span>
+              <div className="ai-brief-header">
+                <div className="ai-brief-badge-clean">
+                  <Sparkles size={14} />
+                  <span>AI DAILY BRIEF</span>
+                </div>
               </div>
             </div>
-            <h3 className="voc-trending-title">"Messy Aisles" — Top Rising Theme</h3>
-            <p className="voc-trending-desc">Mentions up <strong>+34%</strong> over last 2 weeks across <strong>3 stores</strong>. Correlates with declining SEA Cleanliness scores and negative sales trajectory.</p>
-            <div className="voc-trending-stores">
-              <div className="voc-store-chip"><Store size={11} /><span>Hamburg South #2041</span><span className="voc-chip-delta">+22%</span></div>
-              <div className="voc-store-chip"><Store size={11} /><span>Cologne East #2034</span><span className="voc-chip-delta">+18%</span></div>
-              <div className="voc-store-chip"><Store size={11} /><span>Brussels Nord #2038</span><span className="voc-chip-delta">+12%</span></div>
-            </div>
-            <div className="voc-trending-action">
-              <span className="voc-copilot-hint"><Sparkles size={12} /> Co-Pilot has prepared an action plan for this theme</span>
-              <button className="voc-trending-cta">
-                <span>Open in Co-Pilot</span>
-                <ChevronRight size={14} />
-              </button>
+            <div className="ai-brief-meta">
+              <span>Today, {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+              <span className="meta-separator">•</span>
+              <span>5 data streams analysed</span>
             </div>
           </div>
-        </div>
-
-        {/* AI Insight Signal Cards */}
-        <div className="ai-brief-signal-grid">
-          <div className="ai-signal-card signal-risk">
-            <div className="ai-signal-icon"><Truck size={15} /></div>
-            <div className="ai-signal-content">
-              <span className="ai-signal-label">Supply Chain</span>
-              <p className="ai-signal-text"><strong>Cologne East #2034</strong> — 48-hr shipment delay on 3 high-velocity SKUs. OOS risk flagged.</p>
-            </div>
-            <ChevronRight size={14} className="ai-signal-arrow" />
-          </div>
-          <div className="ai-signal-card signal-positive">
-            <div className="ai-signal-icon"><TrendingUp size={15} /></div>
-            <div className="ai-signal-content">
-              <span className="ai-signal-label">District DPI</span>
-              <p className="ai-signal-text">Moved <strong>76 → 78</strong> (+2pts MoM). Amsterdam Central top performer at 91. SEA compliance driving gains.</p>
-            </div>
-            <ChevronRight size={14} className="ai-signal-arrow" />
-          </div>
-          <div className="ai-signal-card signal-positive">
-            <div className="ai-signal-icon"><CheckCircle2 size={15} /></div>
-            <div className="ai-signal-content">
-              <span className="ai-signal-label">Compliance Win</span>
-              <p className="ai-signal-text"><strong>Brussels Nord</strong> — 100% Camera Shelf Audit compliance for 3rd straight week. POG adherence at 97%.</p>
-            </div>
-            <ChevronRight size={14} className="ai-signal-arrow" />
-          </div>
-        </div>
-      </div>
-
-      {/* ZONE 2: Critical Alert Action Card (if exists) */}
-      {criticalBroadcast && (
-        <div className="critical-action-card">
-          <div className="critical-card-accent"></div>
-          <div className="critical-card-content">
-            <div className="critical-card-header">
-              <div className="critical-severity-badge">
-                <AlertTriangle size={14} />
-                <span>CRITICAL</span>
+          <div className="ai-brief-body-wrapper">
+            <div className={`ai-brief-body ${isBriefCollapsed ? 'collapsed' : ''}`}>
+              <div className="ai-brief-greeting">
+                <h2>Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening'}, {user?.name || 'Sarah'}. Here's what changed overnight in your district.</h2>
               </div>
-              <h3 className="critical-card-title">{criticalBroadcast.title}</h3>
-            </div>
-            <p className="critical-card-message">{criticalBroadcast.message}</p>
-            {criticalBroadcast.context && (
-              <p className="critical-card-context">{criticalBroadcast.context}</p>
-            )}
-            {criticalBroadcast.impactCount && (
-              <div className="critical-card-impact">
-                <Store size={14} />
-                <span>{criticalBroadcast.impactCount} {criticalBroadcast.impactLabel}</span>
-              </div>
-            )}
-            <div className="critical-card-actions">
-              <button className="critical-action-primary" onClick={handleViewStores}>
-                <Store size={16} />
-                <span>View Stores</span>
-              </button>
-              <button className="critical-action-assign" onClick={handleAssign}>
-                <Users size={16} />
-                <span>Assign</span>
-              </button>
-              <button 
-                className="critical-action-secondary"
-                onClick={() => {
-                  handleAcknowledgeCritical();
-                  showToast('✓ Alert acknowledged');
-                }}
-              >
-                <Check size={16} />
-                <span>Acknowledge</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="store-ops-content-v2">
-        {/* LEFT: Main Content */}
-        <div className="store-ops-main">
-          {/* ZONE 3: Today's Key Insights - Hero + Compact Layout */}
-          <div className="store-ops-section insights-section-v3">
-            <div className="section-header-v3">
-              <div className="section-title-v3">
-                {insights.some(i => i.type === 'risk') ? (
-                  <>
-                    <AlertTriangle size={18} className="header-icon-risk" />
-                    <h2>1 Issue Needs Attention</h2>
-                  </>
-                ) : (
-                  <>
-                    <Sparkles size={18} className="header-icon-positive" />
-                    <h2>All Systems Healthy</h2>
-                  </>
-                )}
-              </div>
-              <div className="insights-meta">
-                <span className="meta-positive">{insights.filter(i => i.type === 'positive').length} Positive</span>
-                <span className="meta-divider">•</span>
-                <span className="meta-neutral">{insights.filter(i => i.type === 'info').length} On Track</span>
-              </div>
-            </div>
-            <div className="insights-content-v3">
-              {insights.length > 0 ? (
-                <>
-                  {/* HERO CARD - Risk/Primary Issue */}
-                  {insights.filter(i => i.isHero || i.type === 'risk').slice(0, 1).map((item) => (
-                    <div key={item.id} className="insight-hero-card">
-                      <div className="hero-card-accent"></div>
-                      <div className="hero-card-content">
-                        <div className="hero-card-header">
-                          <div className="hero-signal">
-                            <TrendingDown size={14} />
-                            <span>{item.signal}</span>
-                          </div>
-                          {item.overdueCount && (
-                            <div className="hero-overdue">
-                              <Clock size={12} />
-                              <span>{item.overdueCount} overdue actions</span>
-                            </div>
-                          )}
-                        </div>
-                        <h2 className="hero-headline">{item.headline}</h2>
-                        <p className="hero-context">{item.context}</p>
-                        {item.impactDetail && (
-                          <div className="hero-impact">
-                            <AlertCircle size={14} />
-                            <span>{item.impactDetail}</span>
-                          </div>
-                        )}
-                        {item.topStore && (
-                          <div className="hero-top-store">
-                            <Store size={12} />
-                            <span>{item.topStore}</span>
-                          </div>
-                        )}
-                        <div className="hero-actions">
-                          <button className="hero-action-primary" onClick={handleReviewSkus}>
-                            <Package size={16} />
-                            <span>{item.actionCta || 'View Details'}</span>
-                          </button>
-                          <button className="hero-action-secondary" onClick={handleViewStores}>
-                            <ArrowRight size={16} />
-                            <span>{item.actionHint || 'View impacted stores'}</span>
-                          </button>
-                        </div>
-                      </div>
+              {/* VoC Trending Theme Spotlight */}
+              <div className="voc-trending-spotlight">
+                <div className="voc-trending-accent"></div>
+                <div className="voc-trending-body">
+                  <div className="voc-trending-header">
+                    <div className="voc-trending-badge">
+                      <TrendingUp size={12} />
+                      <span>VOC THEME TRENDING</span>
                     </div>
-                  ))}
-
-                  {/* COMPACT CARDS - Supporting Insights */}
-                  <div className="insights-compact-grid">
-                    {insights.filter(i => !i.isHero && i.type !== 'risk').slice(0, 3).map((item) => (
-                      <div key={item.id} className={`insight-compact-card type-${item.type}`}>
-                        <div className={`compact-signal type-${item.type}`}>
-                          {item.trend === 'up' && <TrendingUp size={11} />}
-                          {item.trend === 'neutral' && <Minus size={11} />}
-                          <span>{item.signal}</span>
-                        </div>
-                        <h4 className="compact-headline">{item.headline}</h4>
-                        <p className="compact-context">{item.context}</p>
-                        {item.topStore && (
-                          <div className="compact-meta">
-                            <Store size={10} />
-                            <span>{item.topStore}</span>
-                          </div>
-                        )}
-                        {item.actionHint && (
-                          <button 
-                            className="compact-action"
-                            onClick={() => {
-                              if (item.actionHint?.includes('top performers')) {
-                                setShowTopPerformersModal(true);
-                              } else if (item.actionHint?.includes('regional')) {
-                                setShowRegionalModal(true);
-                              }
-                            }}
-                          >
-                            <ArrowRight size={12} />
-                            <span>{item.actionHint}</span>
-                          </button>
-                        )}
-                      </div>
-                    ))}
+                    <div className="voc-trending-severity">
+                      <AlertTriangle size={12} />
+                      <span>Rising Risk</span>
+                    </div>
                   </div>
-                </>
-              ) : (
-                <div className="insights-empty-v2">
-                  <div className="empty-icon-wrapper">
-                    <ThumbsUp size={28} />
+                  <h3 className="voc-trending-title">"Messy Aisles" — Top Rising Theme</h3>
+                  <p className="voc-trending-desc">Mentions up <strong>+34%</strong> over last 2 weeks across <strong>3 stores</strong>. Correlates with declining SEA Cleanliness scores and negative sales trajectory.</p>
+                  <div className="voc-trending-stores">
+                    <div className="voc-store-chip"><Store size={11} /><span>Hamburg South #2041</span><span className="voc-chip-delta">+22%</span></div>
+                    <div className="voc-store-chip"><Store size={11} /><span>Cologne East #2034</span><span className="voc-chip-delta">+18%</span></div>
+                    <div className="voc-store-chip"><Store size={11} /><span>Brussels Nord #2038</span><span className="voc-chip-delta">+12%</span></div>
                   </div>
-                  <h3>All Systems Running Smoothly</h3>
-                  <p>No risks detected across your stores today</p>
-                  <div className="empty-suggestions">
-                    <button className="suggestion-chip">
-                      <BarChart3 size={14} />
-                      Review trends
-                    </button>
-                    <button className="suggestion-chip">
-                      <Users size={14} />
-                      Check feedback
+                  <div className="voc-trending-action">
+                    <span className="voc-copilot-hint"><Sparkles size={12} /> AI Copilot has prepared an action plan for this theme</span>
+                    <button className="voc-trending-cta" onClick={(e) => {
+                      e.stopPropagation();
+                      navigate('/command-center/ai-copilot?mode=actions&context=voc-messy-aisles');
+                    }}>
+                      <span>Open in AI Copilot</span>
+                      <ChevronRight size={14} />
                     </button>
                   </div>
                 </div>
+              </div>
+
+              {/* AI Insight Signal Cards */}
+              <div className="ai-brief-signal-grid">
+                <div className="ai-signal-card signal-risk">
+                  <div className="ai-signal-icon"><Truck size={15} /></div>
+                  <div className="ai-signal-content">
+                    <span className="ai-signal-label">Supply Chain</span>
+                    <p className="ai-signal-text"><strong>Cologne East #2034</strong> — 48-hr shipment delay on 3 high-velocity SKUs. OOS risk flagged.</p>
+                  </div>
+                  <ChevronRight size={14} className="ai-signal-arrow" />
+                </div>
+                <div className="ai-signal-card signal-positive">
+                  <div className="ai-signal-icon"><TrendingUp size={15} /></div>
+                  <div className="ai-signal-content">
+                    <span className="ai-signal-label">District DPI</span>
+                    <p className="ai-signal-text">Moved <strong>76 → 78</strong> (+2pts MoM). Amsterdam Central top performer at 91. SEA compliance driving gains.</p>
+                  </div>
+                  <ChevronRight size={14} className="ai-signal-arrow" />
+                </div>
+                <div className="ai-signal-card signal-positive">
+                  <div className="ai-signal-icon"><CheckCircle2 size={15} /></div>
+                  <div className="ai-signal-content">
+                    <span className="ai-signal-label">Compliance Win</span>
+                    <p className="ai-signal-text"><strong>Brussels Nord</strong> — 100% Camera Shelf Audit compliance for 3rd straight week. POG adherence at 97%.</p>
+                  </div>
+                  <ChevronRight size={14} className="ai-signal-arrow" />
+                </div>
+              </div>
+            </div>
+            {!isBriefCollapsed && <div className="ai-brief-scroll-fade" />}
+          </div>
+        </div>
+
+        {/* HQ Broadcasts Section - Promoted to top row */}
+        <div className="hq-broadcasts-card">
+          <div 
+            className="hq-broadcasts-header"
+            onClick={() => setBroadcastsExpanded(!broadcastsExpanded)}
+          >
+            <div className="hq-broadcasts-title">
+              <Bell size={15} />
+              <span>HQ Broadcasts</span>
+              {unreadBroadcastCount > 0 && (
+                <span className="hq-broadcast-count">{unreadBroadcastCount}</span>
               )}
             </div>
+            <ChevronDown size={14} className={`expand-icon ${broadcastsExpanded ? 'expanded' : ''}`} />
           </div>
-
-          {/* ZONE 4: Action Queue (Execution Engine) */}
-          <div className="store-ops-section action-queue-v2">
-            <div className="action-queue-header">
-              <div className="queue-title-row">
-                <Zap size={18} className="queue-icon" />
-                <h2>Action Queue</h2>
-              </div>
-              <span className="queue-subtitle">{displayedActions.length} tasks requiring attention</span>
-            </div>
-            <div className="action-queue-content-v2">
-              {displayedActions.length > 0 ? (
-                <div className="action-cards-v2">
-                  {displayedActions.map((item, index) => (
-                    <div
-                      key={item.id}
-                      className={`action-card-v2 severity-${item.severity} ${index === 0 ? 'hero-task' : ''}`}
-                    >
-                      {/* Integrated Rank */}
-                      <div className="action-rank-v2">
-                        <span>{index + 1}</span>
-                      </div>
-                      
-                      {/* Main Content */}
-                      <div className="action-main">
-                        {/* Title Row */}
-                        <div className="action-title-row">
-                          <h4 className="action-title-v2">{item.title}</h4>
-                          {item.severity === 'critical' && (
-                            <span className="severity-badge critical">BLOCKING</span>
-                          )}
-                        </div>
-                        
-                        {/* Impact - Most Prominent */}
-                        {item.impact && (
-                          <p className="action-impact-v2">{item.impact}</p>
-                        )}
-                        
-                        {/* Context Row */}
-                        <div className="action-meta-row">
-                          <span className="action-context-v2">{item.context}</span>
-                          {item.microContext && (
-                            <span className="action-micro">• {item.microContext}</span>
-                          )}
-                          <span className={`action-time-v2 ${item.status === 'overdue' ? 'overdue' : ''}`}>
-                            {item.status === 'overdue' ? '⚠️ ' : ''}
-                            {formatDueTime(item.due_time)}
-                          </span>
-                        </div>
-                      </div>
-                      
-                      {/* CTA Button */}
-                      <button 
-                        className={`action-cta severity-${item.severity}`}
-                        onClick={() => handleActionClick(item)}
-                      >
-                        {item.cta}
-                        <ChevronRight size={14} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="action-queue-empty all-clear">
-                  <CheckCircle2 size={32} />
-                  <h3>You're all caught up!</h3>
-                  <p>No pending tasks. Here are some suggestions:</p>
-                  <div className="empty-suggestions">
-                    <button className="suggestion-btn">
-                      <BarChart3 size={16} />
-                      Review trends
-                    </button>
-                    <button className="suggestion-btn">
-                      <Users size={16} />
-                      Check VoC
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-        </div>
-
-        {/* RIGHT: Sidebar */}
-        <div className="store-ops-sidebar">
-          {/* Broadcasts Section - Clean Style */}
-          <div className="store-ops-section broadcasts-section-clean">
-            <div 
-              className="broadcasts-header-clean"
-              onClick={() => setBroadcastsExpanded(!broadcastsExpanded)}
-            >
-              <div className="broadcasts-title-clean">
-                <Bell size={16} />
-                <h2>Broadcasts</h2>
-                {unreadBroadcastCount > 0 && (
-                  <span className="broadcast-count">{unreadBroadcastCount}</span>
-                )}
-              </div>
-              <ChevronDown size={16} className={`expand-icon ${broadcastsExpanded ? 'expanded' : ''}`} />
-            </div>
-            
-            {broadcastsExpanded && (
-              <div className="broadcasts-list-clean">
+          {broadcastsExpanded && (
+            <div className="hq-broadcasts-body">
+              <div className="hq-broadcasts-list">
                 {broadcasts.map((broadcast) => (
                   <div
                     key={broadcast.id}
-                    className={`broadcast-item-clean ${!broadcast.isRead ? 'unread' : ''}`}
+                    className={`hq-broadcast-item ${!broadcast.isRead ? 'unread' : ''} ${broadcast.priority === 'CRITICAL' ? 'critical' : ''}`}
                     onClick={() => handleBroadcastClick(broadcast)}
                   >
-                    <div className="broadcast-content-clean">
-                      <div className="broadcast-title-row">
-                        <span className="broadcast-title-clean">{broadcast.title}</span>
-                        {!broadcast.isRead && <span className="unread-dot"></span>}
+                    <div className="hq-broadcast-content">
+                      <div className="hq-broadcast-title-row">
+                        {broadcast.priority === 'CRITICAL' && (
+                          <span className="hq-broadcast-priority-badge critical">
+                            <AlertTriangle size={10} />
+                            CRITICAL
+                          </span>
+                        )}
+                        <span className="hq-broadcast-title">{broadcast.title}</span>
+                        {!broadcast.isRead && <span className="hq-unread-dot"></span>}
                       </div>
-                      <p className="broadcast-description">
-                        {broadcast.category === 'Operations' 
-                          ? 'Updated store hours for upcoming holiday weekend. Please review and confirm your availability by Friday.'
-                          : broadcast.category === 'Merchandising'
-                          ? 'New planogram guidelines have been released. Review the updated shelf layouts for seasonal products.'
-                          : 'New training module available for team members. Please confirm staffing assignments.'}
-                      </p>
-                      <div className="broadcast-meta-clean">
-                        <span className="broadcast-sender">{broadcast.sender}</span>
-                        <span className="broadcast-time-clean">{formatTimeAgo(broadcast.timestamp)}</span>
+                      <p className="hq-broadcast-desc">{broadcast.description}</p>
+                      <div className="hq-broadcast-meta">
+                        <span className="hq-broadcast-sender">{broadcast.sender}</span>
+                        <span className="hq-broadcast-time">{formatTimeAgo(broadcast.timestamp)}</span>
                       </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* District Performance Story Card - Premium */}
-          <div className="dpi-card-v2">
-            {/* Hero Score Section */}
-            <div className="dpi-hero-section">
-              <div className="dpi-gauge-wrapper-v2">
-                <svg className="dpi-gauge-v2" viewBox="0 0 160 160">
-                  {/* Background track */}
-                  <circle
-                    cx="80"
-                    cy="80"
-                    r="68"
-                    fill="none"
-                    stroke="#f1f5f9"
-                    strokeWidth="10"
-                  />
-                  {/* Progress arc with gradient */}
-                  <defs>
-                    <linearGradient id="dpiGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#10b981" />
-                      <stop offset="50%" stopColor="#059669" />
-                      <stop offset="100%" stopColor="#047857" />
-                    </linearGradient>
-                  </defs>
-                  <circle
-                    cx="80"
-                    cy="80"
-                    r="68"
-                    fill="none"
-                    stroke="url(#dpiGradient)"
-                    strokeWidth="10"
-                    strokeLinecap="round"
-                    strokeDasharray={`${(dpiData.score / 100) * 427} 427`}
-                    transform="rotate(-90 80 80)"
-                    className="dpi-progress-v2"
-                  />
-                </svg>
-                <div className="dpi-score-center-v2">
-                  <span className="dpi-score-value-v2">{dpiData.score}</span>
-                  <span className="dpi-score-label-v2">Performance Index</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Performance Story */}
-            <div className="dpi-story-section">
-              {/* Excellence Badge */}
-              <div className="dpi-tier-badge-v2">
-                <div className="tier-text">
-                  <span className="tier-title">Excellence Tier</span>
-                  <span className="tier-subtitle">Top 10% of all districts</span>
-                </div>
-              </div>
-
-              {/* Rank & Change Stats */}
-              <div className="dpi-rank-stats">
-                <div className="dpi-rank-card">
-                  <span className="dpi-rank-value">#{dpiData.rank}</span>
-                  <span className="dpi-rank-label">of {dpiData.totalDistricts}</span>
-                </div>
-                <div className="dpi-change-card">
-                  <div className={`dpi-change-value ${dpiData.change < 0 ? 'negative' : ''}`}>
-                    <TrendingUp size={18} />
-                    <span>+{dpiData.change}%</span>
-                  </div>
-                  <span className="dpi-change-label">{dpiData.changePeriod}</span>
-                </div>
-              </div>
-
-              {/* Score Breakdown - Card Grid */}
-              <div className="dpi-breakdown-header">
-                <span className="breakdown-title">Score Breakdown</span>
-              </div>
-              <div className="dpi-breakdown-grid">
-                <div className="breakdown-card">
-                  <div className="breakdown-value">{dpiData.segments.sales}</div>
-                  <div className="breakdown-label">Sales</div>
-                  <div className="breakdown-bar">
-                    <div className="breakdown-fill" style={{ width: `${dpiData.segments.sales}%` }}></div>
-                  </div>
-                </div>
-                <div className="breakdown-card">
-                  <div className="breakdown-value">{dpiData.segments.execution}</div>
-                  <div className="breakdown-label">Execution</div>
-                  <div className="breakdown-bar">
-                    <div className="breakdown-fill" style={{ width: `${dpiData.segments.execution}%` }}></div>
-                  </div>
-                </div>
-                <div className="breakdown-card">
-                  <div className="breakdown-value">{dpiData.segments.voc}</div>
-                  <div className="breakdown-label">VoC</div>
-                  <div className="breakdown-bar">
-                    <div className="breakdown-fill" style={{ width: `${dpiData.segments.voc}%` }}></div>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-          {/* Archived Actions Section */}
-          {archivedActions.length > 0 && (
-            <div className="store-ops-section archived-section">
-              <div className="archived-header">
-                <div className="archived-title-row">
-                  <Archive size={16} />
-                  <h2>Completed Actions</h2>
-                </div>
-                <span className="archived-count">{archivedActions.length}</span>
-              </div>
-              <div className="archived-list">
-                {archivedActions.slice(-5).reverse().map((action) => (
-                  <div key={action.id} className={`archived-item type-${action.type}`}>
-                    <div className={`archived-icon type-${action.type}`}>
-                      {action.type === 'approved' && <Check size={12} />}
-                      {action.type === 'rejected' && <X size={12} />}
-                      {action.type === 'assigned' && <Users size={12} />}
-                      {action.type === 'reorder' && <Package size={12} />}
-                    </div>
-                    <div className="archived-info">
-                      <span className="archived-title">{action.title}</span>
-                      <span className="archived-time">
-                        {action.completedAt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
-                      </span>
                     </div>
                   </div>
                 ))}
@@ -1482,6 +1077,284 @@ export const StoreOpsHome: React.FC = () => {
             </div>
           )}
         </div>
+      </div>
+
+      {/* QUICK PULSE STRIP — operational snapshot */}
+      <div className="quick-pulse-strip">
+        <div className="pulse-card">
+          <div className="pulse-icon stores"><Store size={18} /></div>
+          <div className="pulse-data">
+            <span className="pulse-value">8</span>
+            <span className="pulse-label">Stores Managed</span>
+          </div>
+        </div>
+        <div className="pulse-card">
+          <div className="pulse-icon tasks"><Zap size={18} /></div>
+          <div className="pulse-data">
+            <span className="pulse-value">{pendingCount + overdueCount}</span>
+            <span className="pulse-label">Tasks Today</span>
+          </div>
+          {overdueCount > 0 && <span className="pulse-badge warning">{overdueCount} overdue</span>}
+        </div>
+        <div className="pulse-card">
+          <div className="pulse-icon compliance"><CheckCircle2 size={18} /></div>
+          <div className="pulse-data">
+            <span className="pulse-value">87%</span>
+            <span className="pulse-label">Compliance</span>
+          </div>
+          <span className="pulse-badge positive">+3%</span>
+        </div>
+        <div className="pulse-card">
+          <div className="pulse-icon nps"><Star size={18} /></div>
+          <div className="pulse-data">
+            <span className="pulse-value">72</span>
+            <span className="pulse-label">NPS Score</span>
+          </div>
+          <span className="pulse-badge positive">+12</span>
+        </div>
+      </div>
+
+      {/* MAIN CONTENT: Insights + Action Queue side by side */}
+      <div className="home-content-grid">
+        {/* Key Insights */}
+        <div className="store-ops-section insights-section-v3">
+          <div className="section-header-v3">
+            <div className="section-title-v3">
+              {insights.some(i => i.type === 'risk') ? (
+                <>
+                  <AlertTriangle size={18} className="header-icon-risk" />
+                  <h2>1 Issue Needs Attention</h2>
+                </>
+              ) : (
+                <>
+                  <Sparkles size={18} className="header-icon-positive" />
+                  <h2>All Systems Healthy</h2>
+                </>
+              )}
+            </div>
+            <div className="insights-meta">
+              <span className="meta-positive">{insights.filter(i => i.type === 'positive').length} Positive</span>
+              <span className="meta-divider">•</span>
+              <span className="meta-neutral">{insights.filter(i => i.type === 'info').length} On Track</span>
+            </div>
+          </div>
+          <div className="insights-content-v3">
+            {insights.length > 0 ? (
+              <>
+                {/* HERO CARD - Risk/Primary Issue */}
+                {insights.filter(i => i.isHero || i.type === 'risk').slice(0, 1).map((item) => (
+                  <div key={item.id} className="insight-hero-card">
+                    <div className="hero-card-accent"></div>
+                    <div className="hero-card-content">
+                      <div className="hero-card-header">
+                        <div className="hero-signal">
+                          <TrendingDown size={14} />
+                          <span>{item.signal}</span>
+                        </div>
+                        {item.overdueCount && (
+                          <div className="hero-overdue">
+                            <Clock size={12} />
+                            <span>{item.overdueCount} overdue actions</span>
+                          </div>
+                        )}
+                      </div>
+                      <h2 className="hero-headline">{item.headline}</h2>
+                      <p className="hero-context">{item.context}</p>
+                      {item.impactDetail && (
+                        <div className="hero-impact">
+                          <AlertCircle size={14} />
+                          <span>{item.impactDetail}</span>
+                        </div>
+                      )}
+                      {item.topStore && (
+                        <div className="hero-top-store">
+                          <Store size={12} />
+                          <span>{item.topStore}</span>
+                        </div>
+                      )}
+                      <div className="hero-actions">
+                        <button className="hero-action-primary" onClick={handleReviewSkus}>
+                          <Package size={16} />
+                          <span>{item.actionCta || 'View Details'}</span>
+                        </button>
+                        <button className="hero-action-secondary" onClick={handleViewStores}>
+                          <ArrowRight size={16} />
+                          <span>{item.actionHint || 'View impacted stores'}</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {/* COMPACT CARDS - Supporting Insights */}
+                <div className="insights-compact-grid">
+                  {insights.filter(i => !i.isHero && i.type !== 'risk').slice(0, 3).map((item) => (
+                    <div key={item.id} className={`insight-compact-card type-${item.type}`}>
+                      <div className={`compact-signal type-${item.type}`}>
+                        {item.trend === 'up' && <TrendingUp size={11} />}
+                        {item.trend === 'neutral' && <Minus size={11} />}
+                        <span>{item.signal}</span>
+                      </div>
+                      <h4 className="compact-headline">{item.headline}</h4>
+                      <p className="compact-context">{item.context}</p>
+                      {item.topStore && (
+                        <div className="compact-meta">
+                          <Store size={10} />
+                          <span>{item.topStore}</span>
+                        </div>
+                      )}
+                      {item.actionHint && (
+                        <button 
+                          className="compact-action"
+                          onClick={() => {
+                            if (item.actionHint?.includes('top performers')) {
+                              setShowTopPerformersModal(true);
+                            } else if (item.actionHint?.includes('regional')) {
+                              setShowRegionalModal(true);
+                            }
+                          }}
+                        >
+                          <ArrowRight size={12} />
+                          <span>{item.actionHint}</span>
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="insights-empty-v2">
+                <div className="empty-icon-wrapper">
+                  <ThumbsUp size={28} />
+                </div>
+                <h3>All Systems Running Smoothly</h3>
+                <p>No risks detected across your stores today</p>
+                <div className="empty-suggestions">
+                  <button className="suggestion-chip">
+                    <BarChart3 size={14} />
+                    Review trends
+                  </button>
+                  <button className="suggestion-chip">
+                    <Users size={14} />
+                    Check feedback
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Action Queue */}
+        <div className="store-ops-section action-queue-v2">
+          <div className="action-queue-header">
+            <div className="queue-title-row">
+              <Zap size={18} className="queue-icon" />
+              <h2>Action Queue</h2>
+            </div>
+            <span className="queue-subtitle">{displayedActions.length} tasks requiring attention</span>
+          </div>
+          <div className="action-queue-content-v2">
+            {displayedActions.length > 0 ? (
+              <div className="action-cards-v2">
+                {displayedActions.map((item, index) => (
+                  <div
+                    key={item.id}
+                    className={`action-card-v2 severity-${item.severity} ${index === 0 ? 'hero-task' : ''}`}
+                  >
+                    {/* Integrated Rank */}
+                    <div className="action-rank-v2">
+                      <span>{index + 1}</span>
+                    </div>
+                    
+                    {/* Main Content */}
+                    <div className="action-main">
+                      {/* Title Row */}
+                      <div className="action-title-row">
+                        <h4 className="action-title-v2">{item.title}</h4>
+                        {item.severity === 'critical' && (
+                          <span className="severity-badge critical">BLOCKING</span>
+                        )}
+                      </div>
+                      
+                      {/* Impact - Most Prominent */}
+                      {item.impact && (
+                        <p className="action-impact-v2">{item.impact}</p>
+                      )}
+                      
+                      {/* Context Row */}
+                      <div className="action-meta-row">
+                        <span className="action-context-v2">{item.context}</span>
+                        {item.microContext && (
+                          <span className="action-micro">• {item.microContext}</span>
+                        )}
+                        <span className={`action-time-v2 ${item.status === 'overdue' ? 'overdue' : ''}`}>
+                          {item.status === 'overdue' ? '⚠️ ' : ''}
+                          {formatDueTime(item.due_time)}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {/* CTA Button */}
+                    <button 
+                      className={`action-cta severity-${item.severity}`}
+                      onClick={() => handleActionClick(item)}
+                    >
+                      {item.cta}
+                      <ChevronRight size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="action-queue-empty all-clear">
+                <CheckCircle2 size={32} />
+                <h3>You're all caught up!</h3>
+                <p>No pending tasks. Here are some suggestions:</p>
+                <div className="empty-suggestions">
+                  <button className="suggestion-btn">
+                    <BarChart3 size={16} />
+                    Review trends
+                  </button>
+                  <button className="suggestion-btn">
+                    <Users size={16} />
+                    Check VoC
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Completed Actions - inline */}
+        {archivedActions.length > 0 && (
+          <div className="store-ops-section archived-section archived-inline">
+            <div className="archived-header">
+              <div className="archived-title-row">
+                <Archive size={16} />
+                <h2>Completed Actions</h2>
+              </div>
+              <span className="archived-count">{archivedActions.length}</span>
+            </div>
+            <div className="archived-list archived-list-inline">
+              {archivedActions.slice(-5).reverse().map((action) => (
+                <div key={action.id} className={`archived-item type-${action.type}`}>
+                  <div className={`archived-icon type-${action.type}`}>
+                    {action.type === 'approved' && <Check size={12} />}
+                    {action.type === 'rejected' && <X size={12} />}
+                    {action.type === 'assigned' && <Users size={12} />}
+                    {action.type === 'reorder' && <Package size={12} />}
+                  </div>
+                  <div className="archived-info">
+                    <span className="archived-title">{action.title}</span>
+                    <span className="archived-time">
+                      {action.completedAt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Broadcast Detail Modal */}

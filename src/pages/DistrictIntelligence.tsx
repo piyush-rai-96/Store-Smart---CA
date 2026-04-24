@@ -36,7 +36,8 @@ import {
   Shield,
   FileText,
   Zap,
-  ArrowRight
+  ArrowRight,
+  Bot
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './DistrictIntelligence.css';
@@ -112,6 +113,136 @@ const getComplianceTextColor = (value: number): string => {
   if (value >= 50) return '#92400e';
   if (value >= 25) return '#991b1b';
   return '#7f1d1d';
+};
+
+// Dimension → AI Copilot skill mapping
+interface DimensionSkillMap {
+  dimension: string;
+  skill: 'pog' | 'knowledge' | 'actions' | 'analytics';
+  logic: string;
+}
+
+const dimensionSkillMapping: DimensionSkillMap[] = [
+  { dimension: 'Planogram', skill: 'pog', logic: 'Shelf layout and planogram compliance validation' },
+  { dimension: 'Signage', skill: 'knowledge', logic: 'Guideline-driven display and signage standards' },
+  { dimension: 'Cleanliness', skill: 'actions', logic: 'Execution-focused operational tasks and upkeep' },
+  { dimension: 'Safety', skill: 'knowledge', logic: 'SOP-based safety procedures and compliance' },
+  { dimension: 'Stock Rotation', skill: 'analytics', logic: 'Data-driven validation of FIFO and inventory aging' },
+  { dimension: 'Pricing', skill: 'analytics', logic: 'Price accuracy validation and mismatch detection' },
+  { dimension: 'Backroom', skill: 'actions', logic: 'Operational handling and inventory organization tasks' },
+  { dimension: 'Customer Area', skill: 'actions', logic: 'Store execution and customer experience improvements' },
+  { dimension: 'Avg', skill: 'analytics', logic: 'Aggregated KPI derived from multiple audit dimensions' },
+];
+
+const getSkillForDimension = (dimension: string): DimensionSkillMap => {
+  return dimensionSkillMapping.find(m => m.dimension === dimension) || dimensionSkillMapping[dimensionSkillMapping.length - 1];
+};
+
+// Audit detail findings for clickable heatmap cells
+interface AuditCellDetail {
+  findings: string[];
+  lastAudit: string;
+  auditor: string;
+  trend: 'improving' | 'declining' | 'stable';
+  recommendation: string;
+}
+
+// Auto-generated findings for cells without explicit detail data
+const auditors = ['Sarah Chen', 'John Martinez', 'Emily Davis', 'James Wilson', 'Maria Lopez'];
+const autoFindingsMap: Record<string, string[]> = {
+  Planogram: ['Shelf facings not matching authorized planogram', 'Promotional endcap partially set up', 'Category flow disruption in adjacent aisles', 'Missing shelf labels for new SKUs'],
+  Signage: ['Price signage outdated on 8+ items', 'Promotional banner not displayed per guidelines', 'Department wayfinding signs misaligned', 'Sale end-date signage still active post-promo'],
+  Cleanliness: ['Floor maintenance below standard in aisles 3-5', 'Restroom cleaning log gaps detected', 'Deli counter area needs deep clean', 'Cart corral area debris accumulation'],
+  Safety: ['Emergency exit signage needs replacement', 'Fire extinguisher inspection overdue', 'Wet floor protocol not followed during mopping', 'Staff safety training records incomplete'],
+  'Stock Rotation': ['FIFO not followed in dairy section', 'Items approaching best-before date on shelf', 'Backstock rotation overdue by 48+ hours', 'Produce freshness check missed'],
+  Pricing: ['Shelf price vs POS mismatch on 5 items', 'Clearance tags not updated after markdown', 'Price label missing on new arrivals', 'Multi-buy pricing error on promotional items'],
+  Backroom: ['Receiving dock area congestion', 'Inventory count discrepancy in backroom', 'Overstock pallets blocking access paths', 'Returns processing backlog exceeded 72h'],
+  'Customer Area': ['Shopping cart availability below 80%', 'Checkout queue exceeded 5-minute wait target', 'Customer service desk unstaffed during peak', 'Store entrance cleanliness needs attention'],
+};
+
+const generateAutoDetail = (storeNumber: string, category: string, score: number): AuditCellDetail => {
+  const seed = parseInt(storeNumber) + category.length;
+  const findings = autoFindingsMap[category] || autoFindingsMap['Planogram'];
+  const count = score >= 90 ? 1 : score >= 75 ? 2 : score >= 50 ? 3 : 4;
+  const selectedFindings = findings.slice(0, count);
+  if (score >= 90) {
+    const positiveFindings = [`${category} standards met or exceeded across all audited areas`];
+    return {
+      findings: positiveFindings,
+      lastAudit: `${(seed % 5) + 1} days ago`,
+      auditor: auditors[seed % auditors.length],
+      trend: 'stable',
+      recommendation: `Maintain current ${category.toLowerCase()} protocols. Strong performance.`,
+    };
+  }
+  return {
+    findings: selectedFindings,
+    lastAudit: `${(seed % 7) + 1} days ago`,
+    auditor: auditors[seed % auditors.length],
+    trend: score >= 70 ? 'improving' : 'declining',
+    recommendation: score >= 50
+      ? `Schedule focused ${category.toLowerCase()} improvement review this week.`
+      : `Critical: Immediate ${category.toLowerCase()} intervention required. Escalate to regional.`,
+  };
+};
+
+const auditCellDetails: Record<string, AuditCellDetail> = {
+  '9012-Safety': {
+    findings: ['Fire extinguisher expired on Floor 2', 'Emergency exit B partially blocked by stock carts', 'Wet floor signs not deployed in produce section', 'First aid kit missing key supplies'],
+    lastAudit: '2 days ago',
+    auditor: 'Sarah Chen',
+    trend: 'declining',
+    recommendation: 'Immediate safety review required. Schedule re-audit within 48h.',
+  },
+  '5678-Safety': {
+    findings: ['Emergency lighting non-functional in stockroom', 'Fire exit signage obscured by promotional displays', 'Safety drill not conducted this quarter'],
+    lastAudit: '3 days ago',
+    auditor: 'John Martinez',
+    trend: 'declining',
+    recommendation: 'Escalate to Regional Safety Officer. Mandatory corrective action.',
+  },
+  '1234-Planogram': {
+    findings: ['Aisle 3 endcap missing promotional display', 'Beverage cooler facings off by 30%', 'New seasonal planogram not implemented (overdue 5 days)', 'Shelf tags mismatched in dairy section'],
+    lastAudit: '1 day ago',
+    auditor: 'Emily Davis',
+    trend: 'declining',
+    recommendation: 'Deploy planogram reset team. Prioritize Aisle 3 and beverage cooler.',
+  },
+  '4532-Cleanliness': {
+    findings: ['Floor sticky residue in checkout zone', 'Restroom cleanliness below standard', 'Deli counter glass not cleaned on schedule'],
+    lastAudit: '4 days ago',
+    auditor: 'James Wilson',
+    trend: 'stable',
+    recommendation: 'Increase cleaning frequency during peak hours. Add evening deep-clean shift.',
+  },
+  '2198-Planogram': {
+    findings: ['Promotional endcap partially set up', 'Category adjacency violation in snacks aisle', 'Missing price labels on 12 SKUs'],
+    lastAudit: '2 days ago',
+    auditor: 'Sarah Chen',
+    trend: 'improving',
+    recommendation: 'Complete endcap setup. Address price label gaps by end of shift.',
+  },
+  '1234-Stock Rotation': {
+    findings: ['14 items past best-before date on shelf', 'FIFO not followed in dairy cooler', 'Backstock not rotated in 72+ hours', 'Clearance items blocking fresh stock'],
+    lastAudit: '1 day ago',
+    auditor: 'Emily Davis',
+    trend: 'declining',
+    recommendation: 'Urgent: Pull expired items immediately. Retrain staff on FIFO protocol.',
+  },
+  '9012-Stock Rotation': {
+    findings: ['23 expired items found across 4 aisles', 'No FIFO practice observed during audit', 'Backroom stock untouched for 5+ days', 'Produce section 40% past prime freshness'],
+    lastAudit: '2 days ago',
+    auditor: 'John Martinez',
+    trend: 'declining',
+    recommendation: 'Critical intervention. Full stock rotation audit and staff retraining.',
+  },
+  '2034-Cleanliness': {
+    findings: ['All areas meet or exceed cleanliness standards', 'Restrooms scored 100% on last 3 audits', 'Floor maintenance schedule fully compliant'],
+    lastAudit: '1 day ago',
+    auditor: 'James Wilson',
+    trend: 'stable',
+    recommendation: 'Maintain current protocols. Eligible for "Clean Store" recognition.',
+  },
 };
 
 // Escalation Command Center Data
@@ -381,6 +512,8 @@ export const DistrictIntelligence: React.FC = () => {
 
   // Heatmap tooltip state
   const [heatmapTip, setHeatmapTip] = useState<{ x: number; y: number; store: string; cat: string; val: number } | null>(null);
+  // Heatmap cell detail modal
+  const [heatmapDetail, setHeatmapDetail] = useState<{ storeNumber: string; storeName: string; category: string; score: number; detail: AuditCellDetail; skill: string; skillLogic: string } | null>(null);
 
   // Chat Window States (same as Home Screen)
   const [showChatWindow, setShowChatWindow] = useState(false);
@@ -761,65 +894,64 @@ export const DistrictIntelligence: React.FC = () => {
           </div>
         </div>
 
-        {/* Triage Summary */}
-        <div className="pulse-card triage-card">
-          <div className="pulse-card-header">
-            <AlertCircle size={16} className="triage-icon" />
-            <span className="pulse-card-label">Triage Summary</span>
-          </div>
-          <div className="triage-items">
-            <div className="triage-item" onClick={() => setShowTriageDetail('voc-messy')}>
-              <div className="triage-item-content">
-                <div className="triage-item-header">
-                  <span className="triage-item-title">VoC: Messy Aisles</span>
-                  <span className="triage-item-priority high">High</span>
-                </div>
-                <p className="triage-item-stores">Hamburg South · Cologne East · Berlin Mitte</p>
-                <div className="triage-item-footer">
-                  <span className="triage-item-metric">+22% theme spike</span>
-                  <button className="triage-action-btn" onClick={(e) => { e.stopPropagation(); setShowTriageDetail('voc-messy'); }}>
-                    View Details
-                    <ChevronRight size={14} />
-                  </button>
+        {/* Right Panel — Triage + AI Summary combined */}
+        <div className="pulse-right-panel">
+          {/* Triage Summary */}
+          <div className="triage-section">
+            <div className="ai-summary-label" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 600, color: '#64748b', textTransform: 'uppercase' as const, letterSpacing: '0.5px', marginBottom: 6 }}>
+              <AlertCircle size={12} style={{ color: '#6366f1', width: 12, height: 12 }} />
+              <span>Triage Summary</span>
+            </div>
+            <div className="triage-items">
+              <div className="triage-item" onClick={() => setShowTriageDetail('voc-messy')}>
+                <div className="triage-item-content">
+                  <div className="triage-item-header">
+                    <span className="triage-item-title">VoC: Messy Aisles</span>
+                    <span className="triage-item-priority high">High</span>
+                  </div>
+                  <p className="triage-item-stores">Hamburg South · Cologne East · Berlin Mitte</p>
+                  <div className="triage-item-footer">
+                    <span className="triage-item-metric">+22% theme spike</span>
+                    <button className="triage-action-btn" onClick={(e) => { e.stopPropagation(); setShowTriageDetail('voc-messy'); }}>
+                      View Details <ChevronRight size={14} />
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-            
-            <div className="triage-item" onClick={() => setShowTriageDetail('sea-fire')}>
-              <div className="triage-item-content">
-                <div className="triage-item-header">
-                  <span className="triage-item-title">SEA Auto-Fail: Fire Exit</span>
-                  <span className="triage-item-priority critical">Critical</span>
-                </div>
-                <p className="triage-item-stores">Hamburg South — Display blocking exit</p>
-                <div className="triage-item-footer">
-                  <span className="triage-item-metric">Escalated to DM · Pending</span>
-                  <button className="triage-action-btn" onClick={(e) => { e.stopPropagation(); setShowTriageDetail('sea-fire'); }}>
-                    View Details
-                    <ChevronRight size={14} />
-                  </button>
+              <div className="triage-item" onClick={() => setShowTriageDetail('sea-fire')}>
+                <div className="triage-item-content">
+                  <div className="triage-item-header">
+                    <span className="triage-item-title">SEA Auto-Fail: Fire Exit</span>
+                    <span className="triage-item-priority critical">Critical</span>
+                  </div>
+                  <p className="triage-item-stores">Hamburg South — Display blocking exit</p>
+                  <div className="triage-item-footer">
+                    <span className="triage-item-metric">Escalated to DM · Pending</span>
+                    <button className="triage-action-btn" onClick={(e) => { e.stopPropagation(); setShowTriageDetail('sea-fire'); }}>
+                      View Details <ChevronRight size={14} />
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-            
-            <div className="triage-item" onClick={() => setShowTriageDetail('oos-risk')}>
-              <div className="triage-item-content">
-                <div className="triage-item-header">
-                  <span className="triage-item-title">Inbound OOS Risk</span>
-                  <span className="triage-item-priority medium">Medium</span>
-                </div>
-                <p className="triage-item-stores">Cologne East — 3 SKUs delayed 48h</p>
-                <div className="triage-item-footer">
-                  <span className="triage-item-metric">Adaptation pending approval</span>
-                  <button className="triage-action-btn" onClick={(e) => { e.stopPropagation(); setShowTriageDetail('oos-risk'); }}>
-                    View Details
-                    <ChevronRight size={14} />
-                  </button>
+              <div className="triage-item" onClick={() => setShowTriageDetail('oos-risk')}>
+                <div className="triage-item-content">
+                  <div className="triage-item-header">
+                    <span className="triage-item-title">Inbound OOS Risk</span>
+                    <span className="triage-item-priority medium">Medium</span>
+                  </div>
+                  <p className="triage-item-stores">Cologne East — 3 SKUs delayed 48h</p>
+                  <div className="triage-item-footer">
+                    <span className="triage-item-metric">Adaptation pending approval</span>
+                    <button className="triage-action-btn" onClick={(e) => { e.stopPropagation(); setShowTriageDetail('oos-risk'); }}>
+                      View Details <ChevronRight size={14} />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-          
+
+          {/* AI Summary */}
           <div className="ai-summary-section">
             <div className="ai-summary-label">
               <Sparkles size={12} />
@@ -839,105 +971,117 @@ export const DistrictIntelligence: React.FC = () => {
                 <span className="point-text">The SEA fire-exit block is a regulatory and safety exposure; any delay risks store closure and penalties.</span>
               </div>
               <div className="ai-summary-point">
-                <span className="point-label">Manager’s first move</span>
+                <span className="point-label">Manager's first move</span>
                 <span className="point-text">Deploy Hamburg South team now to clear the exit, confirm compliance, then approve Cologne East adaptation plan to protect sales.</span>
               </div>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* District Broadcasting */}
-        <div className="pulse-card broadcast-card">
-          <div className="pulse-card-header">
+      {/* District Broadcasting — full width below executive pulse */}
+      <div className="broadcast-section-fw">
+        <div className="broadcast-fw-header">
+          <div className="broadcast-section-header">
             <Megaphone size={16} className="broadcast-icon" />
-            <span className="pulse-card-label">District Broadcasting</span>
+            <span>District Broadcasting</span>
           </div>
-          <div className="broadcast-content">
-            <div className="broadcast-stats">
-              <div className="broadcast-stat">
+          <button
+            className="create-broadcast-btn-sm"
+            onClick={() => {
+              setShowChatWindow(true);
+              setChatExpanded(true);
+              setShowBroadcastComposer(true);
+            }}
+          >
+            <Megaphone size={12} />
+            Create Broadcast
+          </button>
+        </div>
+        <div className="broadcast-grid">
+          {/* Column 1 — Stats */}
+          <div className="broadcast-col broadcast-col-stats">
+            <div className="broadcast-stats-vertical">
+              <div className="broadcast-stat-compact">
                 <span className="stat-number">3</span>
                 <span className="stat-label">Active</span>
               </div>
-              <div className="broadcast-stat">
+              <div className="broadcast-stat-compact">
                 <span className="stat-number">12</span>
                 <span className="stat-label">This Week</span>
               </div>
-              <div className="broadcast-stat">
+              <div className="broadcast-stat-compact">
                 <span className="stat-number">94%</span>
                 <span className="stat-label">Acknowledged</span>
               </div>
             </div>
-            
-            <div className="recent-broadcasts">
-              <div className="broadcast-item">
-                <div className="broadcast-item-header">
-                  <span className="broadcast-priority high">HIGH</span>
-                  <span className="broadcast-time">2h ago</span>
-                </div>
-                <p className="broadcast-title">Safety Protocol Update</p>
-                <span className="broadcast-ack">8/8 stores acknowledged</span>
+          </div>
+          {/* Column 2 — Recent Broadcasts */}
+          <div className="broadcast-col broadcast-col-recent">
+            <span className="broadcast-col-title">Recent Broadcasts</span>
+            <div className="broadcast-item-compact">
+              <div className="broadcast-item-row">
+                <span className="broadcast-priority high">HIGH</span>
+                <span className="broadcast-title-sm">Safety Protocol Update</span>
+                <span className="broadcast-time">2h ago</span>
               </div>
-              <div className="broadcast-item">
-                <div className="broadcast-item-header">
-                  <span className="broadcast-priority medium">MEDIUM</span>
-                  <span className="broadcast-time">Yesterday</span>
-                </div>
-                <p className="broadcast-title">Weekend Staffing Reminder</p>
-                <span className="broadcast-ack">6/8 stores acknowledged</span>
-              </div>
-              <div className="broadcast-item">
-                <div className="broadcast-item-header">
-                  <span className="broadcast-priority low">LOW</span>
-                  <span className="broadcast-time">3d ago</span>
-                </div>
-                <p className="broadcast-title">Planogram Refresh Checklist</p>
-                <span className="broadcast-ack">5/8 stores acknowledged</span>
-              </div>
+              <span className="broadcast-ack">8/8 stores acknowledged</span>
             </div>
-
-            <div className="broadcast-insights">
-              <div className="broadcast-insight risk">
-                <AlertTriangle size={16} />
-                <div className="insight-copy">
-                  <span className="insight-label">Biggest gap</span>
-                  <p>Cologne East has 3 broadcasts pending acknowledgment.</p>
-                </div>
-                <button className="insight-action" onClick={() => {
-                  setShowChatWindow(true);
-                  setChatExpanded(true);
-                  setShowBroadcastComposer(true);
-                }}>
-                  Send Nudge
-                  <ChevronRight size={14} />
+            <div className="broadcast-item-compact">
+              <div className="broadcast-item-row">
+                <span className="broadcast-priority medium">MEDIUM</span>
+                <span className="broadcast-title-sm">Weekend Staffing Reminder</span>
+                <span className="broadcast-time">Yesterday</span>
+              </div>
+              <span className="broadcast-ack">6/8 stores acknowledged</span>
+            </div>
+            <div className="broadcast-item-compact">
+              <div className="broadcast-item-row">
+                <span className="broadcast-priority low">LOW</span>
+                <span className="broadcast-title-sm">Planogram Refresh Checklist</span>
+                <span className="broadcast-time">3d ago</span>
+              </div>
+              <div className="broadcast-item-actions">
+                <span className="broadcast-ack">5/8 stores acknowledged</span>
+                <button className="copilot-link-btn" onClick={() => navigate('/command-center/ai-copilot?mode=pog&context=pog-self-audit')}>
+                  <Bot size={12} />
+                  POG Self Audit in AI Copilot
+                  <ChevronRight size={12} />
                 </button>
               </div>
-              <div className="broadcast-insight engagement">
-                <Users size={16} />
-                <div className="insight-copy">
-                  <span className="insight-label">Audience focus</span>
-                  <p>Ops teams responded fastest (avg 32 min) vs Merch (59 min).</p>
-                </div>
-              </div>
-              <div className="broadcast-insight planning">
-                <Megaphone size={16} />
-                <div className="insight-copy">
-                  <span className="insight-label">Next broadcast</span>
-                  <p>Schedule safety refresher follow-up for Friday morning.</p>
-                </div>
-              </div>
             </div>
-            
-            <button 
-              className="create-broadcast-btn"
-              onClick={() => {
+          </div>
+          {/* Column 3 — Insights */}
+          <div className="broadcast-col broadcast-col-insights">
+            <span className="broadcast-col-title">Insights</span>
+            <div className="broadcast-insight-compact risk">
+              <AlertTriangle size={14} />
+              <div className="insight-copy">
+                <span className="insight-label">Biggest gap</span>
+                <p>Cologne East — 3 pending acks</p>
+              </div>
+              <button className="insight-action" onClick={() => {
                 setShowChatWindow(true);
                 setChatExpanded(true);
                 setShowBroadcastComposer(true);
-              }}
-            >
+              }}>
+                Nudge <ChevronRight size={12} />
+              </button>
+            </div>
+            <div className="broadcast-insight-compact engagement">
+              <Users size={14} />
+              <div className="insight-copy">
+                <span className="insight-label">Response speed</span>
+                <p>Ops avg 32 min · Merch avg 59 min</p>
+              </div>
+            </div>
+            <div className="broadcast-insight-compact planning">
               <Megaphone size={14} />
-              Create Broadcast
-            </button>
+              <div className="insight-copy">
+                <span className="insight-label">Next broadcast</span>
+                <p>Safety refresher — Friday AM</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1538,10 +1682,13 @@ export const DistrictIntelligence: React.FC = () => {
                     </td>
                     {auditCategories.map(cat => {
                       const val = scores?.[cat] || 0;
+                      const cellKey = `${store.storeNumber}-${cat}`;
+                      const detail = cellKey in auditCellDetails ? auditCellDetails[cellKey] : generateAutoDetail(store.storeNumber, cat, val);
+                      const skillMap = getSkillForDimension(cat);
                       return (
                         <td key={cat} className="heatmap-cell">
                           <div
-                            className="heatmap-cell-inner"
+                            className="heatmap-cell-inner heatmap-cell-clickable"
                             style={{
                               background: getComplianceColor(val),
                               color: getComplianceTextColor(val),
@@ -1551,6 +1698,18 @@ export const DistrictIntelligence: React.FC = () => {
                               setHeatmapTip({ x: rect.left + rect.width / 2, y: rect.top, store: store.storeName, cat, val });
                             }}
                             onMouseLeave={() => setHeatmapTip(null)}
+                            onClick={() => {
+                              setHeatmapTip(null);
+                              setHeatmapDetail({
+                                storeNumber: store.storeNumber,
+                                storeName: store.storeName,
+                                category: cat,
+                                score: val,
+                                detail,
+                                skill: skillMap.skill,
+                                skillLogic: skillMap.logic,
+                              });
+                            }}
                           >
                             <span className="heatmap-value">{val}%</span>
                           </div>
@@ -1559,7 +1718,7 @@ export const DistrictIntelligence: React.FC = () => {
                     })}
                     <td className="heatmap-cell">
                       <div
-                        className="heatmap-cell-inner heatmap-avg"
+                        className="heatmap-cell-inner heatmap-avg heatmap-cell-clickable"
                         style={{
                           background: getComplianceColor(avg),
                           color: getComplianceTextColor(avg),
@@ -1569,6 +1728,19 @@ export const DistrictIntelligence: React.FC = () => {
                           setHeatmapTip({ x: rect.left + rect.width / 2, y: rect.top, store: store.storeName, cat: 'Average', val: avg });
                         }}
                         onMouseLeave={() => setHeatmapTip(null)}
+                        onClick={() => {
+                          setHeatmapTip(null);
+                          const avgSkillMap = getSkillForDimension('Avg');
+                          setHeatmapDetail({
+                            storeNumber: store.storeNumber,
+                            storeName: store.storeName,
+                            category: 'Avg',
+                            score: avg,
+                            detail: generateAutoDetail(store.storeNumber, 'Avg', avg),
+                            skill: avgSkillMap.skill,
+                            skillLogic: avgSkillMap.logic,
+                          });
+                        }}
                       >
                         <span className="heatmap-value">{avg}%</span>
                       </div>
@@ -1589,6 +1761,95 @@ export const DistrictIntelligence: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Heatmap Cell Detail Modal */}
+      {heatmapDetail && (
+        <div className="heatmap-detail-overlay" onClick={() => setHeatmapDetail(null)}>
+          <div className="heatmap-detail-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="heatmap-detail-header">
+              <div className="heatmap-detail-title-row">
+                <div className="heatmap-detail-badge" style={{ background: getComplianceColor(heatmapDetail.score), color: getComplianceTextColor(heatmapDetail.score) }}>
+                  {heatmapDetail.score}%
+                </div>
+                <div className="heatmap-detail-title">
+                  <h3>{heatmapDetail.category} Audit</h3>
+                  <span className="heatmap-detail-store">#{heatmapDetail.storeNumber} — {heatmapDetail.storeName}</span>
+                </div>
+              </div>
+              <button className="heatmap-detail-close" onClick={() => setHeatmapDetail(null)}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="heatmap-detail-meta">
+              <div className="heatmap-detail-meta-item">
+                <Clock size={13} />
+                <span>Last audit: {heatmapDetail.detail.lastAudit}</span>
+              </div>
+              <div className="heatmap-detail-meta-item">
+                <Users size={13} />
+                <span>Auditor: {heatmapDetail.detail.auditor}</span>
+              </div>
+              <div className={`heatmap-detail-trend heatmap-trend--${heatmapDetail.detail.trend}`}>
+                {heatmapDetail.detail.trend === 'improving' && <TrendingUp size={13} />}
+                {heatmapDetail.detail.trend === 'declining' && <TrendingDown size={13} />}
+                {heatmapDetail.detail.trend === 'stable' && <Minus size={13} />}
+                <span>{heatmapDetail.detail.trend.charAt(0).toUpperCase() + heatmapDetail.detail.trend.slice(1)}</span>
+              </div>
+            </div>
+
+            <div className="heatmap-detail-findings">
+              <span className="heatmap-detail-section-label">
+                <AlertCircle size={13} />
+                Findings ({heatmapDetail.detail.findings.length})
+              </span>
+              <div className="heatmap-detail-findings-list">
+                {heatmapDetail.detail.findings.map((finding, idx) => (
+                  <div key={idx} className="heatmap-finding-item">
+                    <span className="heatmap-finding-num">{idx + 1}</span>
+                    <span className="heatmap-finding-text">{finding}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="heatmap-detail-recommendation">
+              <span className="heatmap-detail-section-label">
+                <Sparkles size={13} />
+                AI Recommendation
+              </span>
+              <p>{heatmapDetail.detail.recommendation}</p>
+            </div>
+
+            <div className="heatmap-detail-skill-tag">
+              <span className="heatmap-skill-label">AI Copilot Skill:</span>
+              <span className={`heatmap-skill-pill heatmap-skill--${heatmapDetail.skill}`}>
+                {heatmapDetail.skill === 'pog' ? 'POG' : heatmapDetail.skill === 'knowledge' ? 'Knowledge' : heatmapDetail.skill === 'actions' ? 'Action' : 'Analytics'}
+              </span>
+              <span className="heatmap-skill-logic">{heatmapDetail.skillLogic}</span>
+            </div>
+
+            <div className="heatmap-detail-actions">
+              <button className="heatmap-action-btn heatmap-action-primary" onClick={() => {
+                const d = heatmapDetail;
+                setHeatmapDetail(null);
+                navigate(`/command-center/ai-copilot?mode=${d.skill}&context=audit-${d.category.toLowerCase().replace(/ /g, '-')}&store=${d.storeNumber}&storeName=${encodeURIComponent(d.storeName)}&score=${d.score}`);
+              }}>
+                <Sparkles size={14} />
+                Investigate in AI Copilot
+                <ChevronRight size={14} />
+              </button>
+              <button className="heatmap-action-btn heatmap-action-secondary" onClick={() => {
+                setHeatmapDetail(null);
+                navigate(`/store-operations/store-deep-dive?store=${heatmapDetail.storeNumber}`);
+              }}>
+                <Store size={14} />
+                View Store
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Floating Chat Button */}
       <button 
