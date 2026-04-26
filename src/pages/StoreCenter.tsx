@@ -416,6 +416,11 @@ export const StoreCenter: React.FC = () => {
         </div>
       )}
 
+      {/* ── Page Title ──────────────────────────────────── */}
+      <div className="sc-page-title-bar">
+        <h1 className="sc-page-title">Store Deep Dive</h1>
+      </div>
+
       {/* ── Context Header ──────────────────────────────── */}
       <div className="sc-context-header">
         <div className="sc-ctx-left">

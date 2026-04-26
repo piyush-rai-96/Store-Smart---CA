@@ -77,6 +77,23 @@
 }
 
 /* ========================================
+   PAGE TITLE BAR
+   ======================================== */
+
+.sc-page-title-bar {
+  padding: 20px 32px 0 32px;
+  background: #ffffff;
+}
+
+.sc-page-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e1b4b;
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+/* ========================================
    CONTEXT HEADER
    ======================================== */
 

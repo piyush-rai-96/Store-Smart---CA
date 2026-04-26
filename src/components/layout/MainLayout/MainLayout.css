@@ -19,7 +19,6 @@
 .main-layout-main {
   overflow-y: auto;
   overflow-x: hidden;
-  padding-top: 64px;
 }
 
 /* Constrain Impact UI Header to content area only */
