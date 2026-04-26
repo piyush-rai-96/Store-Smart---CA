@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Sun,
   Moon,
@@ -51,6 +51,7 @@ import {
   Priority
 } from '../types/storeOperations';
 import './StoreOpsHome.css';
+import womensWallPlanogram from '../assets/C&A_WOMENS_WALL_STANDARD.png';
 
 // Enhanced Insight type for headline-driven cards
 interface InsightItem {
@@ -203,24 +204,24 @@ interface ActionItemV2 extends EnhancedActionItem {
 const generateMockActionItems = (): ActionItemV2[] => [
   {
     id: '2',
-    title: 'Approve planogram change request',
+    title: 'Approve C&A Women\'s Wall planogram reset',
     type: 'ASSIGNED',
     source_module: 'Planogram',
     priority_score: 98,
     due_time: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
     status: 'overdue',
     context: 'Store #5678',
-    impact: 'Blocking execution in 3 stores',
+    impact: 'Blocking SS26 floor reset across 3 stores',
     severity: 'critical',
     cta: 'Approve Now',
     microContext: '3 stores waiting',
-    planogramImage: 'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=800&auto=format&fit=crop&q=60',
+    planogramImage: womensWallPlanogram,
     planogramActions: [
-      { id: 'pa1', description: 'Move energy drinks to eye-level shelf (Aisle 3)', section: 'Beverages', priority: 'high' },
-      { id: 'pa2', description: 'Restock protein bars - minimum 20 units front-facing', section: 'Snacks', priority: 'high' },
-      { id: 'pa3', description: 'Add new promotional end-cap for seasonal items', section: 'Seasonal', priority: 'medium' },
-      { id: 'pa4', description: 'Remove discontinued SKUs from bottom shelf', section: 'Clearance', priority: 'low' },
-      { id: 'pa5', description: 'Update price tags for all items in Section B', section: 'Pricing', priority: 'medium' },
+      { id: 'pa1', description: 'Move SS26 premium blouses to Top Rail — face-out, sized XS–XL', section: 'Top Rail', priority: 'high' },
+      { id: 'pa2', description: 'Restock denim Mid Rail — Skinny, Mom, Straight, Wide (min 6 units/size)', section: 'Mid Rail', priority: 'high' },
+      { id: 'pa3', description: 'Set core dresses on Shelf 2 — navy, white, olive, black at €27.99 / €29.89', section: 'Shelf 2', priority: 'medium' },
+      { id: 'pa4', description: 'Remove discontinued FW25 tees from Base Table', section: 'Base Table', priority: 'low' },
+      { id: 'pa5', description: 'Refresh price tags & size strips across 12ft wall section', section: 'Pricing', priority: 'medium' },
     ],
     deep_link: {
       target_module: 'planogram',
@@ -459,6 +460,78 @@ const formatDueTime = (timestamp: string) => {
   if (minutes < 60) return `Due in ${minutes}m`;
   if (hours < 24) return `Due in ${hours}h`;
   return `Due in ${days}d`;
+};
+
+// Premium custom dropdown for assignee selection (matches Planogram Intelligence module style)
+interface AssigneeOption {
+  value: string;
+  label: string;
+  sublabel?: string;
+  avatar?: string;
+}
+
+interface AssigneeDropdownProps {
+  value: string;
+  options: AssigneeOption[];
+  onChange: (value: string) => void;
+  placeholder?: string;
+}
+
+const AssigneeDropdown: React.FC<AssigneeDropdownProps> = ({ value, options, onChange, placeholder = 'Select assignee...' }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const onDocClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setIsOpen(false);
+    };
+    document.addEventListener('mousedown', onDocClick);
+    return () => document.removeEventListener('mousedown', onDocClick);
+  }, []);
+
+  const selected = options.find(o => o.value === value);
+
+  return (
+    <div className="assignee-dropdown" ref={ref}>
+      <button
+        type="button"
+        className={`assignee-dropdown-trigger ${isOpen ? 'open' : ''} ${selected ? 'has-value' : ''}`}
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        {selected ? (
+          <div className="assignee-dropdown-selected">
+            {selected.avatar && <span className="assignee-dropdown-avatar">{selected.avatar}</span>}
+            <div className="assignee-dropdown-selected-text">
+              <span className="assignee-dropdown-name">{selected.label}</span>
+              {selected.sublabel && <span className="assignee-dropdown-role">{selected.sublabel}</span>}
+            </div>
+          </div>
+        ) : (
+          <span className="assignee-dropdown-placeholder">{placeholder}</span>
+        )}
+        <ChevronDown size={16} className={`assignee-dropdown-chevron ${isOpen ? 'open' : ''}`} />
+      </button>
+      {isOpen && (
+        <div className="assignee-dropdown-menu">
+          {options.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              className={`assignee-dropdown-option ${value === opt.value ? 'selected' : ''}`}
+              onClick={() => { onChange(opt.value); setIsOpen(false); }}
+            >
+              {opt.avatar && <span className="assignee-dropdown-avatar">{opt.avatar}</span>}
+              <div className="assignee-dropdown-option-text">
+                <span className="assignee-dropdown-name">{opt.label}</span>
+                {opt.sublabel && <span className="assignee-dropdown-role">{opt.sublabel}</span>}
+              </div>
+              {value === opt.value && <Check size={16} className="assignee-dropdown-check" />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 };
 
 
@@ -2084,19 +2157,19 @@ export const StoreOpsHome: React.FC = () => {
                         <p className="planogram-action-desc">{action.description}</p>
                       </div>
                       <div className="planogram-action-assign">
-                        <select 
+                        <AssigneeDropdown
                           value={planogramActionAssignments[action.id] || ''}
-                          onChange={(e) => handleAssignPlanogramAction(action.id, e.target.value)}
-                          className="assign-select"
-                        >
-                          <option value="">Select assignee...</option>
-                          <option value="self">Assign to myself</option>
-                          {teamMembers.map((member) => (
-                            <option key={member.id} value={member.id}>
-                              {member.name} ({member.role})
-                            </option>
-                          ))}
-                        </select>
+                          onChange={(v) => handleAssignPlanogramAction(action.id, v)}
+                          options={[
+                            { value: 'self', label: 'Assign to myself', sublabel: 'You', avatar: 'ME' },
+                            ...teamMembers.map(m => ({
+                              value: m.id,
+                              label: m.name,
+                              sublabel: `${m.role} · ${m.store}`,
+                              avatar: m.avatar,
+                            })),
+                          ]}
+                        />
                       </div>
                     </div>
                   ))}

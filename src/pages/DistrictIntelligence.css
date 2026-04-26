@@ -910,11 +910,11 @@
   }
 }
 
-/* ===== Individual KPI Tile — Subtle & Clean ===== */
+/* ===== Individual KPI Tile — Premium ===== */
 .kpi-tile {
   background: #ffffff;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  border: 1px solid #eef2f7;
   padding: 12px 14px 10px;
   position: relative;
   transition: all 0.15s ease;
@@ -932,17 +932,18 @@
 }
 
 .kpi-tile--clickable:hover {
-  border-color: #cbd5e1;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  border-color: #c7d2fe;
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.08), 0 1px 3px rgba(15, 23, 42, 0.04);
+  transform: translateY(-1px);
 }
 
 .kpi-tile--active {
   border-color: var(--di-primary) !important;
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1) !important;
-  background: #fafaff;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12), 0 6px 20px rgba(99, 102, 241, 0.1) !important;
+  background: linear-gradient(180deg, #fafaff 0%, #ffffff 60%);
 }
 
-/* Category label — plain text, no colored backgrounds */
+/* Category chip — soft tinted pill matched to category */
 .kpi-tile-category {
   display: inline-flex;
   align-items: center;
@@ -964,87 +965,88 @@
   color: #94a3b8;
 }
 
-.kpi-tile-category--commercial,
-.kpi-tile-category--customer,
-.kpi-tile-category--execution,
-.kpi-tile-category--profitability,
-.kpi-tile-category--operations {
-  background: none;
-  color: #94a3b8;
-}
+/* Per-category icon tints (label stays neutral) */
+.kpi-tile-category--commercial svg { color: #6366f1; }
+.kpi-tile-category--customer svg { color: #ec4899; }
+.kpi-tile-category--execution svg { color: #0ea5e9; }
+.kpi-tile-category--profitability svg { color: #f59e0b; }
+.kpi-tile-category--operations svg { color: #64748b; }
 
 /* Primary value */
 .kpi-tile-value-row {
   display: flex;
   align-items: baseline;
-  gap: 4px;
-  margin-bottom: 1px;
+  gap: 5px;
+  margin-bottom: 2px;
 }
 
 .kpi-tile-primary {
-  font-size: 22px;
+  font-size: 26px;
   font-weight: 700;
-  color: #1e293b;
-  line-height: 1.2;
-  letter-spacing: -0.5px;
+  color: #0f172a;
+  line-height: 1.1;
+  letter-spacing: -0.6px;
   font-feature-settings: 'tnum';
 }
 
 .kpi-tile-unit {
   font-size: 10px;
-  font-weight: 500;
+  font-weight: 600;
   color: #94a3b8;
   text-transform: uppercase;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.4px;
 }
 
 .kpi-tile-label {
   display: block;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
-  color: #64748b;
-  margin-bottom: 4px;
+  color: #475569;
+  margin-bottom: 8px;
 }
 
-/* Secondary row (for combined cards) */
-.kpi-tile-secondary {
-  display: flex;
+/* Insight chip — replaces repetitive secondary numeric block */
+.kpi-tile-insight {
+  display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin-bottom: 4px;
-  padding: 0;
-  background: none;
-  border-radius: 0;
-  border: none;
-}
-
-.kpi-secondary-label {
-  font-size: 10px;
-  color: #94a3b8;
+  font-size: 10.5px;
   font-weight: 500;
+  color: #64748b;
+  background: #f8fafc;
+  border: 1px solid #eef2f7;
+  padding: 3px 8px 3px 7px;
+  border-radius: 999px;
+  margin-bottom: 8px;
+  width: fit-content;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.kpi-secondary-value {
-  font-size: 11px;
-  font-weight: 600;
-  font-feature-settings: 'tnum';
+.kpi-tile-insight-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #94a3b8;
+  flex-shrink: 0;
 }
 
-.kpi-secondary-value.status-positive { color: #16a34a; }
-.kpi-secondary-value.status-negative { color: #dc2626; }
-.kpi-secondary-value.status-warning { color: #b45309; }
-.kpi-secondary-value.status-neutral { color: #475569; }
+.kpi-tile--positive .kpi-tile-insight-dot { background: #10b981; }
+.kpi-tile--negative .kpi-tile-insight-dot { background: #ef4444; }
+.kpi-tile--warning .kpi-tile-insight-dot { background: #f59e0b; }
 
-/* Delta indicator — minimal, no background */
+/* Delta indicator */
 .kpi-tile-delta {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  font-size: 11px;
+  gap: 3px;
+  font-size: 11.5px;
   font-weight: 600;
   padding: 0;
   border-radius: 0;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   font-feature-settings: 'tnum';
   background: none;
 }
@@ -1081,17 +1083,17 @@
   margin-left: 2px;
 }
 
-/* Sparkline — subtle */
+/* Sparkline — premium */
 .kpi-tile-sparkline {
-  height: 24px;
-  width: 100%;
-  margin-top: auto;
-  opacity: 0.6;
-  transition: opacity 0.15s ease;
+  height: 36px;
+  width: calc(100% + 28px);
+  margin: 4px -14px -10px;
+  opacity: 0.92;
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 .kpi-tile:hover .kpi-tile-sparkline {
-  opacity: 0.85;
+  opacity: 1;
 }
 
 .kpi-tile-sparkline svg {
@@ -2479,6 +2481,71 @@
 
 .leaderboard-table-premium thead tr {
   background: linear-gradient(180deg, var(--di-bg-subtle) 0%, #f1f5f9 100%);
+}
+
+.leaderboard-table-premium th.th-sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.leaderboard-table-premium th.th-sortable > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.leaderboard-table-premium th.th-sortable .sort-icon {
+  margin-left: 4px;
+  vertical-align: middle;
+  transition: color 0.12s ease, opacity 0.12s ease;
+}
+
+.leaderboard-table-premium th.th-sortable .sort-icon--idle {
+  color: #cbd5e1;
+  opacity: 0.85;
+}
+
+.leaderboard-table-premium th.th-sortable .sort-icon--active {
+  color: var(--di-primary, #6366f1);
+  opacity: 1;
+}
+
+.leaderboard-table-premium th.th-sortable:hover {
+  background: #eef2ff;
+  color: var(--di-primary, #6366f1);
+}
+
+.leaderboard-table-premium th.th-sortable:hover .sort-icon--idle {
+  color: #94a3b8;
+  opacity: 1;
+}
+
+.store-search-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: #e2e8f0;
+  color: #64748b;
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.12s ease;
+}
+
+.store-search-clear:hover {
+  background: #cbd5e1;
+  color: #1e293b;
+}
+
+.leaderboard-empty {
+  padding: 40px 16px;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 13px;
 }
 
 .leaderboard-table-premium th {

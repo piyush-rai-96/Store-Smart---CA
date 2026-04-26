@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   Store,
@@ -169,60 +169,161 @@ const districtStores: DistrictStore[] = [
   { id: '8', storeNumber: '9012', storeName: 'Maple Heights', format: 'Mall Anchor', cluster: 'Mall Anchor', spi: 58, spiTier: 'Crisis' },
 ];
 
-// Mock Data
-const storeInfo = {
-  storeNumber: '2034',
-  storeName: 'Downtown Plaza',
-  district: 'District 14 — Tennessee',
-  format: 'Urban Flagship',
-  cluster: 'Urban Flagship',
-  lastRefresh: new Date(),
+// District-level context (shared)
+const districtContext = {
+  name: 'District 14 — Tennessee',
+  totalStores: districtStores.length,
 };
 
-const storeMetrics = {
-  spi: 78,
-  spiTier: 'AtRisk' as SPITier,
-  momentum: 'Slipping' as MomentumType,
-  momentumDelta: -2.4,
-  vsDistrictAvg: -4.2,
-  compRank: 4,
-  compTotal: 12,
-  compMovement: -2,
-  inboundRiskActive: true,
-  delayedShipments: 2,
-  oosRiskSkus: 8,
+// ── Per-store data getters — everything below is derived from the selected store ──
+
+const getStoreMetrics = (store: DistrictStore) => {
+  const tier = store.spiTier;
+  const isPositive = tier === 'Excellence' || tier === 'Stable';
+  const deltaBase = tier === 'Excellence' ? 2.8 : tier === 'Stable' ? 0.4 : tier === 'AtRisk' ? -2.4 : -5.6;
+  const vsDistrict = store.spi - 79; // district avg ~79
+  const rank = districtStores
+    .slice()
+    .sort((a, b) => b.spi - a.spi)
+    .findIndex(s => s.id === store.id) + 1;
+  return {
+    spi: store.spi,
+    spiTier: tier,
+    momentum: (isPositive ? 'Improving' : tier === 'Crisis' ? 'Slipping' : 'Slipping') as MomentumType,
+    momentumDelta: deltaBase,
+    vsDistrictAvg: +vsDistrict.toFixed(1),
+    compRank: rank,
+    compTotal: districtStores.length,
+    compMovement: tier === 'Excellence' ? 1 : tier === 'Stable' ? 0 : tier === 'AtRisk' ? -2 : -3,
+    inboundRiskActive: !isPositive,
+    delayedShipments: tier === 'Crisis' ? 4 : tier === 'AtRisk' ? 2 : 0,
+    oosRiskSkus: tier === 'Crisis' ? 14 : tier === 'AtRisk' ? 8 : tier === 'Stable' ? 2 : 0,
+  };
 };
 
-const mockActions: StoreAction[] = [
-  { id: '1', title: "Fix planogram gap — Women's Wall Display", reason: 'Visual audit detected 8 missing facings in Dresses section, impacting trend items', impactType: 'revenue', location: "Section B, Women's Dresses", priority: 'urgent', cta: 'Open Visual Audit' },
-  { id: '2', title: 'Address fitting room availability', reason: 'Customer complaints about fitting room wait times during peak hours', impactType: 'customer', location: 'Fitting Room Area', priority: 'urgent', cta: 'View VoC Details' },
-  { id: '3', title: 'Restock size-run gaps in Basics', reason: 'Size M and L depleted in V-Neck Basics, high demand items', impactType: 'inventory', location: "Section D, Women's Basics", priority: 'high', cta: 'View Stock Levels' },
-  { id: '4', title: 'Update mannequin styling for new arrivals', reason: 'Current season collection not featured on floor mannequins', impactType: 'revenue', location: 'Store Entrance', priority: 'high', cta: 'View Style Guide' },
-  { id: '5', title: 'Review negative checkout experience comments', reason: '4 new comments about long queues during weekend peak', impactType: 'customer', location: 'Front Registers', priority: 'medium', cta: 'View Comments' },
-];
+const getStoreActions = (store: DistrictStore): StoreAction[] => {
+  const tier = store.spiTier;
+  if (tier === 'Excellence') {
+    return [
+      { id: '1', title: `Share ${store.storeName} playbook with district peers`, reason: 'Top performer on VoC and SEA — codify winning practices', impactType: 'compliance', location: 'Back Office', priority: 'high', cta: 'Create Playbook' },
+      { id: '2', title: 'Rotate premium mannequin displays for new drop', reason: 'Seasonal refresh to sustain trend momentum', impactType: 'revenue', location: 'Store Entrance', priority: 'medium', cta: 'View Style Guide' },
+      { id: '3', title: 'Coach adjacent stores on staffing model', reason: 'Staff availability scores leading the district', impactType: 'customer', location: 'District-wide', priority: 'medium', cta: 'Schedule Coaching' },
+    ];
+  }
+  if (tier === 'Stable') {
+    return [
+      { id: '1', title: 'Tighten endcap compliance on Summer Collection', reason: 'Minor POG deviations detected in 2 sections', impactType: 'compliance', location: 'Endcap 4 & 7', priority: 'high', cta: 'Open Visual Audit' },
+      { id: '2', title: 'Refresh basics size-runs in Men\'s', reason: 'Size M and L running low on V-Neck Basics', impactType: 'inventory', location: "Men's Basics", priority: 'medium', cta: 'View Stock Levels' },
+      { id: '3', title: 'Respond to recent VoC comments', reason: '3 neutral reviews on checkout speed this week', impactType: 'customer', location: 'Front Registers', priority: 'medium', cta: 'View Comments' },
+    ];
+  }
+  if (tier === 'AtRisk') {
+    return [
+      { id: '1', title: "Fix planogram gap — Women's Wall Display", reason: 'Visual audit detected 8 missing facings in Dresses section, impacting trend items', impactType: 'revenue', location: "Section B, Women's Dresses", priority: 'urgent', cta: 'Open Visual Audit' },
+      { id: '2', title: 'Address fitting room availability', reason: 'Customer complaints about fitting room wait times during peak hours', impactType: 'customer', location: 'Fitting Room Area', priority: 'urgent', cta: 'View VoC Details' },
+      { id: '3', title: 'Restock size-run gaps in Basics', reason: 'Size M and L depleted in V-Neck Basics, high demand items', impactType: 'inventory', location: "Section D, Women's Basics", priority: 'high', cta: 'View Stock Levels' },
+      { id: '4', title: 'Update mannequin styling for new arrivals', reason: 'Current season collection not featured on floor mannequins', impactType: 'revenue', location: 'Store Entrance', priority: 'high', cta: 'View Style Guide' },
+      { id: '5', title: 'Review negative checkout experience comments', reason: '4 new comments about long queues during weekend peak', impactType: 'customer', location: 'Front Registers', priority: 'medium', cta: 'View Comments' },
+    ];
+  }
+  // Crisis
+  return [
+    { id: '1', title: 'Clear fire exit blockage — Zone B', reason: 'Display merchandise obstructing emergency exit — regulatory risk', impactType: 'safety', location: 'Zone B, Rear Exit', priority: 'urgent', cta: 'Dispatch Now' },
+    { id: '2', title: 'Expedite replenishment — 14 OOS-risk SKUs', reason: 'Availability at 84% with 4 delayed shipments incoming', impactType: 'inventory', location: 'Backroom', priority: 'urgent', cta: 'Open Inbound' },
+    { id: '3', title: 'Deep-clean aisles before opening', reason: '"Messy aisles" VoC theme up 38% in 2 weeks', impactType: 'customer', location: 'All aisles', priority: 'urgent', cta: 'Assign Crew' },
+    { id: '4', title: 'Reassign weekend staffing coverage', reason: 'Sat/Sun coverage 22% below optimal', impactType: 'customer', location: 'Front of House', priority: 'high', cta: 'Open Workforce' },
+    { id: '5', title: 'Escalate to District Manager', reason: 'SPI decline for 4 consecutive weeks — triggers crisis protocol', impactType: 'compliance', location: 'HQ', priority: 'high', cta: 'Send Escalation' },
+  ];
+};
 
-const mockKPIs: KPIData[] = [
-  { id: 'sales', label: 'Net Sales Comp', value: '$186K', variance: '-3.2%', varianceType: 'negative', secondaryVariance: 'vs LY', trend: [85, 82, 78, 75, 72, 70, 68], tier: 'atrisk' },
-  { id: 'voc', label: 'VoC % Satisfied', value: '72%', variance: '-5.1%', varianceType: 'negative', secondaryVariance: 'vs LM', trend: [82, 80, 78, 75, 74, 73, 72], tier: 'atrisk' },
-  { id: 'sea', label: 'SEA Score', value: '76.4', variance: '-2.8', varianceType: 'negative', secondaryVariance: 'vs LM', trend: [82, 80, 79, 78, 77, 76, 76], tier: 'atrisk' },
-  { id: 'salesVar', label: 'Sales $ % Var', value: '-2.8%', variance: '-1.4pp', varianceType: 'negative', secondaryVariance: 'vs LY', trend: [2, 1, 0, -1, -2, -2.5, -2.8], tier: 'atrisk' },
-  { id: 'gm', label: 'GM% bps Var', value: '-25 bps', variance: '-15 bps', varianceType: 'negative', secondaryVariance: 'vs LY', trend: [10, 5, 0, -10, -15, -20, -25], tier: 'warning' },
-  { id: 'pog', label: 'POG Compliance', value: '74%', variance: '-8%', varianceType: 'negative', secondaryVariance: 'vs LM', trend: [88, 85, 82, 80, 78, 76, 74], tier: 'atrisk' },
-];
+const getStoreKPIs = (store: DistrictStore): KPIData[] => {
+  const tier = store.spiTier;
+  const isGood = tier === 'Excellence' || tier === 'Stable';
+  const tierKey = tier === 'Excellence' ? 'good' : tier === 'Stable' ? 'stable' : tier === 'AtRisk' ? 'atrisk' : 'warning';
+  const netSales = Math.round(120 + store.spi * 1.8);
+  const voc = Math.max(55, Math.min(95, store.spi - 2));
+  const sea = Math.max(58, Math.min(97, store.spi + 1));
+  const salesVar = +(((store.spi - 79) / 79) * 12).toFixed(1);
+  const gm = Math.round((store.spi - 79) * 3);
+  const pog = Math.max(60, Math.min(98, store.spi - 4));
+  const mk = (base: number, trendDir: 'up' | 'down') => {
+    const arr: number[] = [];
+    for (let i = 0; i < 7; i++) arr.push(+(base + (trendDir === 'up' ? -6 + i : 6 - i)).toFixed(1));
+    return arr;
+  };
+  return [
+    { id: 'sales', label: 'Net Sales Comp', value: `$${netSales}K`, variance: `${isGood ? '+' : ''}${salesVar}%`, varianceType: isGood ? 'positive' : 'negative', secondaryVariance: 'vs LY', trend: mk(netSales * 0.5, isGood ? 'up' : 'down'), tier: tierKey as KPIData['tier'] },
+    { id: 'voc', label: 'VoC % Satisfied', value: `${voc}%`, variance: `${isGood ? '+' : '-'}${isGood ? 2.8 : 5.1}%`, varianceType: isGood ? 'positive' : 'negative', secondaryVariance: 'vs LM', trend: mk(voc, isGood ? 'up' : 'down'), tier: tierKey as KPIData['tier'] },
+    { id: 'sea', label: 'SEA Score', value: `${sea}.4`, variance: `${isGood ? '+' : '-'}${isGood ? 1.6 : 2.8}`, varianceType: isGood ? 'positive' : 'negative', secondaryVariance: 'vs LM', trend: mk(sea, isGood ? 'up' : 'down'), tier: tierKey as KPIData['tier'] },
+    { id: 'salesVar', label: 'Sales $ % Var', value: `${isGood ? '+' : ''}${salesVar}%`, variance: `${isGood ? '+' : '-'}1.4pp`, varianceType: isGood ? 'positive' : 'negative', secondaryVariance: 'vs LY', trend: mk(salesVar, isGood ? 'up' : 'down'), tier: tierKey as KPIData['tier'] },
+    { id: 'gm', label: 'GM% bps Var', value: `${gm >= 0 ? '+' : ''}${gm} bps`, variance: `${gm >= 0 ? '+' : ''}${Math.round(gm * 0.6)} bps`, varianceType: gm >= 0 ? 'positive' : 'negative', secondaryVariance: 'vs LY', trend: mk(gm, gm >= 0 ? 'up' : 'down'), tier: tierKey as KPIData['tier'] },
+    { id: 'pog', label: 'POG Compliance', value: `${pog}%`, variance: `${isGood ? '+' : '-'}${isGood ? 3 : 8}%`, varianceType: isGood ? 'positive' : 'negative', secondaryVariance: 'vs LM', trend: mk(pog, isGood ? 'up' : 'down'), tier: tierKey as KPIData['tier'] },
+  ];
+};
 
-const mockStreamDiagnostics: StreamDiagnostic[] = [
-  { stream: 'Sales', icon: <DollarSign size={16} />, primaryIssue: 'Apparel Revenue Decline', finding: "Women's Dresses and Tops underperforming vs plan by 12%", variance: '-3.2% vs district', varianceType: 'negative', severity: 'critical' },
-  { stream: 'VoC', icon: <MessageSquare size={16} />, primaryIssue: 'Fitting Room Wait', finding: 'Peak hour complaints up 28%, fitting room availability cited', variance: '-5.1% vs district', varianceType: 'negative', severity: 'critical' },
-  { stream: 'Visual', icon: <ShieldCheck size={16} />, primaryIssue: 'Display Compliance', finding: 'Mannequin styling outdated, color blocking needs refresh', variance: '-4.8 vs district', varianceType: 'negative', severity: 'warning' },
-  { stream: 'Inventory', icon: <Truck size={16} />, primaryIssue: 'Size-Run Gaps', finding: '12 SKUs with broken size runs, Basics most affected', variance: '8 styles impacted', varianceType: 'negative', severity: 'warning' },
-  { stream: 'Field Intel', icon: <Eye size={16} />, primaryIssue: 'No Active Flags', finding: 'Last visual audit 3 days ago, no escalations', variance: 'On track', varianceType: 'neutral', severity: 'healthy' },
-];
+const getStreamDiagnostics = (store: DistrictStore): StreamDiagnostic[] => {
+  const tier = store.spiTier;
+  if (tier === 'Excellence' || tier === 'Stable') {
+    const sev = tier === 'Excellence' ? 'healthy' : 'healthy';
+    return [
+      { stream: 'Sales', icon: <DollarSign size={16} />, primaryIssue: tier === 'Excellence' ? 'Apparel outperforming' : 'On plan', finding: tier === 'Excellence' ? `${store.storeName} leading district in Women's and Men's` : 'Comp sales tracking plan with minor softness in accessories', variance: `${tier === 'Excellence' ? '+4.2' : '+0.4'}% vs district`, varianceType: 'positive', severity: sev },
+      { stream: 'VoC', icon: <MessageSquare size={16} />, primaryIssue: 'Positive sentiment', finding: 'Staff helpfulness & cleanliness themes trending positive', variance: `+${tier === 'Excellence' ? 3.1 : 1.2}% vs district`, varianceType: 'positive', severity: sev },
+      { stream: 'Visual', icon: <ShieldCheck size={16} />, primaryIssue: 'Compliance on target', finding: 'Planogram and display standards consistently met', variance: `+${tier === 'Excellence' ? 2.4 : 0.8} vs district`, varianceType: 'positive', severity: sev },
+      { stream: 'Inventory', icon: <Truck size={16} />, primaryIssue: tier === 'Excellence' ? 'Availability strong' : 'Minor size-run gaps', finding: tier === 'Excellence' ? 'Availability at 97%, no size-run issues' : '2 SKUs below safety stock — replenishment in flight', variance: tier === 'Excellence' ? 'On track' : '2 styles impacted', varianceType: tier === 'Excellence' ? 'positive' : 'neutral', severity: sev },
+      { stream: 'Field Intel', icon: <Eye size={16} />, primaryIssue: 'No Active Flags', finding: 'Last visual audit clean, no escalations', variance: 'On track', varianceType: 'neutral', severity: 'healthy' },
+    ];
+  }
+  if (tier === 'AtRisk') {
+    return [
+      { stream: 'Sales', icon: <DollarSign size={16} />, primaryIssue: 'Apparel Revenue Decline', finding: "Women's Dresses and Tops underperforming vs plan by 12%", variance: '-3.2% vs district', varianceType: 'negative', severity: 'critical' },
+      { stream: 'VoC', icon: <MessageSquare size={16} />, primaryIssue: 'Fitting Room Wait', finding: 'Peak hour complaints up 28%, fitting room availability cited', variance: '-5.1% vs district', varianceType: 'negative', severity: 'critical' },
+      { stream: 'Visual', icon: <ShieldCheck size={16} />, primaryIssue: 'Display Compliance', finding: 'Mannequin styling outdated, color blocking needs refresh', variance: '-4.8 vs district', varianceType: 'negative', severity: 'warning' },
+      { stream: 'Inventory', icon: <Truck size={16} />, primaryIssue: 'Size-Run Gaps', finding: '12 SKUs with broken size runs, Basics most affected', variance: '8 styles impacted', varianceType: 'negative', severity: 'warning' },
+      { stream: 'Field Intel', icon: <Eye size={16} />, primaryIssue: 'No Active Flags', finding: 'Last visual audit 3 days ago, no escalations', variance: 'On track', varianceType: 'neutral', severity: 'healthy' },
+    ];
+  }
+  // Crisis
+  return [
+    { stream: 'Sales', icon: <DollarSign size={16} />, primaryIssue: 'Sustained Sales Miss', finding: 'Comp sales -12% for 4 straight weeks, Apparel leading the drop', variance: '-9.1% vs district', varianceType: 'negative', severity: 'critical' },
+    { stream: 'VoC', icon: <MessageSquare size={16} />, primaryIssue: 'Negative Sentiment Spike', finding: '"Messy aisles" and "staff availability" complaints up 38%', variance: '-8.4% vs district', varianceType: 'negative', severity: 'critical' },
+    { stream: 'Visual', icon: <ShieldCheck size={16} />, primaryIssue: 'SEA Auto-Fail', finding: 'Fire exit blocked in Zone B — regulatory risk', variance: 'Auto-fail triggered', varianceType: 'negative', severity: 'critical' },
+    { stream: 'Inventory', icon: <Truck size={16} />, primaryIssue: 'OOS Spike', finding: '14 SKUs out-of-stock, 4 shipments delayed', variance: 'Availability 84%', varianceType: 'negative', severity: 'critical' },
+    { stream: 'Field Intel', icon: <Eye size={16} />, primaryIssue: 'Active Escalation', finding: 'DM visit scheduled — 2 open escalations unresolved', variance: '2 flags open', varianceType: 'negative', severity: 'warning' },
+  ];
+};
 
-const crossStreamVerdict = {
-  discrepancyClass: 'Leading Indicator' as DiscrepancyClass,
-  assessment: "Fitting room wait times are preceding sales decline — customers abandoning purchase decisions due to inability to try on items, particularly in Women's Dresses.",
-  recommendedAction: "Increase fitting room staffing during 11am–3pm peak. Prioritize restocking size-run gaps in Basics to recover conversion rate.",
-  urgency: 'high' as const,
+const getCrossStreamVerdict = (store: DistrictStore): { discrepancyClass: DiscrepancyClass; assessment: string; recommendedAction: string; urgency: 'low' | 'medium' | 'high' } => {
+  const tier = store.spiTier;
+  if (tier === 'Excellence') {
+    return {
+      discrepancyClass: 'Ground Truth Confirmed' as DiscrepancyClass,
+      assessment: `${store.storeName} is firing on all cylinders — every diagnostic stream confirms sustained outperformance vs district benchmarks.`,
+      recommendedAction: 'Codify the playbook and cascade best practices to peer stores. Protect momentum by pre-empting seasonal transitions.',
+      urgency: 'low' as const,
+    };
+  }
+  if (tier === 'Stable') {
+    return {
+      discrepancyClass: 'Stable' as DiscrepancyClass,
+      assessment: `${store.storeName} is tracking plan with no systemic risks. Minor availability gaps are being managed in-flight.`,
+      recommendedAction: 'Maintain execution cadence, close minor POG deviations, and monitor VoC for early warning signals.',
+      urgency: 'low' as const,
+    };
+  }
+  if (tier === 'AtRisk') {
+    return {
+      discrepancyClass: 'Leading Indicator' as DiscrepancyClass,
+      assessment: "Fitting room wait times are preceding sales decline — customers abandoning purchase decisions due to inability to try on items, particularly in Women's Dresses.",
+      recommendedAction: 'Increase fitting room staffing during 11am–3pm peak. Prioritize restocking size-run gaps in Basics to recover conversion rate.',
+      urgency: 'high' as const,
+    };
+  }
+  return {
+    discrepancyClass: 'Imminent Gap' as DiscrepancyClass,
+    assessment: `${store.storeName} is in crisis: SEA auto-fail, VoC spike, and OOS surge are compounding. Sales are already responding — 4-week comp miss accelerating.`,
+    recommendedAction: 'Dispatch DM for on-site intervention today. Clear SEA auto-fail before close, expedite top-10 OOS SKUs, and restore baseline staffing.',
+    urgency: 'high' as const,
+  };
 };
 
 // Helper functions
@@ -273,6 +374,15 @@ export const StoreDeepDive: React.FC = () => {
     store.storeName.toLowerCase().includes(storeSearchQuery.toLowerCase()) ||
     store.storeNumber.includes(storeSearchQuery)
   );
+
+  // Per-store derived data — re-computes whenever selectedStore changes
+  const storeMetrics = useMemo(() => getStoreMetrics(selectedStore), [selectedStore]);
+  const mockActions = useMemo(() => getStoreActions(selectedStore), [selectedStore]);
+  const mockKPIs = useMemo(() => getStoreKPIs(selectedStore), [selectedStore]);
+  const mockStreamDiagnostics = useMemo(() => getStreamDiagnostics(selectedStore), [selectedStore]);
+  const crossStreamVerdict = useMemo(() => getCrossStreamVerdict(selectedStore), [selectedStore]);
+  const [lastRefreshTime] = useState(new Date());
+  const storeInfo = { district: districtContext.name, lastRefresh: lastRefreshTime };
 
   // Read store from URL parameters and set selected store
   useEffect(() => {

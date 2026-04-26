@@ -10,6 +10,8 @@ import {
   Store,
   ChevronRight,
   ChevronDown,
+  ChevronUp,
+  ArrowUpDown,
   Clock,
   Calendar,
   RefreshCw,
@@ -276,8 +278,7 @@ interface DistrictKPI {
   label: string;
   primaryValue: string;
   primaryUnit?: string;
-  secondaryLabel?: string;
-  secondaryValue?: string;
+  microInsight?: string;
   delta?: string;
   deltaDirection?: 'up' | 'down' | 'flat';
   deltaContext?: string;
@@ -297,8 +298,7 @@ const districtKPIs: DistrictKPI[] = [
     label: 'Sales Performance',
     primaryValue: '$1.26M',
     primaryUnit: 'MTD',
-    secondaryLabel: 'YoY Growth',
-    secondaryValue: '+4.2%',
+    microInsight: '4W avg $1.19M',
     delta: '+4.2%',
     deltaDirection: 'up',
     deltaContext: 'vs LY',
@@ -320,7 +320,8 @@ const districtKPIs: DistrictKPI[] = [
     category: 'customer',
     label: 'VoC Satisfaction',
     primaryValue: '82%',
-    delta: '-1.4%',
+    microInsight: 'Top theme: Messy Aisles',
+    delta: '-1.4pts',
     deltaDirection: 'down',
     deltaContext: 'WoW',
     status: 'warning',
@@ -342,6 +343,7 @@ const districtKPIs: DistrictKPI[] = [
     label: 'VoC Issue Rate',
     primaryValue: '3.8',
     primaryUnit: '/ 100 visits',
+    microInsight: '3 of 8 stores affected',
     delta: '+0.6',
     deltaDirection: 'up',
     deltaContext: 'WoW',
@@ -363,9 +365,10 @@ const districtKPIs: DistrictKPI[] = [
     category: 'execution',
     label: 'Shelf Audit Compliance',
     primaryValue: '89%',
-    delta: '-3%',
+    microInsight: '6th week below target',
+    delta: '-6pts',
     deltaDirection: 'down',
-    deltaContext: 'vs Target 95%',
+    deltaContext: 'vs target',
     status: 'warning',
     clickable: true,
     trendData: [92, 93, 91, 90, 92, 91, 89, 90, 88, 89, 90, 89],
@@ -384,7 +387,8 @@ const districtKPIs: DistrictKPI[] = [
     category: 'execution',
     label: 'OOS Rate',
     primaryValue: '4.1%',
-    delta: '+0.8%',
+    microInsight: 'Apparel drives 60%',
+    delta: '+0.8pts',
     deltaDirection: 'up',
     deltaContext: 'WoW',
     status: 'negative',
@@ -406,8 +410,7 @@ const districtKPIs: DistrictKPI[] = [
     label: 'Margin Health',
     primaryValue: '34.2%',
     primaryUnit: 'GM',
-    secondaryLabel: 'GM Δ vs LY',
-    secondaryValue: '-40 bps',
+    microInsight: 'Apparel markdown pressure',
     delta: '-40 bps',
     deltaDirection: 'down',
     deltaContext: 'vs LY',
@@ -497,6 +500,13 @@ export const DistrictIntelligence: React.FC = () => {
   const [isNavigating, setIsNavigating] = useState(false);
   const [navigatingStore, setNavigatingStore] = useState<string | null>(null);
   const [leaderboardFilter, setLeaderboardFilter] = useState<'all' | 'risk' | 'top' | 'revenue'>('all');
+  const [leaderboardSearch, setLeaderboardSearch] = useState('');
+  type SortKey = 'rank' | 'store' | 'dpi' | 'sales' | 'sea' | 'voc' | 'vocIssue' | 'seaIssue' | 'trend' | 'status';
+  const [leaderboardSort, setLeaderboardSort] = useState<{ key: SortKey; dir: 'asc' | 'desc' }>({ key: 'rank', dir: 'asc' });
+
+  const handleLeaderboardSort = (key: SortKey) => {
+    setLeaderboardSort(prev => prev.key === key ? { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: key === 'rank' || key === 'store' || key === 'vocIssue' || key === 'seaIssue' ? 'asc' : 'desc' });
+  };
   const [lastRefresh, setLastRefresh] = useState(new Date());
   
   // Calendar state
@@ -638,13 +648,49 @@ export const DistrictIntelligence: React.FC = () => {
     setLastRefresh(new Date());
   };
 
-  const filteredStores = mockStores.filter(store => {
-    if (leaderboardFilter === 'all') return true;
-    if (leaderboardFilter === 'risk') return store.status === 'critical' || store.status === 'warning';
-    if (leaderboardFilter === 'top') return store.status === 'excellent';
-    if (leaderboardFilter === 'revenue') return store.netSalesVar < 0;
-    return true;
-  });
+  const filteredStores = (() => {
+    const q = leaderboardSearch.trim().toLowerCase();
+    const trendOrder: Record<string, number> = { up: 2, flat: 1, down: 0 };
+    const statusOrder: Record<string, number> = { excellent: 0, stable: 1, warning: 2, critical: 3 };
+    const sorters: Record<SortKey, (a: typeof mockStores[0], b: typeof mockStores[0]) => number> = {
+      rank: (a, b) => a.rank - b.rank,
+      store: (a, b) => a.storeName.localeCompare(b.storeName),
+      dpi: (a, b) => a.dpi - b.dpi,
+      sales: (a, b) => a.netSales - b.netSales,
+      sea: (a, b) => a.seaScore - b.seaScore,
+      voc: (a, b) => a.vocSatisfied - b.vocSatisfied,
+      vocIssue: (a, b) => (a.topVocIssue || '').localeCompare(b.topVocIssue || ''),
+      seaIssue: (a, b) => (a.topSeaIssue || '').localeCompare(b.topSeaIssue || ''),
+      trend: (a, b) => (trendOrder[a.trend] ?? 0) - (trendOrder[b.trend] ?? 0),
+      status: (a, b) => (statusOrder[a.status] ?? 0) - (statusOrder[b.status] ?? 0),
+    };
+    return mockStores
+      .filter(store => {
+        if (leaderboardFilter === 'risk' && !(store.status === 'critical' || store.status === 'warning')) return false;
+        if (leaderboardFilter === 'top' && store.status !== 'excellent') return false;
+        if (leaderboardFilter === 'revenue' && store.netSalesVar >= 0) return false;
+        if (!q) return true;
+        return (
+          store.storeName.toLowerCase().includes(q) ||
+          store.storeNumber.toLowerCase().includes(q) ||
+          (store.topVocIssue || '').toLowerCase().includes(q) ||
+          (store.topSeaIssue || '').toLowerCase().includes(q) ||
+          store.status.toLowerCase().includes(q)
+        );
+      })
+      .sort((a, b) => {
+        const cmp = sorters[leaderboardSort.key](a, b);
+        return leaderboardSort.dir === 'asc' ? cmp : -cmp;
+      });
+  })();
+
+  const SortIcon: React.FC<{ col: SortKey }> = ({ col }) => (
+    leaderboardSort.key !== col
+      ? <ArrowUpDown size={12} className="sort-icon sort-icon--idle" />
+      : leaderboardSort.dir === 'asc'
+        ? <ChevronUp size={12} className="sort-icon sort-icon--active" />
+        : <ChevronDown size={12} className="sort-icon sort-icon--active" />
+  );
 
   if (isLoading) {
     return (
@@ -1245,10 +1291,10 @@ export const DistrictIntelligence: React.FC = () => {
                 {kpi.primaryUnit && <span className="kpi-tile-unit">{kpi.primaryUnit}</span>}
               </div>
               <span className="kpi-tile-label">{kpi.label}</span>
-              {kpi.secondaryLabel && (
-                <div className="kpi-tile-secondary">
-                  <span className="kpi-secondary-label">{kpi.secondaryLabel}</span>
-                  <span className={`kpi-secondary-value status-${kpi.status}`}>{kpi.secondaryValue}</span>
+              {kpi.microInsight && (
+                <div className="kpi-tile-insight">
+                  <span className="kpi-tile-insight-dot" />
+                  <span>{kpi.microInsight}</span>
                 </div>
               )}
               <div className={`kpi-tile-delta delta-${kpi.deltaDirection}`}>
@@ -1258,22 +1304,37 @@ export const DistrictIntelligence: React.FC = () => {
                 {kpi.deltaContext && <span className="kpi-delta-ctx">{kpi.deltaContext}</span>}
               </div>
               {kpi.trendData && (() => {
-                const min = Math.min(...kpi.trendData);
-                const max = Math.max(...kpi.trendData);
+                const data = kpi.trendData;
+                const min = Math.min(...data);
+                const max = Math.max(...data);
                 const range = max - min || 1;
-                const pts = kpi.trendData.map((v, i) => `${(i / (kpi.trendData!.length - 1)) * 100},${28 - ((v - min) / range) * 24}`).join(' ');
-                const color = kpi.status === 'positive' ? '#22c55e' : kpi.status === 'negative' ? '#ef4444' : '#f59e0b';
+                const W = 100, H = 32, P = 2;
+                const points = data.map((v, i) => ({
+                  x: (i / (data.length - 1)) * W,
+                  y: H - P - ((v - min) / range) * (H - P * 2),
+                }));
+                // Smooth catmull-rom-ish bezier path
+                const path = points.reduce((acc, p, i, arr) => {
+                  if (i === 0) return `M ${p.x},${p.y}`;
+                  const prev = arr[i - 1];
+                  const cx = (prev.x + p.x) / 2;
+                  return `${acc} C ${cx},${prev.y} ${cx},${p.y} ${p.x},${p.y}`;
+                }, '');
+                const areaPath = `${path} L ${W},${H} L 0,${H} Z`;
+                const last = points[points.length - 1];
+                const color = kpi.status === 'positive' ? '#10b981' : kpi.status === 'negative' ? '#ef4444' : kpi.status === 'warning' ? '#f59e0b' : '#6366f1';
                 return (
                   <div className="kpi-tile-sparkline">
-                    <svg viewBox="0 0 100 28" preserveAspectRatio="none">
+                    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
                       <defs>
                         <linearGradient id={`spark-${kpi.id}`} x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor={color} stopOpacity="0.2" />
+                          <stop offset="0%" stopColor={color} stopOpacity="0.28" />
                           <stop offset="100%" stopColor={color} stopOpacity="0" />
                         </linearGradient>
                       </defs>
-                      <polygon fill={`url(#spark-${kpi.id})`} points={`0,28 ${pts} 100,28`} />
-                      <polyline fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" points={pts} />
+                      <path d={areaPath} fill={`url(#spark-${kpi.id})`} />
+                      <path d={path} fill="none" stroke={color} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+                      <circle cx={last.x} cy={last.y} r="2" fill="#ffffff" stroke={color} strokeWidth="1.5" />
                     </svg>
                   </div>
                 );
@@ -1305,22 +1366,37 @@ export const DistrictIntelligence: React.FC = () => {
                 {kpi.deltaContext && <span className="kpi-delta-ctx">{kpi.deltaContext}</span>}
               </div>
               {kpi.trendData && (() => {
-                const min = Math.min(...kpi.trendData);
-                const max = Math.max(...kpi.trendData);
+                const data = kpi.trendData;
+                const min = Math.min(...data);
+                const max = Math.max(...data);
                 const range = max - min || 1;
-                const pts = kpi.trendData.map((v, i) => `${(i / (kpi.trendData!.length - 1)) * 100},${28 - ((v - min) / range) * 24}`).join(' ');
-                const color = kpi.status === 'positive' ? '#22c55e' : kpi.status === 'negative' ? '#ef4444' : '#f59e0b';
+                const W = 100, H = 32, P = 2;
+                const points = data.map((v, i) => ({
+                  x: (i / (data.length - 1)) * W,
+                  y: H - P - ((v - min) / range) * (H - P * 2),
+                }));
+                // Smooth catmull-rom-ish bezier path
+                const path = points.reduce((acc, p, i, arr) => {
+                  if (i === 0) return `M ${p.x},${p.y}`;
+                  const prev = arr[i - 1];
+                  const cx = (prev.x + p.x) / 2;
+                  return `${acc} C ${cx},${prev.y} ${cx},${p.y} ${p.x},${p.y}`;
+                }, '');
+                const areaPath = `${path} L ${W},${H} L 0,${H} Z`;
+                const last = points[points.length - 1];
+                const color = kpi.status === 'positive' ? '#10b981' : kpi.status === 'negative' ? '#ef4444' : kpi.status === 'warning' ? '#f59e0b' : '#6366f1';
                 return (
                   <div className="kpi-tile-sparkline">
-                    <svg viewBox="0 0 100 28" preserveAspectRatio="none">
+                    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
                       <defs>
                         <linearGradient id={`spark-${kpi.id}`} x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor={color} stopOpacity="0.2" />
+                          <stop offset="0%" stopColor={color} stopOpacity="0.28" />
                           <stop offset="100%" stopColor={color} stopOpacity="0" />
                         </linearGradient>
                       </defs>
-                      <polygon fill={`url(#spark-${kpi.id})`} points={`0,28 ${pts} 100,28`} />
-                      <polyline fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" points={pts} />
+                      <path d={areaPath} fill={`url(#spark-${kpi.id})`} />
+                      <path d={path} fill="none" stroke={color} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+                      <circle cx={last.x} cy={last.y} r="2" fill="#ffffff" stroke={color} strokeWidth="1.5" />
                     </svg>
                   </div>
                 );
@@ -1352,22 +1428,37 @@ export const DistrictIntelligence: React.FC = () => {
                 {kpi.deltaContext && <span className="kpi-delta-ctx">{kpi.deltaContext}</span>}
               </div>
               {kpi.trendData && (() => {
-                const min = Math.min(...kpi.trendData);
-                const max = Math.max(...kpi.trendData);
+                const data = kpi.trendData;
+                const min = Math.min(...data);
+                const max = Math.max(...data);
                 const range = max - min || 1;
-                const pts = kpi.trendData.map((v, i) => `${(i / (kpi.trendData!.length - 1)) * 100},${28 - ((v - min) / range) * 24}`).join(' ');
-                const color = kpi.status === 'positive' ? '#22c55e' : kpi.status === 'negative' ? '#ef4444' : '#f59e0b';
+                const W = 100, H = 32, P = 2;
+                const points = data.map((v, i) => ({
+                  x: (i / (data.length - 1)) * W,
+                  y: H - P - ((v - min) / range) * (H - P * 2),
+                }));
+                // Smooth catmull-rom-ish bezier path
+                const path = points.reduce((acc, p, i, arr) => {
+                  if (i === 0) return `M ${p.x},${p.y}`;
+                  const prev = arr[i - 1];
+                  const cx = (prev.x + p.x) / 2;
+                  return `${acc} C ${cx},${prev.y} ${cx},${p.y} ${p.x},${p.y}`;
+                }, '');
+                const areaPath = `${path} L ${W},${H} L 0,${H} Z`;
+                const last = points[points.length - 1];
+                const color = kpi.status === 'positive' ? '#10b981' : kpi.status === 'negative' ? '#ef4444' : kpi.status === 'warning' ? '#f59e0b' : '#6366f1';
                 return (
                   <div className="kpi-tile-sparkline">
-                    <svg viewBox="0 0 100 28" preserveAspectRatio="none">
+                    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
                       <defs>
                         <linearGradient id={`spark-${kpi.id}`} x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor={color} stopOpacity="0.2" />
+                          <stop offset="0%" stopColor={color} stopOpacity="0.28" />
                           <stop offset="100%" stopColor={color} stopOpacity="0" />
                         </linearGradient>
                       </defs>
-                      <polygon fill={`url(#spark-${kpi.id})`} points={`0,28 ${pts} 100,28`} />
-                      <polyline fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" points={pts} />
+                      <path d={areaPath} fill={`url(#spark-${kpi.id})`} />
+                      <path d={path} fill="none" stroke={color} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+                      <circle cx={last.x} cy={last.y} r="2" fill="#ffffff" stroke={color} strokeWidth="1.5" />
                     </svg>
                   </div>
                 );
@@ -1392,10 +1483,10 @@ export const DistrictIntelligence: React.FC = () => {
                 {kpi.primaryUnit && <span className="kpi-tile-unit">{kpi.primaryUnit}</span>}
               </div>
               <span className="kpi-tile-label">{kpi.label}</span>
-              {kpi.secondaryLabel && (
-                <div className="kpi-tile-secondary">
-                  <span className="kpi-secondary-label">{kpi.secondaryLabel}</span>
-                  <span className={`kpi-secondary-value status-${kpi.status}`}>{kpi.secondaryValue}</span>
+              {kpi.microInsight && (
+                <div className="kpi-tile-insight">
+                  <span className="kpi-tile-insight-dot" />
+                  <span>{kpi.microInsight}</span>
                 </div>
               )}
               <div className={`kpi-tile-delta delta-${kpi.deltaDirection}`}>
@@ -1405,22 +1496,37 @@ export const DistrictIntelligence: React.FC = () => {
                 {kpi.deltaContext && <span className="kpi-delta-ctx">{kpi.deltaContext}</span>}
               </div>
               {kpi.trendData && (() => {
-                const min = Math.min(...kpi.trendData);
-                const max = Math.max(...kpi.trendData);
+                const data = kpi.trendData;
+                const min = Math.min(...data);
+                const max = Math.max(...data);
                 const range = max - min || 1;
-                const pts = kpi.trendData.map((v, i) => `${(i / (kpi.trendData!.length - 1)) * 100},${28 - ((v - min) / range) * 24}`).join(' ');
-                const color = kpi.status === 'positive' ? '#22c55e' : kpi.status === 'negative' ? '#ef4444' : '#f59e0b';
+                const W = 100, H = 32, P = 2;
+                const points = data.map((v, i) => ({
+                  x: (i / (data.length - 1)) * W,
+                  y: H - P - ((v - min) / range) * (H - P * 2),
+                }));
+                // Smooth catmull-rom-ish bezier path
+                const path = points.reduce((acc, p, i, arr) => {
+                  if (i === 0) return `M ${p.x},${p.y}`;
+                  const prev = arr[i - 1];
+                  const cx = (prev.x + p.x) / 2;
+                  return `${acc} C ${cx},${prev.y} ${cx},${p.y} ${p.x},${p.y}`;
+                }, '');
+                const areaPath = `${path} L ${W},${H} L 0,${H} Z`;
+                const last = points[points.length - 1];
+                const color = kpi.status === 'positive' ? '#10b981' : kpi.status === 'negative' ? '#ef4444' : kpi.status === 'warning' ? '#f59e0b' : '#6366f1';
                 return (
                   <div className="kpi-tile-sparkline">
-                    <svg viewBox="0 0 100 28" preserveAspectRatio="none">
+                    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
                       <defs>
                         <linearGradient id={`spark-${kpi.id}`} x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor={color} stopOpacity="0.2" />
+                          <stop offset="0%" stopColor={color} stopOpacity="0.28" />
                           <stop offset="100%" stopColor={color} stopOpacity="0" />
                         </linearGradient>
                       </defs>
-                      <polygon fill={`url(#spark-${kpi.id})`} points={`0,28 ${pts} 100,28`} />
-                      <polyline fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" points={pts} />
+                      <path d={areaPath} fill={`url(#spark-${kpi.id})`} />
+                      <path d={path} fill="none" stroke={color} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+                      <circle cx={last.x} cy={last.y} r="2" fill="#ffffff" stroke={color} strokeWidth="1.5" />
                     </svg>
                   </div>
                 );
@@ -1524,7 +1630,18 @@ export const DistrictIntelligence: React.FC = () => {
           <div className="leaderboard-controls">
             <div className="search-filter">
               <Search size={16} />
-              <input type="text" placeholder="Search stores..." className="store-search-input" />
+              <input
+                type="text"
+                placeholder="Search stores, issues, status..."
+                className="store-search-input"
+                value={leaderboardSearch}
+                onChange={(e) => setLeaderboardSearch(e.target.value)}
+              />
+              {leaderboardSearch && (
+                <button className="store-search-clear" onClick={() => setLeaderboardSearch('')} aria-label="Clear search">
+                  <X size={14} />
+                </button>
+              )}
             </div>
             <div className="filter-tabs">
               <button
@@ -1558,20 +1675,27 @@ export const DistrictIntelligence: React.FC = () => {
           <table>
             <thead>
               <tr>
-                <th className="th-rank">Rank</th>
-                <th className="th-store">Store</th>
-                <th className="th-dpi">DPI</th>
-                <th className="th-sales">Net Sales</th>
-                <th className="th-sea">SEA Score</th>
-                <th className="th-voc">VoC %</th>
-                <th className="th-issue">Top VoC Issue</th>
-                <th className="th-issue">Top SEA Issue</th>
-                <th className="th-trend">Trend</th>
-                <th className="th-status">Status</th>
+                <th className="th-rank th-sortable" onClick={() => handleLeaderboardSort('rank')}><span>Rank</span><SortIcon col="rank" /></th>
+                <th className="th-store th-sortable" onClick={() => handleLeaderboardSort('store')}><span>Store</span><SortIcon col="store" /></th>
+                <th className="th-dpi th-sortable" onClick={() => handleLeaderboardSort('dpi')}><span>DPI</span><SortIcon col="dpi" /></th>
+                <th className="th-sales th-sortable" onClick={() => handleLeaderboardSort('sales')}><span>Net Sales</span><SortIcon col="sales" /></th>
+                <th className="th-sea th-sortable" onClick={() => handleLeaderboardSort('sea')}><span>SEA Score</span><SortIcon col="sea" /></th>
+                <th className="th-voc th-sortable" onClick={() => handleLeaderboardSort('voc')}><span>VoC %</span><SortIcon col="voc" /></th>
+                <th className="th-issue th-sortable" onClick={() => handleLeaderboardSort('vocIssue')}><span>Top VoC Issue</span><SortIcon col="vocIssue" /></th>
+                <th className="th-issue th-sortable" onClick={() => handleLeaderboardSort('seaIssue')}><span>Top SEA Issue</span><SortIcon col="seaIssue" /></th>
+                <th className="th-trend th-sortable" onClick={() => handleLeaderboardSort('trend')}><span>Trend</span><SortIcon col="trend" /></th>
+                <th className="th-status th-sortable" onClick={() => handleLeaderboardSort('status')}><span>Status</span><SortIcon col="status" /></th>
                 <th className="th-action"></th>
               </tr>
             </thead>
             <tbody>
+              {filteredStores.length === 0 && (
+                <tr>
+                  <td colSpan={11} className="leaderboard-empty">
+                    No stores match your search or filters.
+                  </td>
+                </tr>
+              )}
               {filteredStores.map((store) => (
                 <tr key={store.id} className={`row-${store.status.toLowerCase()}`}>
                   <td className="td-rank">

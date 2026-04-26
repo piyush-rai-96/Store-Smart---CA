@@ -489,6 +489,7 @@ export const POGLocalizationEngine: React.FC = () => {
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [dateFilter, setDateFilter] = useState<string>('all');
   const [showFilters, setShowFilters] = useState(false);
+  const [customPrompt, setCustomPrompt] = useState('');
 
   const workflowSteps = [
     { id: 'category' as WorkflowStep, label: 'Category', number: 1 },
@@ -655,8 +656,12 @@ export const POGLocalizationEngine: React.FC = () => {
         s.id === stage ? { 
           ...s, 
           status: 'completed' as StageStatus, 
-          reasoning: stageReasonings[stage].reasoning,
-          details: stageReasonings[stage].details,
+          reasoning: stage === 'geometry' && customPrompt.trim()
+            ? `User guidance applied · ${stageReasonings[stage].reasoning}`
+            : stageReasonings[stage].reasoning,
+          details: stage === 'geometry' && customPrompt.trim()
+            ? [`📝 User guidance: ${customPrompt.trim().replace(/\n/g, ' ')}`, ...stageReasonings[stage].details]
+            : stageReasonings[stage].details,
         } : s
       ));
     }
@@ -1232,10 +1237,43 @@ export const POGLocalizationEngine: React.FC = () => {
         )}
 
         {!localizationResult && !isEngineRunning && (
-          <button className="loc-run-engine-btn" onClick={runLocalizationEngine}>
-            <Play size={18} />
-            Run Localization Engine
-          </button>
+          <div className="loc-prompt-block">
+            <div className="loc-prompt-header">
+              <div className="loc-prompt-label">
+                <Sparkles size={14} />
+                <span>Customize this run <em>(optional)</em></span>
+              </div>
+              <span className="loc-prompt-hint">Add natural-language guidance — the engine will factor it into Geometry, Demand &amp; Policy stages.</span>
+            </div>
+            <textarea
+              className="loc-prompt-textarea"
+              value={customPrompt}
+              onChange={(e) => setCustomPrompt(e.target.value)}
+              placeholder="e.g. Prioritize premium SKUs at eye level, cap promotional facings at 30%, and bias toward local brands for this cluster..."
+              rows={3}
+            />
+            <div className="loc-prompt-chips">
+              {[
+                'Prioritize premium SKUs at eye level',
+                'Bias toward local / regional brands',
+                'Cap promo facings at 30%',
+                'Maximize family / value SKU visibility',
+              ].map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  className="loc-prompt-chip"
+                  onClick={() => setCustomPrompt((p) => (p ? `${p}\n• ${s}` : `• ${s}`))}
+                >
+                  + {s}
+                </button>
+              ))}
+            </div>
+            <button className="loc-run-engine-btn" onClick={runLocalizationEngine}>
+              <Play size={18} />
+              Run Localization Engine
+            </button>
+          </div>
         )}
 
         {localizationResult && (

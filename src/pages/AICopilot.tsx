@@ -89,6 +89,7 @@ interface ChatMessage {
   imageUrl?: string;
   suggestedQueries?: string[];
   followUpQuestions?: string[];
+  confidence?: number; // 0-100
   // ShelfIQ-style rich content
   complianceReport?: ComplianceAuditReport;
   oosItems?: OosItem[];
@@ -673,66 +674,103 @@ export const AICopilot: React.FC = () => {
 
   const generateId = () => `msg-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
 
-  const simulateResponse = (userQuery: string) => {
+  const simulateResponse = async (userQuery: string) => {
     setIsProcessing(true);
 
-    // Add typing indicator
-    const typingId = generateId();
-    const typingMsg: ChatMessage = {
-      id: typingId,
+    // Build skill-specific agentic processing steps
+    const stepsBySkill: Record<'knowledge' | 'analytics', ProcessingStep[]> = {
+      knowledge: [
+        { step: 'Parsing your question…', status: 'active' },
+        { step: 'Searching SOPs & policy knowledge base…', status: 'pending' },
+        { step: 'Retrieving top-ranked source documents…', status: 'pending' },
+        { step: 'Synthesizing cited answer…', status: 'pending' },
+      ],
+      analytics: [
+        { step: 'Parsing your question…', status: 'active' },
+        { step: 'Querying district metrics warehouse…', status: 'pending' },
+        { step: 'Running trend & benchmark analysis…', status: 'pending' },
+        { step: 'Generating KPI cards and charts…', status: 'pending' },
+      ],
+    };
+    const steps = stepsBySkill[activeSkill as 'knowledge' | 'analytics'];
+
+    // Add processing message
+    const processingId = generateId();
+    const processingMsg: ChatMessage = {
+      id: processingId,
       role: 'assistant',
       content: '',
       timestamp: new Date(),
       skill: activeSkill,
-      isTyping: true,
+      isProcessing: true,
+      processingSteps: [...steps],
     };
     setMessages(prev => ({
       ...prev,
-      [activeSkill]: [...prev[activeSkill], typingMsg],
+      [activeSkill]: [...prev[activeSkill], processingMsg],
     }));
 
-    setTimeout(() => {
-      // Remove typing indicator and add real response
-      setMessages(prev => {
-        const filtered = prev[activeSkill].filter(m => m.id !== typingId);
-        let response: ChatMessage;
+    // Animate steps — total ~1.4-1.9s so overall response lands in 1-2s range
+    const perStep = 350 + Math.random() * 120;
+    for (let i = 0; i < steps.length; i++) {
+      await new Promise(resolve => setTimeout(resolve, perStep));
+      setMessages(prev => ({
+        ...prev,
+        [activeSkill]: prev[activeSkill].map(m =>
+          m.id === processingId ? {
+            ...m,
+            processingSteps: m.processingSteps?.map((s, idx) => ({
+              ...s,
+              status: idx <= i ? 'completed' as const : idx === i + 1 ? 'active' as const : 'pending' as const,
+            })),
+          } : m
+        ),
+      }));
+    }
 
-        if (activeSkill === 'knowledge') {
-          const result = findKnowledgeResponse(userQuery);
-          response = {
-            id: generateId(),
-            role: 'assistant',
-            content: result.answer,
-            timestamp: new Date(),
-            skill: 'knowledge',
-            sources: result.sources,
-            followUpQuestions: result.followUpQuestions,
-          };
-        } else if (activeSkill === 'analytics') {
-          const result = findAnalyticsResponse(userQuery);
-          response = {
-            id: generateId(),
-            role: 'assistant',
-            content: result.answer,
-            timestamp: new Date(),
-            skill: 'analytics',
-            kpiCards: result.kpiCards,
-            chartData: result.chartData,
-            followUpQuestions: result.followUpQuestions,
-          };
-        } else if (activeSkill === 'pog') {
-          // POG skill handled by simulatePogAgentic — should not reach here
-          response = { id: generateId(), role: 'assistant', content: '', timestamp: new Date(), skill: 'pog' };
-        } else {
-          // Actions skill — will be handled by agentic flow below
-          response = { id: generateId(), role: 'assistant', content: '', timestamp: new Date(), skill: 'actions' };
-        }
+    // Small pause, then swap processing message for final response
+    await new Promise(resolve => setTimeout(resolve, 250));
+    const randConfidence = () => Math.round(86 + Math.random() * 11); // 86-97
 
-        return { ...prev, [activeSkill]: [...filtered, response] };
-      });
+    setMessages(prev => {
+      const filtered = prev[activeSkill].filter(m => m.id !== processingId);
+      let response: ChatMessage;
 
-      setIsProcessing(false);
-    }, 1500 + Math.random() * 1000);
+      if (activeSkill === 'knowledge') {
+        const result = findKnowledgeResponse(userQuery);
+        response = {
+          id: generateId(),
+          role: 'assistant',
+          content: result.answer,
+          timestamp: new Date(),
+          skill: 'knowledge',
+          sources: result.sources,
+          followUpQuestions: result.followUpQuestions,
+          confidence: randConfidence(),
+        };
+      } else if (activeSkill === 'analytics') {
+        const result = findAnalyticsResponse(userQuery);
+        response = {
+          id: generateId(),
+          role: 'assistant',
+          content: result.answer,
+          timestamp: new Date(),
+          skill: 'analytics',
+          kpiCards: result.kpiCards,
+          chartData: result.chartData,
+          followUpQuestions: result.followUpQuestions,
+          confidence: randConfidence(),
+        };
+      } else if (activeSkill === 'pog') {
+        response = { id: generateId(), role: 'assistant', content: '', timestamp: new Date(), skill: 'pog' };
+      } else {
+        response = { id: generateId(), role: 'assistant', content: '', timestamp: new Date(), skill: 'actions' };
+      }
+
+      return { ...prev, [activeSkill]: [...filtered, response] };
+    });
+
+    setIsProcessing(false);
   };
 
   // Agentic flow for regular Actions skill user queries
@@ -1130,20 +1168,45 @@ export const AICopilot: React.FC = () => {
           </div>
         )}
 
-        {/* Knowledge Sources */}
-        {msg.sources && msg.sources.length > 0 && (
-          <div className="cop-sources">
-            <div className="cop-sources-label"><BookOpen size={13} /> Sources</div>
-            {msg.sources.map((src, i) => (
-              <div key={i} className="cop-source-card">
-                <FileText size={14} />
-                <div className="cop-source-info">
-                  <span className="cop-source-doc">{src.doc}</span>
-                  <span className="cop-source-detail">{src.section} — {src.page}</span>
-                </div>
-                <ExternalLink size={12} className="cop-source-link" />
+        {/* Confidence Score Badge */}
+        {msg.role === 'assistant' && typeof msg.confidence === 'number' && !msg.isProcessing && !msg.isTyping && (
+          <div className={`cop-confidence cop-confidence--${msg.confidence >= 90 ? 'high' : msg.confidence >= 75 ? 'medium' : 'low'}`}>
+            <div className="cop-confidence-icon">
+              <CheckCircle size={12} />
+            </div>
+            <div className="cop-confidence-body">
+              <span className="cop-confidence-label">Confidence Score</span>
+              <div className="cop-confidence-bar">
+                <div className="cop-confidence-bar-fill" style={{ width: `${msg.confidence}%` }} />
               </div>
-            ))}
+            </div>
+            <span className="cop-confidence-value">{msg.confidence}%</span>
+          </div>
+        )}
+
+        {/* Knowledge Sources — Premium */}
+        {msg.sources && msg.sources.length > 0 && (
+          <div className="cop-sources cop-sources--premium">
+            <div className="cop-sources-header">
+              <div className="cop-sources-label"><BookOpen size={13} /> Cited Sources</div>
+              <span className="cop-sources-count">{msg.sources.length} document{msg.sources.length > 1 ? 's' : ''}</span>
+            </div>
+            <div className="cop-sources-grid">
+              {msg.sources.map((src, i) => (
+                <div key={i} className="cop-source-card">
+                  <div className="cop-source-rank">{i + 1}</div>
+                  <div className="cop-source-icon"><FileText size={14} /></div>
+                  <div className="cop-source-info">
+                    <span className="cop-source-doc">{src.doc}</span>
+                    <span className="cop-source-detail">{src.section}</span>
+                    <span className="cop-source-page">{src.page}</span>
+                  </div>
+                  <button className="cop-source-link-btn" aria-label="Open source">
+                    <ExternalLink size={12} />
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 

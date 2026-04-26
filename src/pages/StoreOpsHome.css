@@ -3888,29 +3888,38 @@
 .planogram-action-item {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   padding: 14px;
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   border-left: 3px solid transparent;
   transition: all 0.2s ease;
+  position: relative;
+  z-index: 1;
+}
+
+/* Lift the card whose dropdown is open above subsequent siblings */
+.planogram-action-item:has(.assignee-dropdown-trigger.open) {
+  z-index: 50;
 }
 
 .planogram-action-item:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border-color: #c7d2fe;
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.08);
+  transform: translateY(-1px);
 }
 
 .planogram-action-item.priority-high {
-  border-left-color: #ef4444;
+  border-left: 3px solid #ef4444;
 }
 
 .planogram-action-item.priority-medium {
-  border-left-color: #f59e0b;
+  border-left: 3px solid #f59e0b;
 }
 
 .planogram-action-item.priority-low {
-  border-left-color: #22c55e;
+  border-left: 3px solid #22c55e;
 }
 
 .planogram-action-content {
@@ -3967,26 +3976,160 @@
   width: 100%;
 }
 
-.assign-select {
+/* Premium Assignee Dropdown — matches Planogram Intelligence module */
+.assignee-dropdown {
+  position: relative;
   width: 100%;
-  padding: 10px 12px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 13px;
-  color: #1e293b;
-  cursor: pointer;
-  transition: all 0.2s ease;
 }
 
-.assign-select:focus {
-  outline: none;
-  border-color: #6366f1;
+.assignee-dropdown-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 12px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+  min-height: 44px;
+  font-family: inherit;
+}
+
+.assignee-dropdown-trigger:hover {
+  border-color: #c7d2fe;
+  background: #fafbff;
+}
+
+.assignee-dropdown-trigger.open {
+  border-color: #818cf8;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
   background: #ffffff;
 }
 
-.assign-select:hover {
-  border-color: #cbd5e1;
+.assignee-dropdown-trigger.has-value {
+  border-color: #c7d2fe;
+  background: #faf9ff;
+}
+
+.assignee-dropdown-placeholder {
+  font-size: 13px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.assignee-dropdown-chevron {
+  color: #94a3b8;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.assignee-dropdown-chevron.open {
+  transform: rotate(180deg);
+}
+
+.assignee-dropdown-selected {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.assignee-dropdown-selected-text,
+.assignee-dropdown-option-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+
+.assignee-dropdown-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+  color: #ffffff;
+  font-size: 10.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  letter-spacing: 0.3px;
+}
+
+.assignee-dropdown-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.assignee-dropdown-role {
+  font-size: 11px;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.assignee-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06);
+  z-index: 100;
+  overflow: hidden;
+  max-height: 280px;
+  overflow-y: auto;
+  animation: assigneeDropdownIn 0.15s ease;
+}
+
+@keyframes assigneeDropdownIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.assignee-dropdown-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 0.1s ease;
+  text-align: left;
+  font-family: inherit;
+}
+
+.assignee-dropdown-option:hover {
+  background: #f5f3ff;
+}
+
+.assignee-dropdown-option.selected {
+  background: #eef2ff;
+}
+
+.assignee-dropdown-option + .assignee-dropdown-option {
+  border-top: 1px solid #f1f5f9;
+}
+
+.assignee-dropdown-check {
+  color: #6366f1;
+  flex-shrink: 0;
 }
 
 @media (max-width: 768px) {
