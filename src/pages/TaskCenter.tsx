@@ -12,7 +12,15 @@ import {
   X,
   Calendar,
   User,
+  Sparkles,
+  ExternalLink,
+  Clock,
+  Store,
+  AlertTriangle,
+  Image,
+  Shield,
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useExecutionTasks, ExecutionTask, TaskStatus, Priority } from '../context/ExecutionTasksContext';
 import './TaskCenter.css';
 
@@ -36,6 +44,13 @@ const seedTasks: ExecutionTask[] = [
     category: 'Accessories',
     createdAt: '2026-04-23T08:30:00Z',
     localizationId: 'loc-acc-01',
+    source: 'AI POG Audit',
+    sourceLink: '/planogram-intelligence/pog-localization-engine',
+    slaHours: 24,
+    severityRationale: 'Compliance score 76.4% is below 85% threshold — scarves shifted 6 inches left, sunglasses rotated 15°, belt display missing from fixture entirely.',
+    confidenceScore: 94,
+    beforeImage: '/audit-evidence/acc-endcap-before.jpg',
+    afterImage: '/audit-evidence/acc-endcap-after.jpg',
   },
   {
     id: 'tc-seed-2',
@@ -55,6 +70,12 @@ const seedTasks: ExecutionTask[] = [
     category: 'Women\'s Apparel',
     createdAt: '2026-04-23T09:00:00Z',
     localizationId: 'loc-wwd-01',
+    source: 'AI POG Audit',
+    sourceLink: '/planogram-intelligence/pog-localization-engine',
+    slaHours: 12,
+    severityRationale: '4 OOS positions detected on high-traffic Women\'s Wall — V-Neck Tee, Floral Dress, Slim Denim, Classic Blouse. Estimated $580/day revenue at risk.',
+    confidenceScore: 97,
+    beforeImage: '/audit-evidence/womens-wall-before.jpg',
   },
   {
     id: 'tc-seed-3',
@@ -74,6 +95,11 @@ const seedTasks: ExecutionTask[] = [
     category: 'Jewelry',
     createdAt: '2026-04-23T08:45:00Z',
     localizationId: 'loc-jew-01',
+    source: 'AI POG Audit',
+    sourceLink: '/planogram-intelligence/pog-localization-engine',
+    slaHours: 48,
+    severityRationale: '3 missing labels detected during compliance audit — customer confusion risk and potential checkout pricing errors.',
+    confidenceScore: 91,
   },
   {
     id: 'tc-seed-4',
@@ -93,6 +119,9 @@ const seedTasks: ExecutionTask[] = [
     category: 'Accessories',
     createdAt: '2026-04-22T16:00:00Z',
     localizationId: 'loc-acc-01',
+    source: 'Manual',
+    slaHours: 72,
+    severityRationale: 'Non-functional LED strip reduces product visibility on shelf 2 — low urgency but impacts premium display zone.',
   },
   {
     id: 'tc-seed-5',
@@ -112,6 +141,13 @@ const seedTasks: ExecutionTask[] = [
     category: 'Accessories',
     createdAt: '2026-04-21T14:00:00Z',
     localizationId: 'loc-acc-01',
+    source: 'AI POG Audit',
+    sourceLink: '/planogram-intelligence/pog-localization-engine',
+    slaHours: 24,
+    severityRationale: 'Premium sunglasses on left side rotated 15° from planogram spec — 12% conversion risk on high-margin category.',
+    confidenceScore: 96,
+    beforeImage: '/audit-evidence/sunglasses-before.jpg',
+    afterImage: '/audit-evidence/sunglasses-after.jpg',
   },
   {
     id: 'tc-seed-6',
@@ -131,6 +167,13 @@ const seedTasks: ExecutionTask[] = [
     category: 'Accessories',
     createdAt: '2026-04-21T14:30:00Z',
     localizationId: 'loc-acc-01',
+    source: 'AI POG Audit',
+    sourceLink: '/planogram-intelligence/pog-localization-engine',
+    slaHours: 48,
+    severityRationale: 'Hair accessories showing 4 facings vs required 6 per planogram — 33% facing gap reducing category visibility.',
+    confidenceScore: 92,
+    beforeImage: '/audit-evidence/hair-acc-before.jpg',
+    afterImage: '/audit-evidence/hair-acc-after.jpg',
   },
   // Broadcast-linked tasks
   {
@@ -151,6 +194,9 @@ const seedTasks: ExecutionTask[] = [
     category: 'Health & Beauty',
     createdAt: '2026-04-24T10:00:00Z',
     localizationId: 'bc-001',
+    source: 'Broadcast',
+    slaHours: 4,
+    severityRationale: 'Product Recall — regulatory compliance requires immediate removal from all customer-accessible areas.',
   },
   {
     id: 'tc-bc-001-2',
@@ -170,6 +216,9 @@ const seedTasks: ExecutionTask[] = [
     category: 'Health & Beauty',
     createdAt: '2026-04-24T10:00:00Z',
     localizationId: 'bc-001',
+    source: 'Broadcast',
+    slaHours: 4,
+    severityRationale: 'Product Recall — backroom quarantine required to prevent re-shelving of recalled inventory.',
   },
   {
     id: 'tc-bc-001-3',
@@ -189,6 +238,9 @@ const seedTasks: ExecutionTask[] = [
     category: 'Health & Beauty',
     createdAt: '2026-04-24T10:00:00Z',
     localizationId: 'bc-001',
+    source: 'Broadcast',
+    slaHours: 8,
+    severityRationale: 'Audit trail required for recalled product — compliance documentation must be submitted within shift.',
   },
   {
     id: 'tc-bc-002-1',
@@ -208,6 +260,9 @@ const seedTasks: ExecutionTask[] = [
     category: 'Seasonal',
     createdAt: '2026-04-23T08:00:00Z',
     localizationId: 'bc-002',
+    source: 'Broadcast',
+    slaHours: 48,
+    severityRationale: 'Seasonal planogram refresh — revenue impact on featured endcap items during transition period.',
   },
   {
     id: 'tc-bc-003-1',
@@ -227,6 +282,9 @@ const seedTasks: ExecutionTask[] = [
     category: 'Safety',
     createdAt: '2026-04-21T09:00:00Z',
     localizationId: 'bc-003',
+    source: 'Broadcast',
+    slaHours: 24,
+    severityRationale: 'Q2 fire safety audit preparation — overdue compliance check requires immediate walk-through and photo documentation.',
   },
 ];
 
@@ -241,6 +299,7 @@ type ViewMode = 'board' | 'list';
 type FilterStatus = 'all' | 'Pending' | 'In Progress' | 'Completed';
 
 export const TaskCenter: React.FC = () => {
+  const navigate = useNavigate();
   const { tasks: contextTasks, addTasks, updateTaskStatus, assignTask, teamMembers } = useExecutionTasks();
   const [tcSearchParams, setTcSearchParams] = useSearchParams();
   const [view, setView] = useState<ViewMode>('board');
@@ -342,6 +401,33 @@ export const TaskCenter: React.FC = () => {
     setNewTask({ title: '', description: '', priority: 'Medium', assignedTo: '', dueDate: '', type: 'Reset Shelf' });
   };
 
+  // ── Source badge helper ──
+  const getSourceIcon = (source?: string) => {
+    if (source === 'AI POG Audit') return <Sparkles size={10} />;
+    if (source === 'Localization Engine') return <Sparkles size={10} />;
+    if (source === 'Broadcast') return <AlertTriangle size={10} />;
+    return null;
+  };
+
+  const getSourceClass = (source?: string) => {
+    if (source === 'AI POG Audit' || source === 'Localization Engine') return 'tc-source--ai';
+    if (source === 'Broadcast') return 'tc-source--broadcast';
+    return 'tc-source--manual';
+  };
+
+  // ── SLA helper ──
+  const getSlaStatus = (task: ExecutionTask) => {
+    if (!task.slaHours || !task.createdAt) return null;
+    const created = new Date(task.createdAt).getTime();
+    const deadline = created + task.slaHours * 60 * 60 * 1000;
+    const now = Date.now();
+    const remaining = deadline - now;
+    if (task.status === 'Completed') return { label: 'Met', className: 'tc-sla--met' };
+    if (remaining < 0) return { label: 'Breached', className: 'tc-sla--breached' };
+    if (remaining < 4 * 60 * 60 * 1000) return { label: `${Math.ceil(remaining / (60 * 60 * 1000))}h left`, className: 'tc-sla--urgent' };
+    return { label: `${Math.ceil(remaining / (60 * 60 * 1000))}h left`, className: 'tc-sla--ok' };
+  };
+
   // ── Task Card ──
   const renderCard = (task: ExecutionTask) => (
     <div key={task.id} className="tc-card" onClick={() => setSelectedTask(task)}>
@@ -350,6 +436,13 @@ export const TaskCenter: React.FC = () => {
         <span className={`tc-card-priority tc-pri--${task.priority.toLowerCase()}`}>{task.priority}</span>
       </div>
       {task.description && <div className="tc-card-desc">{task.description}</div>}
+      {task.source && task.source !== 'Manual' && (
+        <div className={`tc-card-source ${getSourceClass(task.source)}`}>
+          {getSourceIcon(task.source)}
+          <span>{task.source === 'AI POG Audit' ? 'Created from AI POG Audit' : task.source === 'Localization Engine' ? 'Created from Localization Engine' : task.source}</span>
+          {task.confidenceScore && <span className="tc-card-source-conf">{task.confidenceScore}%</span>}
+        </div>
+      )}
       <div className="tc-card-meta">
         <div className="tc-card-meta-left">
           <span className="tc-card-type">{task.type}</span>
@@ -611,6 +704,7 @@ export const TaskCenter: React.FC = () => {
               <button className="tc-modal-close" onClick={() => setSelectedTask(null)}><X size={16} /></button>
             </div>
             <div className="tc-detail-body">
+              {/* Title + Description */}
               <div className="tc-detail-section">
                 <h4 style={{ fontSize: '16px', fontWeight: 700, color: '#0f172a', margin: 0 }}>{selectedTask.title}</h4>
                 {selectedTask.description && (
@@ -618,6 +712,31 @@ export const TaskCenter: React.FC = () => {
                 )}
               </div>
 
+              {/* Source Badge */}
+              {selectedTask.source && selectedTask.source !== 'Manual' && (
+                <div className="tc-detail-section">
+                  <div
+                    className={`tc-detail-source-badge ${getSourceClass(selectedTask.source)}`}
+                    onClick={() => selectedTask.sourceLink && navigate(selectedTask.sourceLink)}
+                    style={{ cursor: selectedTask.sourceLink ? 'pointer' : 'default' }}
+                  >
+                    <div className="tc-detail-source-left">
+                      {getSourceIcon(selectedTask.source)}
+                      <span>Created from <strong>{selectedTask.source}</strong></span>
+                    </div>
+                    <div className="tc-detail-source-right">
+                      {selectedTask.confidenceScore && (
+                        <span className="tc-detail-source-conf">
+                          <Sparkles size={10} /> {selectedTask.confidenceScore}% confidence
+                        </span>
+                      )}
+                      {selectedTask.sourceLink && <ExternalLink size={12} />}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Details */}
               <div className="tc-detail-section">
                 <span className="tc-detail-section-title">Details</span>
                 <div className="tc-detail-row">
@@ -644,7 +763,7 @@ export const TaskCenter: React.FC = () => {
                   <span className="tc-detail-row-value">{selectedTask.type}</span>
                 </div>
                 <div className="tc-detail-row">
-                  <span className="tc-detail-row-label">Assignee</span>
+                  <span className="tc-detail-row-label"><User size={12} /> Owner</span>
                   <select
                     className="tc-detail-assignee-select"
                     value={selectedTask.assignedTo || ''}
@@ -658,13 +777,13 @@ export const TaskCenter: React.FC = () => {
                   >
                     <option value="">Unassigned</option>
                     {teamMembers.map(m => (
-                      <option key={m.id} value={m.id}>{m.name}</option>
+                      <option key={m.id} value={m.id}>{m.name} — {m.role}</option>
                     ))}
                   </select>
                 </div>
                 <div className="tc-detail-row">
                   <span className="tc-detail-row-label">Due Date</span>
-                  <span className="tc-detail-row-value">{formatDate(selectedTask.dueDate)}</span>
+                  <span className={`tc-detail-row-value ${isOverdue(selectedTask.dueDate, selectedTask.status) ? 'tc-due--overdue' : ''}`}>{formatDate(selectedTask.dueDate)}</span>
                 </div>
                 <div className="tc-detail-row">
                   <span className="tc-detail-row-label">Created</span>
@@ -672,13 +791,36 @@ export const TaskCenter: React.FC = () => {
                 </div>
               </div>
 
+              {/* SLA */}
+              {selectedTask.slaHours && (
+                <div className="tc-detail-section">
+                  <span className="tc-detail-section-title"><Clock size={12} /> SLA</span>
+                  <div className="tc-detail-sla-row">
+                    <div className="tc-detail-sla-info">
+                      <span className="tc-detail-sla-target">Target: {selectedTask.slaHours}h from creation</span>
+                      {(() => {
+                        const sla = getSlaStatus(selectedTask);
+                        return sla ? <span className={`tc-detail-sla-status ${sla.className}`}>{sla.label}</span> : null;
+                      })()}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Store & Context */}
               {(selectedTask.storeName || selectedTask.pogName) && (
                 <div className="tc-detail-section">
-                  <span className="tc-detail-section-title">Context</span>
+                  <span className="tc-detail-section-title"><Store size={12} /> Store & Context</span>
                   {selectedTask.storeName && (
                     <div className="tc-detail-row">
                       <span className="tc-detail-row-label">Store</span>
                       <span className="tc-detail-row-value">{selectedTask.storeName}</span>
+                    </div>
+                  )}
+                  {selectedTask.storeGroup && (
+                    <div className="tc-detail-row">
+                      <span className="tc-detail-row-label">Store Group</span>
+                      <span className="tc-detail-row-value">{selectedTask.storeGroup}</span>
                     </div>
                   )}
                   {selectedTask.pogName && (
@@ -693,12 +835,51 @@ export const TaskCenter: React.FC = () => {
                       <span className="tc-detail-row-value">{selectedTask.category}</span>
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* Severity Rationale */}
+              {selectedTask.severityRationale && (
+                <div className="tc-detail-section">
+                  <span className="tc-detail-section-title"><Shield size={12} /> Severity Rationale</span>
+                  <div className="tc-detail-rationale">
+                    {selectedTask.severityRationale}
+                  </div>
                   {selectedTask.reason && (
-                    <div className="tc-detail-row">
-                      <span className="tc-detail-row-label">Reason</span>
-                      <span className="tc-detail-row-value" style={{ fontSize: '12px', maxWidth: '250px', textAlign: 'right' }}>{selectedTask.reason}</span>
+                    <div className="tc-detail-row" style={{ marginTop: 8 }}>
+                      <span className="tc-detail-row-label">Impact</span>
+                      <span className="tc-detail-row-value" style={{ fontSize: '12px', maxWidth: '250px', textAlign: 'right' }}>{selectedTask.impact}</span>
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* Before / After Proof */}
+              {(selectedTask.beforeImage || selectedTask.afterImage) && (
+                <div className="tc-detail-section">
+                  <span className="tc-detail-section-title"><Image size={12} /> Audit Evidence</span>
+                  <div className="tc-detail-proof-grid">
+                    {selectedTask.beforeImage && (
+                      <div className="tc-detail-proof-card">
+                        <div className="tc-detail-proof-label">Before</div>
+                        <div className="tc-detail-proof-placeholder">
+                          <Image size={24} />
+                          <span>Shelf photo captured</span>
+                          <span className="tc-detail-proof-file">{selectedTask.beforeImage.split('/').pop()}</span>
+                        </div>
+                      </div>
+                    )}
+                    {selectedTask.afterImage && (
+                      <div className="tc-detail-proof-card">
+                        <div className="tc-detail-proof-label after">After</div>
+                        <div className="tc-detail-proof-placeholder">
+                          <Image size={24} />
+                          <span>Expected layout</span>
+                          <span className="tc-detail-proof-file">{selectedTask.afterImage.split('/').pop()}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>

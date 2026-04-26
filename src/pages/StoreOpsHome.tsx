@@ -29,7 +29,6 @@ import {
   X,
   MapPin,
   Phone,
-  Mail,
   Search,
   Download,
   ExternalLink,
@@ -361,8 +360,8 @@ const generateMockBroadcasts = (): BroadcastMessage[] => [
   {
     id: '1',
     priority: 'CRITICAL',
-    title: 'Product Recall — SKU #12345',
-    description: 'SKU #12345 must be removed immediately. FDA safety alert issued 2 hours ago. 3 stores impacted.',
+    title: 'Product Recall — Organic Baby Lotion Batch #7742',
+    description: 'Organic Baby Lotion Batch #7742 must be removed immediately. FDA safety alert issued 2 hours ago. 3 stores impacted.',
     sender: 'Regional Safety',
     senderRole: 'HQ',
     timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
@@ -551,6 +550,14 @@ export const StoreOpsHome: React.FC = () => {
   const [isBriefCollapsed, setIsBriefCollapsed] = useState(false);
   const [selectedBroadcast, setSelectedBroadcast] = useState<BroadcastMessage | null>(null);
   
+  // Next Best Action strip
+  const [dismissedNextAction, setDismissedNextAction] = useState(false);
+  
+  // Approval Drawer States
+  const [showApprovalDrawer, setShowApprovalDrawer] = useState(false);
+  const [approvalDrawerItem, setApprovalDrawerItem] = useState<ActionItemV2 | null>(null);
+  const [approvalNote, setApprovalNote] = useState('');
+
   // Action Modal States
   const [showViewStoresModal, setShowViewStoresModal] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState(false);
@@ -560,9 +567,6 @@ export const StoreOpsHome: React.FC = () => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [assignSearchQuery, setAssignSearchQuery] = useState('');
   const [selectedAssignee, setSelectedAssignee] = useState<string | null>(null);
-  const [selectedStores, setSelectedStores] = useState<string[]>([]);
-  const [showNotificationSent, setShowNotificationSent] = useState(false);
-  const [notifiedStores, setNotifiedStores] = useState<typeof impactedStores>([]);
   
   // SKU Reorder States
   const [selectedSkus, setSelectedSkus] = useState<string[]>([]);
@@ -655,9 +659,9 @@ export const StoreOpsHome: React.FC = () => {
 
   // Mock data for modals
   const impactedStores = [
-    { id: '1847', name: 'Store #1847', address: '123 Main St, Nashville, TN', status: 'critical', skuCount: 5, manager: 'Sarah Johnson', phone: '(615) 555-0123' },
-    { id: '2341', name: 'Store #2341', address: '456 Oak Ave, Memphis, TN', status: 'warning', skuCount: 3, manager: 'Mike Chen', phone: '(901) 555-0456' },
-    { id: '3892', name: 'Store #3892', address: '789 Pine Rd, Knoxville, TN', status: 'warning', skuCount: 4, manager: 'Lisa Park', phone: '(865) 555-0789' },
+    { id: '1847', name: 'Store #1847', address: '123 Main St, Nashville, TN', status: 'critical', unitCount: 24, manager: 'Sarah Johnson', phone: '(615) 555-0123' },
+    { id: '2341', name: 'Store #2341', address: '456 Oak Ave, Memphis, TN', status: 'warning', unitCount: 12, manager: 'Mike Chen', phone: '(901) 555-0456' },
+    { id: '3892', name: 'Store #3892', address: '789 Pine Rd, Knoxville, TN', status: 'warning', unitCount: 18, manager: 'Lisa Park', phone: '(865) 555-0789' },
   ];
 
   const atRiskSkus = [
@@ -725,9 +729,9 @@ export const StoreOpsHome: React.FC = () => {
     // Route to context-specific modal based on source_module
     switch (item.source_module) {
       case 'Planogram':
-        if (item.planogramImage) {
-          handleOpenPlanogramModal(item);
-        }
+        setApprovalDrawerItem(item);
+        setApprovalNote('');
+        setShowApprovalDrawer(true);
         break;
       case 'Inventory':
         if (item.inventoryItems) {
@@ -793,6 +797,38 @@ export const StoreOpsHome: React.FC = () => {
       showToast(`Action "${selectedActionItem.title}" sent back for review`);
       setShowActionApprovalModal(false);
       setSelectedActionItem(null);
+    }
+  };
+
+  const handleDrawerApprove = () => {
+    if (approvalDrawerItem) {
+      setArchivedActions(prev => [...prev, {
+        id: approvalDrawerItem.id,
+        title: approvalDrawerItem.title,
+        completedAt: new Date(),
+        type: 'approved'
+      }]);
+      setActionItems(prev => prev.filter(a => a.id !== approvalDrawerItem.id));
+      showToast(`✓ ${approvalDrawerItem.title} approved — stores notified`);
+      setShowApprovalDrawer(false);
+      setApprovalDrawerItem(null);
+      setApprovalNote('');
+    }
+  };
+
+  const handleDrawerReject = () => {
+    if (approvalDrawerItem) {
+      setArchivedActions(prev => [...prev, {
+        id: approvalDrawerItem.id,
+        title: approvalDrawerItem.title,
+        completedAt: new Date(),
+        type: 'rejected'
+      }]);
+      setActionItems(prev => prev.filter(a => a.id !== approvalDrawerItem.id));
+      showToast(`Planogram reset sent back for revision`);
+      setShowApprovalDrawer(false);
+      setApprovalDrawerItem(null);
+      setApprovalNote('');
     }
   };
 
@@ -880,11 +916,6 @@ export const StoreOpsHome: React.FC = () => {
     return messages.length > 0 ? messages[messages.length - 1] : null;
   };
 
-  const handleOpenPlanogramModal = (item: ActionItemV2) => {
-    setSelectedPlanogramItem(item);
-    setPlanogramActionAssignments({});
-    setShowPlanogramModal(true);
-  };
 
   const handleAssignPlanogramAction = (actionId: string, assignee: string) => {
     setPlanogramActionAssignments(prev => ({
@@ -1009,6 +1040,29 @@ export const StoreOpsHome: React.FC = () => {
           <span>{getSystemSummary()}</span>
         </div>
       </div>
+
+      {/* STICKY: Next Best Action Strip */}
+      {!dismissedNextAction && sortedActions.length > 0 && sortedActions[0].severity === 'critical' && (
+        <div className="next-best-action-strip">
+          <div className="nba-left">
+            <div className="nba-pulse" />
+            <span className="nba-badge">Next action</span>
+            <span className="nba-title">{sortedActions[0].title}</span>
+            <span className="nba-meta">
+              {sortedActions[0].microContext} · <span className={`nba-due ${sortedActions[0].status === 'overdue' ? 'overdue' : ''}`}>{formatDueTime(sortedActions[0].due_time)}</span>
+            </span>
+          </div>
+          <div className="nba-right">
+            <button className="nba-cta" onClick={() => handleActionClick(sortedActions[0])}>
+              {sortedActions[0].cta}
+              <ArrowRight size={13} />
+            </button>
+            <button className="nba-dismiss" onClick={() => setDismissedNextAction(true)}>
+              <X size={14} />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* TOP ROW: AI Daily Brief + HQ Broadcasts side by side */}
       <div className={`home-top-row ${isBriefCollapsed ? 'brief-collapsed' : ''}`}>
@@ -1143,6 +1197,22 @@ export const StoreOpsHome: React.FC = () => {
                         <span className="hq-broadcast-sender">{broadcast.sender}</span>
                         <span className="hq-broadcast-time">{formatTimeAgo(broadcast.timestamp)}</span>
                       </div>
+                      {broadcast.priority === 'CRITICAL' && broadcast.category === 'Safety' && (
+                        <button 
+                          className="hq-broadcast-view-stores-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setBroadcasts((prev) =>
+                              prev.map((b) => (b.id === broadcast.id ? { ...b, isRead: true } : b))
+                            );
+                            handleViewStores();
+                          }}
+                        >
+                          <Store size={13} />
+                          View Impacted Stores
+                          <ChevronRight size={13} />
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -1464,212 +1534,137 @@ export const StoreOpsHome: React.FC = () => {
               </div>
             </div>
             
+            {/* View Stores CTA for recall / safety broadcasts */}
+            {selectedBroadcast.priority === 'CRITICAL' && selectedBroadcast.category === 'Safety' && (
+              <div className="broadcast-recall-stores-preview">
+                <div className="recall-stores-header">
+                  <Store size={14} />
+                  <span>3 Stores Impacted</span>
+                </div>
+                <div className="recall-stores-chips">
+                  {impactedStores.map((s) => (
+                    <span key={s.id} className={`recall-store-chip status-${s.status}`}>
+                      <MapPin size={11} />
+                      {s.address.split(',').slice(1, 2).join('').trim()}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="broadcast-modal-actions-v2">
               <button className="broadcast-btn-secondary" onClick={() => handleOpenChat('1')}>
                 <MessageSquare size={16} />
                 Chat
               </button>
-              <button className="broadcast-btn-primary" onClick={closeBroadcastModal}>
-                <Check size={16} />
-                Mark as Read
-              </button>
+              {selectedBroadcast.priority === 'CRITICAL' && selectedBroadcast.category === 'Safety' ? (
+                <button className="broadcast-btn-primary view-stores" onClick={() => {
+                  closeBroadcastModal();
+                  handleViewStores();
+                }}>
+                  <Store size={16} />
+                  View Stores
+                </button>
+              ) : (
+                <button className="broadcast-btn-primary" onClick={closeBroadcastModal}>
+                  <Check size={16} />
+                  Mark as Read
+                </button>
+              )}
             </div>
           </div>
         </div>
       )}
 
-      {/* View Stores Modal */}
-      {showViewStoresModal && !showNotificationSent && (
-        <div className="action-modal-overlay" onClick={() => {
-          setShowViewStoresModal(false);
-          setSelectedStores([]);
-        }}>
-          <div className="action-modal" onClick={(e) => e.stopPropagation()}>
+      {/* View Stores Modal — Read-only awareness view */}
+      {showViewStoresModal && (
+        <div className="action-modal-overlay" onClick={() => setShowViewStoresModal(false)}>
+          <div className="action-modal recall-stores-modal" onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
             <div className="action-modal-header">
               <div className="action-modal-title-row">
-                <Store size={20} />
-                <h2>Impacted Stores</h2>
+                <div className="recall-header-icon">
+                  <AlertTriangle size={18} />
+                </div>
+                <div>
+                  <h2>Product Recall — Impacted Stores</h2>
+                  <span className="recall-header-sub">Organic Baby Lotion Batch #7742 · FDA Safety Alert</span>
+                </div>
               </div>
-              <button className="action-modal-close" onClick={() => {
-                setShowViewStoresModal(false);
-                setSelectedStores([]);
-              }}>
+              <button className="action-modal-close" onClick={() => setShowViewStoresModal(false)}>
                 <X size={20} />
               </button>
             </div>
-            <div className="action-modal-subtitle">
-              <div className="subtitle-row">
-                <span>{impactedStores.length} stores require attention for Product Recall</span>
-                <button 
-                  className="select-all-btn"
-                  onClick={() => {
-                    if (selectedStores.length === impactedStores.length) {
-                      setSelectedStores([]);
-                    } else {
-                      setSelectedStores(impactedStores.map(s => s.id));
-                    }
-                  }}
-                >
-                  {selectedStores.length === impactedStores.length ? 'Deselect All' : 'Select All'}
-                </button>
+
+            {/* Summary bar */}
+            <div className="recall-select-bar">
+              <div className="recall-select-meta">
+                <span className="recall-stores-count"><Store size={13} /> {impactedStores.length} stores impacted</span>
+                <span className="recall-sku-total">{impactedStores.reduce((sum, s) => sum + s.unitCount, 0)} units to pull</span>
               </div>
             </div>
+
+            {/* Store Cards — info only */}
             <div className="action-modal-content">
-              <div className="stores-list">
+              <div className="recall-stores-list">
                 {impactedStores.map((store) => (
                   <div 
                     key={store.id} 
-                    className={`store-card status-${store.status} ${selectedStores.includes(store.id) ? 'selected' : ''}`}
-                    onClick={() => {
-                      if (selectedStores.includes(store.id)) {
-                        setSelectedStores(prev => prev.filter(id => id !== store.id));
-                      } else {
-                        setSelectedStores(prev => [...prev, store.id]);
-                      }
-                    }}
+                    className={`recall-store-card severity-${store.status}`}
                   >
-                    <div className="store-checkbox">
-                      <div className={`checkbox ${selectedStores.includes(store.id) ? 'checked' : ''}`}>
-                        {selectedStores.includes(store.id) && <Check size={12} />}
-                      </div>
+                    {/* Severity indicator */}
+                    <div className="recall-card-left">
+                      <div className={`recall-severity-bar severity-${store.status}`} />
                     </div>
-                    <div className="store-card-main">
-                      <div className="store-card-header">
-                        <div className="store-info">
+
+                    {/* Main Content */}
+                    <div className="recall-card-body">
+                      <div className="recall-card-top">
+                        <div className="recall-card-identity">
                           <h4>{store.name}</h4>
-                          <span className={`store-status-badge ${store.status}`}>
+                          <span className={`recall-status-pill ${store.status}`}>
+                            {store.status === 'critical' && <AlertTriangle size={10} />}
+                            {store.status === 'warning' && <AlertCircle size={10} />}
                             {store.status === 'critical' ? 'Critical' : 'Warning'}
                           </span>
                         </div>
-                        <div className="store-sku-count">{store.skuCount} SKUs affected</div>
+                        <div className="recall-sku-badge">{store.unitCount} units</div>
                       </div>
-                      <div className="store-card-details">
-                        <div className="store-detail">
-                          <MapPin size={14} />
+
+                      <div className="recall-card-grid">
+                        <div className="recall-card-detail">
+                          <MapPin size={13} />
                           <span>{store.address}</span>
                         </div>
-                        <div className="store-detail">
-                          <Users size={14} />
+                        <div className="recall-card-detail">
+                          <div className="recall-manager-avatar">{store.manager.split(' ').map(n => n[0]).join('')}</div>
                           <span>{store.manager}</span>
                         </div>
-                        <div className="store-detail">
-                          <Phone size={14} />
+                        <div className="recall-card-detail">
+                          <Phone size={13} />
                           <span>{store.phone}</span>
                         </div>
                       </div>
-                      <div className="store-card-actions">
-                        <button className="store-action-btn" onClick={(e) => {
-                          e.stopPropagation();
-                          showToast(`Calling ${store.manager}...`);
-                        }}>
-                          <Phone size={14} />
-                          Call
-                        </button>
-                        <button className="store-action-btn" onClick={(e) => {
-                          e.stopPropagation();
-                          showToast(`Email sent to ${store.manager}`);
-                        }}>
-                          <Mail size={14} />
-                          Email
-                        </button>
-                        <button className="store-action-btn primary" onClick={(e) => {
-                          e.stopPropagation();
-                          showToast(`Opening ${store.name} details...`);
-                        }}>
-                          <ExternalLink size={14} />
-                          View Store
-                        </button>
-                      </div>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
+
+            {/* Footer — single CTA to Operations Queue */}
             <div className="action-modal-footer">
-              <button className="modal-btn secondary" onClick={() => {
-                setShowViewStoresModal(false);
-                setSelectedStores([]);
-              }}>
+              <button className="modal-btn secondary" onClick={() => setShowViewStoresModal(false)}>
                 Close
               </button>
               <button 
-                className="modal-btn primary" 
-                disabled={selectedStores.length === 0}
+                className="modal-btn primary"
                 onClick={() => {
-                  const stores = impactedStores.filter(s => selectedStores.includes(s.id));
-                  setNotifiedStores(stores);
-                  setShowNotificationSent(true);
-                }}
-              >
-                <Send size={16} />
-                {selectedStores.length === 0 
-                  ? 'Select Stores to Notify' 
-                  : selectedStores.length === impactedStores.length 
-                    ? 'Notify All Stores' 
-                    : `Notify ${selectedStores.length} Store${selectedStores.length > 1 ? 's' : ''}`}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Notification Sent Confirmation */}
-      {showNotificationSent && (
-        <div className="action-modal-overlay" onClick={() => {
-          setShowNotificationSent(false);
-          setShowViewStoresModal(false);
-          setSelectedStores([]);
-          setNotifiedStores([]);
-        }}>
-          <div className="action-modal notification-sent" onClick={(e) => e.stopPropagation()}>
-            <div className="notification-sent-content">
-              <div className="notification-sent-icon">
-                <CheckCircle2 size={48} />
-              </div>
-              <h2>Notifications Sent Successfully!</h2>
-              <p>Alert messages have been delivered to the following store managers:</p>
-              
-              <div className="notified-stores-list">
-                {notifiedStores.map((store) => (
-                  <div key={store.id} className="notified-store-item">
-                    <div className="notified-store-avatar">
-                      {store.manager.split(' ').map(n => n[0]).join('')}
-                    </div>
-                    <div className="notified-store-info">
-                      <span className="notified-store-name">{store.manager}</span>
-                      <span className="notified-store-location">{store.name}</span>
-                    </div>
-                    <div className="notified-store-status">
-                      <Check size={14} />
-                      <span>Sent</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="notification-message-preview">
-                <div className="message-preview-header">
-                  <Bell size={14} />
-                  <span>Message Preview</span>
-                </div>
-                <div className="message-preview-content">
-                  <strong>🚨 URGENT: Product Recall Alert</strong>
-                  <p>SKU #12345 must be removed from shelves immediately. FDA safety alert issued. Please confirm action completion within 2 hours.</p>
-                </div>
-              </div>
-
-              <button 
-                className="modal-btn primary full-width"
-                onClick={() => {
-                  setShowNotificationSent(false);
                   setShowViewStoresModal(false);
-                  setSelectedStores([]);
-                  setNotifiedStores([]);
-                  showToast('✓ All notifications delivered');
+                  navigate('/command-center/operations-queue?broadcast=bc-001');
                 }}
               >
-                <Check size={16} />
-                Done
+                <ExternalLink size={16} />
+                Open in Operations Queue
               </button>
             </div>
           </div>
@@ -2888,6 +2883,163 @@ export const StoreOpsHome: React.FC = () => {
             )}
           </div>
         </div>
+      )}
+
+      {/* Approval Drawer */}
+      {showApprovalDrawer && approvalDrawerItem && (
+        <>
+          <div className="approval-drawer-overlay" onClick={() => {
+            setShowApprovalDrawer(false);
+            setApprovalDrawerItem(null);
+            setApprovalNote('');
+          }} />
+          <div className="approval-drawer open">
+            <div className="drawer-header">
+              <div className="drawer-header-top">
+                <div className="drawer-badge-row">
+                  <span className="drawer-badge severity">BLOCKING</span>
+                  <span className="drawer-badge overdue">
+                    <Clock size={11} />
+                    {formatDueTime(approvalDrawerItem.due_time)}
+                  </span>
+                </div>
+                <button className="drawer-close" onClick={() => {
+                  setShowApprovalDrawer(false);
+                  setApprovalDrawerItem(null);
+                  setApprovalNote('');
+                }}>
+                  <X size={18} />
+                </button>
+              </div>
+              <h2 className="drawer-title">{approvalDrawerItem.title}</h2>
+              <p className="drawer-subtitle">{approvalDrawerItem.impact}</p>
+            </div>
+
+            <div className="drawer-body">
+              {/* Planogram Preview */}
+              {approvalDrawerItem.planogramImage && (
+                <div className="drawer-section">
+                  <h3 className="drawer-section-title">Planogram Preview</h3>
+                  <div className="drawer-planogram-preview">
+                    <img src={approvalDrawerItem.planogramImage} alt="Planogram" />
+                  </div>
+                </div>
+              )}
+
+              {/* Impacted Stores */}
+              <div className="drawer-section">
+                <h3 className="drawer-section-title">
+                  <Store size={14} />
+                  Impacted Stores
+                  <span className="drawer-section-count">3</span>
+                </h3>
+                <div className="drawer-stores-grid">
+                  {[
+                    { id: 's1', name: 'Downtown Plaza #2034', manager: 'Sarah M.', status: 'waiting', waitTime: '3h 12m' },
+                    { id: 's2', name: 'Riverside Mall #1876', manager: 'Marcus C.', status: 'waiting', waitTime: '2h 48m' },
+                    { id: 's3', name: 'Central Station #3421', manager: 'Lisa W.', status: 'waiting', waitTime: '2h 30m' },
+                  ].map(store => (
+                    <div key={store.id} className="drawer-store-chip">
+                      <div className="drawer-store-avatar">{store.manager.split(' ').map(n => n[0]).join('')}</div>
+                      <div className="drawer-store-info">
+                        <span className="drawer-store-name">{store.name}</span>
+                        <span className="drawer-store-manager">{store.manager} · waiting {store.waitTime}</span>
+                      </div>
+                      <div className="drawer-store-status waiting">
+                        <Clock size={11} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Reset Actions */}
+              {approvalDrawerItem.planogramActions && (
+                <div className="drawer-section">
+                  <h3 className="drawer-section-title">
+                    <ClipboardCheck size={14} />
+                    Reset Actions
+                    <span className="drawer-section-count">{approvalDrawerItem.planogramActions.length}</span>
+                  </h3>
+                  <div className="drawer-actions-list">
+                    {approvalDrawerItem.planogramActions.map((action, idx) => (
+                      <div key={action.id} className="drawer-action-row">
+                        <span className="drawer-action-num">{idx + 1}</span>
+                        <div className="drawer-action-content">
+                          <span className="drawer-action-desc">{action.description}</span>
+                          <div className="drawer-action-meta">
+                            <span className="drawer-action-section">{action.section}</span>
+                            <span className={`drawer-action-priority ${action.priority}`}>{action.priority}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Audit Trail */}
+              <div className="drawer-section">
+                <h3 className="drawer-section-title">
+                  <Clock size={14} />
+                  Audit Trail
+                </h3>
+                <div className="drawer-audit-trail">
+                  <div className="audit-entry">
+                    <div className="audit-dot current" />
+                    <div className="audit-info">
+                      <span className="audit-action">Awaiting your approval</span>
+                      <span className="audit-time">Now</span>
+                    </div>
+                  </div>
+                  <div className="audit-entry">
+                    <div className="audit-dot" />
+                    <div className="audit-info">
+                      <span className="audit-action">Planogram submitted by Visual Merchandising</span>
+                      <span className="audit-time">3h ago</span>
+                    </div>
+                  </div>
+                  <div className="audit-entry">
+                    <div className="audit-dot" />
+                    <div className="audit-info">
+                      <span className="audit-action">Store readiness confirmed (3/3 stores)</span>
+                      <span className="audit-time">4h ago</span>
+                    </div>
+                  </div>
+                  <div className="audit-entry">
+                    <div className="audit-dot" />
+                    <div className="audit-info">
+                      <span className="audit-action">SS26 Women's Wall planogram finalized</span>
+                      <span className="audit-time">Yesterday, 4:30 PM</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Note */}
+              <div className="drawer-section">
+                <h3 className="drawer-section-title">Add a note (optional)</h3>
+                <textarea 
+                  className="drawer-note-input"
+                  placeholder="Enter comments or instructions for store teams..."
+                  value={approvalNote}
+                  onChange={(e) => setApprovalNote(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="drawer-footer">
+              <button className="drawer-btn reject" onClick={handleDrawerReject}>
+                <X size={15} />
+                Send Back
+              </button>
+              <button className="drawer-btn approve" onClick={handleDrawerApprove}>
+                <Check size={15} />
+                Approve &amp; Notify Stores
+              </button>
+            </div>
+          </div>
+        </>
       )}
 
       {/* Toast Notification */}

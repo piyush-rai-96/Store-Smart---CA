@@ -85,7 +85,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ user }) => {
         {!isCollapsed && (
           <div className="sidebar-brand">
             <div className="sidebar-brand-icon">DG</div>
-            <span className="sidebar-brand-text">Store Smart</span>
+            <span className="sidebar-brand-text">StoreHub</span>
           </div>
         )}
         <button 

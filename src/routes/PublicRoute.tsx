@@ -17,7 +17,7 @@ export const PublicRoute: React.FC<PublicRouteProps> = ({ children }) => {
 
   if (isAuthenticated) {
     // Redirect to home if already authenticated
-    return <Navigate to={ROUTES.HOME} replace />;
+    return <Navigate to={ROUTES.STORE_OPS_HOME} replace />;
   }
 
   // Render the public content

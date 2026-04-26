@@ -38,14 +38,14 @@ function App() {
       <ExecutionTasksProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Navigate to={ROUTES.LOGIN} replace />} />
+          <Route path="/" element={<Navigate to={ROUTES.STORE_OPS_HOME} replace />} />
           <Route path={ROUTES.LOGIN} element={<PublicRoute><Login /></PublicRoute>} />
           {/* <Route path={ROUTES.SIGNUP} element={<PublicRoute><SignUp /></PublicRoute>} />
           <Route path={ROUTES.FORGOT_PASSWORD} element={<PublicRoute><ForgotPassword /></PublicRoute>} /> */}
           
           {/* Protected routes with MainLayout */}
           <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
-            <Route path={ROUTES.HOME} element={<div className="home-welcome"><h2>Welcome to Store Smart</h2><p>Select a module from the sidebar to get started.</p></div>} />
+            <Route path={ROUTES.HOME} element={<Navigate to={ROUTES.STORE_OPS_HOME} replace />} />
             <Route path={ROUTES.MASTER_POG} element={<MasterPOGManagement />} />
             <Route path="/planogram/rule-management" element={<POGRuleManagement />} />
             <Route path="/planogram/localization-engine" element={<POGLocalizationEngine />} />

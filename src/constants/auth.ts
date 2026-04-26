@@ -1,5 +1,5 @@
 // Authentication constants
-export const AUTH_STORAGE_KEY = 'ia_storesmart_auth';
+export const AUTH_STORAGE_KEY = 'ia_storehub_auth';
 
 // Predefined credentials - in production, this would be handled by backend
 export const VALID_CREDENTIALS = {

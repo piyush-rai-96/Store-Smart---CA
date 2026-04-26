@@ -1,7 +1,7 @@
 {
-  "name": "store-smart",
+  "name": "storehub",
   "version": "1.0.0",
-  "description": "Store Smart - Retail Operations Management Platform with Impact UI",
+  "description": "StoreHub - Retail Operations Management Platform with Impact UI",
   "type": "module",
   "scripts": {
     "dev": "vite",

@@ -28,6 +28,13 @@ export interface ExecutionTask {
   category: string;
   createdAt: string;
   localizationId: string;
+  source?: 'AI POG Audit' | 'Localization Engine' | 'Broadcast' | 'Manual';
+  sourceLink?: string;
+  slaHours?: number;
+  severityRationale?: string;
+  confidenceScore?: number;
+  beforeImage?: string;
+  afterImage?: string;
 }
 
 export interface TeamMember {

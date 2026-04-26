@@ -2572,7 +2572,7 @@
 }
 
 .leaderboard-table-premium tbody tr:hover {
-  background: var(--di-bg-subtle);
+  background: #f5f3ff;
 }
 
 .leaderboard-table-premium tbody tr:last-child td {
@@ -2737,27 +2737,62 @@
 }
 
 .td-action {
-  width: 50px;
+  width: auto;
+  text-align: right;
 }
 
-.action-btn {
-  display: flex;
+.view-store-link {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  background: transparent;
-  border: 1px solid var(--di-border);
-  border-radius: 6px;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
   color: var(--di-text-muted);
-  cursor: pointer;
+  opacity: 0;
   transition: all 0.15s ease;
+  white-space: nowrap;
 }
 
-.action-btn:hover {
-  background: var(--di-primary);
-  border-color: var(--di-primary);
-  color: #ffffff;
+.view-store-link svg {
+  flex-shrink: 0;
+}
+
+.view-store-link.loading {
+  opacity: 1;
+  color: var(--di-primary, #6366f1);
+}
+
+.view-store-link.loading .spinning {
+  animation: spin 0.8s linear infinite;
+}
+
+/* Clickable row */
+.leaderboard-table-premium tbody tr.clickable-row {
+  cursor: pointer;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.leaderboard-table-premium tbody tr.clickable-row:hover {
+  background: #f5f3ff;
+}
+
+.leaderboard-table-premium tbody tr.clickable-row:hover .view-store-link {
+  opacity: 1;
+  color: var(--di-primary, #6366f1);
+}
+
+.leaderboard-table-premium tbody tr.clickable-row:hover .store-name {
+  color: var(--di-primary, #6366f1);
+}
+
+.leaderboard-table-premium tbody tr.clickable-row.navigating {
+  background: #eef2ff;
+  pointer-events: none;
+}
+
+.leaderboard-table-premium tbody tr.clickable-row.navigating .view-store-link {
+  opacity: 1;
+  color: var(--di-primary, #6366f1);
 }
 
 /* Legacy Leaderboard Section */

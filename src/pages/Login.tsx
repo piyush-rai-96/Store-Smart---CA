@@ -34,7 +34,7 @@ export const Login: React.FC = () => {
 
     if (success) {
       // Redirect to home on success
-      navigate(ROUTES.HOME);
+      navigate(ROUTES.STORE_OPS_HOME);
     } else {
       // Show error on failure
       setError(AUTH_ERRORS.INVALID_CREDENTIALS);

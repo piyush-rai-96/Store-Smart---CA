@@ -14,7 +14,6 @@ import {
   Target,
   BarChart3,
   ArrowUpRight,
-  ArrowDownRight,
   FileText,
   Info,
   Layers,
@@ -28,7 +27,11 @@ import {
   Eye,
   Calendar,
   AlertCircle,
-  TrendingUp
+  TrendingUp,
+  RotateCcw,
+  Clock,
+  Printer,
+  X
 } from 'lucide-react';
 import { useExecutionTasks, ExecutionTask } from '../context/ExecutionTasksContext';
 import './POGLocalizationEngine.css';
@@ -490,6 +493,9 @@ export const POGLocalizationEngine: React.FC = () => {
   const [dateFilter, setDateFilter] = useState<string>('all');
   const [showFilters, setShowFilters] = useState(false);
   const [customPrompt, setCustomPrompt] = useState('');
+  const [showPublishModal, setShowPublishModal] = useState<string | null>(null);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [showRollbackConfirm, setShowRollbackConfirm] = useState<string | null>(null);
 
   const workflowSteps = [
     { id: 'category' as WorkflowStep, label: 'Category', number: 1 },
@@ -1283,7 +1289,7 @@ export const POGLocalizationEngine: React.FC = () => {
               <strong>Localization Complete</strong>
               <p>View results in the Published Results tab</p>
             </div>
-            <button className="loc-view-results-btn" onClick={() => setActiveTab('results')}>
+            <button className="loc-view-results-btn" onClick={() => { setSelectedResultId(localizationResult?.id || null); setActiveTab('results'); }}>
               View Results <ChevronRight size={16} />
             </button>
           </div>
@@ -1314,38 +1320,108 @@ export const POGLocalizationEngine: React.FC = () => {
     </div>
   );
 
+  const handlePublishWithConfirm = async (resultId: string) => {
+    setIsPublishing(true);
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    handlePublish(resultId);
+    setIsPublishing(false);
+    setShowPublishModal(null);
+  };
+
+  const handleRollback = (resultId: string) => {
+    setPublishedResults(prev => prev.map(r => 
+      r.id === resultId ? { ...r, status: 'Ready' as const } : r
+    ));
+    setShowRollbackConfirm(null);
+  };
+
   const renderResultDetail = (result: LocalizationResult) => {
     const corpPOG = allCorporatePOGs.find(p => p.id === result.corporatePOGId);
+    const storeGroup = storeGroups.find(g => g.name === result.storeGroup);
+    
+    // Validation checks based on the localization
+    const validationChecks = [
+      { id: 'policy', label: 'Policy Rules Validated', detail: `${corpPOG?.rules.length || 5} merchandising rules passed`, passed: true },
+      { id: 'capacity', label: 'Shelf Capacity Within Limits', detail: 'All shelves within 70-85% density target', passed: true },
+      { id: 'facing', label: 'Minimum Facings Met', detail: 'No SKU below minimum 1-facing threshold', passed: true },
+      { id: 'brand', label: 'Brand Blocking Maintained', detail: 'Brand adjacency and grouping rules intact', passed: true },
+      { id: 'demand', label: 'Demand Signal Alignment', detail: `Top categories match ${result.cluster} velocity data`, passed: true },
+      { id: 'size', label: 'Size-Run Integrity', detail: result.confidenceScore > 90 ? 'Full size runs preserved across key styles' : 'Minor size-run gaps flagged — review recommended', passed: result.confidenceScore > 90 },
+    ];
+
+    // Task package preview
+    const taskPackage = [
+      { type: 'Reset Shelf', count: Math.round((storeGroup?.storeCount || 50) * 0.08), priority: 'High', icon: <Layers size={16} /> },
+      { type: 'Relocate Products', count: Math.round(result.changes.facingsAdjusted * 0.6), priority: 'High', icon: <ArrowUpRight size={16} /> },
+      { type: 'Adjust Facings', count: result.changes.facingsAdjusted, priority: 'Medium', icon: <Target size={16} /> },
+      { type: 'Update Labels', count: Math.round(result.changes.facingsAdjusted * 0.8), priority: 'Medium', icon: <FileText size={16} /> },
+      { type: 'Photo Compliance', count: Math.round((storeGroup?.storeCount || 50) * 0.08), priority: 'Low', icon: <Eye size={16} /> },
+    ];
     
     return (
-      <div className="loc-result-detail">
-        <div className="loc-result-detail-header">
+      <div className="loc-artifact">
+        {/* Top Bar */}
+        <div className="loc-artifact-topbar">
           <button className="loc-back-btn" onClick={() => setSelectedResultId(null)}>
-            <ChevronRight size={16} className="rotated" /> Back to List
+            <ChevronRight size={16} className="rotated" /> Back to Results
           </button>
-          <div className="loc-result-actions">
-            <button className="loc-action-btn"><Download size={16} /> Download</button>
-            <button className="loc-action-btn"><Share2 size={16} /> Share</button>
+          <div className="loc-artifact-actions">
+            <button className="loc-artifact-action-btn"><Printer size={15} /> Print</button>
+            <button className="loc-artifact-action-btn"><Download size={15} /> Export PDF</button>
+            <button className="loc-artifact-action-btn primary"><Share2 size={15} /> Share Artifact</button>
           </div>
         </div>
 
-        <div className="loc-results-header">
-          <div className="loc-results-title-section">
-            <h3>{result.corporatePOG} → {result.cluster}</h3>
-            <div className="loc-results-tags">
-              <span className="loc-tag category">{result.category}</span>
-              <span className="loc-tag cluster">{result.cluster}</span>
-              <span className="loc-tag version">{result.version}</span>
-              <span className={`loc-tag status ${result.status.toLowerCase()}`}>{result.status}</span>
+        {/* Artifact Header */}
+        <div className="loc-artifact-header">
+          <div className="loc-artifact-header-left">
+            <div className="loc-artifact-badge-row">
+              <span className={`loc-artifact-status ${result.status.toLowerCase()}`}>
+                {result.status === 'Published' ? <CheckCircle size={13} /> : <Clock size={13} />}
+                {result.status}
+              </span>
+              <span className="loc-artifact-confidence">
+                <Sparkles size={13} />
+                {result.confidenceScore}% Confidence
+              </span>
+            </div>
+            <h2 className="loc-artifact-title">{result.corporatePOG}</h2>
+            <p className="loc-artifact-subtitle">Localized for <strong>{result.cluster}</strong> · {storeGroup?.storeCount || 0} stores · {result.category}</p>
+            <div className="loc-artifact-meta-row">
+              <span><Calendar size={13} /> Created {result.createdAt}</span>
+              <span>{result.version}</span>
+              <span>Derived from corporate standard</span>
+            </div>
+          </div>
+          <div className="loc-artifact-header-right">
+            <div className="loc-artifact-kpi-strip">
+              <div className="loc-artifact-kpi">
+                <span className="loc-artifact-kpi-value">{result.changes.facingsAdjusted}</span>
+                <span className="loc-artifact-kpi-label">Facings Changed</span>
+              </div>
+              <div className="loc-artifact-kpi">
+                <span className="loc-artifact-kpi-value">{result.changes.premiumShift}</span>
+                <span className="loc-artifact-kpi-label">Premium Shift</span>
+              </div>
+              <div className="loc-artifact-kpi">
+                <span className="loc-artifact-kpi-value">{result.changes.valuePLShift}</span>
+                <span className="loc-artifact-kpi-label">Value/PL Shift</span>
+              </div>
+              <div className="loc-artifact-kpi">
+                <span className="loc-artifact-kpi-value">{result.changes.tasksGenerated}</span>
+                <span className="loc-artifact-kpi-label">Tasks Generated</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="loc-results-grid">
-          <div className="loc-results-left">
-            <div className="loc-pog-viewer-card">
-              <div className="loc-viewer-header">
-                <h4>Planogram Comparison</h4>
+        {/* Main Content Grid */}
+        <div className="loc-artifact-grid">
+          {/* Left: Visual Layout Preview */}
+          <div className="loc-artifact-left">
+            <div className="loc-artifact-card">
+              <div className="loc-artifact-card-header">
+                <h3>Visual Layout Preview</h3>
                 <div className="loc-viewer-toggle">
                   <button className={!showCorporateView ? 'active' : ''} onClick={() => setShowCorporateView(false)}>
                     Localized
@@ -1355,7 +1431,7 @@ export const POGLocalizationEngine: React.FC = () => {
                   </button>
                 </div>
               </div>
-              <div className="loc-pog-viewer">
+              <div className="loc-artifact-viewer">
                 <img 
                   src={showCorporateView 
                     ? (corpPOG?.image || WomensWallStandard)
@@ -1369,116 +1445,168 @@ export const POGLocalizationEngine: React.FC = () => {
                   }}
                 />
                 {!showCorporateView && (
-                  <div className="loc-pog-overlay-badge"><Sparkles size={14} /> Localized for {result.cluster}</div>
+                  <div className="loc-artifact-overlay-badge"><Sparkles size={14} /> AI-Localized for {result.cluster}</div>
                 )}
               </div>
-              {/* Diff Highlights */}
-              <div className="loc-diff-highlights">
-                <h5><TrendingUp size={14} /> Key Changes from Corporate</h5>
-                <div className="loc-diff-tags">
+              <div className="loc-artifact-diff-strip">
+                <span className="loc-artifact-diff-label"><TrendingUp size={14} /> Key Changes</span>
+                <div className="loc-artifact-diff-tags">
                   {result.diffHighlights.map((diff, idx) => (
-                    <span key={idx} className="loc-diff-tag">{diff}</span>
+                    <span key={idx} className="loc-artifact-diff-tag">{diff}</span>
                   ))}
                 </div>
               </div>
             </div>
 
-            <div className="loc-why-changed-card">
-              <h4><Info size={18} /> Why This Changed</h4>
-              <div className="loc-why-list">
+            {/* Why This Changed */}
+            <div className="loc-artifact-card">
+              <div className="loc-artifact-card-header">
+                <h3><Info size={16} /> Why This Changed</h3>
+              </div>
+              <div className="loc-artifact-why-list">
                 {result.whyChanged.map((item, idx) => (
-                  <div key={idx} className="loc-why-item">
-                    <div className="loc-why-header" onClick={() => toggleReasonExpand(item.title)}>
-                      <ChevronDown size={16} className={expandedReasons.includes(item.title) ? 'expanded' : ''} />
-                      <span>{item.title}</span>
+                  <div key={idx} className="loc-artifact-why-item">
+                    <div className="loc-artifact-why-header" onClick={() => toggleReasonExpand(item.title)}>
+                      <ChevronDown size={15} className={expandedReasons.includes(item.title) ? 'expanded' : ''} />
+                      <span className="loc-artifact-why-title">{item.title}</span>
                     </div>
-                    {expandedReasons.includes(item.title) && <p className="loc-why-reason">{item.reason}</p>}
+                    {expandedReasons.includes(item.title) && (
+                      <p className="loc-artifact-why-reason">{item.reason}</p>
+                    )}
                   </div>
                 ))}
               </div>
             </div>
           </div>
 
-          <div className="loc-results-right">
-            <div className="loc-confidence-card">
-              <div className="loc-confidence-header">
-                <h4>Localization Confidence</h4>
-                <span className="loc-confidence-score">{result.confidenceScore}%</span>
+          {/* Right: Validation, Tasks, Actions */}
+          <div className="loc-artifact-right">
+            {/* Validation Checks */}
+            <div className="loc-artifact-card">
+              <div className="loc-artifact-card-header">
+                <h3><ShieldCheck size={16} /> Validation Checks</h3>
+                <span className="loc-artifact-check-summary">
+                  {validationChecks.filter(c => c.passed).length}/{validationChecks.length} passed
+                </span>
               </div>
-              <div className="loc-confidence-bar">
-                <div className="loc-confidence-fill" style={{ width: `${result.confidenceScore}%` }} />
-              </div>
-              <div className="loc-agentic-summary">
-                {result.agenticSummary.map((item, idx) => (
-                  <span key={idx} className="loc-summary-tag"><CheckCircle size={12} />{item}</span>
+              <div className="loc-artifact-checks">
+                {validationChecks.map(check => (
+                  <div key={check.id} className={`loc-artifact-check ${check.passed ? 'passed' : 'warning'}`}>
+                    <div className="loc-artifact-check-icon">
+                      {check.passed ? <CheckCircle size={16} /> : <AlertCircle size={16} />}
+                    </div>
+                    <div className="loc-artifact-check-info">
+                      <span className="loc-artifact-check-label">{check.label}</span>
+                      <span className="loc-artifact-check-detail">{check.detail}</span>
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
 
-            <div className="loc-change-summary-card">
-              <h4>Change Summary</h4>
-              <div className="loc-change-grid">
-                <div className="loc-change-item">
-                  <div className="loc-change-icon facings"><Target size={18} /></div>
-                  <div className="loc-change-info">
-                    <span className="loc-change-value">{result.changes.facingsAdjusted}</span>
-                    <span className="loc-change-label">Facings Adjusted</span>
+            {/* Task Package */}
+            <div className="loc-artifact-card">
+              <div className="loc-artifact-card-header">
+                <h3><Package size={16} /> Task Package</h3>
+                <span className="loc-artifact-task-total">{result.changes.tasksGenerated} tasks</span>
+              </div>
+              <div className="loc-artifact-tasks">
+                {taskPackage.map((task, idx) => (
+                  <div key={idx} className="loc-artifact-task-row">
+                    <div className="loc-artifact-task-icon">{task.icon}</div>
+                    <div className="loc-artifact-task-info">
+                      <span className="loc-artifact-task-type">{task.type}</span>
+                      <span className="loc-artifact-task-count">{task.count} across {storeGroup?.storeCount || 0} stores</span>
+                    </div>
+                    <span className={`loc-artifact-task-priority ${task.priority.toLowerCase()}`}>{task.priority}</span>
                   </div>
-                </div>
-                <div className="loc-change-item">
-                  <div className="loc-change-icon premium"><ArrowUpRight size={18} /></div>
-                  <div className="loc-change-info">
-                    <span className="loc-change-value">{result.changes.premiumShift}</span>
-                    <span className="loc-change-label">Premium Shift</span>
-                  </div>
-                </div>
-                <div className="loc-change-item">
-                  <div className="loc-change-icon value"><ArrowDownRight size={18} /></div>
-                  <div className="loc-change-info">
-                    <span className="loc-change-value">{result.changes.valuePLShift}</span>
-                    <span className="loc-change-label">Value / PL Shift</span>
-                  </div>
-                </div>
-                <div className="loc-change-item">
-                  <div className="loc-change-icon tasks"><FileText size={18} /></div>
-                  <div className="loc-change-info">
-                    <span className="loc-change-value">{result.changes.tasksGenerated}</span>
-                    <span className="loc-change-label">Tasks Generated</span>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
 
-            <div className="loc-output-summary-card">
-              <h4>Output Summary</h4>
-              <div className="loc-output-details">
-                <div className="loc-output-row">
-                  <span className="loc-output-label">Derived From</span>
-                  <span className="loc-output-value">{result.corporatePOG}</span>
-                </div>
-                <div className="loc-output-row">
-                  <span className="loc-output-label">Store Group</span>
-                  <span className="loc-output-value">{result.storeGroup}</span>
-                </div>
-                <div className="loc-output-row">
-                  <span className="loc-output-label">Created</span>
-                  <span className="loc-output-value">{result.createdAt}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="loc-execution-card">
-              <div className="loc-execution-header">
-                <h4>Execution Readiness</h4>
-                <span className={`loc-execution-status ${result.status.toLowerCase()}`}>{result.status}</span>
-              </div>
-              <p>{result.changes.tasksGenerated} store-level tasks ready for deployment</p>
-              {result.status === 'Ready' && (
-                <button className="loc-publish-btn" onClick={() => handlePublish(result.id)}>Publish to Stores</button>
+            {/* Publish / Rollback Actions */}
+            <div className="loc-artifact-card loc-artifact-publish-card">
+              {result.status === 'Ready' ? (
+                <>
+                  <div className="loc-artifact-publish-header">
+                    <div>
+                      <h3>Ready to Publish</h3>
+                      <p>Deploy this localized planogram and {result.changes.tasksGenerated} tasks to {storeGroup?.storeCount || 0} stores.</p>
+                    </div>
+                  </div>
+                  <button className="loc-artifact-publish-btn" onClick={() => setShowPublishModal(result.id)}>
+                    <Zap size={16} />
+                    Publish to Stores
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div className="loc-artifact-publish-header published">
+                    <CheckCircle size={20} />
+                    <div>
+                      <h3>Published</h3>
+                      <p>Live across {storeGroup?.storeCount || 0} stores · {result.changes.tasksGenerated} tasks dispatched</p>
+                    </div>
+                  </div>
+                  <button className="loc-artifact-rollback-btn" onClick={() => setShowRollbackConfirm(result.id)}>
+                    <RotateCcw size={15} />
+                    Rollback to Draft
+                  </button>
+                </>
               )}
             </div>
           </div>
         </div>
+
+        {/* Publish Confirmation Modal */}
+        {showPublishModal === result.id && (
+          <div className="loc-modal-overlay" onClick={() => !isPublishing && setShowPublishModal(null)}>
+            <div className="loc-modal" onClick={e => e.stopPropagation()}>
+              <button className="loc-modal-close" onClick={() => !isPublishing && setShowPublishModal(null)}><X size={18} /></button>
+              <div className="loc-modal-icon publish"><Zap size={28} /></div>
+              <h3>Publish Localization</h3>
+              <p>This will deploy the localized planogram to <strong>{storeGroup?.storeCount || 0} {result.cluster} stores</strong> and generate <strong>{result.changes.tasksGenerated} execution tasks</strong> in the Operations Queue.</p>
+              <div className="loc-modal-summary">
+                <div className="loc-modal-summary-row">
+                  <span>Planogram</span>
+                  <strong>{result.corporatePOG}</strong>
+                </div>
+                <div className="loc-modal-summary-row">
+                  <span>Store Group</span>
+                  <strong>{result.cluster}</strong>
+                </div>
+                <div className="loc-modal-summary-row">
+                  <span>Confidence</span>
+                  <strong>{result.confidenceScore}%</strong>
+                </div>
+              </div>
+              <div className="loc-modal-actions">
+                <button className="loc-modal-cancel" onClick={() => setShowPublishModal(null)} disabled={isPublishing}>Cancel</button>
+                <button className="loc-modal-confirm" onClick={() => handlePublishWithConfirm(result.id)} disabled={isPublishing}>
+                  {isPublishing ? <><Loader2 size={16} className="spinning" /> Publishing…</> : <><Zap size={16} /> Confirm Publish</>}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Rollback Confirmation Modal */}
+        {showRollbackConfirm === result.id && (
+          <div className="loc-modal-overlay" onClick={() => setShowRollbackConfirm(null)}>
+            <div className="loc-modal" onClick={e => e.stopPropagation()}>
+              <button className="loc-modal-close" onClick={() => setShowRollbackConfirm(null)}><X size={18} /></button>
+              <div className="loc-modal-icon rollback"><RotateCcw size={28} /></div>
+              <h3>Rollback to Draft</h3>
+              <p>This will revert the localization status to <strong>Ready</strong>. Published tasks in the Operations Queue will remain but no new tasks will be dispatched.</p>
+              <div className="loc-modal-actions">
+                <button className="loc-modal-cancel" onClick={() => setShowRollbackConfirm(null)}>Cancel</button>
+                <button className="loc-modal-confirm rollback" onClick={() => handleRollback(result.id)}>
+                  <RotateCcw size={16} /> Confirm Rollback
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   };

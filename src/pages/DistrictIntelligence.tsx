@@ -1697,7 +1697,11 @@ export const DistrictIntelligence: React.FC = () => {
                 </tr>
               )}
               {filteredStores.map((store) => (
-                <tr key={store.id} className={`row-${store.status.toLowerCase()}`}>
+                <tr 
+                  key={store.id} 
+                  className={`row-${store.status.toLowerCase()} clickable-row ${navigatingStore === store.storeNumber ? 'navigating' : ''}`}
+                  onClick={() => !isNavigating && handleStoreClick(store)}
+                >
                   <td className="td-rank">
                     <span className="rank-text">{store.rank}</span>
                   </td>
@@ -1739,17 +1743,19 @@ export const DistrictIntelligence: React.FC = () => {
                     <span className={`status-pill ${store.status.toLowerCase()}`}>{store.status}</span>
                   </td>
                   <td className="td-action">
-                    <button 
-                      className={`action-btn ${navigatingStore === store.storeNumber ? 'loading' : ''}`}
-                      onClick={() => handleStoreClick(store)}
-                      disabled={isNavigating}
-                    >
+                    <span className={`view-store-link ${navigatingStore === store.storeNumber ? 'loading' : ''}`}>
                       {navigatingStore === store.storeNumber ? (
-                        <RefreshCw size={16} className="spinning" />
+                        <>
+                          <RefreshCw size={13} className="spinning" />
+                          <span>Loading…</span>
+                        </>
                       ) : (
-                        <ChevronRight size={16} />
+                        <>
+                          <span>View store</span>
+                          <ChevronRight size={14} />
+                        </>
                       )}
-                    </button>
+                    </span>
                   </td>
                 </tr>
               ))}
