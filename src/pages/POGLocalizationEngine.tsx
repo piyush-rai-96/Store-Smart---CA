@@ -279,15 +279,6 @@ const pogClusterMapping: Record<string, string[]> = {
   'sea-corp-001': ['urban', 'family', 'mall', 'outlet'],     // Seasonal Promo - 4 clusters
 };
 
-// Store group insights for business context
-const _storeGroupInsights: Record<string, string> = {
-  urban: 'Fashion-forward → prioritize trend items and premium placement',
-  family: 'Family-focused → emphasize size range and value options',
-  outlet: 'Value-driven → optimize for clearance and deal visibility',
-  mall: 'Impulse-heavy → focus on accessories and gift-ready displays',
-};
-void _storeGroupInsights; // Reserved for future use
-
 // Category Demand Index data per category and cluster
 interface DemandIndexItem {
   name: string;
@@ -403,68 +394,6 @@ const generateDemandImplication = (indexData: DemandIndexItem[]): string => {
   return `Shift assortment toward ${top.join(' and ')}; reduce emphasis on ${low.join(' and ')}.`;
 };
 
-// Mock Published Results (reserved for demo/testing)
-const _mockPublishedResults: LocalizationResult[] = [
-  {
-    id: 'loc-001',
-    cluster: 'Campus Pulse',
-    version: 'v1.2',
-    status: 'Published',
-    confidenceScore: 96,
-    corporatePOG: 'Beverage Cooler - Standard',
-    corporatePOGId: 'bev-corp-001',
-    storeGroup: 'Campus Pulse',
-    category: 'Beverages',
-    createdAt: '2024-03-15',
-    changes: { facingsAdjusted: 22, premiumShift: '+15%', valuePLShift: '-10%', tasksGenerated: 28 },
-    whyChanged: [
-      { title: 'Energy drinks expanded', reason: 'High velocity in campus stores (+35% vs avg)' },
-      { title: 'Single-serve prioritized', reason: 'Impulse purchase behavior dominates' },
-    ],
-    agenticSummary: ['Policy validated', 'Execution complete', 'Demand optimized'],
-    diffHighlights: ['Energy +3 facings', 'Water -2 facings', 'Premium moved to shelf 2'],
-  },
-  {
-    id: 'loc-002',
-    cluster: 'Family Stock-Up',
-    version: 'v1.0',
-    status: 'Ready',
-    confidenceScore: 91,
-    corporatePOG: 'Beverage Aisle - Premium',
-    corporatePOGId: 'bev-corp-002',
-    storeGroup: 'Family Stock-Up',
-    category: 'Beverages',
-    createdAt: '2024-03-14',
-    changes: { facingsAdjusted: 18, premiumShift: '-5%', valuePLShift: '+12%', tasksGenerated: 20 },
-    whyChanged: [
-      { title: 'Multi-pack emphasis', reason: 'Family shoppers prefer bulk purchases' },
-      { title: 'Value tier expanded', reason: 'Price sensitivity in suburban markets' },
-    ],
-    agenticSummary: ['Policy validated', 'Execution ready', 'Value optimized'],
-    diffHighlights: ['Multi-pack +4 facings', 'Premium -2 facings', 'Value moved to eye-level'],
-  },
-  {
-    id: 'loc-003',
-    cluster: 'Rural Core',
-    version: 'v1.1',
-    status: 'Published',
-    confidenceScore: 88,
-    corporatePOG: 'Beverage End Cap',
-    corporatePOGId: 'bev-corp-003',
-    storeGroup: 'Rural Core',
-    category: 'Beverages',
-    createdAt: '2024-03-12',
-    changes: { facingsAdjusted: 12, premiumShift: '-8%', valuePLShift: '+15%', tasksGenerated: 14 },
-    whyChanged: [
-      { title: 'Core SKU focus', reason: 'Limited shelf space requires essential items only' },
-      { title: 'Value positioning', reason: 'Price-sensitive rural demographic' },
-    ],
-    agenticSummary: ['Policy validated', 'Execution complete', 'Essentials optimized'],
-    diffHighlights: ['Core +2 facings', 'Premium removed', 'Value at eye-level'],
-  },
-];
-void _mockPublishedResults; // Reserved for demo/testing
-
 export const POGLocalizationEngine: React.FC = () => {
   const navigate = useNavigate();
   const { addTasks } = useExecutionTasks();
@@ -539,8 +468,6 @@ export const POGLocalizationEngine: React.FC = () => {
     
     // Get context for business-specific changes
     const storeGroup = storeGroups.find(g => g.id === selectedStoreGroup);
-    const _categoryName = categories.find(c => c.id === selectedCategory)?.name || 'Beverages';
-    void _categoryName; // Reserved for future use
     const demandData = categoryDemandIndex[selectedCategory!]?.[selectedStoreGroup!] || [];
     const topDemand = [...demandData].sort((a, b) => b.value - a.value)[0];
     const lowDemand = [...demandData].sort((a, b) => a.value - b.value)[0];
@@ -789,9 +716,6 @@ export const POGLocalizationEngine: React.FC = () => {
     const generatedTasks: ExecutionTask[] = [];
     const timestamp = new Date().toISOString();
     const storeGroup = storeGroups.find(g => g.name === result.storeGroup);
-    const _storeCount = storeGroup?.storeCount || 50;
-    void _storeCount; // Reserved for future use
-
     // Task 1: Shelf Reset for high-demand subcategories
     generatedTasks.push({
       id: `task-${resultId}-1`,
