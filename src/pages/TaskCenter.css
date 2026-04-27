@@ -3,7 +3,7 @@
 .tc-container {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 64px);
+  height: calc(100vh - 96px);
   background: #f8fafc;
   overflow: hidden;
 }

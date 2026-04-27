@@ -2552,6 +2552,8 @@ export const DistrictIntelligence: React.FC = () => {
       <button 
         className="floating-chat-btn"
         onClick={() => setShowChatWindow(!showChatWindow)}
+        aria-label="Messages & Broadcasts"
+        title="Messages & Broadcasts"
       >
         <MessageSquare size={24} />
       </button>

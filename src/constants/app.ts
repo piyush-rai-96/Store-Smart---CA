@@ -7,6 +7,6 @@ export const APP_CONFIG = {
 
 // Asset paths - centralized for easy updates
 export const ASSETS = {
-  iaLogo: '/assets/impact-analytics-logo.png',
+  iaLogo: '/assets/Impact Analytics Logo_Colored.png',
   dgLogo: '/assets/Logo_DG_Stretched_Yellow.png',
 } as const;

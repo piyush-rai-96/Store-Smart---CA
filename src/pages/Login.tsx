@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Button, Card } from 'impact-ui/dist/components';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -110,9 +110,9 @@ export const Login: React.FC = () => {
 
               {/* Forgot Password Link */}
               <div className="forgot-password-link">
-                <Link to={ROUTES.FORGOT_PASSWORD}>
+                <span className="forgot-password-disabled" title="Contact your administrator to reset your password">
                   Forgot Password?
-                </Link>
+                </span>
               </div>
 
               {/* Submit Button */}
@@ -127,7 +127,7 @@ export const Login: React.FC = () => {
 
               {/* Sign Up Link */}
               <div className="signup-link">
-                Don't have an account? <Link to={ROUTES.SIGNUP}>Sign Up</Link>
+                Need access? Contact your administrator
               </div>
             </form>
           </div>

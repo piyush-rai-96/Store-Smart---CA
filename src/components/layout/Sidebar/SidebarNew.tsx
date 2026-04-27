@@ -51,7 +51,16 @@ interface SidebarNewProps {
 export const SidebarNew: React.FC<SidebarNewProps> = ({ user, isCollapsed, onToggle }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [expandedModules, setExpandedModules] = useState<string[]>(['store-operations', 'planogram', 'command-center', 'app-config']);
+  // Only expand the section that contains the current route by default
+  const getInitialExpandedModule = (): string[] => {
+    const path = location.pathname;
+    if (path.startsWith('/store-operations')) return ['store-operations'];
+    if (path.startsWith('/planogram')) return ['planogram'];
+    if (path.startsWith('/command-center')) return ['command-center'];
+    if (path.startsWith('/app-config')) return ['app-config'];
+    return ['store-operations'];
+  };
+  const [expandedModules, setExpandedModules] = useState<string[]>(getInitialExpandedModule);
 
   const navigationModules: NavigationModule[] = [
     {

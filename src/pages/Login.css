@@ -429,6 +429,13 @@
   margin-top: -8px;
 }
 
+.forgot-password-disabled {
+  color: #9ca3af;
+  text-decoration: none;
+  font-size: 13px;
+  cursor: help;
+}
+
 .forgot-password-link a {
   color: #5b45e0;
   text-decoration: none;

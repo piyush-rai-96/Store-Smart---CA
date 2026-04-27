@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ExecutionTasksProvider } from './context/ExecutionTasksContext';
+import { ToastProvider } from './context/ToastContext';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import { PublicRoute } from './routes/PublicRoute';
 import { Login } from './pages/Login';
@@ -36,6 +37,7 @@ function App() {
   return (
     <AuthProvider>
       <ExecutionTasksProvider>
+      <ToastProvider>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Navigate to={ROUTES.STORE_OPS_HOME} replace />} />
@@ -67,6 +69,7 @@ function App() {
           <Route path="*" element={<Navigate to={ROUTES.LOGIN} replace />} />
         </Routes>
       </BrowserRouter>
+      </ToastProvider>
       </ExecutionTasksProvider>
     </AuthProvider>
   );

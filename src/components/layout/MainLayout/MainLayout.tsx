@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { Outlet } from 'react-router-dom';
-import { Header } from 'impact-ui/dist/components';
-import { useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
+import { AppHeader } from '../AppHeader/AppHeader';
+import { Breadcrumb } from '../../common/Breadcrumb';
 import { SidebarNew } from '../Sidebar/SidebarNew';
 import { useAuth } from '../../../context/AuthContext';
 import { ROUTES } from '../../../types';
-import { APP_CONFIG } from '../../../constants/app';
 import './MainLayout.css';
 
 export const MainLayout: React.FC = () => {
@@ -20,13 +19,6 @@ export const MainLayout: React.FC = () => {
 
   if (!user) return null;
 
-  const dropMenuOptions = [
-    {
-      label: 'Logout',
-      onClick: handleLogout,
-    },
-  ];
-
   return (
     <div className="main-layout">
       <SidebarNew 
@@ -35,12 +27,11 @@ export const MainLayout: React.FC = () => {
         onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       />
       <div className={`main-layout-content ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
-        <Header
-          title={APP_CONFIG.name}
-          userName={user.name}
-          dropMenuOptions={dropMenuOptions}
-          avatarType="withoutPicture"
+        <AppHeader
+          user={user}
+          onLogout={handleLogout}
         />
+        <Breadcrumb />
         <main className="main-layout-main">
           <Outlet />
         </main>
