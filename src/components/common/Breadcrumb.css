@@ -5,9 +5,12 @@
   padding: 10px 24px;
   background: #f8fafc;
   border-top: 1px solid #e5e7eb;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #d1d5db;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
   font-size: 12px;
   min-height: 36px;
+  position: relative;
+  z-index: 5;
 }
 
 .breadcrumb-home {

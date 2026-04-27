@@ -33,7 +33,7 @@ body,
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: calc(100vh - 96px);
+  height: calc(100vh - 106px);
   text-align: center;
   padding: 40px;
 }
