@@ -3,10 +3,11 @@
 .cop-container {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 106px);
+  height: calc(100vh - 108px);
   background: #ffffff;
   overflow: hidden;
   position: relative;
+  margin-top: 8px;
 }
 
 /* ========================================

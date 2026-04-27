@@ -2,9 +2,10 @@
 
 .mc-container {
   display: flex;
-  height: calc(100vh - 106px);
+  height: calc(100vh - 108px);
   background: #eae6df;
   overflow: hidden;
+  margin-top: 8px;
 }
 
 /* ========================================
