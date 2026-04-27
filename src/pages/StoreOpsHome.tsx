@@ -21,7 +21,6 @@ import {
   Check,
   BarChart3,
   ArrowRight,
-  Info,
   Minus,
   ThumbsUp,
   MessageSquare,
@@ -51,6 +50,7 @@ import {
 } from '../types/storeOperations';
 import './StoreOpsHome.css';
 import womensWallPlanogram from '../assets/C&A_WOMENS_WALL_STANDARD.png';
+import { HQHome } from './HQHome';
 
 // Enhanced Insight type for headline-driven cards
 interface InsightItem {
@@ -539,6 +539,11 @@ export const StoreOpsHome: React.FC = () => {
   const navigate = useNavigate();
   const greeting = getGreeting();
 
+  // HQ users get the strategic command center view
+  if (user?.role === 'HQ') {
+    return <HQHome />;
+  }
+
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [, setSystemState] = useState<SystemState>('HIGH_ACTIVITY');
@@ -657,11 +662,11 @@ export const StoreOpsHome: React.FC = () => {
   ];
   const [selectedIncomingBroadcast, setSelectedIncomingBroadcast] = useState<typeof incomingBroadcasts[0] | null>(null);
 
-  // Mock data for modals
+  // Mock data for modals — aligned with StoreCenter broadcastActions bc-001 store breakdown
   const impactedStores = [
-    { id: '1847', name: 'Store #1847', address: '123 Main St, Nashville, TN', status: 'critical', unitCount: 24, manager: 'Sarah Johnson', phone: '(615) 555-0123' },
-    { id: '2341', name: 'Store #2341', address: '456 Oak Ave, Memphis, TN', status: 'warning', unitCount: 12, manager: 'Mike Chen', phone: '(901) 555-0456' },
-    { id: '3892', name: 'Store #3892', address: '789 Pine Rd, Knoxville, TN', status: 'warning', unitCount: 18, manager: 'Lisa Park', phone: '(865) 555-0789' },
+    { id: '1234', name: 'Oak Street #1234', address: '88 Oak Street, East Region', status: 'critical', unitCount: 24, manager: 'Dan Kim', phone: '(615) 555-0123' },
+    { id: '5678', name: 'Pine Grove #5678', address: '220 Pine Grove Blvd, South Bay', status: 'warning', unitCount: 12, manager: 'Rachel Torres', phone: '(901) 555-0456' },
+    { id: '9012', name: 'Maple Heights #9012', address: '45 Maple Heights Dr, East Region', status: 'warning', unitCount: 18, manager: 'Kevin Patel', phone: '(865) 555-0789' },
   ];
 
   const atRiskSkus = [
@@ -967,18 +972,8 @@ export const StoreOpsHome: React.FC = () => {
     }
   };
 
-  // Calculate system state summary
   const overdueCount = actionItems.filter(a => a.status === 'overdue').length;
   const pendingCount = actionItems.filter(a => a.status === 'pending').length;
-  const riskInsights = insights.filter(i => i.type === 'risk').length;
-  const hasCriticalBroadcast = broadcasts.some(b => b.priority === 'CRITICAL' && !b.isAcknowledged);
-  const getSystemSummary = () => {
-    if (hasCriticalBroadcast) return `1 critical alert needs attention`;
-    if (overdueCount > 0) return `${overdueCount} overdue task${overdueCount > 1 ? 's' : ''} need attention`;
-    if (riskInsights > 0) return `${riskInsights} risk${riskInsights > 1 ? 's' : ''} detected today`;
-    if (pendingCount > 0) return `${pendingCount} task${pendingCount > 1 ? 's' : ''} pending today`;
-    return 'Operations running smoothly';
-  };
   
   const unreadBroadcastCount = broadcasts.filter((b) => !b.isRead).length;
   
@@ -1033,11 +1028,6 @@ export const StoreOpsHome: React.FC = () => {
               <RefreshCw size={14} />
             </button>
           </div>
-        </div>
-        {/* System State Awareness */}
-        <div className={`system-state-summary ${hasCriticalBroadcast ? 'critical' : overdueCount > 0 ? 'warning' : 'normal'}`}>
-          <Info size={14} />
-          <span>{getSystemSummary()}</span>
         </div>
       </div>
 
@@ -1545,7 +1535,7 @@ export const StoreOpsHome: React.FC = () => {
                   {impactedStores.map((s) => (
                     <span key={s.id} className={`recall-store-chip status-${s.status}`}>
                       <MapPin size={11} />
-                      {s.address.split(',').slice(1, 2).join('').trim()}
+                      {s.name}
                     </span>
                   ))}
                 </div>
@@ -1611,6 +1601,11 @@ export const StoreOpsHome: React.FC = () => {
                   <div 
                     key={store.id} 
                     className={`recall-store-card severity-${store.status}`}
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => {
+                      setShowViewStoresModal(false);
+                      navigate(`/store-operations/store-deep-dive?store=${store.id}`);
+                    }}
                   >
                     {/* Severity indicator */}
                     <div className="recall-card-left">

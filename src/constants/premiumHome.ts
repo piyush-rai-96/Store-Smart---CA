@@ -162,7 +162,7 @@ export const MOCK_QUICK_ACCESS: QuickAccessItem[] = [
     label: 'My District Dashboard',
     icon: 'Home',
     onClick: () => alert('Navigate to District Dashboard'),
-    roles: ['DM', 'RD'],
+    roles: ['DM', 'HQ'],
   },
   {
     id: 'attention',
@@ -176,7 +176,7 @@ export const MOCK_QUICK_ACCESS: QuickAccessItem[] = [
     label: 'Team Management',
     icon: 'Users',
     onClick: () => alert('Navigate to Team Management'),
-    roles: ['DM', 'RD', 'ADMIN'],
+    roles: ['DM', 'HQ', 'ADMIN'],
   },
   {
     id: 'copilot',

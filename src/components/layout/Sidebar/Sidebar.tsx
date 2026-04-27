@@ -34,7 +34,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ user }) => {
       label: 'District Center',
       icon: 'Building2',
       path: '/district',
-      roles: ['DM', 'RD', 'ADMIN'],
+      roles: ['DM', 'HQ', 'ADMIN'],
     },
     {
       id: 'store',

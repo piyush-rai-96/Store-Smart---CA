@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   Brain,
   BarChart3,
@@ -85,6 +85,7 @@ interface ChatMessage {
   chartData?: { type: 'bar' | 'line' | 'horizontal-bar'; title: string; labels: string[]; values: number[]; color?: string; secondaryValues?: number[]; secondaryLabel?: string }[];
   pogResults?: { status: 'pass' | 'fail'; item: string; detail: string }[];
   taskCreated?: { title: string; assignee: string; priority: string; due: string };
+  pogRuleCreated?: { name: string; type: string; description: string; status: 'Active' | 'Warning'; category: string };
   isTyping?: boolean;
   imageUrl?: string;
   suggestedQueries?: string[];
@@ -190,7 +191,7 @@ const knowledgeResponses: Record<string, { answer: string; sources: { doc: strin
 type AnalyticsChart = { type: 'bar' | 'line' | 'horizontal-bar'; title: string; labels: string[]; values: number[]; color?: string; secondaryValues?: number[]; secondaryLabel?: string };
 const analyticsResponses: Record<string, { answer: string; kpiCards: { label: string; value: string; delta: string; direction: 'up' | 'down' }[]; chartData?: AnalyticsChart[]; followUpQuestions?: string[] }> = {
   'sales down': {
-    answer: '## 📉 District Sales Performance — Weekly Decline Analysis\n\n**Report Period:** Current Week vs Prior Week · **Scope:** All 8 District Stores\n\n---\n\n### Executive Summary\n\nDistrict-wide sales declined **-3.2%** this week ($1.26M vs $1.30M prior week), driven primarily by underperformance at 3 stores. The decline is attributable to reduced weekend foot traffic, lower conversion rates, and smaller basket sizes.\n\n### Root Cause Breakdown\n\n| Factor | Impact | Affected Stores | Detail |\n|--------|--------|-----------------|--------|\n| Weekend Foot Traffic | **-12%** | All stores | Local events competition diverted weekend shoppers |\n| Conversion Rate | **-2.8pp** (34% → 31.2%) | Harbor View, Oak Street | Insufficient floor coverage during peak hours |\n| Average Basket Size | **-8%** ($41.70 → $38.40) | District-wide | Fewer promotional items in baskets — end-of-promo cycle effect |\n| Product Availability | **-4.2%** | Pine Grove, Maple Heights | OOS on 12 high-velocity SKUs across health & beauty |\n\n### Store-Level Performance\n\n| Store | Sales | vs Plan | vs LW | Status |\n|-------|-------|---------|-------|--------|\n| Downtown Plaza #2034 | $218K | +8.2% | +2.1% | ✅ On Track |\n| Riverside Mall #1876 | $195K | +5.4% | +1.8% | ✅ On Track |\n| Central Station #3421 | $172K | +2.1% | -0.4% | ✅ On Track |\n| Westfield Center #2198 | $164K | -1.2% | -3.1% | ⚠️ Watch |\n| Harbor View #4532 | $148K | -4.8% | -6.2% | 🔴 Below |\n| Oak Street #1234 | $132K | -6.8% | -8.4% | 🔴 Below |\n| Pine Grove #5678 | $118K | -9.2% | -11.1% | 🔴 Critical |\n| Maple Heights #9012 | $113K | -12.4% | -14.2% | 🔴 Critical |\n\n### Recommended Actions\n\n| Priority | Action | Owner | Timeline |\n|----------|--------|-------|----------|\n| 🔴 High | Deploy weekend promotional blitz — targeted offers at Harbor View & Oak Street | Marketing Manager | This weekend |\n| 🔴 High | Add 2 floor associates during Sat/Sun peak hours (11am–4pm) at underperforming stores | District Manager | This weekend |\n| ⚠️ Medium | Replenish 12 OOS high-velocity SKUs at Pine Grove & Maple Heights | Supply Chain | Within 48 hours |\n| ⚠️ Medium | Review end-of-promo transition plan — ensure new promotions launch by Wednesday | Category Manager | This week |\n\n> 📊 **Forecast:** If corrective actions are implemented, projected recovery of +1.5–2.0% by next week. Without intervention, the decline trend is expected to continue at -1.5% per week.',
+    answer: '## 📉 District Sales Performance — Weekly Decline Analysis\n\n**Report Period:** Week of Apr 21 vs Apr 14, 2025 · **Scope:** All 8 District Stores\n\n---\n\n### Executive Summary\n\nDistrict-wide sales declined **-3.2%** this week ($1.26M vs $1.30M prior week), driven primarily by underperformance at 3 stores. The decline is attributable to reduced weekend foot traffic, lower conversion rates, and smaller basket sizes.\n\n### Root Cause Breakdown\n\n| Factor | Impact | Affected Stores | Detail |\n|--------|--------|-----------------|--------|\n| Weekend Foot Traffic | **-12%** | All stores | Local events competition diverted weekend shoppers |\n| Conversion Rate | **-2.8pp** (34% → 31.2%) | Harbor View, Oak Street | Insufficient floor coverage during peak hours |\n| Average Basket Size | **-8%** ($41.70 → $38.40) | District-wide | Fewer promotional items in baskets — end-of-promo cycle effect |\n| Product Availability | **-4.2%** | Pine Grove, Maple Heights | OOS on 12 high-velocity SKUs across health & beauty |\n\n### Store-Level Performance\n\n| Store | Sales | vs Plan | vs LW | Status |\n|-------|-------|---------|-------|--------|\n| Downtown Plaza #2034 | $218K | +8.2% | +2.1% | ✅ On Track |\n| Riverside Mall #1876 | $195K | +5.4% | +1.8% | ✅ On Track |\n| Central Station #3421 | $172K | +2.1% | -0.4% | ✅ On Track |\n| Westfield Center #2198 | $164K | -1.2% | -3.1% | ⚠️ Watch |\n| Harbor View #4532 | $148K | -4.8% | -6.2% | 🔴 Below |\n| Oak Street #1234 | $132K | -6.8% | -8.4% | 🔴 Below |\n| Pine Grove #5678 | $118K | -9.2% | -11.1% | 🔴 Critical |\n| Maple Heights #9012 | $113K | -12.4% | -14.2% | 🔴 Critical |\n\n### Recommended Actions\n\n| Priority | Action | Owner | Timeline |\n|----------|--------|-------|----------|\n| 🔴 High | Deploy weekend promotional blitz — targeted offers at Harbor View & Oak Street | Marketing Manager | This weekend |\n| 🔴 High | Add 2 floor associates during Sat/Sun peak hours (11am–4pm) at underperforming stores | District Manager | This weekend |\n| ⚠️ Medium | Replenish 12 OOS high-velocity SKUs at Pine Grove & Maple Heights | Supply Chain | Within 48 hours |\n| ⚠️ Medium | Review end-of-promo transition plan — ensure new promotions launch by Wednesday | Category Manager | This week |\n\n> 📊 **Forecast:** If corrective actions are implemented, projected recovery of +1.5–2.0% by next week. Without intervention, the decline trend is expected to continue at -1.5% per week.',
     kpiCards: [
       { label: 'District Sales', value: '$1.26M', delta: '-3.2%', direction: 'down' },
       { label: 'Foot Traffic', value: '42.1K', delta: '-12%', direction: 'down' },
@@ -199,7 +200,7 @@ const analyticsResponses: Record<string, { answer: string; kpiCards: { label: st
     ],
     chartData: [
       { type: 'bar', title: 'Sales by Store ($K)', labels: ['Plaza', 'Riverside', 'Central', 'Westfield', 'Harbor', 'Oak St', 'Pine Gr', 'Maple'], values: [218, 195, 172, 164, 148, 132, 118, 113], color: '#6366f1' },
-      { type: 'line', title: 'Weekly Sales Trend ($K)', labels: ['W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8'], values: [1280, 1310, 1295, 1340, 1320, 1300, 1280, 1260], color: '#ef4444' },
+      { type: 'line', title: 'Weekly Sales Trend ($K)', labels: ['Mar 2', 'Mar 9', 'Mar 16', 'Mar 23', 'Mar 30', 'Apr 6', 'Apr 13', 'Apr 20'], values: [1280, 1310, 1295, 1340, 1320, 1300, 1280, 1260], color: '#ef4444' },
     ],
     followUpQuestions: [
       'Which stores are underperforming vs target this week?',
@@ -208,7 +209,7 @@ const analyticsResponses: Record<string, { answer: string; kpiCards: { label: st
     ],
   },
   'underperforming': {
-    answer: '## 🔴 Underperforming Stores — Intervention Report\n\n**Report Period:** Current Period · **Classification:** Escalation Required · **Stores Flagged:** 3 of 8\n\n---\n\n### Executive Summary\n\nThree stores are currently operating significantly below target thresholds. Combined, these stores represent a **$94K sales gap** vs plan and have declining DPI scores. All three have been escalated to the Escalation Command Center for intensive monitoring.\n\n### Store Performance Dashboard\n\n| Store | DPI | Sales vs Plan | Key Issue | Weeks Below Target | Escalation Level |\n|-------|-----|---------------|-----------|--------------------|-----------------|\n| Maple Heights #9012 | **58** 🔴 | -12.4% | Safety & Cleanliness critical — 4 audit categories below 40% | 6 weeks | **Level 3** — Regional VP notified |\n| Pine Grove #5678 | **65** 🔴 | -9.2% | Safety audit failed 3 consecutive weeks. Staff turnover at 34% | 4 weeks | **Level 2** — DM intervention |\n| Oak Street #1234 | **72** ⚠️ | -6.8% | Planogram compliance below 60%. Peak-hour understaffing | 3 weeks | **Level 2** — DM intervention |\n\n### Detailed Breakdown — Maple Heights #9012 (Most Critical)\n\n| Audit Category | Score | Target | Gap | Trend |\n|----------------|-------|--------|-----|-------|\n| Safety | 32% | 85% | -53pp | 📉 Declining 4 weeks |\n| Cleanliness | 38% | 85% | -47pp | 📉 Declining 3 weeks |\n| Product Availability | 41% | 90% | -49pp | ➡️ Flat |\n| Planogram Compliance | 44% | 85% | -41pp | 📉 Declining 2 weeks |\n| Customer Experience | 52% | 80% | -28pp | 📉 Declining 2 weeks |\n| Staff Execution | 61% | 80% | -19pp | ➡️ Flat |\n\n### Intervention Plan\n\n| Store | Action | Owner | Start Date | Review Date |\n|-------|--------|-------|------------|------------|\n| Maple Heights | Deploy safety task force — 3-day intensive remediation | Regional Safety Officer | Immediate | +72 hours |\n| Maple Heights | Emergency cleaning crew — daily deep clean for 2 weeks | Facilities Manager | Immediate | +14 days |\n| Pine Grove | Replace Safety Champion — retrain team on safety protocols | District Manager | This week | +7 days |\n| Pine Grove | Launch retention program — address 34% turnover | HR Business Partner | This week | +30 days |\n| Oak Street | Schedule planogram reset crew — full compliance reset | VM Team Lead | Within 48 hours | +5 days |\n| Oak Street | Adjust peak-hour staffing model — add 3 FTEs | Workforce Planning | This week | +7 days |\n\n> ⚠️ **Escalation Note:** Maple Heights has been in decline for 6 consecutive weeks. If DPI does not improve above 65 within 14 days, the store will be placed on the **Performance Improvement Program (PIP)** with bi-weekly executive reviews.',
+    answer: '## 🔴 Underperforming Stores — Intervention Report\n\n**Report Period:** As of Apr 27, 2025 · **Classification:** Escalation Required · **Stores Flagged:** 3 of 8\n\n---\n\n### Executive Summary\n\nThree stores are currently operating significantly below target thresholds. Combined, these stores represent a **$94K sales gap** vs plan and have declining DPI scores. All three have been escalated to the Escalation Command Center for intensive monitoring.\n\n### Store Performance Dashboard\n\n| Store | DPI | Sales vs Plan | Key Issue | Weeks Below Target | Escalation Level |\n|-------|-----|---------------|-----------|--------------------|-----------------|\n| Maple Heights #9012 | **58** 🔴 | -12.4% | Safety & Cleanliness critical — 4 audit categories below 40% | 6 weeks | **Level 3** — Regional VP notified |\n| Pine Grove #5678 | **65** 🔴 | -9.2% | Safety audit failed 3 consecutive weeks. Staff turnover at 34% | 4 weeks | **Level 2** — DM intervention |\n| Oak Street #1234 | **72** ⚠️ | -6.8% | Planogram compliance below 60%. Peak-hour understaffing | 3 weeks | **Level 2** — DM intervention |\n\n### Detailed Breakdown — Maple Heights #9012 (Most Critical)\n\n| Audit Category | Score | Target | Gap | Trend |\n|----------------|-------|--------|-----|-------|\n| Safety | 32% | 85% | -53pp | 📉 Declining 4 weeks |\n| Cleanliness | 38% | 85% | -47pp | 📉 Declining 3 weeks |\n| Product Availability | 41% | 90% | -49pp | ➡️ Flat |\n| Planogram Compliance | 44% | 85% | -41pp | 📉 Declining 2 weeks |\n| Customer Experience | 52% | 80% | -28pp | 📉 Declining 2 weeks |\n| Staff Execution | 61% | 80% | -19pp | ➡️ Flat |\n\n### Intervention Plan\n\n| Store | Action | Owner | Start Date | Review Date |\n|-------|--------|-------|------------|------------|\n| Maple Heights | Deploy safety task force — 3-day intensive remediation | Regional Safety Officer | Immediate | +72 hours |\n| Maple Heights | Emergency cleaning crew — daily deep clean for 2 weeks | Facilities Manager | Immediate | +14 days |\n| Pine Grove | Replace Safety Champion — retrain team on safety protocols | District Manager | This week | +7 days |\n| Pine Grove | Launch retention program — address 34% turnover | HR Business Partner | This week | +30 days |\n| Oak Street | Schedule planogram reset crew — full compliance reset | VM Team Lead | Within 48 hours | +5 days |\n| Oak Street | Adjust peak-hour staffing model — add 3 FTEs | Workforce Planning | This week | +7 days |\n\n> ⚠️ **Escalation Note:** Maple Heights has been in decline for 6 consecutive weeks. If DPI does not improve above 65 within 14 days, the store will be placed on the **Performance Improvement Program (PIP)** with bi-weekly executive reviews.',
     kpiCards: [
       { label: 'At-Risk Stores', value: '3', delta: '+1', direction: 'down' },
       { label: 'Avg DPI (Bottom 3)', value: '65', delta: '-8.4', direction: 'down' },
@@ -217,7 +218,7 @@ const analyticsResponses: Record<string, { answer: string; kpiCards: { label: st
     ],
     chartData: [
       { type: 'horizontal-bar', title: 'DPI Score by Store', labels: ['Plaza #2034', 'Riverside #1876', 'Central #3421', 'Westfield #2198', 'Harbor #4532', 'Oak St #1234', 'Pine Gr #5678', 'Maple #9012'], values: [94, 91, 85, 79, 76, 72, 65, 58], color: '#6366f1' },
-      { type: 'line', title: 'Bottom 3 — DPI Trend (8 Weeks)', labels: ['W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8'], values: [78, 76, 74, 72, 70, 68, 66, 65], color: '#ef4444', secondaryValues: [85, 85, 85, 85, 85, 85, 85, 85], secondaryLabel: 'Target' },
+      { type: 'line', title: 'Bottom 3 — DPI Trend (8 Weeks)', labels: ['Mar 2', 'Mar 9', 'Mar 16', 'Mar 23', 'Mar 30', 'Apr 6', 'Apr 13', 'Apr 20'], values: [78, 76, 74, 72, 70, 68, 66, 65], color: '#ef4444', secondaryValues: [85, 85, 85, 85, 85, 85, 85, 85], secondaryLabel: 'Target' },
     ],
     followUpQuestions: [
       'Show total sales in the last 4 weeks for Maple Heights',
@@ -226,7 +227,7 @@ const analyticsResponses: Record<string, { answer: string; kpiCards: { label: st
     ],
   },
   'best performing': {
-    answer: '## 🏆 Top Performing Stores — Excellence Report\n\n**Report Period:** Current Period · **Classification:** Best-in-Class · **Stores Recognized:** 3 of 8\n\n---\n\n### Executive Summary\n\nThree stores are significantly outperforming district targets, contributing a combined **+$132K sales surplus** vs plan. These stores demonstrate consistent execution excellence and provide best-practice models for the district.\n\n### Performance Leaders\n\n| Rank | Store | DPI | Sales vs Plan | VoC Score | Key Strength |\n|------|-------|-----|---------------|-----------|-------------|\n| 🥇 | Downtown Plaza #2034 | **94** | +8.2% (+$218K) | 92% | Perfect cleanliness scores · 98% planogram compliance |\n| 🥈 | Riverside Mall #1876 | **91** | +5.4% (+$195K) | 89% | Best product availability · Highest weekend conversion |\n| 🥉 | Central Station #3421 | **85** | +2.1% (+$172K) | 84% | Most consistent execution · No audit failures in 12 weeks |\n\n### Success Factor Analysis\n\n| Factor | Plaza #2034 | Riverside #1876 | Central #3421 | District Avg |\n|--------|-------------|-----------------|---------------|--------------|\n| Planogram Compliance | 98% | 94% | 91% | 78% |\n| Safety Audit Score | 96% | 93% | 90% | 82% |\n| Staff Availability | 99% | 97% | 95% | 88% |\n| OOS Rate | 1.2% | 1.8% | 2.4% | 4.8% |\n| Customer Wait Time | 2.1 min | 2.4 min | 2.8 min | 3.6 min |\n| Weekend Conversion | 41% | 38% | 35% | 31% |\n\n### Best Practices to Scale\n\n| Practice | Origin Store | Impact | Scalability |\n|----------|-------------|--------|-------------|\n| **Pre-shift planogram walkthrough** — 10-min compliance check before store open | Plaza #2034 | +12pp compliance | High — zero cost |\n| **Weekend warrior staffing** — dedicated weekend team with incentive bonus | Riverside #1876 | +7pp weekend conversion | Medium — requires budget |\n| **Real-time OOS alerts** — 30-min replenishment SLA on flagged items | Plaza #2034 | -3.6pp OOS rate | High — process change only |\n| **Daily safety micro-audits** — 5-min focused check per zone, rotating daily | Central #3421 | +8pp safety score | High — zero cost |\n\n> 🌟 **Recognition:** Downtown Plaza #2034 has maintained DPI above 90 for **12 consecutive weeks** — qualifying for the **District Excellence Award**. Recommend formal recognition at the next regional meeting.',
+    answer: '## 🏆 Top Performing Stores — Excellence Report\n\n**Report Period:** As of Apr 27, 2025 · **Classification:** Best-in-Class · **Stores Recognized:** 3 of 8\n\n---\n\n### Executive Summary\n\nThree stores are significantly outperforming district targets, contributing a combined **+$132K sales surplus** vs plan. These stores demonstrate consistent execution excellence and provide best-practice models for the district.\n\n### Performance Leaders\n\n| Rank | Store | DPI | Sales vs Plan | VoC Score | Key Strength |\n|------|-------|-----|---------------|-----------|-------------|\n| 🥇 | Downtown Plaza #2034 | **94** | +8.2% (+$218K) | 92% | Perfect cleanliness scores · 98% planogram compliance |\n| 🥈 | Riverside Mall #1876 | **91** | +5.4% (+$195K) | 89% | Best product availability · Highest weekend conversion |\n| 🥉 | Central Station #3421 | **85** | +2.1% (+$172K) | 84% | Most consistent execution · No audit failures in 12 weeks |\n\n### Success Factor Analysis\n\n| Factor | Plaza #2034 | Riverside #1876 | Central #3421 | District Avg |\n|--------|-------------|-----------------|---------------|--------------|\n| Planogram Compliance | 98% | 94% | 91% | 78% |\n| Safety Audit Score | 96% | 93% | 90% | 82% |\n| Staff Availability | 99% | 97% | 95% | 88% |\n| OOS Rate | 1.2% | 1.8% | 2.4% | 4.8% |\n| Customer Wait Time | 2.1 min | 2.4 min | 2.8 min | 3.6 min |\n| Weekend Conversion | 41% | 38% | 35% | 31% |\n\n### Best Practices to Scale\n\n| Practice | Origin Store | Impact | Scalability |\n|----------|-------------|--------|-------------|\n| **Pre-shift planogram walkthrough** — 10-min compliance check before store open | Plaza #2034 | +12pp compliance | High — zero cost |\n| **Weekend warrior staffing** — dedicated weekend team with incentive bonus | Riverside #1876 | +7pp weekend conversion | Medium — requires budget |\n| **Real-time OOS alerts** — 30-min replenishment SLA on flagged items | Plaza #2034 | -3.6pp OOS rate | High — process change only |\n| **Daily safety micro-audits** — 5-min focused check per zone, rotating daily | Central #3421 | +8pp safety score | High — zero cost |\n\n> 🌟 **Recognition:** Downtown Plaza #2034 has maintained DPI above 90 for **12 consecutive weeks** — qualifying for the **District Excellence Award**. Recommend formal recognition at the next regional meeting.',
     kpiCards: [
       { label: 'Excellence Stores', value: '3', delta: 'stable', direction: 'up' },
       { label: 'Avg DPI (Top 3)', value: '90', delta: '+2.1', direction: 'up' },
@@ -244,7 +245,7 @@ const analyticsResponses: Record<string, { answer: string; kpiCards: { label: st
     ],
   },
   'voc trend': {
-    answer: '## 💬 Voice of Customer (VoC) — Trend Analysis Report\n\n**Report Period:** Last 4 Weeks · **Data Source:** Customer Feedback Platform · **Total Responses:** 2,847\n\n---\n\n### Executive Summary\n\nOverall customer satisfaction has declined from **82% → 79%** over the past 4 weeks, a **-3 percentage point** drop. The primary driver is a surge in "messy aisles" complaints (+28%), concentrated in Pine Grove and Maple Heights. Checkout speed continues to improve as a bright spot.\n\n### Satisfaction Trend (4-Week View)\n\n| Week | Score | Change | Volume | Key Theme |\n|------|-------|--------|--------|-----------|\n| Week 1 | 82% | — | 684 responses | Baseline period |\n| Week 2 | 81% | -1pp | 712 responses | Early cleanliness complaints emerging |\n| Week 3 | 80% | -1pp | 738 responses | "Messy aisles" becomes top theme |\n| Week 4 (Current) | 79% | -1pp | 713 responses | Decline continues — intervention needed |\n\n### Theme Analysis — Top Issues\n\n| Rank | Theme | Mentions | Trend | Affected Stores | Severity |\n|------|-------|----------|-------|-----------------|----------|\n| 1 | 🧹 **Messy Aisles** | 134 | 📈 +28% | Pine Grove, Maple Heights, Oak Street | 🔴 Critical |\n| 2 | 📦 **Product Availability** | 76 | 📈 +15% | Pine Grove, Maple Heights | ⚠️ High |\n| 3 | ⏱️ **Wait Times** | 42 | 📉 -18% | Improving district-wide | ✅ Improving |\n| 4 | 👤 **Staff Helpfulness** | 38 | ➡️ Flat | Harbor View | ⚠️ Monitor |\n| 5 | 💲 **Pricing Concerns** | 29 | ➡️ Flat | District-wide | ℹ️ Low |\n\n### Store-Level VoC Breakdown\n\n| Store | VoC Score | vs LW | Top Complaint | Positive Feedback |\n|-------|-----------|-------|---------------|-------------------|\n| Downtown Plaza #2034 | 92% | +1pp | None significant | "Always clean and organized" |\n| Riverside Mall #1876 | 89% | +0pp | Minor wait times | "Great product selection" |\n| Central Station #3421 | 84% | -1pp | Product availability | "Friendly staff" |\n| Westfield Center #2198 | 80% | -2pp | Messy aisles | Checkout speed |\n| Harbor View #4532 | 76% | -1pp | Staff helpfulness | Product quality |\n| Oak Street #1234 | 72% | -3pp | Messy aisles | Pricing |\n| Pine Grove #5678 | 65% | -4pp | Messy aisles + OOS | None this period |\n| Maple Heights #9012 | 58% | -5pp | All categories declining | None this period |\n\n### Recommended Actions\n\n| Priority | Action | Target Stores | Owner | Impact Estimate |\n|----------|--------|---------------|-------|-----------------|\n| 🔴 Immediate | Deploy targeted cleaning protocol — hourly aisle walks during peak | Pine Grove, Maple Heights | Store Managers | +4–6pp VoC |\n| 🔴 Immediate | Increase stock-check frequency — every 2 hours on high-velocity SKUs | Pine Grove, Maple Heights | Inventory Leads | +2–3pp VoC |\n| ⚠️ This Week | Share Downtown Plaza cleaning SOP as best practice to all stores | District-wide | District Manager | +1–2pp VoC |\n| ⚠️ This Week | Customer recovery outreach — contact top 20 negative reviewers | Oak Street, Harbor View | CX Manager | Retention |\n\n> 📈 **Positive Signal:** Checkout speed improvements are driven by the new self-checkout rollout at 5 stores. Recommend accelerating rollout to remaining 3 stores to build on this momentum.',
+    answer: '## 💬 Voice of Customer (VoC) — Trend Analysis Report\n\n**Report Period:** Last 4 Weeks · **Data Source:** Customer Feedback Platform · **Total Responses:** 2,847\n\n---\n\n### Executive Summary\n\nOverall customer satisfaction has declined from **82% → 79%** over the past 4 weeks, a **-3 percentage point** drop. The primary driver is a surge in "messy aisles" complaints (+28%), concentrated in Pine Grove and Maple Heights. Checkout speed continues to improve as a bright spot.\n\n### Satisfaction Trend (4-Week View)\n\n| Week | Score | Change | Volume | Key Theme |\n|------|-------|--------|--------|-----------|\n| Apr 6 | 82% | — | 684 responses | Baseline period |\n| Apr 13 | 81% | -1pp | 712 responses | Early cleanliness complaints emerging |\n| Apr 20 | 80% | -1pp | 738 responses | "Messy aisles" becomes top theme |\n| Apr 27 (Current) | 79% | -1pp | 713 responses | Decline continues — intervention needed |\n\n### Theme Analysis — Top Issues\n\n| Rank | Theme | Mentions | Trend | Affected Stores | Severity |\n|------|-------|----------|-------|-----------------|----------|\n| 1 | 🧹 **Messy Aisles** | 134 | 📈 +28% | Pine Grove, Maple Heights, Oak Street | 🔴 Critical |\n| 2 | 📦 **Product Availability** | 76 | 📈 +15% | Pine Grove, Maple Heights | ⚠️ High |\n| 3 | ⏱️ **Wait Times** | 42 | 📉 -18% | Improving district-wide | ✅ Improving |\n| 4 | 👤 **Staff Helpfulness** | 38 | ➡️ Flat | Harbor View | ⚠️ Monitor |\n| 5 | 💲 **Pricing Concerns** | 29 | ➡️ Flat | District-wide | ℹ️ Low |\n\n### Store-Level VoC Breakdown\n\n| Store | VoC Score | vs LW | Top Complaint | Positive Feedback |\n|-------|-----------|-------|---------------|-------------------|\n| Downtown Plaza #2034 | 92% | +1pp | None significant | "Always clean and organized" |\n| Riverside Mall #1876 | 89% | +0pp | Minor wait times | "Great product selection" |\n| Central Station #3421 | 84% | -1pp | Product availability | "Friendly staff" |\n| Westfield Center #2198 | 80% | -2pp | Messy aisles | Checkout speed |\n| Harbor View #4532 | 76% | -1pp | Staff helpfulness | Product quality |\n| Oak Street #1234 | 72% | -3pp | Messy aisles | Pricing |\n| Pine Grove #5678 | 65% | -4pp | Messy aisles + OOS | None this period |\n| Maple Heights #9012 | 58% | -5pp | All categories declining | None this period |\n\n### Recommended Actions\n\n| Priority | Action | Target Stores | Owner | Impact Estimate |\n|----------|--------|---------------|-------|-----------------|\n| 🔴 Immediate | Deploy targeted cleaning protocol — hourly aisle walks during peak | Pine Grove, Maple Heights | Store Managers | +4–6pp VoC |\n| 🔴 Immediate | Increase stock-check frequency — every 2 hours on high-velocity SKUs | Pine Grove, Maple Heights | Inventory Leads | +2–3pp VoC |\n| ⚠️ This Week | Share Downtown Plaza cleaning SOP as best practice to all stores | District-wide | District Manager | +1–2pp VoC |\n| ⚠️ This Week | Customer recovery outreach — contact top 20 negative reviewers | Oak Street, Harbor View | CX Manager | Retention |\n\n> 📈 **Positive Signal:** Checkout speed improvements are driven by the new self-checkout rollout at 5 stores. Recommend accelerating rollout to remaining 3 stores to build on this momentum.',
     kpiCards: [
       { label: 'VoC Score', value: '79%', delta: '-3pp', direction: 'down' },
       { label: 'Top Issue', value: 'Cleanliness', delta: '+28%', direction: 'down' },
@@ -252,7 +253,7 @@ const analyticsResponses: Record<string, { answer: string; kpiCards: { label: st
       { label: 'Response Rate', value: '67%', delta: '+5%', direction: 'up' },
     ],
     chartData: [
-      { type: 'line', title: 'VoC Score Trend (4 Weeks)', labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'], values: [82, 81, 80, 79], color: '#f59e0b', secondaryValues: [85, 85, 85, 85], secondaryLabel: 'Target' },
+      { type: 'line', title: 'VoC Score Trend (4 Weeks)', labels: ['Apr 6', 'Apr 13', 'Apr 20', 'Apr 27'], values: [82, 81, 80, 79], color: '#f59e0b', secondaryValues: [85, 85, 85, 85], secondaryLabel: 'Target' },
       { type: 'horizontal-bar', title: 'VoC by Store', labels: ['Plaza', 'Riverside', 'Central', 'Westfield', 'Harbor', 'Oak St', 'Pine Gr', 'Maple'], values: [92, 89, 84, 80, 76, 72, 65, 58], color: '#6366f1' },
     ],
     followUpQuestions: [
@@ -262,7 +263,7 @@ const analyticsResponses: Record<string, { answer: string; kpiCards: { label: st
     ],
   },
   'total sales': {
-    answer: '## 💰 Store Sales Report — 4-Week Rolling Analysis\n\n**Report Period:** Last 4 Weeks (W1–W4) · **Store:** Downtown Plaza #2034 · **District:** 14\n\n---\n\n### Executive Summary\n\nDowntown Plaza #2034 generated **$872K** in total sales over the last 4 weeks, performing **+8.2% above plan** ($806K target). The store ranks **#1 in the district** and has exceeded target in all 4 weeks. Growth is driven by strong weekend conversion and effective promotional execution.\n\n### Weekly Sales Breakdown\n\n| Week | Sales | vs Plan | vs LY | Transactions | Avg Basket | Conversion |\n|------|-------|---------|-------|-------------|------------|------------|\n| Week 1 | $208K | +6.1% | +4.2% | 5,420 | $38.40 | 38% |\n| Week 2 | $215K | +7.8% | +5.1% | 5,580 | $38.50 | 39% |\n| Week 3 | $221K | +9.4% | +6.8% | 5,710 | $38.70 | 40% |\n| Week 4 | $228K | +9.6% | +7.2% | 5,860 | $38.90 | 41% |\n| **Total** | **$872K** | **+8.2%** | **+5.8%** | **22,570** | **$38.63** | **39.5%** |\n\n### Sales by Department\n\n| Department | 4-Week Sales | % of Total | vs Plan | Trend |\n|-----------|-------------|-----------|---------|-------|\n| Grocery & Staples | $314K | 36.0% | +5.2% | 📈 Growing |\n| Fresh & Produce | $183K | 21.0% | +12.4% | 📈 Strong |\n| Health & Beauty | $131K | 15.0% | +9.8% | 📈 Growing |\n| Household & Cleaning | $96K | 11.0% | +4.1% | ➡️ Stable |\n| Beverages | $79K | 9.1% | +7.3% | 📈 Growing |\n| Other | $69K | 7.9% | +3.6% | ➡️ Stable |\n\n### District Comparison (4-Week Total)\n\n| Rank | Store | 4-Week Sales | vs Plan | vs LY |\n|------|-------|-------------|---------|-------|\n| 🥇 | Downtown Plaza #2034 | $872K | +8.2% | +5.8% |\n| 🥈 | Riverside Mall #1876 | $784K | +5.4% | +3.9% |\n| 🥉 | Central Station #3421 | $692K | +2.1% | +1.4% |\n| 4 | Westfield Center #2198 | $648K | -1.2% | -0.8% |\n| 5 | Harbor View #4532 | $596K | -4.8% | -3.2% |\n| 6 | Oak Street #1234 | $532K | -6.8% | -5.1% |\n| 7 | Pine Grove #5678 | $476K | -9.2% | -7.8% |\n| 8 | Maple Heights #9012 | $448K | -12.4% | -10.1% |\n\n> 📈 **Growth Driver:** Fresh & Produce department is outperforming at +12.4% vs plan — driven by the new local sourcing initiative launched 6 weeks ago. This practice is a candidate for district-wide rollout.',
+    answer: '## 💰 Store Sales Report — 4-Week Rolling Analysis\n\n**Report Period:** Mar 30 – Apr 27, 2025 · **Store:** Downtown Plaza #2034 · **District:** 14\n\n---\n\n### Executive Summary\n\nDowntown Plaza #2034 generated **$872K** in total sales over the last 4 weeks, performing **+8.2% above plan** ($806K target). The store ranks **#1 in the district** and has exceeded target in all 4 weeks. Growth is driven by strong weekend conversion and effective promotional execution.\n\n### Weekly Sales Breakdown\n\n| Week | Sales | vs Plan | vs LY | Transactions | Avg Basket | Conversion |\n|------|-------|---------|-------|-------------|------------|------------|\n| Mar 30 | $208K | +6.1% | +4.2% | 5,420 | $38.40 | 38% |\n| Apr 6 | $215K | +7.8% | +5.1% | 5,580 | $38.50 | 39% |\n| Apr 13 | $221K | +9.4% | +6.8% | 5,710 | $38.70 | 40% |\n| Apr 20 | $228K | +9.6% | +7.2% | 5,860 | $38.90 | 41% |\n| **Total** | **$872K** | **+8.2%** | **+5.8%** | **22,570** | **$38.63** | **39.5%** |\n\n### Sales by Department\n\n| Department | 4-Week Sales | % of Total | vs Plan | Trend |\n|-----------|-------------|-----------|---------|-------|\n| Grocery & Staples | $314K | 36.0% | +5.2% | 📈 Growing |\n| Fresh & Produce | $183K | 21.0% | +12.4% | 📈 Strong |\n| Health & Beauty | $131K | 15.0% | +9.8% | 📈 Growing |\n| Household & Cleaning | $96K | 11.0% | +4.1% | ➡️ Stable |\n| Beverages | $79K | 9.1% | +7.3% | 📈 Growing |\n| Other | $69K | 7.9% | +3.6% | ➡️ Stable |\n\n### District Comparison (4-Week Total)\n\n| Rank | Store | 4-Week Sales | vs Plan | vs LY |\n|------|-------|-------------|---------|-------|\n| 🥇 | Downtown Plaza #2034 | $872K | +8.2% | +5.8% |\n| 🥈 | Riverside Mall #1876 | $784K | +5.4% | +3.9% |\n| 🥉 | Central Station #3421 | $692K | +2.1% | +1.4% |\n| 4 | Westfield Center #2198 | $648K | -1.2% | -0.8% |\n| 5 | Harbor View #4532 | $596K | -4.8% | -3.2% |\n| 6 | Oak Street #1234 | $532K | -6.8% | -5.1% |\n| 7 | Pine Grove #5678 | $476K | -9.2% | -7.8% |\n| 8 | Maple Heights #9012 | $448K | -12.4% | -10.1% |\n\n> 📈 **Growth Driver:** Fresh & Produce department is outperforming at +12.4% vs plan — driven by the new local sourcing initiative launched 6 weeks ago. This practice is a candidate for district-wide rollout.',
     kpiCards: [
       { label: '4-Week Sales', value: '$872K', delta: '+8.2%', direction: 'up' },
       { label: 'Avg Weekly', value: '$218K', delta: '+$16K', direction: 'up' },
@@ -270,7 +271,7 @@ const analyticsResponses: Record<string, { answer: string; kpiCards: { label: st
       { label: 'Avg Basket', value: '$38.63', delta: '+2.1%', direction: 'up' },
     ],
     chartData: [
-      { type: 'bar', title: 'Weekly Sales ($K)', labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'], values: [208, 215, 221, 228], color: '#10b981' },
+      { type: 'bar', title: 'Weekly Sales ($K)', labels: ['Apr 6', 'Apr 13', 'Apr 20', 'Apr 27'], values: [208, 215, 221, 228], color: '#10b981' },
       { type: 'bar', title: '4-Week Sales by Store ($K)', labels: ['Plaza', 'Riverside', 'Central', 'Westfield', 'Harbor', 'Oak St', 'Pine Gr', 'Maple'], values: [872, 784, 692, 648, 596, 532, 476, 448], color: '#6366f1' },
     ],
     followUpQuestions: [
@@ -280,7 +281,7 @@ const analyticsResponses: Record<string, { answer: string; kpiCards: { label: st
     ],
   },
   'margin': {
-    answer: '## 📊 Gross Margin Trend — 13-Week Analysis\n\n**Report Period:** Last 13 Weeks (Q3 W1 – Q4 W1) · **Store:** Downtown Plaza #2034 · **District:** 14\n\n---\n\n### Executive Summary\n\nGross margin has trended from **28.4% → 31.2%** over the past 13 weeks, a **+2.8 percentage point improvement**. This outperforms the district average of 27.8% and puts the store in the **top quartile** nationally. The improvement is driven by reduced shrinkage, better promotional mix optimization, and improved fresh department waste management.\n\n### 13-Week Gross Margin Trend\n\n| Week | Gross Margin % | vs District Avg | vs Target (30%) | Key Event |\n|------|---------------|-----------------|-----------------|----------|\n| W1 | 28.4% | +0.2pp | -1.6pp | Baseline period |\n| W2 | 28.6% | +0.3pp | -1.4pp | — |\n| W3 | 28.9% | +0.5pp | -1.1pp | Shrink reduction program launched |\n| W4 | 29.1% | +0.7pp | -0.9pp | — |\n| W5 | 29.3% | +0.8pp | -0.7pp | Fresh waste protocol v2 deployed |\n| W6 | 29.6% | +1.0pp | -0.4pp | — |\n| W7 | 29.8% | +1.2pp | -0.2pp | Promo mix optimization started |\n| W8 | 30.0% | +1.3pp | 0.0pp | **Target achieved** |\n| W9 | 30.2% | +1.5pp | +0.2pp | — |\n| W10 | 30.5% | +1.7pp | +0.5pp | — |\n| W11 | 30.8% | +1.9pp | +0.8pp | Vendor rebate negotiation completed |\n| W12 | 31.0% | +2.1pp | +1.0pp | — |\n| W13 (Current) | **31.2%** | **+2.4pp** | **+1.2pp** | Sustained above target |\n\n### Margin by Department\n\n| Department | Current GM% | 13W Ago | Change | vs District |\n|-----------|------------|---------|--------|-------------|\n| Fresh & Produce | 34.8% | 30.2% | +4.6pp | +3.1pp above |\n| Health & Beauty | 38.2% | 37.1% | +1.1pp | +0.8pp above |\n| Grocery & Staples | 24.6% | 23.8% | +0.8pp | +0.4pp above |\n| Beverages | 29.4% | 28.2% | +1.2pp | +0.6pp above |\n| Household | 26.8% | 26.1% | +0.7pp | +0.2pp above |\n\n### Key Margin Drivers\n\n| Driver | Impact | Detail |\n|--------|--------|--------|\n| **Shrink Reduction** | +1.2pp | Shrinkage reduced from 2.8% → 1.6% through improved receiving verification and loss prevention |\n| **Fresh Waste Management** | +0.8pp | Produce waste cut by 34% through dynamic markdown and donation partnerships |\n| **Promo Mix Optimization** | +0.5pp | Shifted promotional spend toward higher-margin categories; maintained traffic |\n| **Vendor Rebate Negotiation** | +0.3pp | Secured improved terms on top 50 SKUs; effective Week 11 |\n\n> 🎯 **Outlook:** If current trajectory holds, projected to reach **32.0% GM** by end of Q4 — which would qualify for the **Margin Excellence Tier** and associated team bonus.',
+    answer: '## 📊 Gross Margin Trend — 13-Week Analysis\n\n**Report Period:** Jan 27 – Apr 21, 2025 · **Store:** Downtown Plaza #2034 · **District:** 14\n\n---\n\n### Executive Summary\n\nGross margin has trended from **28.4% → 31.2%** over the past 13 weeks, a **+2.8 percentage point improvement**. This outperforms the district average of 27.8% and puts the store in the **top quartile** nationally. The improvement is driven by reduced shrinkage, better promotional mix optimization, and improved fresh department waste management.\n\n### 13-Week Gross Margin Trend\n\n| Week | Gross Margin % | vs District Avg | vs Target (30%) | Key Event |\n|------|---------------|-----------------|-----------------|----------|\n| Jan 27 | 28.4% | +0.2pp | -1.6pp | Baseline period |\n| Feb 3 | 28.6% | +0.3pp | -1.4pp | — |\n| Feb 10 | 28.9% | +0.5pp | -1.1pp | Shrink reduction program launched |\n| Feb 17 | 29.1% | +0.7pp | -0.9pp | — |\n| Feb 24 | 29.3% | +0.8pp | -0.7pp | Fresh waste protocol v2 deployed |\n| Mar 3 | 29.6% | +1.0pp | -0.4pp | — |\n| Mar 10 | 29.8% | +1.2pp | -0.2pp | Promo mix optimization started |\n| Mar 17 | 30.0% | +1.3pp | 0.0pp | **Target achieved** |\n| Mar 24 | 30.2% | +1.5pp | +0.2pp | — |\n| Mar 31 | 30.5% | +1.7pp | +0.5pp | — |\n| Apr 7 | 30.8% | +1.9pp | +0.8pp | Vendor rebate negotiation completed |\n| Apr 14 | 31.0% | +2.1pp | +1.0pp | — |\n| Apr 21 (Current) | **31.2%** | **+2.4pp** | **+1.2pp** | Sustained above target |\n\n### Margin by Department\n\n| Department | Current GM% | 13W Ago | Change | vs District |\n|-----------|------------|---------|--------|-------------|\n| Fresh & Produce | 34.8% | 30.2% | +4.6pp | +3.1pp above |\n| Health & Beauty | 38.2% | 37.1% | +1.1pp | +0.8pp above |\n| Grocery & Staples | 24.6% | 23.8% | +0.8pp | +0.4pp above |\n| Beverages | 29.4% | 28.2% | +1.2pp | +0.6pp above |\n| Household | 26.8% | 26.1% | +0.7pp | +0.2pp above |\n\n### Key Margin Drivers\n\n| Driver | Impact | Detail |\n|--------|--------|--------|\n| **Shrink Reduction** | +1.2pp | Shrinkage reduced from 2.8% → 1.6% through improved receiving verification and loss prevention |\n| **Fresh Waste Management** | +0.8pp | Produce waste cut by 34% through dynamic markdown and donation partnerships |\n| **Promo Mix Optimization** | +0.5pp | Shifted promotional spend toward higher-margin categories; maintained traffic |\n| **Vendor Rebate Negotiation** | +0.3pp | Secured improved terms on top 50 SKUs; effective Week 11 |\n\n> 🎯 **Outlook:** If current trajectory holds, projected to reach **32.0% GM** by end of Q4 — which would qualify for the **Margin Excellence Tier** and associated team bonus.',
     kpiCards: [
       { label: 'Current GM%', value: '31.2%', delta: '+2.8pp', direction: 'up' },
       { label: 'vs District', value: '+2.4pp', delta: 'above avg', direction: 'up' },
@@ -288,7 +289,7 @@ const analyticsResponses: Record<string, { answer: string; kpiCards: { label: st
       { label: 'Fresh Waste', value: '-34%', delta: 'improved', direction: 'up' },
     ],
     chartData: [
-      { type: 'line', title: 'Gross Margin % Trend (13 Weeks)', labels: ['W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8', 'W9', 'W10', 'W11', 'W12', 'W13'], values: [28.4, 28.6, 28.9, 29.1, 29.3, 29.6, 29.8, 30.0, 30.2, 30.5, 30.8, 31.0, 31.2], color: '#10b981', secondaryValues: [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30], secondaryLabel: 'Target' },
+      { type: 'line', title: 'Gross Margin % Trend (13 Weeks)', labels: ['Jan 27', 'Feb 3', 'Feb 10', 'Feb 17', 'Feb 24', 'Mar 3', 'Mar 10', 'Mar 17', 'Mar 24', 'Mar 31', 'Apr 7', 'Apr 14', 'Apr 21'], values: [28.4, 28.6, 28.9, 29.1, 29.3, 29.6, 29.8, 30.0, 30.2, 30.5, 30.8, 31.0, 31.2], color: '#10b981', secondaryValues: [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30], secondaryLabel: 'Target' },
       { type: 'horizontal-bar', title: 'GM% by Department', labels: ['Health & Beauty', 'Fresh & Produce', 'Beverages', 'Household', 'Grocery'], values: [38.2, 34.8, 29.4, 26.8, 24.6], color: '#6366f1' },
     ],
     followUpQuestions: [
@@ -350,7 +351,7 @@ const skills: { id: SkillMode; label: string; icon: React.ReactNode; description
     icon: <Zap size={16} />,
     description: 'Create tasks & assignments via natural language',
     placeholder: 'Tell me what task to create...',
-    suggestions: ['Create a restocking task for Aisle 5', 'Assign safety audit follow-up to John', 'Schedule planogram reset for next Monday', 'Create urgent task for fire exit clearance'],
+    suggestions: ['Create a planogram rule for brand blocking in Apparel', 'Create a planogram rule for price tier adjacency', 'Schedule planogram reset for next Monday', 'Create urgent task for fire exit clearance'],
   },
 ];
 
@@ -403,10 +404,24 @@ const vocActionPlanResponse = {
   suggestedQueries: ['Create follow-up audit task', 'View affected store details', 'Schedule team briefing'],
 };
 
+// ── HQ District Gaps Action Plan Response ──
+const districtGapsActionPlanResponse = {
+  content: '**Action Plan: Execution Gaps Widening in 2 Districts**\n\nBased on analysis of compliance scores, audit data, and broadcast acknowledgements across District 11 and District 22:\n\n**Root Cause Analysis:**\n• District 11: 3 stores missed Monday audit window — revenue impact est. $18K\n• District 22: Broadcast acknowledgement rate dropped to 56% — 4 stores non-responsive\n• Both districts show correlation between late audit completion and declining DPI scores\n\n**Recommended Actions:**\n\n| Priority | Action | Owner | Timeline |\n|----------|--------|-------|----------|\n| 🔴 Critical | Deploy compliance correction protocol in District 11 — 3 stores | DM Lisa Nguyen | 24 hours |\n| 🔴 Critical | Escalate broadcast non-compliance in District 22 — follow up with 4 non-responsive stores | DM Marcus Reed | 48 hours |\n| 🟡 High | Schedule re-audit for all flagged stores in both districts | Regional Ops | This week |\n| 🟡 High | Review and update broadcast acknowledgement SLA for both districts | HQ Operations | This week |\n\n**Expected Impact:**\n• Compliance recovery to 85%+ within 2 weeks\n• Broadcast acknowledgement rate improvement to 90%+\n• Estimated revenue recovery: $42K across both districts',
+  taskCreated: {
+    title: 'Compliance Recovery Plan — District 11 & 22',
+    assignee: '',
+    priority: 'Critical',
+    due: 'This Week',
+  },
+  suggestedQueries: ['Create follow-up audit tasks for District 11', 'Draft escalation broadcast for District 22', 'Show compliance trend for both districts', 'Schedule DM review meetings'],
+};
+
 // ── Component ──
 export const AICopilot: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [activeSkill, setActiveSkill] = useState<SkillMode>('knowledge');
+  const [pogRuleSent, setPogRuleSent] = useState<Set<string>>(new Set());
   const autoTriggeredRef = useRef(false);
   const [isInitializing, setIsInitializing] = useState(false);
   const [initStep, setInitStep] = useState(0);
@@ -466,9 +481,9 @@ export const AICopilot: React.FC = () => {
       return { ...prev, actions: [...prev.actions, processingMsg] };
     });
 
-    // Animate steps one by one
+    // Animate steps one by one — slow enough for demo impact
     for (let i = 0; i < steps.length; i++) {
-      await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 400));
+      await new Promise(resolve => setTimeout(resolve, 1300 + Math.random() * 700));
       setMessages(prev => ({
         ...prev,
         actions: prev.actions.map(m =>
@@ -483,8 +498,8 @@ export const AICopilot: React.FC = () => {
       }));
     }
 
-    // Small pause after all steps complete, then show final response
-    await new Promise(resolve => setTimeout(resolve, 600));
+    // Pause after all steps complete, then show final response
+    await new Promise(resolve => setTimeout(resolve, 1400));
     setMessages(prev => ({
       ...prev,
       actions: prev.actions.filter(m => m.id !== processingId).concat(finalResponse),
@@ -549,6 +564,60 @@ export const AICopilot: React.FC = () => {
           };
 
           runAgenticActionFlow('msg-processing-voc', vocSteps, finalResponse);
+        }, 500);
+      }, 2000);
+    }
+
+    // Deep-link: HQ Home — District Gaps "Open in AI Copilot"
+    if (mode === 'actions' && context === 'district-gaps' && !autoTriggeredRef.current) {
+      autoTriggeredRef.current = true;
+      setActiveSkill('actions');
+      setInitMode('actions');
+      setSearchParams({}, { replace: true });
+
+      setIsInitializing(true);
+      setInitStep(0);
+      setTimeout(() => setInitStep(1), 600);
+      setTimeout(() => setInitStep(2), 1200);
+      setTimeout(() => setInitStep(3), 1800);
+      setTimeout(() => {
+        setIsInitializing(false);
+        setInitStep(0);
+
+        const userMsg: ChatMessage = {
+          id: 'msg-auto-district-gaps',
+          role: 'user',
+          content: 'Create an action plan for execution gaps widening in District 11 and District 22 — compliance scores declining, correlated with audit misses and late broadcast acknowledgements',
+          timestamp: new Date(),
+          skill: 'actions',
+        };
+        setMessages(prev => {
+          if (prev.actions.some(m => m.id === 'msg-auto-district-gaps')) return prev;
+          return { ...prev, actions: [...prev.actions, userMsg] };
+        });
+        setIsProcessing(true);
+
+        setTimeout(() => {
+          const gapSteps: ProcessingStep[] = [
+            { step: 'Receiving HQ district context...', status: 'active' },
+            { step: 'Analyzing compliance data across District 11 & 22...', status: 'pending' },
+            { step: 'Cross-referencing audit completion and broadcast acknowledgements...', status: 'pending' },
+            { step: 'Identifying root causes and revenue impact...', status: 'pending' },
+            { step: 'Generating action plan with task assignments...', status: 'pending' },
+            { step: 'Publishing task to Operations Queue...', status: 'pending' },
+          ];
+
+          const finalResponse: ChatMessage = {
+            id: 'msg-resp-district-gaps',
+            role: 'assistant',
+            content: districtGapsActionPlanResponse.content,
+            timestamp: new Date(),
+            skill: 'actions',
+            taskCreated: districtGapsActionPlanResponse.taskCreated,
+            suggestedQueries: districtGapsActionPlanResponse.suggestedQueries,
+          };
+
+          runAgenticActionFlow('msg-processing-district-gaps', gapSteps, finalResponse);
         }, 500);
       }, 2000);
     }
@@ -710,10 +779,9 @@ export const AICopilot: React.FC = () => {
       [activeSkill]: [...prev[activeSkill], processingMsg],
     }));
 
-    // Animate steps — total ~1.4-1.9s so overall response lands in 1-2s range
-    const perStep = 350 + Math.random() * 120;
+    // Animate steps — slow for impressive demo feel
     for (let i = 0; i < steps.length; i++) {
-      await new Promise(resolve => setTimeout(resolve, perStep));
+      await new Promise(resolve => setTimeout(resolve, 1200 + Math.random() * 600));
       setMessages(prev => ({
         ...prev,
         [activeSkill]: prev[activeSkill].map(m =>
@@ -728,8 +796,8 @@ export const AICopilot: React.FC = () => {
       }));
     }
 
-    // Small pause, then swap processing message for final response
-    await new Promise(resolve => setTimeout(resolve, 250));
+    // Pause after all steps, then show final response
+    await new Promise(resolve => setTimeout(resolve, 1200));
     const randConfidence = () => Math.round(86 + Math.random() * 11); // 86-97
 
     setMessages(prev => {
@@ -776,6 +844,58 @@ export const AICopilot: React.FC = () => {
   // Agentic flow for regular Actions skill user queries
   const simulateActionAgentic = (userQuery: string) => {
     setIsProcessing(true);
+    const q = userQuery.toLowerCase();
+
+    // POG Rule creation flow
+    if (q.includes('planogram rule') || q.includes('pog rule')) {
+      const ruleNameMatch = q.match(/(?:for|about|on)\s+(.+?)(?:\s+rule)?$/i);
+      const ruleName = ruleNameMatch
+        ? ruleNameMatch[1].replace(/\b\w/g, l => l.toUpperCase())
+        : 'Custom Planogram Rule';
+
+      const ruleType = q.includes('color') ? 'Visual'
+        : q.includes('size') || q.includes('fit') ? 'Product Fit & Placement'
+        : q.includes('price') ? 'Price Tier'
+        : q.includes('season') ? 'Compliance'
+        : q.includes('adjacency') || q.includes('adjacent') ? 'Adjacency'
+        : q.includes('facing') ? 'Facing'
+        : q.includes('brand') ? 'Brand Blocking'
+        : 'Visual';
+
+      const ruleSteps: ProcessingStep[] = [
+        { step: 'Parsing rule definition...', status: 'active' },
+        { step: 'Identifying rule type and category...', status: 'pending' },
+        { step: 'Validating against existing POG rules...', status: 'pending' },
+        { step: 'Generating rule configuration...', status: 'pending' },
+      ];
+
+      const ruleCategory = q.includes('apparel') ? 'Apparel'
+        : q.includes('grocery') ? 'Grocery'
+        : q.includes('electronics') ? 'Electronics'
+        : q.includes('beauty') ? 'Health & Beauty'
+        : q.includes('dairy') ? 'Dairy'
+        : q.includes('beverage') ? 'Beverages'
+        : 'Apparel';
+
+      const finalMsg: ChatMessage = {
+        id: generateId(),
+        role: 'assistant',
+        content: 'Planogram rule created successfully. You can review the details below and send it to the POG Localization Engine.',
+        timestamp: new Date(),
+        skill: 'actions',
+        pogRuleCreated: {
+          name: ruleName,
+          type: ruleType,
+          description: `${ruleName} — automatically generated from natural language input. Applies ${ruleType.toLowerCase()} constraints to planogram layouts.`,
+          status: 'Active',
+          category: ruleCategory,
+        },
+        suggestedQueries: ['Create another planogram rule', 'Schedule planogram reset for next Monday', 'Create a restocking task'],
+      };
+
+      runAgenticActionFlow(`proc-${Date.now()}`, ruleSteps, finalMsg);
+      return;
+    }
 
     const taskTitle = userQuery.replace(/^(create|assign|schedule)\s+(a\s+)?/i, '').replace(/\s+task\s+/i, ' ');
     const actionSteps: ProcessingStep[] = [
@@ -984,7 +1104,13 @@ export const AICopilot: React.FC = () => {
       };
       addMessage(userMsg);
       setInputValue('');
-      simulateResponse(query);
+      if (activeSkill === 'actions') {
+        simulateActionAgentic(query);
+      } else if (activeSkill === 'pog') {
+        simulatePogAgentic(query);
+      } else {
+        simulateResponse(query);
+      }
     }, 100);
   };
 
@@ -1043,25 +1169,48 @@ export const AICopilot: React.FC = () => {
       );
     }
 
-    // Agentic processing steps (ShelfIQ-style)
+    // Agentic processing steps — tabbed card
     if (msg.isProcessing && msg.processingSteps) {
+      const completedCount = msg.processingSteps.filter(s => s.status === 'completed').length;
+      const activeStep = msg.processingSteps.find(s => s.status === 'active');
       return (
-        <div className="cop-agent-processing">
-          <div className="cop-processing-header">
-            <div className="cop-processing-spinner" />
-            <span>{msg.skill === 'pog' ? 'Analyzing image...' : msg.skill === 'actions' ? 'Processing action request...' : 'Analyzing...'}</span>
+        <div className="cop-agentic-card">
+          <div className="cop-agentic-planning">
+            <Sparkles size={16} className="cop-agentic-planning-icon" />
+            <span>{activeStep ? activeStep.step.replace(/\.{3}$/, '') : 'Planning next moves'}.....</span>
+            <ChevronDown size={14} />
           </div>
-          <div className="cop-processing-steps">
-            {msg.processingSteps.map((step, idx) => (
-              <div key={idx} className={`cop-processing-step cop-step--${step.status}`}>
-                <div className="cop-step-indicator">
-                  {step.status === 'completed' && <span className="cop-step-check">✓</span>}
-                  {step.status === 'active' && <span className="cop-step-dot cop-step-dot--active" />}
-                  {step.status === 'pending' && <span className="cop-step-dot" />}
+          <div className="cop-agentic-tabbed">
+            <div className="cop-agentic-tabs">
+              <button className="cop-agentic-tab active"><ClipboardList size={14} /> Steps</button>
+              <button className="cop-agentic-tab"><Sparkles size={14} /> Agent Response</button>
+            </div>
+            <div className="cop-agentic-tab-content">
+              <div className="cop-agentic-section">
+                <div className="cop-agentic-section-header">
+                  <ChevronRight size={16} />
+                  <span>Processing Request</span>
+                  <span className="cop-agentic-step-count">{completedCount}/{msg.processingSteps.length}</span>
                 </div>
-                <span className="cop-step-text">{step.step}</span>
+                <div className="cop-agentic-step-list">
+                  {msg.processingSteps.map((step, idx) => (
+                    <div key={idx} className={`cop-agentic-step cop-agentic-step--${step.status}`}>
+                      <div className="cop-agentic-step-icon">
+                        {step.status === 'completed' && <CheckCircle size={16} className="cop-agentic-check" />}
+                        {step.status === 'active' && <div className="cop-agentic-spinner" />}
+                        {step.status === 'pending' && <div className="cop-agentic-pending-dot" />}
+                      </div>
+                      <div className="cop-agentic-step-content">
+                        <span className={`cop-agentic-step-title ${step.status === 'active' ? 'active' : ''}`}>{step.step}</span>
+                        {step.status === 'active' && (
+                          <span className="cop-agentic-step-desc">AI is processing this step...</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
+            </div>
           </div>
         </div>
       );
@@ -1073,6 +1222,10 @@ export const AICopilot: React.FC = () => {
           <div className="cop-msg-text" dangerouslySetInnerHTML={{
             __html: (() => {
               let text = msg.content;
+              // Replace medal/rank emojis with text before general emoji strip
+              text = text.replace(/🥇/g, '#1').replace(/🥈/g, '#2').replace(/🥉/g, '#3');
+              // Strip remaining emoji characters for clean professional output (preserve newlines)
+              text = text.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{FE00}-\u{FE0F}\u{1FA00}-\u{1FAFF}\u{200D}\u{20E3}\u{E0020}-\u{E007F}]/gu, '').replace(/ {2,}/g, ' ');
               // Hide "Recommended Actions:" section once task is pushed
               if (msg.taskCreated && taskPushed.has(msg.id)) {
                 text = text.split(/\*\*Recommended Actions:\*\*/)[0].trimEnd();
@@ -1083,20 +1236,28 @@ export const AICopilot: React.FC = () => {
               let inTable = false;
               let tableRows: string[] = [];
 
+              const fmtCell = (c: string) => c.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/`(.*?)`/g, '<code class="cop-md-code">$1</code>');
+              const isSeparatorRow = (row: string) => /^\|[\s\-:|]+\|$/.test(row);
               const flushTable = () => {
-                if (tableRows.length < 2) { htmlParts.push(...tableRows); tableRows = []; inTable = false; return; }
-                const headerCells = tableRows[0].split('|').map(c => c.trim()).filter(Boolean);
-                const dataRows = tableRows.slice(2); // skip separator row
-                let t = '<table class="cop-md-table"><thead><tr>';
-                headerCells.forEach(c => { t += `<th>${c.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</th>`; });
+                if (tableRows.length < 2) { htmlParts.push(...tableRows.map(r => `<p class="cop-md-p">${fmtCell(r)}</p>`)); tableRows = []; inTable = false; return; }
+                // Find the separator row (usually row index 1)
+                let sepIdx = tableRows.findIndex(r => isSeparatorRow(r));
+                if (sepIdx < 0) sepIdx = 1; // fallback
+                const headerCells = tableRows[sepIdx > 0 ? 0 : 0].split('|').map(c => c.trim()).filter(Boolean);
+                const dataRows = tableRows.filter((_, idx) => idx !== 0 && idx !== sepIdx);
+                let t = '<div class="cop-md-table-wrap"><table class="cop-md-table"><thead><tr>';
+                headerCells.forEach(c => { t += `<th>${fmtCell(c)}</th>`; });
                 t += '</tr></thead><tbody>';
                 dataRows.forEach(row => {
                   const cells = row.split('|').map(c => c.trim()).filter(Boolean);
                   t += '<tr>';
-                  cells.forEach(c => { t += `<td>${c.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</td>`; });
+                  // Pad or trim cells to match header count
+                  for (let ci = 0; ci < headerCells.length; ci++) {
+                    t += `<td>${ci < cells.length ? fmtCell(cells[ci]) : ''}</td>`;
+                  }
                   t += '</tr>';
                 });
-                t += '</tbody></table>';
+                t += '</tbody></table></div>';
                 htmlParts.push(t);
                 tableRows = [];
                 inTable = false;
@@ -1168,43 +1329,17 @@ export const AICopilot: React.FC = () => {
           </div>
         )}
 
-        {/* Confidence Score Badge */}
-        {msg.role === 'assistant' && typeof msg.confidence === 'number' && !msg.isProcessing && !msg.isTyping && (
-          <div className={`cop-confidence cop-confidence--${msg.confidence >= 90 ? 'high' : msg.confidence >= 75 ? 'medium' : 'low'}`}>
-            <div className="cop-confidence-icon">
-              <CheckCircle size={12} />
-            </div>
-            <div className="cop-confidence-body">
-              <span className="cop-confidence-label">Confidence Score</span>
-              <div className="cop-confidence-bar">
-                <div className="cop-confidence-bar-fill" style={{ width: `${msg.confidence}%` }} />
-              </div>
-            </div>
-            <span className="cop-confidence-value">{msg.confidence}%</span>
-          </div>
-        )}
-
-        {/* Knowledge Sources — Premium */}
+        {/* Knowledge Sources — ChatGPT/Gemini style pills */}
         {msg.sources && msg.sources.length > 0 && (
-          <div className="cop-sources cop-sources--premium">
-            <div className="cop-sources-header">
-              <div className="cop-sources-label"><BookOpen size={13} /> Cited Sources</div>
-              <span className="cop-sources-count">{msg.sources.length} document{msg.sources.length > 1 ? 's' : ''}</span>
-            </div>
-            <div className="cop-sources-grid">
+          <div className="cop-sources-pills">
+            <div className="cop-sources-pills-label"><BookOpen size={13} /> Sources</div>
+            <div className="cop-sources-pills-row">
               {msg.sources.map((src, i) => (
-                <div key={i} className="cop-source-card">
-                  <div className="cop-source-rank">{i + 1}</div>
-                  <div className="cop-source-icon"><FileText size={14} /></div>
-                  <div className="cop-source-info">
-                    <span className="cop-source-doc">{src.doc}</span>
-                    <span className="cop-source-detail">{src.section}</span>
-                    <span className="cop-source-page">{src.page}</span>
-                  </div>
-                  <button className="cop-source-link-btn" aria-label="Open source">
-                    <ExternalLink size={12} />
-                  </button>
-                </div>
+                <button key={i} className="cop-source-pill" title={`${src.section} · ${src.page}`}>
+                  <span className="cop-source-pill-num">{i + 1}</span>
+                  <span className="cop-source-pill-name">{src.doc}</span>
+                  <ExternalLink size={11} />
+                </button>
               ))}
             </div>
           </div>
@@ -1320,6 +1455,19 @@ export const AICopilot: React.FC = () => {
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {/* Confidence Score Badge — after content, before follow-ups */}
+        {msg.role === 'assistant' && typeof msg.confidence === 'number' && !msg.isProcessing && !msg.isTyping && (
+          <div className={`cop-confidence cop-confidence--${msg.confidence >= 90 ? 'high' : msg.confidence >= 75 ? 'medium' : 'low'}`}>
+            <div className="cop-confidence-body">
+              <span className="cop-confidence-label">Confidence Score</span>
+              <div className="cop-confidence-bar">
+                <div className="cop-confidence-bar-fill" style={{ width: `${msg.confidence}%` }} />
+              </div>
+            </div>
+            <span className="cop-confidence-value">{msg.confidence}%</span>
           </div>
         )}
 
@@ -1727,8 +1875,53 @@ export const AICopilot: React.FC = () => {
           </div>
         )}
 
+        {/* POG Rule Created Card */}
+        {msg.pogRuleCreated && (
+          <div className={`cop-pog-rule-card ${pogRuleSent.has(msg.id) ? 'cop-pog-rule-sent' : ''}`}>
+            <div className="cop-pog-rule-header">
+              <FileText size={15} />
+              <span>{pogRuleSent.has(msg.id) ? 'Rule Sent to POG Engine' : 'Planogram Rule Created'}</span>
+              {pogRuleSent.has(msg.id) && <CheckCircle2 size={14} className="cop-task-check" />}
+            </div>
+            <div className="cop-pog-rule-body">
+              <div className="cop-task-row"><span className="cop-task-label">Rule Name</span><span className="cop-task-value">{msg.pogRuleCreated.name}</span></div>
+              <div className="cop-task-row"><span className="cop-task-label">Type</span><span className="cop-task-value">{msg.pogRuleCreated.type}</span></div>
+              <div className="cop-task-row"><span className="cop-task-label">Category</span><span className="cop-task-value">{msg.pogRuleCreated.category}</span></div>
+              <div className="cop-task-row"><span className="cop-task-label">Status</span><span className={`cop-task-priority cop-pri--${msg.pogRuleCreated.status === 'Active' ? 'medium' : 'high'}`}>{msg.pogRuleCreated.status}</span></div>
+              {msg.pogRuleCreated.description && (
+                <div className="cop-pog-rule-desc">{msg.pogRuleCreated.description}</div>
+              )}
+            </div>
+            {!pogRuleSent.has(msg.id) ? (
+              <button
+                className="cop-pog-rule-send-btn"
+                onClick={() => {
+                  setPogRuleSent(prev => new Set(prev).add(msg.id));
+                  setTimeout(() => {
+                    const params = new URLSearchParams({
+                      newRuleName: msg.pogRuleCreated!.name,
+                      newRuleType: msg.pogRuleCreated!.type,
+                      newRuleCategory: msg.pogRuleCreated!.category,
+                    });
+                    navigate(`/planogram/rule-management?${params.toString()}`);
+                  }, 1500);
+                }}
+              >
+                <Send size={13} />
+                Send to POG Rules
+                <ChevronRight size={14} />
+              </button>
+            ) : (
+              <div className="cop-pog-rule-sent-banner">
+                <CheckCircle2 size={14} />
+                <span>Sent to POG Localization Engine — redirecting...</span>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Suggested Follow-ups — hidden once task is pushed to Operations Queue */}
-        {msg.suggestedQueries && msg.suggestedQueries.length > 0 && !(msg.taskCreated && taskPushed.has(msg.id)) && (
+        {msg.suggestedQueries && msg.suggestedQueries.length > 0 && !(msg.taskCreated && taskPushed.has(msg.id)) && !(msg.pogRuleCreated && pogRuleSent.has(msg.id)) && (
           <div className="cop-suggestions-inline">
             {msg.suggestedQueries.map((q, i) => (
               <button key={i} className="cop-suggestion-chip" onClick={() => handleSuggestionClick(q)}>

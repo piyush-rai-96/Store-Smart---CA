@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { 
   Search, 
   Plus, 
@@ -174,7 +175,7 @@ const initialMockRules: Rule[] = [
     description: 'Arrange sizes from XS to XL, left to right on rails and shelves',
     types: ['Facing'],
     mapping: { categories: ['Women\'s Apparel'], clusters: ['Urban Flagship', 'Family Center'], fixtures: ['Wall Display'] },
-    lastUpdated: '2024-03-15',
+    lastUpdated: '2025-04-22',
     status: 'Active',
     definition: { Facing: { minFacings: 2, maxFacings: 4 } },
     completedSteps: [1, 2, 3, 4],
@@ -185,7 +186,7 @@ const initialMockRules: Rule[] = [
     description: 'Group denim by wash color and prioritize bestsellers at eye level',
     types: ['Brand Blocking', 'Priority'],
     mapping: { categories: ['Denim'], clusters: [], fixtures: ['Wall Display'] },
-    lastUpdated: '2024-03-14',
+    lastUpdated: '2025-04-20',
     status: 'Active',
     definition: { 
       'Brand Blocking': { brand: 'C&A Essentials', blockingType: 'Vertical', minProducts: 3 },
@@ -199,7 +200,7 @@ const initialMockRules: Rule[] = [
     description: 'Require trend items, exclude discontinued styles in flagship stores',
     types: ['Mandatory SKU', 'Prohibited SKU'],
     mapping: { categories: ['Accessories'], clusters: ['Urban Flagship'], fixtures: ['End Cap'] },
-    lastUpdated: '2024-03-12',
+    lastUpdated: '2025-04-18',
     status: 'Active',
     definition: { 
       'Mandatory SKU': { skus: ['SKU-005', 'SKU-006'], minQuantity: 2 },
@@ -213,7 +214,7 @@ const initialMockRules: Rule[] = [
     description: 'Organize kids apparel by age group with toddler items at lower heights',
     types: ['Adjacency'],
     mapping: { categories: ['Kids Apparel'], clusters: ['Family Center'], fixtures: ['Wall Display'] },
-    lastUpdated: '2024-03-18',
+    lastUpdated: '2025-04-25',
     status: 'Draft',
     definition: {},
     completedSteps: [1, 2],
@@ -224,7 +225,7 @@ const initialMockRules: Rule[] = [
     description: 'Feature promotional items prominently with clear pricing on tables',
     types: ['Priority', 'Space Allocation'],
     mapping: { categories: ['Seasonal', 'Sale Items'], clusters: ['Mall Anchor', 'Outlet Value'], fixtures: ['Table'] },
-    lastUpdated: '2024-03-10',
+    lastUpdated: '2025-04-15',
     status: 'Active',
     definition: { 
       'Priority': { target: 'New Arrivals', placement: 'Front-center', priority: 'High' },
@@ -238,7 +239,7 @@ const initialMockRules: Rule[] = [
     description: 'Maintain proper spacing between hangers for easy browsing',
     types: ['Capacity'],
     mapping: { categories: ['Apparel', 'Dresses', 'Outerwear'], clusters: [], fixtures: ['Hanging Rail'] },
-    lastUpdated: '2024-03-08',
+    lastUpdated: '2025-04-10',
     status: 'Active',
     definition: { 
       'Capacity': { maxItemsPerRail: 25, minSpacing: '2 inches' }
@@ -396,9 +397,40 @@ const CustomSelect: React.FC<{
 };
 
 export const POGRuleManagement: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<'library' | 'builder'>('library');
   const [searchQuery, setSearchQuery] = useState('');
   const [rules, setRules] = useState<Rule[]>(initialMockRules);
+  const [newRuleHighlight, setNewRuleHighlight] = useState<string | null>(null);
+
+  // Accept new rule from AI Copilot via URL params
+  useEffect(() => {
+    const ruleName = searchParams.get('newRuleName');
+    const ruleType = searchParams.get('newRuleType');
+    const ruleCategory = searchParams.get('newRuleCategory');
+    if (ruleName && ruleType) {
+      const mappedType = (ruleTypeOptions.find(rt => rt.label === ruleType || rt.value === ruleType)?.value || 'Brand Blocking') as RuleType;
+      const newId = `RULE-${String(rules.length + 1).padStart(3, '0')}`;
+      const newRule: Rule = {
+        id: newId,
+        name: ruleName,
+        description: `${ruleName} — created via AI Copilot. Applies ${ruleType.toLowerCase()} constraints to planogram layouts.`,
+        types: [mappedType],
+        mapping: { categories: ruleCategory ? [ruleCategory] : [], clusters: [], fixtures: [] },
+        lastUpdated: new Date().toISOString().split('T')[0],
+        status: 'Active',
+        definition: {},
+        completedSteps: [1, 2, 3, 4],
+      };
+      setRules(prev => {
+        if (prev.some(r => r.name === ruleName)) return prev;
+        return [newRule, ...prev];
+      });
+      setNewRuleHighlight(newId);
+      setSearchParams({}, { replace: true });
+      setTimeout(() => setNewRuleHighlight(null), 5000);
+    }
+  }, []);
   const [filters, setFilters] = useState<Filters>({ ruleType: '', category: '', mappingStatus: '', ruleStatus: '' });
   const [selectedRule, setSelectedRule] = useState<Rule | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -1354,7 +1386,7 @@ export const POGRuleManagement: React.FC = () => {
                     const mapped = isMapped(rule);
                     const isDraft = rule.status === 'Draft';
                     return (
-                      <tr key={rule.id} className={`${!mapped && !isDraft ? 'unmapped-row' : ''} ${isDraft ? 'draft-row' : ''}`}>
+                      <tr key={rule.id} className={`${!mapped && !isDraft ? 'unmapped-row' : ''} ${isDraft ? 'draft-row' : ''} ${newRuleHighlight === rule.id ? 'new-rule-highlight' : ''}`}>
                         <td>
                           <button className="rule-id-link" onClick={() => handleViewRule(rule)}>
                             {rule.id}

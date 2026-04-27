@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import {
   Store,
   MapPin,
@@ -42,7 +43,10 @@ import {
   ClipboardCheck,
   MessageCircle,
   Search,
-  Check
+  Check,
+  Calendar,
+  Filter,
+  ChevronUp
 } from 'lucide-react';
 import './StoreDeepDive.css';
 
@@ -360,6 +364,8 @@ const getDiscrepancyColor = (cls: DiscrepancyClass) => {
 };
 
 export const StoreDeepDive: React.FC = () => {
+  const { user } = useAuth();
+  const isDMReadOnly = user?.role === 'DM';
   const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overall');
@@ -370,6 +376,139 @@ export const StoreDeepDive: React.FC = () => {
   const [pogSectionFilter, setPogSectionFilter] = useState('');
   const [pogCategoryFilter, setPogCategoryFilter] = useState('');
 
+  // ── Calendar / Period Filter State ──
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [calendarMode, setCalendarMode] = useState<'week' | 'month' | 'quarter'>('week');
+  const [viewingMonth, setViewingMonth] = useState(new Date().getMonth());
+  const [viewingYear, setViewingYear] = useState(new Date().getFullYear());
+
+  const getLastAvailableWeekStart = () => {
+    const today = new Date();
+    const startOfThisWeek = new Date(today);
+    startOfThisWeek.setDate(today.getDate() - today.getDay());
+    startOfThisWeek.setHours(0, 0, 0, 0);
+    const lastWeekStart = new Date(startOfThisWeek);
+    lastWeekStart.setDate(startOfThisWeek.getDate() - 7);
+    return lastWeekStart;
+  };
+  const getLastAvailableMonth = () => {
+    const today = new Date();
+    const m = today.getMonth() === 0 ? 11 : today.getMonth() - 1;
+    const y = today.getMonth() === 0 ? today.getFullYear() - 1 : today.getFullYear();
+    return new Date(y, m, 1);
+  };
+  const [selectedWeekStart, setSelectedWeekStart] = useState<Date | null>(getLastAvailableWeekStart);
+  const [selectedMonth, setSelectedMonth] = useState<Date | null>(getLastAvailableMonth);
+  const [selectedQuarter, setSelectedQuarter] = useState<{ label: string; quarter: number; year: number } | null>(() => {
+    const now = new Date();
+    const currentQ = Math.floor(now.getMonth() / 3) + 1;
+    const currentY = now.getFullYear();
+    let q = currentQ - 1;
+    let y = currentY;
+    if (q <= 0) { q += 4; y -= 1; }
+    const qMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const startM = (q - 1) * 3;
+    return { label: `Q${q} ${y} (${qMonths[startM]}–${qMonths[startM + 2]})`, quarter: q, year: y };
+  });
+
+  const isDateInCurrentWeek = (date: Date) => {
+    const today = new Date();
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - today.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    endOfWeek.setHours(23, 59, 59, 999);
+    return date >= startOfWeek && date <= endOfWeek;
+  };
+  const isDateInFuture = (date: Date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return date > today;
+  };
+
+  const getCalendarDays = (year: number, month: number) => {
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startDayOfWeek = firstDay.getDay();
+    const days: { day: number; trailing: boolean }[] = [];
+    if (startDayOfWeek > 0) {
+      const prevMonthLastDay = new Date(year, month, 0).getDate();
+      for (let i = startDayOfWeek - 1; i >= 0; i--) {
+        days.push({ day: prevMonthLastDay - i, trailing: true });
+      }
+    }
+    for (let i = 1; i <= daysInMonth; i++) {
+      days.push({ day: i, trailing: false });
+    }
+    return days;
+  };
+
+  const handleDayClick = (day: number | null) => {
+    if (!day) return;
+    const clickedDate = new Date(viewingYear, viewingMonth, day);
+    if (isDateInFuture(clickedDate) || isDateInCurrentWeek(clickedDate)) return;
+    if (calendarMode === 'week') {
+      const weekStart = new Date(clickedDate);
+      weekStart.setDate(clickedDate.getDate() - clickedDate.getDay());
+      setSelectedWeekStart(weekStart);
+      setShowCalendar(false);
+    }
+  };
+
+  const isInSelectedWeek = (day: number | null) => {
+    if (!day || !selectedWeekStart || calendarMode !== 'week') return false;
+    const date = new Date(viewingYear, viewingMonth, day);
+    const weekEnd = new Date(selectedWeekStart);
+    weekEnd.setDate(selectedWeekStart.getDate() + 6);
+    return date >= selectedWeekStart && date <= weekEnd;
+  };
+
+  const getAvailableQuarters = () => {
+    const now = new Date();
+    const currentQ = Math.floor(now.getMonth() / 3) + 1;
+    const currentY = now.getFullYear();
+    const quarters: { label: string; quarter: number; year: number }[] = [];
+    let q = currentQ - 1;
+    let y = currentY;
+    if (q <= 0) { q += 4; y -= 1; }
+    for (let i = 0; i < 4; i++) {
+      const qMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const startM = (q - 1) * 3;
+      quarters.push({ label: `Q${q} ${y} (${qMonths[startM]}–${qMonths[startM + 2]})`, quarter: q, year: y });
+      q -= 1;
+      if (q <= 0) { q = 4; y -= 1; }
+    }
+    return quarters;
+  };
+  const availableQuarters = getAvailableQuarters();
+
+  const getSelectedPeriodLabel = () => {
+    if (calendarMode === 'week' && selectedWeekStart) {
+      const weekEnd = new Date(selectedWeekStart);
+      weekEnd.setDate(selectedWeekStart.getDate() + 6);
+      return `${selectedWeekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+    } else if (calendarMode === 'month' && selectedMonth) {
+      return selectedMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    } else if (calendarMode === 'quarter' && selectedQuarter) {
+      return selectedQuarter.label;
+    }
+    return 'Select Period';
+  };
+
+  const navigateMonth = (dir: number) => {
+    let nm = viewingMonth + dir;
+    let ny = viewingYear;
+    if (nm < 0) { nm = 11; ny -= 1; }
+    if (nm > 11) { nm = 0; ny += 1; }
+    setViewingMonth(nm);
+    setViewingYear(ny);
+  };
+
+  const calendarDays = getCalendarDays(viewingYear, viewingMonth);
+  const isDateFilterActive = true;
+
   const filteredStores = districtStores.filter(store => 
     store.storeName.toLowerCase().includes(storeSearchQuery.toLowerCase()) ||
     store.storeNumber.includes(storeSearchQuery)
@@ -378,11 +517,40 @@ export const StoreDeepDive: React.FC = () => {
   // Per-store derived data — re-computes whenever selectedStore changes
   const storeMetrics = useMemo(() => getStoreMetrics(selectedStore), [selectedStore]);
   const mockActions = useMemo(() => getStoreActions(selectedStore), [selectedStore]);
-  const mockKPIs = useMemo(() => getStoreKPIs(selectedStore), [selectedStore]);
+  const baseKPIs = useMemo(() => getStoreKPIs(selectedStore), [selectedStore]);
   const mockStreamDiagnostics = useMemo(() => getStreamDiagnostics(selectedStore), [selectedStore]);
   const crossStreamVerdict = useMemo(() => getCrossStreamVerdict(selectedStore), [selectedStore]);
   const [lastRefreshTime] = useState(new Date());
   const storeInfo = { district: districtContext.name, lastRefresh: lastRefreshTime };
+
+  // Period-adjusted KPIs
+  const mockKPIs = useMemo(() => {
+    if (calendarMode === 'week') return baseKPIs;
+    const factor = calendarMode === 'month' ? 4.2 : 13.1;
+    const varLabel = calendarMode === 'month' ? 'vs LM' : 'vs LQ';
+    return baseKPIs.map(kpi => {
+      if (kpi.id === 'sales') {
+        const baseNum = parseFloat(kpi.value.replace(/[^0-9.]/g, ''));
+        const newVal = Math.round(baseNum * factor);
+        return { ...kpi, value: `$${newVal >= 1000 ? (newVal / 1000).toFixed(1) + 'M' : newVal + 'K'}`, secondaryVariance: varLabel };
+      }
+      return { ...kpi, secondaryVariance: varLabel };
+    });
+  }, [baseKPIs, calendarMode]);
+
+  // Period-adjusted SPI metrics
+  const adjustedSPI = useMemo(() => {
+    const base = storeMetrics.spi;
+    if (calendarMode === 'week') return storeMetrics;
+    const shift = calendarMode === 'month' ? -2 : -4;
+    return {
+      ...storeMetrics,
+      spi: Math.max(40, base + shift),
+      momentumDelta: +(storeMetrics.momentumDelta + (calendarMode === 'month' ? -0.4 : -0.8)).toFixed(1),
+    };
+  }, [storeMetrics, calendarMode]);
+
+  const varianceContext = calendarMode === 'week' ? 'vs last week' : calendarMode === 'month' ? 'vs last month' : 'vs last quarter';
 
   // Read store from URL parameters and set selected store
   useEffect(() => {
@@ -400,12 +568,15 @@ export const StoreDeepDive: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Close dropdown when clicking outside
+  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       if (!target.closest('.store-filter-container')) {
         setIsStoreFilterOpen(false);
+      }
+      if (!target.closest('.sdd-period-selector')) {
+        setShowCalendar(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -425,6 +596,13 @@ export const StoreDeepDive: React.FC = () => {
 
   return (
     <div className="store-deep-dive">
+      {/* DM Read-Only Banner */}
+      {isDMReadOnly && (
+        <div className="sdd-readonly-banner">
+          <Eye size={14} />
+          <span>View-Only Mode — You have read-only access to Store Deep Dive</span>
+        </div>
+      )}
       {/* Store Health Header - Premium */}
       <div className="store-health-header">
         {/* Store Filter + Identity Block */}
@@ -497,6 +675,63 @@ export const StoreDeepDive: React.FC = () => {
             <span className="meta-tag">{selectedStore.format}</span>
             <span className="meta-tag">{selectedStore.cluster}</span>
           </div>
+          <div className="sdd-period-selector" style={{ position: 'relative' }}>
+            <button className="sdd-period-btn" onClick={() => setShowCalendar(!showCalendar)}>
+              <Calendar size={13} />
+              <span>{getSelectedPeriodLabel()}</span>
+              <ChevronDown size={13} className={showCalendar ? 'rotated' : ''} />
+            </button>
+            {showCalendar && (
+              <div className="sdd-calendar-dropdown">
+                <div className="sdd-calendar-mode-toggle">
+                  <button className={`sdd-mode-btn ${calendarMode === 'week' ? 'active' : ''}`} onClick={() => { setCalendarMode('week'); if (selectedWeekStart) { setViewingMonth(selectedWeekStart.getMonth()); setViewingYear(selectedWeekStart.getFullYear()); } }}>Week</button>
+                  <button className={`sdd-mode-btn ${calendarMode === 'month' ? 'active' : ''}`} onClick={() => { setCalendarMode('month'); if (selectedMonth) { setViewingMonth(selectedMonth.getMonth()); setViewingYear(selectedMonth.getFullYear()); } }}>Month</button>
+                  <button className={`sdd-mode-btn ${calendarMode === 'quarter' ? 'active' : ''}`} onClick={() => setCalendarMode('quarter')}>Quarter</button>
+                </div>
+                {calendarMode === 'quarter' ? (
+                  <div className="sdd-quarter-list">
+                    {availableQuarters.map((q, idx) => (
+                      <button key={idx} className={`sdd-quarter-option ${selectedQuarter?.quarter === q.quarter && selectedQuarter?.year === q.year ? 'selected' : ''}`} onClick={() => { setSelectedQuarter(q); setShowCalendar(false); }}>
+                        <span className="sdd-quarter-label">Q{q.quarter} {q.year}</span>
+                        <span className="sdd-quarter-range">{q.label.match(/\((.+)\)/)?.[1]}</span>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <>
+                    <div className="sdd-calendar-nav">
+                      <button onClick={() => navigateMonth(-1)}><ChevronUp size={14} style={{ transform: 'rotate(-90deg)' }} /></button>
+                      <span>{new Date(viewingYear, viewingMonth).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
+                      <button onClick={() => navigateMonth(1)}><ChevronUp size={14} style={{ transform: 'rotate(90deg)' }} /></button>
+                    </div>
+                    <div className="sdd-calendar-grid">
+                      <div className="sdd-calendar-weekdays">
+                        {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => <span key={d}>{d}</span>)}
+                      </div>
+                      <div className="sdd-calendar-days">
+                        {calendarDays.map((entry, index) => {
+                          if (entry.trailing) return <button key={index} className="sdd-cal-day trailing" disabled>{entry.day}</button>;
+                          const day = entry.day;
+                          const date = new Date(viewingYear, viewingMonth, day);
+                          const isDisabledWeek = isDateInFuture(date) || isDateInCurrentWeek(date);
+                          const isDisabledMonth = viewingYear > new Date().getFullYear() || (viewingYear === new Date().getFullYear() && viewingMonth >= new Date().getMonth());
+                          const isDisabled = calendarMode === 'week' ? isDisabledWeek : isDisabledMonth;
+                          const isSelectedWeek = isInSelectedWeek(day);
+                          const isSelectedMonth = selectedMonth && viewingYear === selectedMonth.getFullYear() && viewingMonth === selectedMonth.getMonth();
+                          const isSelected = calendarMode === 'week' ? isSelectedWeek : isSelectedMonth;
+                          return (
+                            <button key={index} className={`sdd-cal-day ${isDisabled ? 'disabled' : ''} ${isSelected ? 'selected' : ''}`} onClick={() => { if (calendarMode === 'week') { handleDayClick(day); } else if (!isDisabledMonth) { setSelectedMonth(new Date(viewingYear, viewingMonth, 1)); setShowCalendar(false); } }} disabled={isDisabled}>
+                              {day}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
           <div className="last-refresh">
             <Clock size={10} />
             Updated {storeInfo.lastRefresh.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -513,25 +748,25 @@ export const StoreDeepDive: React.FC = () => {
                 cy="60"
                 r="52"
                 fill="none"
-                stroke={getSPIColor(storeMetrics.spiTier)}
+                stroke={getSPIColor(adjustedSPI.spiTier)}
                 strokeWidth="8"
                 strokeLinecap="round"
-                strokeDasharray={`${(storeMetrics.spi / 100) * 327} 327`}
+                strokeDasharray={`${(adjustedSPI.spi / 100) * 327} 327`}
                 transform="rotate(-90 60 60)"
                 className="spi-progress-ring"
               />
             </svg>
             <div className="spi-center">
-              <span className="spi-value">{storeMetrics.spi}</span>
+              <span className="spi-value">{adjustedSPI.spi}</span>
               <span className="spi-label">SPI</span>
             </div>
           </div>
-          <div className={`spi-tier-badge tier-${storeMetrics.spiTier.toLowerCase()}`}>
-            {storeMetrics.spiTier === 'Excellence' && <Award size={12} />}
-            {storeMetrics.spiTier === 'Stable' && <ThumbsUp size={12} />}
-            {storeMetrics.spiTier === 'AtRisk' && <AlertTriangle size={12} />}
-            {storeMetrics.spiTier === 'Crisis' && <AlertCircle size={12} />}
-            {storeMetrics.spiTier === 'AtRisk' ? 'At Risk' : storeMetrics.spiTier}
+          <div className={`spi-tier-badge tier-${adjustedSPI.spiTier.toLowerCase()}`}>
+            {adjustedSPI.spiTier === 'Excellence' && <Award size={12} />}
+            {adjustedSPI.spiTier === 'Stable' && <ThumbsUp size={12} />}
+            {adjustedSPI.spiTier === 'AtRisk' && <AlertTriangle size={12} />}
+            {adjustedSPI.spiTier === 'Crisis' && <AlertCircle size={12} />}
+            {adjustedSPI.spiTier === 'AtRisk' ? 'At Risk' : adjustedSPI.spiTier}
           </div>
         </div>
 
@@ -539,19 +774,19 @@ export const StoreDeepDive: React.FC = () => {
         <div className="momentum-strip">
           <div className="momentum-item">
             <span className="momentum-label">Momentum</span>
-            <div className={`momentum-value ${storeMetrics.momentum.toLowerCase()}`}>
-              {storeMetrics.momentum === 'Improving' && <TrendingUp size={16} />}
-              {storeMetrics.momentum === 'Slipping' && <TrendingDown size={16} />}
-              {storeMetrics.momentum === 'Flat' && <Minus size={16} />}
-              <span>{storeMetrics.momentumDelta >= 0 ? '+' : ''}{storeMetrics.momentumDelta}%</span>
+            <div className={`momentum-value ${adjustedSPI.momentum.toLowerCase()}`}>
+              {adjustedSPI.momentum === 'Improving' && <TrendingUp size={16} />}
+              {adjustedSPI.momentum === 'Slipping' && <TrendingDown size={16} />}
+              {adjustedSPI.momentum === 'Flat' && <Minus size={16} />}
+              <span>{adjustedSPI.momentumDelta >= 0 ? '+' : ''}{adjustedSPI.momentumDelta}%</span>
             </div>
-            <span className="momentum-period">vs last month</span>
+            <span className="momentum-period">{varianceContext}</span>
           </div>
           <div className="momentum-item">
             <span className="momentum-label">vs District</span>
-            <div className={`momentum-value ${storeMetrics.vsDistrictAvg >= 0 ? 'improving' : 'slipping'}`}>
-              {storeMetrics.vsDistrictAvg >= 0 ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
-              <span>{storeMetrics.vsDistrictAvg >= 0 ? '+' : ''}{storeMetrics.vsDistrictAvg}%</span>
+            <div className={`momentum-value ${adjustedSPI.vsDistrictAvg >= 0 ? 'improving' : 'slipping'}`}>
+              {adjustedSPI.vsDistrictAvg >= 0 ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
+              <span>{adjustedSPI.vsDistrictAvg >= 0 ? '+' : ''}{adjustedSPI.vsDistrictAvg}%</span>
             </div>
             <span className="momentum-period">avg SPI</span>
           </div>
@@ -559,20 +794,20 @@ export const StoreDeepDive: React.FC = () => {
 
         {/* Comp Rank Badge */}
         <div className="comp-rank-container">
-          <div className={`comp-rank-badge ${storeMetrics.compRank <= 4 ? 'top' : storeMetrics.compRank <= 8 ? 'middle' : 'bottom'}`}>
-            <span className="rank-number">#{storeMetrics.compRank}</span>
-            <span className="rank-total">of {storeMetrics.compTotal}</span>
+          <div className={`comp-rank-badge ${adjustedSPI.compRank <= 4 ? 'top' : adjustedSPI.compRank <= 8 ? 'middle' : 'bottom'}`}>
+            <span className="rank-number">#{adjustedSPI.compRank}</span>
+            <span className="rank-total">of {adjustedSPI.compTotal}</span>
           </div>
           <div className="rank-movement">
-            {storeMetrics.compMovement < 0 ? (
+            {adjustedSPI.compMovement < 0 ? (
               <span className="movement-down">
                 <ArrowDownRight size={12} />
-                {Math.abs(storeMetrics.compMovement)} spots
+                {Math.abs(adjustedSPI.compMovement)} spots
               </span>
-            ) : storeMetrics.compMovement > 0 ? (
+            ) : adjustedSPI.compMovement > 0 ? (
               <span className="movement-up">
                 <ArrowUpRight size={12} />
-                {storeMetrics.compMovement} spots
+                {adjustedSPI.compMovement} spots
               </span>
             ) : (
               <span className="movement-flat">No change</span>
@@ -582,7 +817,7 @@ export const StoreDeepDive: React.FC = () => {
         </div>
 
         {/* Inbound Risk Banner */}
-        {storeMetrics.inboundRiskActive && (
+        {adjustedSPI.inboundRiskActive && (
           <div className="inbound-risk-banner">
             <div className="risk-icon">
               <Truck size={18} />
@@ -590,13 +825,15 @@ export const StoreDeepDive: React.FC = () => {
             <div className="risk-content">
               <span className="risk-title">Inbound Risk Active</span>
               <span className="risk-details">
-                {storeMetrics.delayedShipments} delayed • {storeMetrics.oosRiskSkus} OOS-risk SKUs
+                {adjustedSPI.delayedShipments} delayed • {adjustedSPI.oosRiskSkus} OOS-risk SKUs
               </span>
             </div>
-            <button className="risk-cta">
-              View Inbound
-              <ChevronRight size={14} />
-            </button>
+            {!isDMReadOnly && (
+              <button className="risk-cta">
+                View Inbound
+                <ChevronRight size={14} />
+              </button>
+            )}
           </div>
         )}
 
@@ -621,7 +858,7 @@ export const StoreDeepDive: React.FC = () => {
         <div className="section-header">
           <h2>
             <Zap size={18} />
-            Priority Actions
+            Priority Actions {isDateFilterActive && <Filter size={12} className="sdd-filter-icon" />}
           </h2>
           <span className="section-subtitle">What to fix first</span>
         </div>
@@ -642,10 +879,12 @@ export const StoreDeepDive: React.FC = () => {
                   </span>
                 )}
               </div>
-              <button className={`action-cta priority-${action.priority}`}>
-                {action.cta}
-                <ChevronRight size={14} />
-              </button>
+              {!isDMReadOnly && (
+                <button className={`action-cta priority-${action.priority}`}>
+                  {action.cta}
+                  <ChevronRight size={14} />
+                </button>
+              )}
             </div>
           ))}
         </div>
@@ -656,7 +895,7 @@ export const StoreDeepDive: React.FC = () => {
         <div className="section-header">
           <h2>
             <BarChart3 size={18} />
-            Key Performance Indicators
+            Key Performance Indicators {isDateFilterActive && <Filter size={12} className="sdd-filter-icon" />}
           </h2>
         </div>
         <div className="kpi-cards">
@@ -701,7 +940,7 @@ export const StoreDeepDive: React.FC = () => {
         <div className="section-header">
           <h2>
             <Grid3X3 size={18} />
-            Cross-Stream Diagnosis
+            Cross-Stream Diagnosis {isDateFilterActive && <Filter size={12} className="sdd-filter-icon" />}
           </h2>
           <span className="section-subtitle">Understanding the root cause</span>
         </div>
@@ -749,12 +988,14 @@ export const StoreDeepDive: React.FC = () => {
               <h4>Recommended Action</h4>
               <p className="verdict-action">{crossStreamVerdict.recommendedAction}</p>
             </div>
-            <div className="verdict-cta">
-              <button className="verdict-btn primary">
-                <Zap size={14} />
-                Execute Action Plan
-              </button>
-            </div>
+            {!isDMReadOnly && (
+              <div className="verdict-cta">
+                <button className="verdict-btn primary">
+                  <Zap size={14} />
+                  Execute Action Plan
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -1131,16 +1372,18 @@ export const StoreDeepDive: React.FC = () => {
                   <span className="shelf-score-value">74%</span>
                   <span className="shelf-score-change negative">-8% vs last scan</span>
                 </div>
-                <div className="shelf-actions">
-                  <button className="shelf-action-btn">
-                    <Camera size={14} />
-                    New Scan
-                  </button>
-                  <button className="shelf-action-btn secondary">
-                    <RefreshCw size={14} />
-                    Re-scan Section
-                  </button>
-                </div>
+                {!isDMReadOnly && (
+                  <div className="shelf-actions">
+                    <button className="shelf-action-btn">
+                      <Camera size={14} />
+                      New Scan
+                    </button>
+                    <button className="shelf-action-btn secondary">
+                      <RefreshCw size={14} />
+                      Re-scan Section
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Aisle Selector */}
@@ -1229,10 +1472,12 @@ export const StoreDeepDive: React.FC = () => {
                   <span className="pog-version">Women's Wall Display v2.1</span>
                   <span className="pog-date">Published: Apr 1, 2026</span>
                 </div>
-                <button className="request-change-btn">
-                  <FileText size={14} />
-                  Request POG Change
-                </button>
+                {!isDMReadOnly && (
+                  <button className="request-change-btn">
+                    <FileText size={14} />
+                    Request POG Change
+                  </button>
+                )}
               </div>
 
               {/* POG Viewer */}
@@ -1342,7 +1587,7 @@ export const StoreDeepDive: React.FC = () => {
                     </div>
                   </div>
                   <div className="timeline-day">
-                    <span className="day-label">Apr 14</span>
+                    <span className="day-label">Apr 29</span>
                     <div className="day-shipments">
                       <div className="shipment-badge scheduled">
                         <Truck size={12} />
@@ -1351,7 +1596,7 @@ export const StoreDeepDive: React.FC = () => {
                     </div>
                   </div>
                   <div className="timeline-day">
-                    <span className="day-label">Apr 15</span>
+                    <span className="day-label">Apr 30</span>
                     <div className="day-shipments">
                       <div className="shipment-badge scheduled">
                         <Truck size={12} />
@@ -1382,7 +1627,7 @@ export const StoreDeepDive: React.FC = () => {
                     <span className="oos-rank">3</span>
                     <span className="oos-sku">Slim Fit Denim — Dark Wash (L)</span>
                     <span className="oos-velocity">Medium Velocity</span>
-                    <span className="oos-eta">ETA: Apr 14</span>
+                    <span className="oos-eta">ETA: Apr 29</span>
                   </div>
                 </div>
               </div>

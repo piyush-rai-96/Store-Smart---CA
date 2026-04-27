@@ -2656,6 +2656,22 @@
   background: #e0f2fe;
 }
 
+@keyframes newRuleGlow {
+  0% { background: #dcfce7; }
+  50% { background: #bbf7d0; }
+  100% { background: #dcfce7; }
+}
+
+.premium-table tbody tr.new-rule-highlight {
+  animation: newRuleGlow 1.5s ease-in-out 3;
+  border-left: 3px solid #22c55e;
+}
+
+.premium-table tbody tr.new-rule-highlight td:first-child {
+  font-weight: 700;
+  color: #15803d;
+}
+
 .premium-table tbody td {
   padding: 16px 18px;
   font-size: 14px;

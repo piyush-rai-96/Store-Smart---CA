@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, AuthContextType } from '../types';
-import { VALID_CREDENTIALS, AUTH_STORAGE_KEY } from '../constants/auth';
+import { User, AuthContextType, ROLE_ACCESS } from '../types';
+import { DEFAULT_USERS, AUTH_STORAGE_KEY, USERS_STORAGE_KEY } from '../constants/auth';
 import { storage } from '../utils/storage';
 
 // Create context
@@ -15,45 +15,63 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [user, setUser] = useState<User | null>(null);
+  const [allUsers, setAllUsers] = useState<User[]>([]);
 
-  // Initialize auth state from localStorage on mount
+  // Initialize auth state and user list from localStorage on mount
   useEffect(() => {
+    // Load user list (or seed from defaults)
+    const storedUsers = storage.get<User[]>(USERS_STORAGE_KEY);
+    if (storedUsers && storedUsers.length > 0) {
+      setAllUsers(storedUsers);
+    } else {
+      const defaultUserList = DEFAULT_USERS.map(uc => uc.user);
+      setAllUsers(defaultUserList);
+      storage.set(USERS_STORAGE_KEY, defaultUserList);
+    }
+
+    // Restore session
     try {
       const storedAuth = storage.get<{ user: User }>(AUTH_STORAGE_KEY);
-      // Validate that stored user has required new fields
-      if (storedAuth && storedAuth.user && storedAuth.user.id && storedAuth.user.role) {
+      if (storedAuth && storedAuth.user && storedAuth.user.id && storedAuth.user.role && storedAuth.user.accessRoutes) {
+        const refreshedUser = { ...storedAuth.user, accessRoutes: ROLE_ACCESS[storedAuth.user.role] || storedAuth.user.accessRoutes };
         setIsAuthenticated(true);
-        setUser(storedAuth.user);
+        setUser(refreshedUser);
+        storage.set(AUTH_STORAGE_KEY, { user: refreshedUser });
       } else if (storedAuth) {
-        // Clear invalid old data
         storage.remove(AUTH_STORAGE_KEY);
       }
     } catch (error) {
-      // Clear corrupted data
       storage.remove(AUTH_STORAGE_KEY);
     }
   }, []);
 
-  // Login function - validates credentials and updates state
+  // Login function - validates credentials against all known users
   const login = (email: string, password: string): boolean => {
-    // Validate credentials
-    if (email === VALID_CREDENTIALS.email && password === VALID_CREDENTIALS.password) {
-      const userData: User = {
-        id: 'user-001',
-        email: email,
-        name: 'John Doe',
-        role: 'DM', // District Manager role
-        district: 'District 14 - Tennessee',
-        districtId: 'D14',
-      };
+    const trimmedEmail = email.trim().toLowerCase();
 
-      // Update state
+    // Check default users first
+    const match = DEFAULT_USERS.find(
+      uc => uc.email.toLowerCase() === trimmedEmail && uc.password === password
+    );
+
+    if (match) {
       setIsAuthenticated(true);
-      setUser(userData);
+      setUser(match.user);
+      storage.set(AUTH_STORAGE_KEY, { user: match.user });
+      return true;
+    }
 
-      // Persist to localStorage
-      storage.set(AUTH_STORAGE_KEY, { user: userData });
-
+    // Check dynamically created users (invited users use default password)
+    const dynamicUser = allUsers.find(u => u.email.toLowerCase() === trimmedEmail);
+    if (dynamicUser && password === 'Password@123') {
+      const activatedUser = { ...dynamicUser, status: 'active' as const };
+      setIsAuthenticated(true);
+      setUser(activatedUser);
+      storage.set(AUTH_STORAGE_KEY, { user: activatedUser });
+      // Update user status in list
+      const updated = allUsers.map(u => u.id === activatedUser.id ? activatedUser : u);
+      setAllUsers(updated);
+      storage.set(USERS_STORAGE_KEY, updated);
       return true;
     }
 
@@ -67,11 +85,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     storage.remove(AUTH_STORAGE_KEY);
   };
 
+  // Add a new user (from UAM module)
+  const addUser = (newUser: User): void => {
+    const updated = [...allUsers, newUser];
+    setAllUsers(updated);
+    storage.set(USERS_STORAGE_KEY, updated);
+  };
+
+  // Update an existing user
+  const updateUser = (userId: string, updates: Partial<User>): void => {
+    const updated = allUsers.map(u => u.id === userId ? { ...u, ...updates } : u);
+    setAllUsers(updated);
+    storage.set(USERS_STORAGE_KEY, updated);
+  };
+
   const value: AuthContextType = {
     isAuthenticated,
     user,
+    allUsers,
     login,
     logout,
+    addUser,
+    updateUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -72,11 +72,11 @@ const pogClusterMapping: Record<string, POGClusterMapping> = {
 };
 
 const mockPOGData: POGItem[] = [
-  { id: '1', name: "Women's Wall Display - Standard", category: 'Apparel', lastModified: '2024-03-15', status: 'active', version: 'v2.1', clusters: 12, planogramImage: WomensWallStandard },
-  { id: '2', name: "Men's Denim Wall Display", category: 'Apparel', lastModified: '2024-03-14', status: 'active', version: 'v1.5', clusters: 8, planogramImage: MensDenimWall },
-  { id: '3', name: "Kids Color Block Wall", category: 'Apparel', lastModified: '2024-03-12', status: 'draft', version: 'v3.0', clusters: 5, planogramImage: KidsColorBlockWall },
-  { id: '4', name: 'Accessories End Cap', category: 'Accessories', lastModified: '2024-03-10', status: 'active', version: 'v1.2', clusters: 15, planogramImage: AccessoriesEndcap },
-  { id: '5', name: 'Seasonal Promo Table', category: 'Seasonal', lastModified: '2024-03-08', status: 'archived', version: 'v2.0', clusters: 3, planogramImage: SeasonalPromoTable },
+  { id: '1', name: "Women's Wall Display - Standard", category: 'Apparel', lastModified: '2025-04-22', status: 'active', version: 'v2.1', clusters: 12, planogramImage: WomensWallStandard },
+  { id: '2', name: "Men's Denim Wall Display", category: 'Apparel', lastModified: '2025-04-20', status: 'active', version: 'v1.5', clusters: 8, planogramImage: MensDenimWall },
+  { id: '3', name: "Kids Color Block Wall", category: 'Apparel', lastModified: '2025-04-18', status: 'draft', version: 'v3.0', clusters: 5, planogramImage: KidsColorBlockWall },
+  { id: '4', name: 'Accessories End Cap', category: 'Accessories', lastModified: '2025-04-15', status: 'active', version: 'v1.2', clusters: 15, planogramImage: AccessoriesEndcap },
+  { id: '5', name: 'Seasonal Promo Table', category: 'Seasonal', lastModified: '2025-04-10', status: 'archived', version: 'v2.0', clusters: 3, planogramImage: SeasonalPromoTable },
 ];
 
 interface Filters {
@@ -414,11 +414,11 @@ export const MasterPOGManagement: React.FC = () => {
                     </div>
                     <div className="pog-version-item">
                       <Clock size={14} />
-                      <span>v2.0 - Mar 10, 2024</span>
+                      <span>v2.0 - Apr 10, 2025</span>
                     </div>
                     <div className="pog-version-item">
                       <Clock size={14} />
-                      <span>v1.5 - Feb 28, 2024</span>
+                      <span>v1.5 - Mar 28, 2025</span>
                     </div>
                   </div>
                 </div>

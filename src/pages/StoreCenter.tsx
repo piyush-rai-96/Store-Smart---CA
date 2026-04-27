@@ -35,9 +35,12 @@ import {
   CircleAlert,
   FileText,
   Zap,
-  Users
+  Users,
+  Calendar,
+  Filter
 } from 'lucide-react';
 import './StoreCenter.css';
+import './DistrictIntelligence.css';
 
 // ── Types ──────────────────────────────────────────────
 interface StoreMeta {
@@ -63,6 +66,7 @@ interface KPITile {
   unit?: string;
   delta: string;
   deltaDir: 'up' | 'down' | 'flat';
+  deltaContext?: string;
   status: 'positive' | 'negative' | 'neutral';
   icon: React.ReactNode;
   trendData: number[];
@@ -76,9 +80,14 @@ interface AuditWeek {
   overall: number;
   safety: number;
   planogram: number;
+  signage: number;
   cleanliness: number;
   availability: number;
   staffing: number;
+  stockRotation: number;
+  pricing: number;
+  backroom: number;
+  customerArea: number;
 }
 
 interface VoCItem {
@@ -121,32 +130,46 @@ const storesData: StoreMeta[] = [
 ];
 
 const getKPIsForStore = (store: StoreMeta): KPITile[] => [
-  { id: 'sales', label: 'Sales vs Plan', value: store.dpi >= 85 ? '104.2%' : store.dpi >= 75 ? '97.8%' : '91.3%', delta: store.dpi >= 85 ? '+4.2%' : store.dpi >= 75 ? '-2.2%' : '-8.7%', deltaDir: store.dpi >= 85 ? 'up' : 'down', status: store.dpi >= 85 ? 'positive' : 'negative', icon: <DollarSign size={16} />, trendData: [96, 98, 97, 101, 99, 103, 104, 102, 105, 104, 103, 106], trendLabels: ['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10','W11','W12'], insight: store.dpi >= 85 ? 'Consistently above plan for 6 weeks' : 'Below plan — weekend traffic declining' },
-  { id: 'sea', label: 'SEA Score', value: store.dpi >= 80 ? '91' : '76', unit: '/100', delta: store.dpi >= 80 ? '+3' : '-5', deltaDir: store.dpi >= 80 ? 'up' : 'down', status: store.dpi >= 80 ? 'positive' : 'negative', icon: <Shield size={16} />, trendData: [85, 87, 88, 86, 89, 90, 88, 91, 90, 92, 91, 91], trendLabels: ['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10','W11','W12'], insight: store.dpi >= 80 ? 'Audit scores improving steadily' : 'Safety category pulling score down' },
-  { id: 'voc', label: 'VoC Score', value: store.dpi >= 80 ? '4.3' : '3.6', unit: '/5', delta: store.dpi >= 80 ? '+0.2' : '-0.4', deltaDir: store.dpi >= 80 ? 'up' : 'down', status: store.dpi >= 80 ? 'positive' : 'negative', icon: <Heart size={16} />, trendData: [4.0, 4.1, 4.0, 4.2, 4.1, 4.3, 4.2, 4.3, 4.4, 4.3, 4.2, 4.3], trendLabels: ['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10','W11','W12'], insight: store.dpi >= 80 ? 'Customer satisfaction trending positively' : '"Messy aisles" theme rising — needs attention' },
-  { id: 'avail', label: 'Availability', value: store.dpi >= 80 ? '96.8%' : '89.2%', delta: store.dpi >= 80 ? '+1.1%' : '-3.4%', deltaDir: store.dpi >= 80 ? 'up' : 'down', status: store.dpi >= 80 ? 'positive' : 'negative', icon: <Package size={16} />, trendData: [94, 95, 94, 96, 95, 97, 96, 97, 96, 97, 97, 97], trendLabels: ['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10','W11','W12'], insight: store.dpi >= 80 ? 'Near-target availability maintained' : '3 SKUs out-of-stock contributing to drop' },
-  { id: 'gm', label: 'Gross Margin', value: store.dpi >= 85 ? '42.1%' : store.dpi >= 75 ? '39.8%' : '37.2%', delta: store.dpi >= 85 ? '+0.8%' : '-1.2%', deltaDir: store.dpi >= 85 ? 'up' : 'down', status: store.dpi >= 85 ? 'positive' : 'negative', icon: <BarChart3 size={16} />, trendData: [40, 41, 40, 41, 42, 41, 42, 41, 42, 42, 42, 42], trendLabels: ['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10','W11','W12'], insight: store.dpi >= 85 ? 'Margin improvement from better mix' : 'Markdown pressure from slow movers' },
-  { id: 'alerts', label: 'Open Alerts', value: store.risk === 'high' ? '7' : store.risk === 'moderate' ? '3' : '1', delta: store.risk === 'high' ? '+4' : store.risk === 'moderate' ? '+1' : '-1', deltaDir: store.risk === 'high' ? 'up' : store.risk === 'moderate' ? 'up' : 'down', status: store.risk === 'high' ? 'negative' : store.risk === 'moderate' ? 'neutral' : 'positive', icon: <Bell size={16} />, trendData: [2, 3, 2, 4, 3, 5, 4, 3, 2, 3, 2, 1], trendLabels: ['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10','W11','W12'], insight: store.risk === 'high' ? 'Alert volume spiking — 4 new this week' : 'Alert volume under control' },
+  { id: 'sales', label: 'Sales vs Plan', value: store.dpi >= 85 ? '104.2%' : store.dpi >= 75 ? '97.8%' : '91.3%', delta: store.dpi >= 85 ? '+4.2%' : store.dpi >= 75 ? '-2.2%' : '-8.7%', deltaDir: store.dpi >= 85 ? 'up' : 'down', deltaContext: 'WoW', status: store.dpi >= 85 ? 'positive' : 'negative', icon: <DollarSign size={16} />, trendData: [96, 98, 97, 101, 99, 103, 104, 102, 105, 104, 103, 106], trendLabels: ['Feb 3','Feb 10','Feb 17','Feb 24','Mar 3','Mar 10','Mar 17','Mar 24','Mar 31','Apr 6','Apr 13','Apr 20'], insight: store.dpi >= 85 ? 'Consistently above plan for 6 weeks' : 'Below plan — weekend traffic declining' },
+  { id: 'sea', label: 'SEA Score', value: store.dpi >= 80 ? '91' : '76', unit: '/100', delta: store.dpi >= 80 ? '+3' : '-5', deltaDir: store.dpi >= 80 ? 'up' : 'down', deltaContext: 'WoW', status: store.dpi >= 80 ? 'positive' : 'negative', icon: <Shield size={16} />, trendData: [85, 87, 88, 86, 89, 90, 88, 91, 90, 92, 91, 91], trendLabels: ['Feb 3','Feb 10','Feb 17','Feb 24','Mar 3','Mar 10','Mar 17','Mar 24','Mar 31','Apr 6','Apr 13','Apr 20'], insight: store.dpi >= 80 ? 'Audit scores improving steadily' : 'Safety category pulling score down' },
+  { id: 'voc', label: 'VoC Score', value: store.dpi >= 80 ? '4.3' : '3.6', unit: '/5', delta: store.dpi >= 80 ? '+0.2' : '-0.4', deltaDir: store.dpi >= 80 ? 'up' : 'down', deltaContext: 'WoW', status: store.dpi >= 80 ? 'positive' : 'negative', icon: <Heart size={16} />, trendData: [4.0, 4.1, 4.0, 4.2, 4.1, 4.3, 4.2, 4.3, 4.4, 4.3, 4.2, 4.3], trendLabels: ['Feb 3','Feb 10','Feb 17','Feb 24','Mar 3','Mar 10','Mar 17','Mar 24','Mar 31','Apr 6','Apr 13','Apr 20'], insight: store.dpi >= 80 ? 'Customer satisfaction trending positively' : '"Messy aisles" theme rising — needs attention' },
+  { id: 'avail', label: 'Availability', value: store.dpi >= 80 ? '96.8%' : '89.2%', delta: store.dpi >= 80 ? '+1.1%' : '-3.4%', deltaDir: store.dpi >= 80 ? 'up' : 'down', deltaContext: 'WoW', status: store.dpi >= 80 ? 'positive' : 'negative', icon: <Package size={16} />, trendData: [94, 95, 94, 96, 95, 97, 96, 97, 96, 97, 97, 97], trendLabels: ['Feb 3','Feb 10','Feb 17','Feb 24','Mar 3','Mar 10','Mar 17','Mar 24','Mar 31','Apr 6','Apr 13','Apr 20'], insight: store.dpi >= 80 ? 'Near-target availability maintained' : '3 SKUs out-of-stock contributing to drop' },
+  { id: 'gm', label: 'Gross Margin', value: store.dpi >= 85 ? '42.1%' : store.dpi >= 75 ? '39.8%' : '37.2%', delta: store.dpi >= 85 ? '+0.8%' : '-1.2%', deltaDir: store.dpi >= 85 ? 'up' : 'down', deltaContext: 'WoW', status: store.dpi >= 85 ? 'positive' : 'negative', icon: <BarChart3 size={16} />, trendData: [40, 41, 40, 41, 42, 41, 42, 41, 42, 42, 42, 42], trendLabels: ['Feb 3','Feb 10','Feb 17','Feb 24','Mar 3','Mar 10','Mar 17','Mar 24','Mar 31','Apr 6','Apr 13','Apr 20'], insight: store.dpi >= 85 ? 'Margin improvement from better mix' : 'Markdown pressure from slow movers' },
+  { id: 'alerts', label: 'Open Alerts', value: store.risk === 'high' ? '7' : store.risk === 'moderate' ? '3' : '1', delta: store.risk === 'high' ? '+4' : store.risk === 'moderate' ? '+1' : '-1', deltaDir: store.risk === 'high' ? 'up' : store.risk === 'moderate' ? 'up' : 'down', deltaContext: 'WoW', status: store.risk === 'high' ? 'negative' : store.risk === 'moderate' ? 'neutral' : 'positive', icon: <Bell size={16} />, trendData: [2, 3, 2, 4, 3, 5, 4, 3, 2, 3, 2, 1], trendLabels: ['Feb 3','Feb 10','Feb 17','Feb 24','Mar 3','Mar 10','Mar 17','Mar 24','Mar 31','Apr 6','Apr 13','Apr 20'], insight: store.risk === 'high' ? 'Alert volume spiking — 4 new this week' : 'Alert volume under control' },
 ];
 
 const getAuditData = (store: StoreMeta): AuditWeek[] => {
   const base = store.dpi >= 80 ? 85 : 65;
   const variance = store.dpi >= 80 ? 8 : 15;
+  const gen = (offset: number, trendFactor: number, i: number) =>
+    Math.round(Math.min(100, Math.max(30, base + offset + Math.floor(Math.random() * variance) - variance / 2 + (i * trendFactor))));
+  const tf = store.momentum === 'rising' ? 1.5 : store.momentum === 'declining' ? -1.5 : 0;
+  const weekDates = ['Mar 2', 'Mar 9', 'Mar 16', 'Mar 23', 'Mar 30', 'Apr 6', 'Apr 13', 'Apr 20'];
   return Array.from({ length: 8 }, (_, i) => {
-    const s = Math.min(100, Math.max(30, base + Math.floor(Math.random() * variance) - variance / 2 + (i * (store.momentum === 'rising' ? 1.5 : store.momentum === 'declining' ? -1.5 : 0))));
-    const p = Math.min(100, Math.max(30, base + Math.floor(Math.random() * variance) - variance / 2));
-    const c = Math.min(100, Math.max(30, base + 5 + Math.floor(Math.random() * variance) - variance / 2));
-    const a = Math.min(100, Math.max(30, base + 3 + Math.floor(Math.random() * variance) - variance / 2));
-    const st = Math.min(100, Math.max(30, base - 2 + Math.floor(Math.random() * variance) - variance / 2));
+    const s = gen(0, tf, i);
+    const p = gen(0, 0, i);
+    const sg = gen(-2, 0, i);
+    const c = gen(5, 0, i);
+    const a = gen(3, 0, i);
+    const st = gen(-2, 0, i);
+    const sr = gen(-3, 0, i);
+    const pr = gen(1, 0, i);
+    const br = gen(-4, 0, i);
+    const ca = gen(2, 0, i);
     return {
-      weekLabel: `W${i + 1}`,
-      date: `Mar ${3 + i * 7}`,
-      overall: Math.round((s + p + c + a + st) / 5),
-      safety: Math.round(s),
-      planogram: Math.round(p),
-      cleanliness: Math.round(c),
-      availability: Math.round(a),
-      staffing: Math.round(st),
+      weekLabel: weekDates[i],
+      date: weekDates[i],
+      overall: Math.round((s + p + sg + c + a + st + sr + pr + br + ca) / 10),
+      safety: s,
+      planogram: p,
+      signage: sg,
+      cleanliness: c,
+      availability: a,
+      staffing: st,
+      stockRotation: sr,
+      pricing: pr,
+      backroom: br,
+      customerArea: ca,
     };
   });
 };
@@ -359,6 +382,141 @@ export const StoreCenter: React.FC = () => {
   const [ocvCompletedActions, setOcvCompletedActions] = useState<Set<string>>(new Set());
   const [ocvExpandedRow, setOcvExpandedRow] = useState<string | null>(null);
 
+  // ── Calendar / Period Filter State ──
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [calendarMode, setCalendarMode] = useState<'week' | 'month' | 'quarter'>('week');
+  const [viewingMonth, setViewingMonth] = useState(new Date().getMonth());
+  const [viewingYear, setViewingYear] = useState(new Date().getFullYear());
+
+  const getLastAvailableWeekStart = () => {
+    const today = new Date();
+    const sow = new Date(today);
+    sow.setDate(today.getDate() - today.getDay());
+    sow.setHours(0, 0, 0, 0);
+    const lw = new Date(sow);
+    lw.setDate(sow.getDate() - 7);
+    return lw;
+  };
+  const getLastAvailableMonth = () => {
+    const today = new Date();
+    const m = today.getMonth() === 0 ? 11 : today.getMonth() - 1;
+    const y = today.getMonth() === 0 ? today.getFullYear() - 1 : today.getFullYear();
+    return new Date(y, m, 1);
+  };
+
+  const [selectedWeekStart, setSelectedWeekStart] = useState<Date | null>(getLastAvailableWeekStart);
+  const [selectedMonth, setSelectedMonth] = useState<Date | null>(getLastAvailableMonth);
+  const [selectedQuarter, setSelectedQuarter] = useState<{ label: string; quarter: number; year: number } | null>(() => {
+    const now = new Date();
+    const cq = Math.floor(now.getMonth() / 3) + 1;
+    const cy = now.getFullYear();
+    let q = cq - 1, y = cy;
+    if (q <= 0) { q += 4; y -= 1; }
+    const mn = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const s = (q - 1) * 3;
+    return { label: `Q${q} ${y} (${mn[s]}–${mn[s + 2]})`, quarter: q, year: y };
+  });
+
+  const isDateInCurrentWeek = (date: Date) => {
+    const today = new Date();
+    const sow = new Date(today);
+    sow.setDate(today.getDate() - today.getDay());
+    sow.setHours(0, 0, 0, 0);
+    const eow = new Date(sow);
+    eow.setDate(sow.getDate() + 6);
+    eow.setHours(23, 59, 59, 999);
+    return date >= sow && date <= eow;
+  };
+  const isDateInFuture = (date: Date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return date > today;
+  };
+
+  const getCalendarDays = (yr: number, mo: number) => {
+    const firstDay = new Date(yr, mo, 1);
+    const lastDay = new Date(yr, mo + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startDow = firstDay.getDay();
+    const days: { day: number; trailing: boolean }[] = [];
+    if (startDow > 0) {
+      const pmLast = new Date(yr, mo, 0).getDate();
+      for (let i = startDow - 1; i >= 0; i--) days.push({ day: pmLast - i, trailing: true });
+    }
+    for (let i = 1; i <= daysInMonth; i++) days.push({ day: i, trailing: false });
+    return days;
+  };
+
+  const handleDayClick = (day: number | null) => {
+    if (!day) return;
+    const cd = new Date(viewingYear, viewingMonth, day);
+    if (isDateInFuture(cd) || isDateInCurrentWeek(cd)) return;
+    if (calendarMode === 'week') {
+      const ws = new Date(cd);
+      ws.setDate(cd.getDate() - cd.getDay());
+      setSelectedWeekStart(ws);
+      setShowCalendar(false);
+    }
+  };
+
+  const isInSelectedWeek = (day: number | null) => {
+    if (!day || !selectedWeekStart || calendarMode !== 'week') return false;
+    const date = new Date(viewingYear, viewingMonth, day);
+    const we = new Date(selectedWeekStart);
+    we.setDate(selectedWeekStart.getDate() + 6);
+    return date >= selectedWeekStart && date <= we;
+  };
+
+  const getAvailableQuarters = () => {
+    const now = new Date();
+    const cq = Math.floor(now.getMonth() / 3) + 1;
+    const cy = now.getFullYear();
+    const quarters: { label: string; quarter: number; year: number }[] = [];
+    let q = cq - 1, y = cy;
+    if (q <= 0) { q += 4; y -= 1; }
+    const mn = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    for (let i = 0; i < 4; i++) {
+      const s = (q - 1) * 3;
+      quarters.push({ label: `Q${q} ${y} (${mn[s]}–${mn[s + 2]})`, quarter: q, year: y });
+      q -= 1;
+      if (q <= 0) { q = 4; y -= 1; }
+    }
+    return quarters;
+  };
+  const availableQuarters = getAvailableQuarters();
+
+  const getSelectedPeriodLabel = () => {
+    if (calendarMode === 'week' && selectedWeekStart) {
+      const we = new Date(selectedWeekStart);
+      we.setDate(selectedWeekStart.getDate() + 6);
+      return `${selectedWeekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${we.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+    }
+    if (calendarMode === 'month' && selectedMonth) return selectedMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    if (calendarMode === 'quarter' && selectedQuarter) return selectedQuarter.label;
+    return 'Select Period';
+  };
+
+  const navigateMonth = (dir: number) => {
+    let nm = viewingMonth + dir, ny = viewingYear;
+    if (nm < 0) { nm = 11; ny -= 1; }
+    if (nm > 11) { nm = 0; ny += 1; }
+    setViewingMonth(nm);
+    setViewingYear(ny);
+  };
+
+  const calendarDays = getCalendarDays(viewingYear, viewingMonth);
+  const isDateFilterActive = true;
+
+  // Close calendar on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      const t = e.target as HTMLElement;
+      if (!t.closest('.calendar-picker-wrapper')) setShowCalendar(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
   // Handle incoming store selection via URL query param
   useEffect(() => {
     const storeParam = searchParams.get('store');
@@ -380,12 +538,51 @@ export const StoreCenter: React.FC = () => {
   }, [searchParams]);
 
   const store = storesData.find(s => s.id === selectedStoreId) || storesData[0];
-  const kpis = getKPIsForStore(store);
+  const baseKpis = getKPIsForStore(store);
+  // Period-adjusted KPIs with WoW/MoM/QoQ and period-level trend data
+  const kpis = (() => {
+    if (calendarMode === 'week') return baseKpis;
+    const ctx = calendarMode === 'month' ? 'MoM' : 'QoQ';
+    const monthOverrides: Record<string, Partial<KPITile>> = {
+      sales: { value: store.dpi >= 85 ? '437.6%' : store.dpi >= 75 ? '410.8%' : '383.5%', delta: store.dpi >= 85 ? '+3.8%' : '-1.9%', insight: 'Monthly aggregate vs plan', trendData: [395, 402, 410, 418, 425, 430, 438], trendLabels: ['Sep','Oct','Nov','Dec','Jan','Feb','Mar'] },
+      sea: { value: store.dpi >= 80 ? '89' : '74', delta: store.dpi >= 80 ? '+2' : '-3', insight: 'Monthly avg audit score', trendData: [84, 85, 86, 87, 88, 88, 89], trendLabels: ['Sep','Oct','Nov','Dec','Jan','Feb','Mar'] },
+      voc: { value: store.dpi >= 80 ? '4.2' : '3.5', delta: store.dpi >= 80 ? '+0.1' : '-0.3', insight: 'Monthly avg satisfaction', trendData: [3.9, 4.0, 4.0, 4.1, 4.1, 4.2, 4.2], trendLabels: ['Sep','Oct','Nov','Dec','Jan','Feb','Mar'] },
+      avail: { value: store.dpi >= 80 ? '96.2%' : '88.5%', delta: store.dpi >= 80 ? '+0.8%' : '-2.1%', insight: 'Monthly avg availability', trendData: [94.5, 95.0, 95.2, 95.8, 96.0, 96.1, 96.2], trendLabels: ['Sep','Oct','Nov','Dec','Jan','Feb','Mar'] },
+      gm: { value: store.dpi >= 85 ? '41.8%' : store.dpi >= 75 ? '39.5%' : '36.9%', delta: store.dpi >= 85 ? '+0.6%' : '-0.9%', insight: 'Monthly margin trend', trendData: [40.2, 40.5, 40.8, 41.0, 41.2, 41.5, 41.8], trendLabels: ['Sep','Oct','Nov','Dec','Jan','Feb','Mar'] },
+      alerts: { value: store.risk === 'high' ? '28' : store.risk === 'moderate' ? '12' : '4', delta: store.risk === 'high' ? '+8' : store.risk === 'moderate' ? '+2' : '-2', insight: 'Monthly alert volume', trendData: [8, 6, 10, 5, 7, 4, 4], trendLabels: ['Sep','Oct','Nov','Dec','Jan','Feb','Mar'] },
+    };
+    const quarterOverrides: Record<string, Partial<KPITile>> = {
+      sales: { value: store.dpi >= 85 ? '1,364%' : store.dpi >= 75 ? '1,281%' : '1,196%', delta: store.dpi >= 85 ? '+5.1%' : '-2.8%', insight: 'Quarterly aggregate vs plan', trendData: [1180, 1220, 1280, 1364], trendLabels: ['Q2 2025','Q3 2025','Q4 2025','Q1 2026'] },
+      sea: { value: store.dpi >= 80 ? '88' : '73', delta: store.dpi >= 80 ? '+3' : '-4', insight: 'Quarterly avg audit score', trendData: [82, 84, 86, 88], trendLabels: ['Q2 2025','Q3 2025','Q4 2025','Q1 2026'] },
+      voc: { value: store.dpi >= 80 ? '4.1' : '3.4', delta: store.dpi >= 80 ? '+0.2' : '-0.5', insight: 'Quarterly avg satisfaction', trendData: [3.8, 3.9, 4.0, 4.1], trendLabels: ['Q2 2025','Q3 2025','Q4 2025','Q1 2026'] },
+      avail: { value: store.dpi >= 80 ? '95.8%' : '87.9%', delta: store.dpi >= 80 ? '+1.2%' : '-3.0%', insight: 'Quarterly avg availability', trendData: [93.5, 94.2, 95.0, 95.8], trendLabels: ['Q2 2025','Q3 2025','Q4 2025','Q1 2026'] },
+      gm: { value: store.dpi >= 85 ? '41.5%' : store.dpi >= 75 ? '39.2%' : '36.6%', delta: store.dpi >= 85 ? '+0.9%' : '-1.4%', insight: 'Quarterly margin trend', trendData: [39.8, 40.2, 40.8, 41.5], trendLabels: ['Q2 2025','Q3 2025','Q4 2025','Q1 2026'] },
+      alerts: { value: store.risk === 'high' ? '84' : store.risk === 'moderate' ? '36' : '12', delta: store.risk === 'high' ? '+18' : store.risk === 'moderate' ? '+4' : '-5', insight: 'Quarterly alert volume', trendData: [24, 18, 30, 12], trendLabels: ['Q2 2025','Q3 2025','Q4 2025','Q1 2026'] },
+    };
+    const overrides = calendarMode === 'month' ? monthOverrides : quarterOverrides;
+    return baseKpis.map(kpi => {
+      const ov = overrides[kpi.id];
+      return { ...kpi, deltaContext: ctx, ...ov };
+    });
+  })();
   const auditData = getAuditData(store);
   const aiInsight = getAIInsight(store);
   const vocData = getVoCData(store);
   const inventoryData = getInventoryData(store);
   const alerts = getAlerts(store);
+
+  // Filter broadcasts to only those where this store has a non-completed status
+  const storeBroadcasts = broadcastActions.filter(bc => {
+    const storeRow = bc.storeBreakdown.find(s => s.storeNumber === store.number);
+    return storeRow && storeRow.status !== 'completed';
+  });
+
+  // Reset active broadcast when store changes
+  useEffect(() => {
+    if (storeBroadcasts.length > 0) {
+      setActiveBroadcast(storeBroadcasts[0]);
+    }
+  }, [selectedStoreId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const filteredStores = storesData.filter(s =>
     s.name.toLowerCase().includes(storeSearch.toLowerCase()) ||
@@ -474,6 +671,98 @@ export const StoreCenter: React.FC = () => {
               {store.risk.charAt(0).toUpperCase() + store.risk.slice(1)} Risk
             </span>
           </div>
+
+          {/* Period Selector — uses same classes as District Intelligence Hub */}
+          <div className="calendar-picker-wrapper">
+            <button className="period-selector" onClick={() => setShowCalendar(!showCalendar)}>
+              <Calendar size={14} />
+              <span>{getSelectedPeriodLabel()}</span>
+              <ChevronDown size={14} className={showCalendar ? 'rotated' : ''} />
+            </button>
+
+            {showCalendar && (
+              <div className="calendar-dropdown">
+                <div className="calendar-mode-toggle">
+                  <button
+                    className={`mode-btn ${calendarMode === 'week' ? 'active' : ''}`}
+                    onClick={() => { setCalendarMode('week'); if (selectedWeekStart) { setViewingMonth(selectedWeekStart.getMonth()); setViewingYear(selectedWeekStart.getFullYear()); } }}
+                  >Week</button>
+                  <button
+                    className={`mode-btn ${calendarMode === 'month' ? 'active' : ''}`}
+                    onClick={() => { setCalendarMode('month'); if (selectedMonth) { setViewingMonth(selectedMonth.getMonth()); setViewingYear(selectedMonth.getFullYear()); } }}
+                  >Month</button>
+                  <button
+                    className={`mode-btn ${calendarMode === 'quarter' ? 'active' : ''}`}
+                    onClick={() => setCalendarMode('quarter')}
+                  >Quarter</button>
+                </div>
+
+                {calendarMode === 'quarter' ? (
+                  <div className="quarter-list">
+                    {availableQuarters.map((q, idx) => (
+                      <button
+                        key={idx}
+                        className={`quarter-option ${selectedQuarter?.quarter === q.quarter && selectedQuarter?.year === q.year ? 'selected' : ''}`}
+                        onClick={() => { setSelectedQuarter(q); setShowCalendar(false); }}
+                      >
+                        <span className="quarter-label">Q{q.quarter} {q.year}</span>
+                        <span className="quarter-range">{q.label.match(/\((.+)\)/)?.[1]}</span>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <>
+                    <div className="calendar-nav">
+                      <button className="nav-btn" onClick={() => navigateMonth(-1)}>
+                        <ChevronDown size={16} style={{ transform: 'rotate(90deg)' }} />
+                      </button>
+                      <div className="calendar-month-year">
+                        <span className="calendar-month">{['January','February','March','April','May','June','July','August','September','October','November','December'][viewingMonth]}</span>
+                        <span className="calendar-year">{viewingYear}</span>
+                      </div>
+                      <button className="nav-btn" onClick={() => navigateMonth(1)}>
+                        <ChevronDown size={16} style={{ transform: 'rotate(-90deg)' }} />
+                      </button>
+                    </div>
+
+                    <div className="calendar-grid">
+                      <div className="calendar-weekdays">
+                        <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+                      </div>
+                      <div className="calendar-days">
+                        {calendarDays.map((entry, index) => {
+                          if (entry.trailing) {
+                            return <button key={index} className="calendar-day trailing" disabled>{entry.day}</button>;
+                          }
+                          const day = entry.day;
+                          const date = new Date(viewingYear, viewingMonth, day);
+                          const isDisabledWeek = isDateInFuture(date) || isDateInCurrentWeek(date);
+                          const isDisabledMonth = viewingYear > new Date().getFullYear() || (viewingYear === new Date().getFullYear() && viewingMonth >= new Date().getMonth());
+                          const isDisabled = calendarMode === 'week' ? isDisabledWeek : isDisabledMonth;
+                          const isSelectedWeek = isInSelectedWeek(day);
+                          const isSelectedMo = selectedMonth && viewingYear === selectedMonth.getFullYear() && viewingMonth === selectedMonth.getMonth();
+                          const isSelected = calendarMode === 'week' ? isSelectedWeek : !!isSelectedMo;
+                          return (
+                            <button
+                              key={index}
+                              className={`calendar-day ${isDisabled ? 'disabled' : ''} ${isSelected ? 'selected' : ''}`}
+                              disabled={isDisabled}
+                              onClick={() => {
+                                if (calendarMode === 'week') { handleDayClick(day); }
+                                else if (!isDisabledMonth) { setSelectedMonth(new Date(viewingYear, viewingMonth, 1)); setShowCalendar(false); }
+                              }}
+                            >
+                              {day}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="sc-ctx-right">
@@ -516,37 +805,58 @@ export const StoreCenter: React.FC = () => {
       <div className="sc-scroll-area" ref={scrollRef}>
         {/* ── KPI Tiles ──────────────────────────────────── */}
         <div className="sc-kpi-section">
+          {isDateFilterActive && <div className="sc-section-filter-badge"><Filter size={11} className="filter-active-icon" /><span>{getSelectedPeriodLabel()}</span></div>}
           <div className="sc-kpi-grid">
-            {kpis.map(kpi => (
-              <button key={kpi.id} className={`sc-kpi-tile sc-kpi--${kpi.status}`} onClick={() => setTrendModal(kpi)}>
-                <div className="sc-kpi-tile-header">
-                  <span className="sc-kpi-icon">{kpi.icon}</span>
-                  <span className="sc-kpi-label">{kpi.label}</span>
-                </div>
-                <div className="sc-kpi-tile-body">
-                  <span className="sc-kpi-value">{kpi.value}<span className="sc-kpi-unit">{kpi.unit}</span></span>
-                  <span className={`sc-kpi-delta sc-delta--${kpi.deltaDir}`}>
-                    {kpi.deltaDir === 'up' ? <ArrowUpRight size={12} /> : kpi.deltaDir === 'down' ? <ArrowDownRight size={12} /> : <Minus size={12} />}
-                    {kpi.delta}
-                  </span>
-                </div>
-                <div className="sc-kpi-spark">
-                  <svg viewBox={`0 0 ${kpi.trendData.length * 10} 30`} className="sc-spark-svg">
-                    <polyline
-                      fill="none"
-                      stroke={kpi.status === 'positive' ? '#10b981' : kpi.status === 'negative' ? '#ef4444' : '#94a3b8'}
-                      strokeWidth="1.5"
-                      points={kpi.trendData.map((v, i) => {
-                        const min = Math.min(...kpi.trendData);
-                        const max = Math.max(...kpi.trendData);
-                        const range = max - min || 1;
-                        return `${i * 10},${28 - ((v - min) / range) * 24}`;
-                      }).join(' ')}
-                    />
-                  </svg>
-                </div>
-              </button>
-            ))}
+            {kpis.map(kpi => {
+              const data = kpi.trendData;
+              const min = Math.min(...data);
+              const max = Math.max(...data);
+              const range = max - min || 1;
+              const W = 120, H = 44, P = 3;
+              const points = data.map((v, i) => ({
+                x: (i / (data.length - 1)) * W,
+                y: H - P - ((v - min) / range) * (H - P * 2),
+              }));
+              const path = points.map((p, i) => i === 0 ? `M ${p.x},${p.y}` : `L ${p.x},${p.y}`).join(' ');
+              const areaPath = `${path} L ${W},${H} L 0,${H} Z`;
+              const last = points[points.length - 1];
+              const color = kpi.status === 'positive' ? '#047857' : kpi.status === 'negative' ? '#991b1b' : '#4338ca';
+              return (
+                <button key={kpi.id} className={`sc-kpi-tile sc-kpi--${kpi.status}`} onClick={() => setTrendModal(kpi)}>
+                  <div className="sc-kpi-tile-header">
+                    <span className="sc-kpi-icon">{kpi.icon}</span>
+                    <span className="sc-kpi-label">{kpi.label}</span>
+                  </div>
+                  <div className="sc-kpi-tile-body">
+                    <span className="sc-kpi-value">{kpi.value}<span className="sc-kpi-unit">{kpi.unit}</span></span>
+                    <span className={`sc-kpi-delta sc-delta--${kpi.deltaDir}`}>
+                      {kpi.deltaDir === 'up' ? <ArrowUpRight size={12} /> : kpi.deltaDir === 'down' ? <ArrowDownRight size={12} /> : <Minus size={12} />}
+                      {kpi.delta}
+                      {kpi.deltaContext && <span className="sc-kpi-delta-ctx">{kpi.deltaContext}</span>}
+                    </span>
+                  </div>
+                  {kpi.insight && (
+                    <div className="sc-kpi-insight">
+                      <span className="sc-kpi-insight-dot" />
+                      <span>{kpi.insight}</span>
+                    </div>
+                  )}
+                  <div className="sc-kpi-spark">
+                    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="sc-spark-svg">
+                      <defs>
+                        <linearGradient id={`sc-spark-${kpi.id}`} x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor={color} stopOpacity="0.08" />
+                          <stop offset="100%" stopColor={color} stopOpacity="0" />
+                        </linearGradient>
+                      </defs>
+                      <path d={areaPath} fill={`url(#sc-spark-${kpi.id})`} />
+                      <path d={path} fill="none" stroke={color} strokeWidth="1.3" strokeLinecap="square" strokeLinejoin="miter" />
+                      <circle cx={last.x} cy={last.y} r="1.8" fill={color} stroke="#ffffff" strokeWidth="1" />
+                    </svg>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -562,37 +872,47 @@ export const StoreCenter: React.FC = () => {
                 <span className="ocv-subtitle">Broadcast → Action → Execution tracking</span>
               </div>
             </div>
-            <div className="ocv-kpi-pills">
-              <div className="ocv-kpi-pill">
-                <span className="ocv-kpi-val">{activeBroadcast.completionPct}%</span>
-                <span className="ocv-kpi-lbl">Completion</span>
+            {storeBroadcasts.length > 0 ? (
+              <div className="ocv-kpi-pills">
+                <div className="ocv-kpi-pill">
+                  <span className="ocv-kpi-val">{activeBroadcast.completionPct}%</span>
+                  <span className="ocv-kpi-lbl">Completion</span>
+                </div>
+                <div className="ocv-kpi-pill ocv-kpi--pending">
+                  <span className="ocv-kpi-val">{activeBroadcast.pendingStores}</span>
+                  <span className="ocv-kpi-lbl">Pending</span>
+                </div>
+                <div className="ocv-kpi-pill ocv-kpi--overdue">
+                  <span className="ocv-kpi-val">{activeBroadcast.overdueStores}</span>
+                  <span className="ocv-kpi-lbl">Overdue</span>
+                </div>
               </div>
-              <div className="ocv-kpi-pill ocv-kpi--pending">
-                <span className="ocv-kpi-val">{activeBroadcast.pendingStores}</span>
-                <span className="ocv-kpi-lbl">Pending</span>
+            ) : (
+              <div className="ocv-kpi-pills">
+                <div className="ocv-kpi-pill" style={{ background: '#dcfce7', borderColor: '#bbf7d0' }}>
+                  <span className="ocv-kpi-val" style={{ color: '#15803d' }}>All Clear</span>
+                </div>
               </div>
-              <div className="ocv-kpi-pill ocv-kpi--overdue">
-                <span className="ocv-kpi-val">{activeBroadcast.overdueStores}</span>
-                <span className="ocv-kpi-lbl">Overdue</span>
-              </div>
-            </div>
+            )}
           </div>
 
-          <div className="ocv-broadcast-tabs">
-            {broadcastActions.map(bc => (
-              <button
-                key={bc.broadcastId}
-                className={`ocv-bc-tab ${activeBroadcast.broadcastId === bc.broadcastId ? 'active' : ''}`}
-                onClick={() => setActiveBroadcast(bc)}
-              >
-                <span className={`ocv-bc-tab-dot ocv-status--${bc.storeStatus}`} />
-                <span className="ocv-bc-tab-title">{bc.broadcastTitle.length > 40 ? bc.broadcastTitle.slice(0, 40) + '…' : bc.broadcastTitle}</span>
-                <span className={`ocv-bc-tab-priority ocv-pri--${bc.priority}`}>{bc.priority}</span>
-              </button>
-            ))}
-          </div>
+          {storeBroadcasts.length > 0 ? (
+            <>
+              <div className="ocv-broadcast-tabs">
+                {storeBroadcasts.map(bc => (
+                  <button
+                    key={bc.broadcastId}
+                    className={`ocv-bc-tab ${activeBroadcast.broadcastId === bc.broadcastId ? 'active' : ''}`}
+                    onClick={() => setActiveBroadcast(bc)}
+                  >
+                    <span className={`ocv-bc-tab-dot ocv-status--${bc.storeStatus}`} />
+                    <span className="ocv-bc-tab-title">{bc.broadcastTitle.length > 40 ? bc.broadcastTitle.slice(0, 40) + '…' : bc.broadcastTitle}</span>
+                    <span className={`ocv-bc-tab-priority ocv-pri--${bc.priority}`}>{bc.priority}</span>
+                  </button>
+                ))}
+              </div>
 
-          <div className="ocv-zones">
+              <div className="ocv-zones">
             {/* LEFT: Broadcast Feed */}
             <div className="ocv-zone ocv-zone-broadcast">
               <div className="ocv-zone-label">
@@ -748,7 +1068,16 @@ export const StoreCenter: React.FC = () => {
                 })()}
               </div>
             </div>
-          </div>
+              </div>
+            </>
+          ) : (
+            <div className="ocv-all-clear">
+              <div className="ocv-all-clear-icon">
+                <CheckCircle2 size={24} />
+              </div>
+              <p className="ocv-all-clear-text">No active compliance actions for <strong>{store.name}</strong>. All broadcasts have been completed.</p>
+            </div>
+          )}
         </div>
 
         {/* ── 8-Week Audit Lens ──────────────────────────── */}
@@ -757,6 +1086,7 @@ export const StoreCenter: React.FC = () => {
             <div className="sc-section-title-row">
               <ClipboardCheck size={18} />
               <h3>8-Week Audit Lens</h3>
+              {isDateFilterActive && <Filter size={12} className="filter-active-icon" />}
             </div>
             <span className="sc-section-subtitle">Execution consistency across audit categories</span>
           </div>
@@ -770,9 +1100,9 @@ export const StoreCenter: React.FC = () => {
                 </button>
               ))}
             </div>
-            {['overall', 'safety', 'planogram', 'cleanliness', 'availability', 'staffing'].map(cat => (
+            {['overall', 'safety', 'planogram', 'signage', 'cleanliness', 'availability', 'staffing', 'stockRotation', 'pricing', 'backroom', 'customerArea'].map(cat => (
               <div key={cat} className={`sc-audit-row ${cat === 'overall' ? 'sc-audit-row--overall' : ''}`}>
-                <span className="sc-audit-cat-label">{cat.charAt(0).toUpperCase() + cat.slice(1)}</span>
+                <span className="sc-audit-cat-label">{cat === 'stockRotation' ? 'Stock Rotation' : cat === 'customerArea' ? 'Customer Area' : cat.charAt(0).toUpperCase() + cat.slice(1)}</span>
                 {auditData.map(w => {
                   const val = w[cat as keyof AuditWeek] as number;
                   return (
@@ -797,6 +1127,7 @@ export const StoreCenter: React.FC = () => {
             <div className="sc-section-title-row">
               <Sparkles size={18} />
               <h3>AI Insight</h3>
+              {isDateFilterActive && <Filter size={12} className="filter-active-icon" />}
             </div>
             <span className="sc-section-subtitle">Root cause analysis and recommended actions</span>
           </div>
@@ -1015,53 +1346,51 @@ export const StoreCenter: React.FC = () => {
             <div className="sc-modal-header">
               <div className="sc-modal-title-row">
                 {trendModal.icon}
-                <h3>{trendModal.label} — 12-Week Trend</h3>
+                <h3>{trendModal.label} — {calendarMode === 'week' ? '12-Week' : calendarMode === 'month' ? '7-Month' : '4-Quarter'} Trend</h3>
               </div>
               <button className="sc-modal-close" onClick={() => setTrendModal(null)}><X size={18} /></button>
             </div>
             <div className="sc-modal-body">
               <div className="sc-trend-chart">
-                <svg viewBox="0 0 480 180" className="sc-trend-svg">
-                  {/* Grid lines */}
-                  {[0, 1, 2, 3, 4].map(i => (
-                    <line key={i} x1="40" y1={20 + i * 35} x2="460" y2={20 + i * 35} stroke="#f1f5f9" strokeWidth="1" />
-                  ))}
-                  {/* Data line */}
-                  <polyline
-                    fill="none"
-                    stroke={trendModal.status === 'positive' ? '#10b981' : trendModal.status === 'negative' ? '#ef4444' : '#6366f1'}
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    points={trendModal.trendData.map((v, i) => {
-                      const min = Math.min(...trendModal.trendData) * 0.95;
-                      const max = Math.max(...trendModal.trendData) * 1.05;
-                      const range = max - min || 1;
-                      const x = 50 + i * (400 / (trendModal.trendData.length - 1));
-                      const y = 155 - ((v - min) / range) * 130;
-                      return `${x},${y}`;
-                    }).join(' ')}
-                  />
-                  {/* Data points */}
-                  {trendModal.trendData.map((v, i) => {
-                    const min = Math.min(...trendModal.trendData) * 0.95;
-                    const max = Math.max(...trendModal.trendData) * 1.05;
-                    const range = max - min || 1;
-                    const x = 50 + i * (400 / (trendModal.trendData.length - 1));
-                    const y = 155 - ((v - min) / range) * 130;
-                    return (
-                      <g key={i}>
-                        <circle cx={x} cy={y} r="4" fill="#fff" stroke={trendModal.status === 'positive' ? '#10b981' : trendModal.status === 'negative' ? '#ef4444' : '#6366f1'} strokeWidth="2" />
-                        <text x={x} y={y - 10} textAnchor="middle" fontSize="10" fill="#64748b">{v}</text>
-                      </g>
-                    );
-                  })}
-                  {/* X labels */}
-                  {trendModal.trendLabels.map((label, i) => {
-                    const x = 50 + i * (400 / (trendModal.trendLabels.length - 1));
-                    return <text key={i} x={x} y={175} textAnchor="middle" fontSize="10" fill="#94a3b8">{label}</text>;
-                  })}
-                </svg>
+                {(() => {
+                  const n = trendModal.trendData.length;
+                  const padL = 50, padR = 30;
+                  const spacing = 60;
+                  const chartW = padL + (n - 1) * spacing + padR;
+                  const color = trendModal.status === 'positive' ? '#10b981' : trendModal.status === 'negative' ? '#ef4444' : '#6366f1';
+                  const min = Math.min(...trendModal.trendData) * 0.95;
+                  const max = Math.max(...trendModal.trendData) * 1.05;
+                  const range = max - min || 1;
+                  const pts = trendModal.trendData.map((v, i) => ({
+                    x: padL + i * spacing,
+                    y: 155 - ((v - min) / range) * 130,
+                    v,
+                  }));
+                  return (
+                    <svg viewBox={`0 0 ${chartW} 190`} className="sc-trend-svg">
+                      {[0, 1, 2, 3, 4].map(i => (
+                        <line key={i} x1={padL - 10} y1={20 + i * 35} x2={chartW - padR + 10} y2={20 + i * 35} stroke="#f1f5f9" strokeWidth="1" />
+                      ))}
+                      <polyline
+                        fill="none"
+                        stroke={color}
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        points={pts.map(p => `${p.x},${p.y}`).join(' ')}
+                      />
+                      {pts.map((p, i) => (
+                        <g key={i}>
+                          <circle cx={p.x} cy={p.y} r="4" fill="#fff" stroke={color} strokeWidth="2" />
+                          <text x={p.x} y={p.y - 10} textAnchor="middle" fontSize="10" fill="#64748b">{p.v}</text>
+                        </g>
+                      ))}
+                      {trendModal.trendLabels.map((label, i) => (
+                        <text key={i} x={padL + i * spacing} y={182} textAnchor="middle" fontSize="10" fill="#94a3b8">{label}</text>
+                      ))}
+                    </svg>
+                  );
+                })()}
               </div>
               <div className="sc-trend-insight">
                 <Sparkles size={14} />
@@ -1085,13 +1414,14 @@ export const StoreCenter: React.FC = () => {
             </div>
             <div className="sc-modal-body">
               <div className="sc-audit-detail-grid">
-                {(['safety', 'planogram', 'cleanliness', 'availability', 'staffing'] as const).map(cat => {
+                {(['safety', 'planogram', 'signage', 'cleanliness', 'availability', 'staffing', 'stockRotation', 'pricing', 'backroom', 'customerArea'] as const).map(cat => {
                   const val = auditWeekDetail[cat];
+                  const label = cat === 'stockRotation' ? 'Stock Rotation' : cat === 'customerArea' ? 'Customer Area' : cat.charAt(0).toUpperCase() + cat.slice(1);
                   return (
                     <div key={cat} className="sc-audit-detail-card">
                       <div className="sc-audit-detail-bar" style={{ background: getComplianceColor(val), width: `${val}%` }} />
                       <div className="sc-audit-detail-info">
-                        <span className="sc-audit-detail-cat">{cat.charAt(0).toUpperCase() + cat.slice(1)}</span>
+                        <span className="sc-audit-detail-cat">{label}</span>
                         <span className="sc-audit-detail-val" style={{ color: getComplianceTextColor(val) }}>{val}%</span>
                       </div>
                     </div>

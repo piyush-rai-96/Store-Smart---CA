@@ -9,7 +9,7 @@ interface WelcomeBarProps {
 
 export const WelcomeBar: React.FC<WelcomeBarProps> = ({ user }) => {
   const getAssignment = () => {
-    if (user.role === 'DM' || user.role === 'RD') {
+    if (user.role === 'DM' || user.role === 'HQ') {
       return user.district || 'All Districts';
     }
     if (user.role === 'SM') {

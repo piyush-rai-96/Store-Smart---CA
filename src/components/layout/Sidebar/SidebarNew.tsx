@@ -11,8 +11,22 @@ import {
   Radio,
   Settings
 } from 'lucide-react';
-import { User } from '../../../types';
+import { User, ScreenAccess } from '../../../types';
 import './SidebarNew.css';
+
+// Map sidebar sub-module IDs to ScreenAccess identifiers
+const SUB_MODULE_ACCESS: Record<string, ScreenAccess> = {
+  'store-ops-home': 'home',
+  'district-intelligence': 'district_intelligence',
+  'store-deep-dive': 'store_deep_dive',
+  'master-pog': 'master_pog_management',
+  'rule-management': 'pog_rule_management',
+  'localization-engine': 'pog_localization_engine',
+  'ai-copilot': 'ai_copilot',
+  'operations-queue': 'operations_queue',
+  'communications': 'communications',
+  'user-access': 'user_access_management',
+};
 
 interface SubModule {
   id: string;
@@ -120,6 +134,18 @@ export const SidebarNew: React.FC<SidebarNewProps> = ({ user, isCollapsed, onTog
     },
   ];
 
+  // Filter navigation based on user's accessRoutes
+  const filteredModules = navigationModules
+    .map(module => {
+      if (!module.subModules) return module;
+      const allowedSubs = module.subModules.filter(sub => {
+        const screenKey = SUB_MODULE_ACCESS[sub.id];
+        return screenKey ? user.accessRoutes.includes(screenKey) : true;
+      });
+      return allowedSubs.length > 0 ? { ...module, subModules: allowedSubs } : null;
+    })
+    .filter((m): m is NavigationModule => m !== null);
+
   const toggleModule = (moduleId: string) => {
     if (isCollapsed) {
       onToggle();
@@ -163,7 +189,7 @@ export const SidebarNew: React.FC<SidebarNewProps> = ({ user, isCollapsed, onTog
       </div>
 
       <nav className="sidebar-new-nav">
-        {navigationModules.map(module => {
+        {filteredModules.map(module => {
           const isExpanded = expandedModules.includes(module.id);
           const isActive = isModuleActive(module);
           const hasSubModules = module.subModules && module.subModules.length > 0;

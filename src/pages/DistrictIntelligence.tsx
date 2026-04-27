@@ -39,7 +39,8 @@ import {
   FileText,
   Zap,
   ArrowRight,
-  Bot
+  Bot,
+  Filter
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './DistrictIntelligence.css';
@@ -99,6 +100,205 @@ const auditComplianceData: Record<string, Record<string, number>> = {
   '1234': { Planogram: 55, Signage: 62, Cleanliness: 70, Safety: 58, 'Stock Rotation': 48, Pricing: 65, Backroom: 52, 'Customer Area': 60 },
   '5678': { Planogram: 42, Signage: 50, Cleanliness: 55, Safety: 38, 'Stock Rotation': 35, Pricing: 48, Backroom: 40, 'Customer Area': 45 },
   '9012': { Planogram: 28, Signage: 35, Cleanliness: 40, Safety: 22, 'Stock Rotation': 18, Pricing: 32, Backroom: 25, 'Customer Area': 30 },
+};
+
+// District options for HQ role selector
+const HQ_DISTRICT_OPTIONS = [
+  { id: 'd14', label: 'District 14 — Tennessee', dm: 'John Doe', storeCount: 8, seedOffset: 0 },
+  { id: 'd08', label: 'District 08 — Georgia', dm: 'Sarah Kim', storeCount: 6, seedOffset: 1 },
+  { id: 'd22', label: 'District 22 — Carolina', dm: 'Marcus Reed', storeCount: 7, seedOffset: 2 },
+  { id: 'd11', label: 'District 11 — Florida', dm: 'Lisa Nguyen', storeCount: 9, seedOffset: 3 },
+  { id: 'd19', label: 'District 19 — Alabama', dm: 'David Park', storeCount: 5, seedOffset: 4 },
+];
+
+// Generate district-varied store data
+const DISTRICT_STORE_NAMES: string[][] = [
+  ['Downtown Plaza', 'Riverside Mall', 'Central Station', 'Westfield Center', 'Harbor View', 'Oak Street', 'Pine Grove', 'Maple Heights'],
+  ['Peachtree Plaza', 'Savannah Square', 'Augusta Mall', 'Athens Center', 'Macon Point', 'Columbus Walk'],
+  ['Charlotte Hub', 'Raleigh Court', 'Durham Heights', 'Wilmington Bay', 'Greensboro Lane', 'Asheville Park', 'Chapel Hill'],
+  ['Miami Central', 'Orlando Gateway', 'Tampa Bay Mall', 'Jacksonville Hub', 'Fort Lauderdale', 'St. Petersburg', 'Tallahassee', 'Gainesville', 'Naples Point'],
+  ['Birmingham Center', 'Huntsville Plaza', 'Montgomery Mall', 'Mobile Bay', 'Tuscaloosa Walk'],
+];
+
+const getDistrictStores = (seedOffset: number): StoreData[] => {
+  if (seedOffset === 0) return mockStores;
+  const names = DISTRICT_STORE_NAMES[seedOffset] || mockStores.map(s => s.storeName);
+  const baseDPIs = [94, 91, 85, 82, 78, 72, 65, 58, 70];
+  return names.map((name, i) => {
+    const shift = ((seedOffset * 7 + i * 3) % 11) - 4;
+    const baseDpi = (baseDPIs[i % baseDPIs.length] || 75) + shift;
+    const dpi = Math.max(48, Math.min(98, baseDpi));
+    const salesBase = [245000, 198000, 176000, 165000, 142000, 128000, 112000, 95000, 135000];
+    const salesShift = ((seedOffset * 11 + i * 5) % 20) - 10;
+    return {
+      id: `${seedOffset}-${i}`,
+      rank: i + 1,
+      storeNumber: String(1000 + seedOffset * 200 + i * 111),
+      storeName: name,
+      dpi,
+      dpiTier: (dpi >= 90 ? 'Excellence' : dpi >= 75 ? 'Stable' : dpi >= 60 ? 'AtRisk' : 'Crisis') as StoreData['dpiTier'],
+      netSales: Math.max(80000, (salesBase[i % salesBase.length] || 120000) + salesShift * 5000),
+      netSalesVar: parseFloat(((i < 3 ? 5 : i < 5 ? 0 : -5) + shift * 0.5).toFixed(1)),
+      seaScore: Math.max(55, Math.min(98, dpi + ((i * 3 + seedOffset) % 7) - 3)),
+      vocSatisfied: Math.max(50, Math.min(95, dpi - 5 + ((i * 2 + seedOffset) % 6))),
+      topVocIssue: ['Wait times', 'Product availability', 'Staff friendliness', 'Checkout speed', 'Product quality', 'Staff availability', 'Long queues', 'Overall experience'][i % 8],
+      topSeaIssue: i < 2 ? '-' : ['Signage', 'Planogram', 'Cleanliness', 'Safety', 'Stock Rotation', 'Pricing'][i % 6],
+      trend: (dpi >= 85 ? 'up' : dpi >= 70 ? 'flat' : 'down') as StoreData['trend'],
+      status: (dpi >= 85 ? 'excellent' : dpi >= 70 ? 'stable' : dpi >= 60 ? 'warning' : 'critical') as StoreData['status'],
+    };
+  });
+};
+
+// Generate audit compliance data keyed by store numbers for a district
+const getDistrictAuditData = (seedOffset: number): Record<string, Record<string, number>> => {
+  if (seedOffset === 0) return auditComplianceData;
+  const stores = getDistrictStores(seedOffset);
+  const result: Record<string, Record<string, number>> = {};
+  stores.forEach((store, i) => {
+    const base = Math.max(30, Math.min(95, store.dpi + ((i * 3 + seedOffset) % 10) - 4));
+    const row: Record<string, number> = {};
+    auditCategories.forEach((cat, ci) => {
+      const variation = ((seedOffset * 7 + i * 5 + ci * 3) % 25) - 12;
+      row[cat] = Math.max(15, Math.min(100, base + variation));
+    });
+    result[store.storeNumber] = row;
+  });
+  return result;
+};
+
+// Generate district-varied metrics
+const getDistrictMetrics = (seedOffset: number) => {
+  const dpiShifts = [0, -3, -5, -8, -2];
+  const s = dpiShifts[seedOffset] || 0;
+  return {
+    week: { dpi: 87 + s, tier: (87 + s >= 85 ? 'Excellence' : 'Stable') as DistrictTier, rank: 3 + seedOffset, dpiChange: +(2.4 - seedOffset * 0.3).toFixed(1), momentum: (s >= -2 ? 'Improving' : 'Slipping') as MomentumType, momentumDelta: +(3.2 + s * 0.2).toFixed(1), chainAvg: 79, scoreSales: 92 + s, scoreExecution: 85 + s, scoreVoC: 84 + s },
+    month: { dpi: 82 + s, tier: (82 + s >= 85 ? 'Excellence' : 82 + s >= 70 ? 'Stable' : 'AtRisk') as DistrictTier, rank: 5 + seedOffset, dpiChange: +(1.8 - seedOffset * 0.2).toFixed(1), momentum: (s >= -3 ? 'Improving' : 'Flat') as MomentumType, momentumDelta: +(2.1 + s * 0.15).toFixed(1), chainAvg: 79, scoreSales: 86 + s, scoreExecution: 80 + s, scoreVoC: 79 + s },
+    quarter: { dpi: 80 + s, tier: (80 + s >= 85 ? 'Excellence' : 80 + s >= 70 ? 'Stable' : 'AtRisk') as DistrictTier, rank: 6 + seedOffset, dpiChange: +(1.2 - seedOffset * 0.15).toFixed(1), momentum: 'Flat' as MomentumType, momentumDelta: +(0.8 + s * 0.1).toFixed(1), chainAvg: 79, scoreSales: 84 + s, scoreExecution: 78 + s, scoreVoC: 77 + s },
+  };
+};
+
+// Per-district KPI overrides (weekly base values by district)
+const DISTRICT_KPI_OVERRIDES: Record<string, Record<string, { primaryValue: string; delta: string; deltaDirection: 'up' | 'down' | 'flat'; microInsight: string; status: 'positive' | 'negative' | 'neutral' | 'warning' }>> = {
+  d14: {}, // default — use base districtKPIs
+  d08: {
+    'sales-performance': { primaryValue: '$982K', delta: '+2.1%', deltaDirection: 'up', microInsight: '4W avg $945K', status: 'positive' },
+    'voc-satisfaction': { primaryValue: '78%', delta: '-3.2pts', deltaDirection: 'down', microInsight: 'Top theme: Checkout Speed', status: 'warning' },
+    'voc-issue-rate': { primaryValue: '4.2', delta: '+0.9', deltaDirection: 'up', microInsight: '4 of 6 stores affected', status: 'negative' },
+    'shelf-audit': { primaryValue: '84%', delta: '-11pts', deltaDirection: 'down', microInsight: '8th week below target', status: 'negative' },
+    'oos-rate': { primaryValue: '5.1%', delta: '+1.3pts', deltaDirection: 'up', microInsight: 'Shrinkage driving 45%', status: 'negative' },
+    'margin-health': { primaryValue: '33.1%', delta: '-85 bps', deltaDirection: 'down', microInsight: 'Clearance markdown pressure', status: 'negative' },
+  },
+  d22: {
+    'sales-performance': { primaryValue: '$1.08M', delta: '+1.4%', deltaDirection: 'up', microInsight: '4W avg $1.02M', status: 'positive' },
+    'voc-satisfaction': { primaryValue: '75%', delta: '-4.8pts', deltaDirection: 'down', microInsight: 'Top theme: Staff Availability', status: 'negative' },
+    'voc-issue-rate': { primaryValue: '4.6', delta: '+1.2', deltaDirection: 'up', microInsight: '5 of 7 stores affected', status: 'negative' },
+    'shelf-audit': { primaryValue: '81%', delta: '-14pts', deltaDirection: 'down', microInsight: 'Planogram reset overdue', status: 'negative' },
+    'oos-rate': { primaryValue: '4.8%', delta: '+1.1pts', deltaDirection: 'up', microInsight: 'Seasonal items drive 55%', status: 'negative' },
+    'margin-health': { primaryValue: '33.6%', delta: '-60 bps', deltaDirection: 'down', microInsight: 'Promotional mix impact', status: 'warning' },
+  },
+  d11: {
+    'sales-performance': { primaryValue: '$1.52M', delta: '+5.8%', deltaDirection: 'up', microInsight: '4W avg $1.41M', status: 'positive' },
+    'voc-satisfaction': { primaryValue: '71%', delta: '-6.1pts', deltaDirection: 'down', microInsight: 'Top theme: Product Availability', status: 'negative' },
+    'voc-issue-rate': { primaryValue: '5.1', delta: '+1.8', deltaDirection: 'up', microInsight: '7 of 9 stores affected', status: 'negative' },
+    'shelf-audit': { primaryValue: '76%', delta: '-19pts', deltaDirection: 'down', microInsight: 'Cooler section dragging avg', status: 'negative' },
+    'oos-rate': { primaryValue: '6.2%', delta: '+2.4pts', deltaDirection: 'up', microInsight: 'Perishables drive 65%', status: 'negative' },
+    'margin-health': { primaryValue: '32.8%', delta: '-110 bps', deltaDirection: 'down', microInsight: 'Spoilage & markdown heavy', status: 'negative' },
+  },
+  d19: {
+    'sales-performance': { primaryValue: '$640K', delta: '+3.6%', deltaDirection: 'up', microInsight: '4W avg $618K', status: 'positive' },
+    'voc-satisfaction': { primaryValue: '85%', delta: '+1.2pts', deltaDirection: 'up', microInsight: 'Top theme: Staff Friendliness', status: 'positive' },
+    'voc-issue-rate': { primaryValue: '2.4', delta: '-0.3', deltaDirection: 'down', microInsight: '1 of 5 stores affected', status: 'positive' },
+    'shelf-audit': { primaryValue: '92%', delta: '-3pts', deltaDirection: 'down', microInsight: 'Near target, minor gaps', status: 'neutral' },
+    'oos-rate': { primaryValue: '2.8%', delta: '+0.2pts', deltaDirection: 'up', microInsight: 'Well managed supply', status: 'neutral' },
+    'margin-health': { primaryValue: '35.1%', delta: '+15 bps', deltaDirection: 'up', microInsight: 'Efficient ops, low markdown', status: 'positive' },
+  },
+};
+
+// Per-district triage data
+interface TriageItem { id: string; title: string; priority: 'critical' | 'high' | 'medium'; stores: string; metric: string }
+const DISTRICT_TRIAGE: Record<string, TriageItem[]> = {
+  d14: [
+    { id: 'voc-messy', title: 'VoC: Messy Aisles', priority: 'high', stores: 'Hamburg South · Cologne East · Berlin Mitte', metric: '+22% theme spike' },
+    { id: 'sea-fire', title: 'SEA Auto-Fail: Fire Exit', priority: 'critical', stores: 'Hamburg South — Display blocking exit', metric: 'Escalated to DM · Pending' },
+    { id: 'oos-risk', title: 'Inbound OOS Risk', priority: 'medium', stores: 'Cologne East — 3 SKUs delayed 48h', metric: 'Adaptation pending approval' },
+  ],
+  d08: [
+    { id: 'shrink-spike', title: 'Shrinkage Spike', priority: 'critical', stores: 'Peachtree Plaza · Savannah Square', metric: '+18% vs 4-week avg' },
+    { id: 'voc-checkout', title: 'VoC: Checkout Speed', priority: 'high', stores: 'Augusta Mall · Athens Center', metric: '+31% complaint volume' },
+    { id: 'labor-gap', title: 'Labor Coverage Gap', priority: 'medium', stores: 'Macon Point — Weekend understaffed', metric: '3 shifts uncovered' },
+  ],
+  d22: [
+    { id: 'compliance-drop', title: 'Planogram Compliance Drop', priority: 'high', stores: 'Charlotte Hub · Durham Heights', metric: 'Below 60% threshold' },
+    { id: 'safety-incident', title: 'Safety Incident Reported', priority: 'critical', stores: 'Raleigh Court — Wet floor slip', metric: 'Investigation required' },
+    { id: 'stock-expiry', title: 'Stock Expiry Alert', priority: 'medium', stores: 'Wilmington Bay — 28 items near expiry', metric: '48h window to clear' },
+  ],
+  d11: [
+    { id: 'voc-availability', title: 'VoC: Product Availability', priority: 'high', stores: 'Miami Central · Orlando Gateway · Tampa Bay Mall', metric: '+26% theme spike' },
+    { id: 'cooler-temp', title: 'Cooler Temp Deviation', priority: 'critical', stores: 'Jacksonville Hub — Dairy cooler at 48°F', metric: 'Maintenance dispatched' },
+    { id: 'promo-execution', title: 'Promo Execution Miss', priority: 'medium', stores: 'Fort Lauderdale · St. Petersburg', metric: '4 endcaps incomplete' },
+  ],
+  d19: [
+    { id: 'audit-backlog', title: 'Audit Backlog', priority: 'high', stores: 'Birmingham Center · Huntsville Plaza', metric: '6 audits overdue' },
+    { id: 'receiving-delay', title: 'Receiving Dock Delay', priority: 'medium', stores: 'Montgomery Mall — 12h behind schedule', metric: 'Impacts floor replenishment' },
+    { id: 'voc-cleanliness', title: 'VoC: Store Cleanliness', priority: 'high', stores: 'Mobile Bay · Tuscaloosa Walk', metric: '+19% negative mentions' },
+  ],
+};
+
+// Per-district escalation data
+const getDistrictEscalations = (seedOffset: number): EscalatedStore[] => {
+  if (seedOffset === 0) return escalatedStores;
+  const stores = getDistrictStores(seedOffset);
+  const worstStores = [...stores].sort((a, b) => a.dpi - b.dpi).slice(0, Math.min(3, stores.length));
+  const stages: EscalatedStore['stage'][] = ['critical', 'escalated', 'early-warning'];
+  const reasons = [
+    'Multiple audit categories below acceptable threshold',
+    'Consecutive compliance misses across 2+ weeks',
+    'DPI declined for 3 straight weeks',
+  ];
+  return worstStores.map((s, i) => ({
+    storeNumber: s.storeNumber,
+    storeName: s.storeName,
+    stage: stages[i % 3],
+    reason: reasons[i % 3],
+    missStreak: 3 - i,
+    lastAuditDate: [`2 days ago`, `4 days ago`, `1 day ago`][i % 3],
+    dpiImpact: parseFloat((-4.2 + i * 1.1).toFixed(1)),
+    categories: [['Safety', 'Planogram'], ['Cleanliness', 'Stock Rotation', 'Backroom'], ['Planogram']][i % 3],
+  }));
+};
+
+// Per-district broadcast stats
+interface DistrictBroadcastData {
+  active: number; thisWeek: number; ackRate: string;
+  broadcasts: { priority: 'high' | 'medium' | 'low'; title: string; time: string; ack: string }[];
+  gap: string; topInsight: string;
+}
+const DISTRICT_BROADCASTS: Record<string, DistrictBroadcastData> = {
+  d14: { active: 3, thisWeek: 12, ackRate: '94%', broadcasts: [
+    { priority: 'high', title: 'Safety Protocol Update', time: '2h ago', ack: '8/8 stores acknowledged' },
+    { priority: 'medium', title: 'Weekend Staffing Reminder', time: 'Yesterday', ack: '6/8 stores acknowledged' },
+    { priority: 'low', title: 'Planogram Refresh Checklist', time: '3d ago', ack: '5/8 stores acknowledged' },
+  ], gap: 'Cologne East — 3 pending acks', topInsight: 'Safety broadcasts get 98% ack rate within 2h' },
+  d08: { active: 2, thisWeek: 8, ackRate: '88%', broadcasts: [
+    { priority: 'high', title: 'Shrinkage Prevention Alert', time: '1h ago', ack: '5/6 stores acknowledged' },
+    { priority: 'medium', title: 'Holiday Staffing Plan', time: '4h ago', ack: '4/6 stores acknowledged' },
+    { priority: 'low', title: 'New POS Training Schedule', time: '2d ago', ack: '6/6 stores acknowledged' },
+  ], gap: 'Macon Point — 2 pending acks', topInsight: 'Training broadcasts get 100% ack within 48h' },
+  d22: { active: 4, thisWeek: 15, ackRate: '82%', broadcasts: [
+    { priority: 'high', title: 'Wet Floor Safety Reminder', time: '30m ago', ack: '5/7 stores acknowledged' },
+    { priority: 'high', title: 'Planogram Reset Deadline', time: '3h ago', ack: '4/7 stores acknowledged' },
+    { priority: 'medium', title: 'Stock Rotation Checklist', time: 'Yesterday', ack: '6/7 stores acknowledged' },
+  ], gap: 'Chapel Hill — 4 pending acks', topInsight: 'Compliance-related broadcasts have lowest ack rate (78%)' },
+  d11: { active: 5, thisWeek: 18, ackRate: '79%', broadcasts: [
+    { priority: 'high', title: 'Cooler Maintenance Alert', time: '45m ago', ack: '7/9 stores acknowledged' },
+    { priority: 'high', title: 'Promo Execution Deadline', time: '2h ago', ack: '5/9 stores acknowledged' },
+    { priority: 'medium', title: 'Product Recall Notice', time: 'Yesterday', ack: '8/9 stores acknowledged' },
+  ], gap: 'Naples Point — 5 pending acks', topInsight: 'Recall notices get 89% ack within 1h' },
+  d19: { active: 2, thisWeek: 6, ackRate: '91%', broadcasts: [
+    { priority: 'high', title: 'Audit Compliance Reminder', time: '1h ago', ack: '4/5 stores acknowledged' },
+    { priority: 'medium', title: 'Cleanliness Checklist Update', time: '5h ago', ack: '5/5 stores acknowledged' },
+    { priority: 'low', title: 'Monthly Team Meeting', time: '2d ago', ack: '5/5 stores acknowledged' },
+  ], gap: 'Birmingham Center — 1 pending ack', topInsight: 'Smaller district shows faster ack rates (avg 45min)' },
 };
 
 const getComplianceColor = (value: number): string => {
@@ -308,8 +508,8 @@ const districtKPIs: DistrictKPI[] = [
     trendInsight: 'Consistent upward trend. Q4 seasonality effect visible. Rolling 4-week avg: $1.19M.',
     panelTitle: 'Sales $ — 52-Week Trend',
     panelDetails: [
-      { label: 'Best Week', value: '$1.32M (W48)', status: 'positive' },
-      { label: 'Worst Week', value: '$940K (W08)', status: 'negative' },
+      { label: 'Best Week', value: '$1.32M (Mar 23)', status: 'positive' },
+      { label: 'Worst Week', value: '$940K (Jun 23)', status: 'negative' },
       { label: 'Rolling 4W Avg', value: '$1.19M', status: 'neutral' },
       { label: 'YoY Δ', value: '+4.2%', status: 'positive' },
     ]
@@ -330,8 +530,8 @@ const districtKPIs: DistrictKPI[] = [
     trendInsight: 'Gradual decline over 12 weeks. "Messy Aisles" and "Staff Availability" are top negative themes.',
     panelTitle: 'VoC Satisfaction — 52-Week Trend',
     panelDetails: [
-      { label: 'Peak', value: '91% (W12)', status: 'positive' },
-      { label: 'Low', value: '80% (W36)', status: 'negative' },
+      { label: 'Peak', value: '91% (Jul 21)', status: 'positive' },
+      { label: 'Low', value: '80% (Jan 5)', status: 'negative' },
       { label: 'Top Theme (↑)', value: 'Messy Aisles (+34%)', status: 'negative' },
       { label: 'Top Theme (↓)', value: 'Checkout Speed (improved)', status: 'positive' },
     ]
@@ -353,8 +553,8 @@ const districtKPIs: DistrictKPI[] = [
     trendInsight: 'Spike detected in last 2 weeks. Driven primarily by "Messy Aisles" theme across 3 stores.',
     panelTitle: 'VoC Issue Rate — 52-Week Trend',
     panelDetails: [
-      { label: 'Best', value: '2.1 / 100 (W05)', status: 'positive' },
-      { label: 'Worst', value: '4.2 / 100 (W41)', status: 'negative' },
+      { label: 'Best', value: '2.1 / 100 (Jun 2)', status: 'positive' },
+      { label: 'Worst', value: '4.2 / 100 (Feb 2)', status: 'negative' },
       { label: 'Spike Driver', value: 'Messy Aisles (+34%)', status: 'negative' },
       { label: 'Stores Affected', value: '3 of 8', status: 'warning' },
     ]
@@ -397,8 +597,8 @@ const districtKPIs: DistrictKPI[] = [
     trendInsight: 'Rising trend over 8 weeks. Apparel category driving 60% of OOS. Cologne East shipment delay a key factor.',
     panelTitle: 'OOS Rate — 52-Week Trend',
     panelDetails: [
-      { label: 'Best', value: '2.1% (W09)', status: 'positive' },
-      { label: 'Worst', value: '4.5% (W44)', status: 'negative' },
+      { label: 'Best', value: '2.1% (Jun 30)', status: 'positive' },
+      { label: 'Worst', value: '4.5% (Feb 23)', status: 'negative' },
       { label: 'Top Category', value: 'Apparel (60% of OOS)', status: 'negative' },
       { label: 'Key Driver', value: 'Cologne East delay', status: 'warning' },
     ]
@@ -420,8 +620,8 @@ const districtKPIs: DistrictKPI[] = [
     trendInsight: 'Margin pressure from increased markdowns in Apparel. Promotional mix shift impacting blended margin.',
     panelTitle: 'Gross Margin — 52-Week Trend',
     panelDetails: [
-      { label: 'Peak', value: '36.1% (W14)', status: 'positive' },
-      { label: 'Low', value: '33.8% (W38)', status: 'negative' },
+      { label: 'Peak', value: '36.1% (Aug 4)', status: 'positive' },
+      { label: 'Low', value: '33.8% (Jan 12)', status: 'negative' },
       { label: 'Pressure Source', value: 'Apparel markdowns', status: 'negative' },
       { label: 'YoY Δ', value: '-40 bps', status: 'warning' },
     ]
@@ -459,16 +659,19 @@ const getCalendarDays = (year: number, month: number) => {
   const daysInMonth = lastDay.getDate();
   const startDayOfWeek = firstDay.getDay();
   
-  const days: (number | null)[] = [];
+  const days: { day: number; trailing: boolean }[] = [];
   
-  // Add empty slots for days before the first day of month
-  for (let i = 0; i < startDayOfWeek; i++) {
-    days.push(null);
+  // Add previous month's trailing days
+  if (startDayOfWeek > 0) {
+    const prevMonthLastDay = new Date(year, month, 0).getDate();
+    for (let i = startDayOfWeek - 1; i >= 0; i--) {
+      days.push({ day: prevMonthLastDay - i, trailing: true });
+    }
   }
   
   // Add all days of the month
   for (let i = 1; i <= daysInMonth; i++) {
-    days.push(i);
+    days.push({ day: i, trailing: false });
   }
   
   return days;
@@ -494,8 +697,18 @@ const isDateInFuture = (date: Date) => {
 };
 
 export const DistrictIntelligence: React.FC = () => {
-  useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
+  const isHQ = user?.role === 'HQ' || user?.role === 'ADMIN';
+  const [selectedDistrictId, setSelectedDistrictId] = useState('d14');
+  const [showDistrictDropdown, setShowDistrictDropdown] = useState(false);
+  const selectedDistrictOption = HQ_DISTRICT_OPTIONS.find(d => d.id === selectedDistrictId) || HQ_DISTRICT_OPTIONS[0];
+  const activeStores = isHQ ? getDistrictStores(selectedDistrictOption.seedOffset) : mockStores;
+  const activeAuditData = isHQ ? getDistrictAuditData(selectedDistrictOption.seedOffset) : auditComplianceData;
+  const activeTriageItems = DISTRICT_TRIAGE[selectedDistrictId] || DISTRICT_TRIAGE['d14'];
+  const activeEscalations = isHQ ? getDistrictEscalations(selectedDistrictOption.seedOffset) : escalatedStores;
+  const activeBroadcasts = DISTRICT_BROADCASTS[selectedDistrictId] || DISTRICT_BROADCASTS['d14'];
+  const activeMetricsSet = isHQ ? getDistrictMetrics(selectedDistrictOption.seedOffset) : undefined;
   const [isLoading, setIsLoading] = useState(true);
   const [isNavigating, setIsNavigating] = useState(false);
   const [navigatingStore, setNavigatingStore] = useState<string | null>(null);
@@ -511,11 +724,38 @@ export const DistrictIntelligence: React.FC = () => {
   
   // Calendar state
   const [showCalendar, setShowCalendar] = useState(false);
-  const [calendarMode, setCalendarMode] = useState<'week' | 'month'>('week');
+  const [calendarMode, setCalendarMode] = useState<'week' | 'month' | 'quarter'>('week');
   const [viewingMonth, setViewingMonth] = useState(new Date().getMonth());
   const [viewingYear, setViewingYear] = useState(new Date().getFullYear());
-  const [selectedWeekStart, setSelectedWeekStart] = useState<Date | null>(null);
-  const [selectedMonth, setSelectedMonth] = useState<Date | null>(null);
+  // Auto-select last available week on landing
+  const getLastAvailableWeekStart = () => {
+    const today = new Date();
+    const startOfThisWeek = new Date(today);
+    startOfThisWeek.setDate(today.getDate() - today.getDay());
+    startOfThisWeek.setHours(0, 0, 0, 0);
+    const lastWeekStart = new Date(startOfThisWeek);
+    lastWeekStart.setDate(startOfThisWeek.getDate() - 7);
+    return lastWeekStart;
+  };
+  const getLastAvailableMonth = () => {
+    const today = new Date();
+    const m = today.getMonth() === 0 ? 11 : today.getMonth() - 1;
+    const y = today.getMonth() === 0 ? today.getFullYear() - 1 : today.getFullYear();
+    return new Date(y, m, 1);
+  };
+  const [selectedWeekStart, setSelectedWeekStart] = useState<Date | null>(getLastAvailableWeekStart);
+  const [selectedMonth, setSelectedMonth] = useState<Date | null>(getLastAvailableMonth);
+  const [selectedQuarter, setSelectedQuarter] = useState<{ label: string; quarter: number; year: number } | null>(() => {
+    const now = new Date();
+    const currentQ = Math.floor(now.getMonth() / 3) + 1;
+    const currentY = now.getFullYear();
+    let q = currentQ - 1;
+    let y = currentY;
+    if (q <= 0) { q += 4; y -= 1; }
+    const qMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const startM = (q - 1) * 3;
+    return { label: `Q${q} ${y} (${qMonths[startM]}–${qMonths[startM + 2]})`, quarter: q, year: y };
+  });
   
   // Escalation policy modal
   const [showEscPolicy, setShowEscPolicy] = useState(false);
@@ -524,6 +764,8 @@ export const DistrictIntelligence: React.FC = () => {
   const [heatmapTip, setHeatmapTip] = useState<{ x: number; y: number; store: string; cat: string; val: number } | null>(null);
   // Heatmap cell detail modal
   const [heatmapDetail, setHeatmapDetail] = useState<{ storeNumber: string; storeName: string; category: string; score: number; detail: AuditCellDetail; skill: string; skillLogic: string } | null>(null);
+  // Heatmap chip popover (inline on-click)
+  const [chipPopover, setChipPopover] = useState<{ cellKey: string; storeNumber: string; storeName: string; category: string; score: number; detail: AuditCellDetail; skill: string; skillLogic: string; rect: { top: number; left: number; width: number; height: number } } | null>(null);
 
   // Chat Window States (same as Home Screen)
   const [showChatWindow, setShowChatWindow] = useState(false);
@@ -546,7 +788,7 @@ export const DistrictIntelligence: React.FC = () => {
   };
   
   // Navigate to Store Deep Dive with loading
-  const handleStoreClick = (store: typeof mockStores[0]) => {
+  const handleStoreClick = (store: typeof activeStores[0]) => {
     setIsNavigating(true);
     setNavigatingStore(store.storeNumber);
     
@@ -606,38 +848,256 @@ export const DistrictIntelligence: React.FC = () => {
       return `${selectedWeekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
     } else if (calendarMode === 'month' && selectedMonth) {
       return selectedMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    } else if (calendarMode === 'quarter' && selectedQuarter) {
+      return selectedQuarter.label;
     }
     return 'Select Period';
   };
 
-  // District metrics - different values for Week vs Month
-  const weekData: { dpi: number; tier: DistrictTier; rank: number; dpiChange: number; momentum: MomentumType; momentumDelta: number; chainAvg: number } = {
-    dpi: 87,
-    tier: 'Excellence',
-    rank: 3,
-    dpiChange: +2.4,
-    momentum: 'Improving',
-    momentumDelta: +3.2,
-    chainAvg: 79
+  // Generate last 4 completed quarters (exclude running quarter)
+  const getAvailableQuarters = () => {
+    const now = new Date();
+    const currentQ = Math.floor(now.getMonth() / 3) + 1;
+    const currentY = now.getFullYear();
+    const quarters: { label: string; quarter: number; year: number }[] = [];
+    let q = currentQ - 1;
+    let y = currentY;
+    if (q <= 0) { q += 4; y -= 1; }
+    for (let i = 0; i < 4; i++) {
+      const qMonths = [`Jan`, `Feb`, `Mar`, `Apr`, `May`, `Jun`, `Jul`, `Aug`, `Sep`, `Oct`, `Nov`, `Dec`];
+      const startM = (q - 1) * 3;
+      quarters.push({ label: `Q${q} ${y} (${qMonths[startM]}–${qMonths[startM + 2]})`, quarter: q, year: y });
+      q -= 1;
+      if (q <= 0) { q = 4; y -= 1; }
+    }
+    return quarters;
+  };
+  const availableQuarters = getAvailableQuarters();
+
+  // District metrics - different values for Week vs Month vs Quarter
+  type DistrictMetrics = { dpi: number; tier: DistrictTier; rank: number; dpiChange: number; momentum: MomentumType; momentumDelta: number; chainAvg: number; scoreSales: number; scoreExecution: number; scoreVoC: number };
+  const weekData: DistrictMetrics = activeMetricsSet ? activeMetricsSet.week : {
+    dpi: 87, tier: 'Excellence', rank: 3, dpiChange: +2.4, momentum: 'Improving', momentumDelta: +3.2, chainAvg: 79, scoreSales: 92, scoreExecution: 85, scoreVoC: 84
   };
   
-  const monthData: { dpi: number; tier: DistrictTier; rank: number; dpiChange: number; momentum: MomentumType; momentumDelta: number; chainAvg: number } = {
-    dpi: 82,
-    tier: 'Stable',
-    rank: 5,
-    dpiChange: +1.8,
-    momentum: 'Improving',
-    momentumDelta: +2.1,
-    chainAvg: 79
+  const monthData: DistrictMetrics = activeMetricsSet ? activeMetricsSet.month : {
+    dpi: 82, tier: 'Stable', rank: 5, dpiChange: +1.8, momentum: 'Improving', momentumDelta: +2.1, chainAvg: 79, scoreSales: 86, scoreExecution: 80, scoreVoC: 79
+  };
+
+  const quarterData: DistrictMetrics = activeMetricsSet ? activeMetricsSet.quarter : {
+    dpi: 80, tier: 'Stable', rank: 6, dpiChange: +1.2, momentum: 'Flat', momentumDelta: +0.8, chainAvg: 79, scoreSales: 84, scoreExecution: 78, scoreVoC: 77
   };
   
-  const currentData = calendarMode === 'week' ? weekData : monthData;
+  const currentData = calendarMode === 'quarter' ? quarterData : calendarMode === 'month' ? monthData : weekData;
+
+  // Transform KPI data based on selected district + time period
+  const getAdjustedKPIs = (): DistrictKPI[] => {
+    // Step 1: apply district overrides to base KPIs
+    const districtOverrides = DISTRICT_KPI_OVERRIDES[selectedDistrictId] || {};
+    const baseKPIs = districtKPIs.map(kpi => {
+      const ov = districtOverrides[kpi.id];
+      if (!ov) return kpi;
+      return { ...kpi, primaryValue: ov.primaryValue, delta: ov.delta, deltaDirection: ov.deltaDirection, microInsight: ov.microInsight, status: ov.status };
+    });
+    if (calendarMode === 'week') return baseKPIs;
+    
+    const contextLabel = calendarMode === 'month' ? 'MoM' : 'QoQ';
+    
+    // Month and Quarter KPI overrides for realistic data
+    const monthOverrides: Record<string, { primaryValue: string; primaryUnit?: string; delta: string; deltaDirection: 'up' | 'down' | 'flat'; microInsight: string }> = {
+      'sales-performance': { primaryValue: '$4.92M', primaryUnit: 'MTD', delta: '+3.8%', deltaDirection: 'up', microInsight: 'Monthly total across 8 stores' },
+      'voc-satisfaction': { primaryValue: '81%', delta: '-2.1pts', deltaDirection: 'down', microInsight: 'Avg across 4 weeks' },
+      'voc-issue-rate': { primaryValue: '3.4', delta: '+0.4', deltaDirection: 'up', microInsight: '4 of 8 stores affected' },
+      'shelf-audit': { primaryValue: '88%', delta: '-7pts', deltaDirection: 'down', microInsight: 'Monthly avg below target' },
+      'oos-rate': { primaryValue: '3.8%', delta: '+0.6pts', deltaDirection: 'up', microInsight: 'Apparel drives 55%' },
+      'margin-health': { primaryValue: '34.0%', primaryUnit: 'GM', delta: '-55 bps', deltaDirection: 'down', microInsight: 'Markdown pressure sustained' },
+    };
+    
+    const quarterOverrides: Record<string, { primaryValue: string; primaryUnit?: string; delta: string; deltaDirection: 'up' | 'down' | 'flat'; microInsight: string }> = {
+      'sales-performance': { primaryValue: '$14.8M', primaryUnit: 'QTD', delta: '+2.9%', deltaDirection: 'up', microInsight: 'Q1 total across 8 stores' },
+      'voc-satisfaction': { primaryValue: '83%', delta: '-1.8pts', deltaDirection: 'down', microInsight: 'Quarterly avg across stores' },
+      'voc-issue-rate': { primaryValue: '3.2', delta: '+0.3', deltaDirection: 'up', microInsight: '3 of 8 stores impacted' },
+      'shelf-audit': { primaryValue: '90%', delta: '-5pts', deltaDirection: 'down', microInsight: 'Quarterly avg below target' },
+      'oos-rate': { primaryValue: '3.5%', delta: '+0.4pts', deltaDirection: 'up', microInsight: 'Apparel drives 52%' },
+      'margin-health': { primaryValue: '34.4%', primaryUnit: 'GM', delta: '-30 bps', deltaDirection: 'down', microInsight: 'Seasonal markdown impact' },
+    };
+    
+    const overrides = calendarMode === 'month' ? monthOverrides : quarterOverrides;
+    
+    return baseKPIs.map(kpi => {
+      const override = overrides[kpi.id];
+      if (!override) return { ...kpi, deltaContext: kpi.deltaContext === 'WoW' ? contextLabel : kpi.deltaContext };
+      return {
+        ...kpi,
+        primaryValue: override.primaryValue,
+        primaryUnit: override.primaryUnit ?? kpi.primaryUnit,
+        delta: override.delta,
+        deltaDirection: override.deltaDirection,
+        microInsight: override.microInsight,
+        deltaContext: kpi.deltaContext === 'WoW' || kpi.deltaContext === 'MoM' || kpi.deltaContext === 'QoQ' ? contextLabel : kpi.deltaContext,
+      };
+    });
+  };
+  
+  const adjustedKPIs = getAdjustedKPIs();
   const districtDPI = currentData.dpi;
   const districtTier: DistrictTier = currentData.tier;
   const districtRank = currentData.rank;
   const totalDistricts = 24;
   const dpiChange = currentData.dpiChange;
   const chainAvgDPI = currentData.chainAvg;
+
+  // Always true — a period is always pre-selected on landing and mode switch
+  const isDateFilterActive = true;
+  // True when HQ user has selected a non-default district
+  const isDistrictFilterActive = isHQ && selectedDistrictId !== 'd14';
+  const isAnyFilterActive = isDateFilterActive || isDistrictFilterActive;
+
+  // Period-adjusted store leaderboard data
+  const getAdjustedStores = () => {
+    if (calendarMode === 'week') return activeStores;
+    // Slight variations for month/quarter to show data reactivity
+    const factor = calendarMode === 'month' ? 4.1 : 12.8;
+    const varShift = calendarMode === 'month' ? -0.3 : -0.6;
+    const dpiShift = calendarMode === 'month' ? -2 : -4;
+    return activeStores.map(store => ({
+      ...store,
+      dpi: Math.max(45, store.dpi + dpiShift + Math.round((parseInt(store.storeNumber) % 5) - 2)),
+      netSales: Math.round(store.netSales * factor),
+      netSalesVar: parseFloat((store.netSalesVar + varShift).toFixed(1)),
+      seaScore: Math.max(50, store.seaScore + dpiShift + (parseInt(store.storeNumber) % 3)),
+      vocSatisfied: Math.max(45, store.vocSatisfied + dpiShift + (parseInt(store.storeNumber) % 4)),
+    }));
+  };
+  const adjustedStores = getAdjustedStores();
+
+  // Period-adjusted audit compliance heatmap
+  const getAdjustedAuditData = () => {
+    if (calendarMode === 'week') return activeAuditData;
+    const shift = calendarMode === 'month' ? -2 : -4;
+    const adjusted: Record<string, Record<string, number>> = {};
+    for (const [store, cats] of Object.entries(activeAuditData)) {
+      adjusted[store] = {};
+      for (const [cat, val] of Object.entries(cats)) {
+        const seed = parseInt(store) % 7;
+        adjusted[store][cat] = Math.max(10, Math.min(100, val + shift + (seed % 3 - 1)));
+      }
+    }
+    return adjusted;
+  };
+  const adjustedAuditData = getAdjustedAuditData();
+
+  // Period-adjusted + district-aware AI Summary
+  const DISTRICT_AI_SUMMARIES: Record<string, { week: { situation: string; pattern: string; risk: string; action: string }; month: { situation: string; pattern: string; risk: string; action: string }; quarter: { situation: string; pattern: string; risk: string; action: string } }> = {
+    d14: {
+      week: {
+        situation: 'Three concurrent triage issues across Hamburg South, Cologne East, and Berlin Mitte show execution stability slipping this week.',
+        pattern: 'VoC complaints and the SEA violation both originate at Hamburg South, pointing to a shared root cause—messy aisles blocking emergency paths during peak hours.',
+        risk: 'The SEA fire-exit block is a regulatory and safety exposure; any delay risks store closure and penalties.',
+        action: 'Deploy Hamburg South team now to clear the exit, confirm compliance, then approve Cologne East adaptation plan to protect sales.',
+      },
+      month: {
+        situation: 'Monthly analysis reveals systemic execution gaps in 3 of 8 stores. Hamburg South and Pine Grove consistently lag on audit compliance across all 4 weeks.',
+        pattern: 'VoC "Messy Aisles" theme correlates strongly with declining audit scores in Cleanliness and Customer Area categories—month-long pattern, not a one-off.',
+        risk: 'Sustained underperformance at Pine Grove (DPI 63) risks sliding into Crisis tier. Monthly NPS trending -4pts with no recovery signal.',
+        action: 'Schedule a focused DM visit to Pine Grove and Hamburg South. Assign dedicated reset crews for Cleanliness category improvement plan.',
+      },
+      quarter: {
+        situation: 'Quarterly view shows the district stabilizing at DPI 80 after a Q4 dip. Two stores (Pine Grove, Maple Heights) remain chronically underperforming across all quarters.',
+        pattern: 'Seasonal markdown pressure drove 30bps margin erosion. VoC satisfaction follows a consistent Q1 dip pattern across the last 3 years—likely weather and staffing-related.',
+        risk: 'If Pine Grove and Maple Heights remain in Crisis through Q2, district tier risks downgrade from Stable to AtRisk at the half-year review.',
+        action: 'Present quarterly turnaround plan for bottom-2 stores at regional review. Lock in staffing uplift for Q2 peak season to prevent repeat VoC decline.',
+      },
+    },
+    d08: {
+      week: {
+        situation: 'Shrinkage spike at Peachtree Plaza and Savannah Square is the dominant risk this week—+18% above 4-week average with checkout speed complaints rising in parallel.',
+        pattern: 'Shrinkage increase coincides with reduced floor staffing during afternoon shifts. Checkout speed complaints map to the same 2–5 PM window.',
+        risk: 'Uncontrolled shrinkage erodes GM by an estimated 85 bps this month. Checkout delays are dragging VoC satisfaction below the 80% threshold.',
+        action: 'Increase afternoon floor coverage at Peachtree Plaza immediately. Deploy loss-prevention audit at Savannah Square within 48 hours.',
+      },
+      month: {
+        situation: 'Georgia district shows persistent margin pressure—clearance markdowns drove GM down 85 bps. Peachtree Plaza and Augusta Mall underperforming on SEA scores for 3 straight weeks.',
+        pattern: 'Shrinkage and clearance issues are concentrated in high-traffic stores. Smaller-format stores (Savannah Square, Macon Center) are outperforming on compliance.',
+        risk: 'Continued shrinkage trend at current rate projects a $42K loss for the quarter. DPI at risk of dropping below Stable tier.',
+        action: 'Implement targeted loss prevention measures at top-2 stores. Review clearance markdown strategy with merchandising team.',
+      },
+      quarter: {
+        situation: 'District 08 closed Q1 at DPI 84 with mixed signals—strong sales growth (+2.1%) but compliance gaps pulling the average down.',
+        pattern: 'Urban flagship stores consistently outperform on sales but lag on execution metrics. Shrinkage is a structural issue, not seasonal.',
+        risk: 'Without addressing the shrinkage root cause, Q2 margin target is at risk. Two stores trending toward AtRisk tier.',
+        action: 'Propose shrinkage reduction initiative at regional review. Benchmark against District 14 playbook for execution improvement.',
+      },
+    },
+    d22: {
+      week: {
+        situation: 'Carolina district faces a planogram compliance drop across 5 of 7 stores—worst at Raleigh Commons (62%). A safety incident at Durham Hub adds to the urgency.',
+        pattern: 'Planogram non-compliance spikes correlate with the seasonal reset that began last week. Stores without dedicated visual teams are falling behind.',
+        risk: 'Safety incident at Durham Hub is unresolved—potential regulatory exposure. Planogram gaps are costing an estimated $8K/week in lost impulse sales.',
+        action: 'Prioritize safety resolution at Durham Hub today. Dispatch visual merchandising support to bottom-3 stores for planogram reset completion.',
+      },
+      month: {
+        situation: 'Monthly trend shows Carolina district struggling with seasonal transition—POG compliance at 81% is the lowest across all districts.',
+        pattern: 'Staff availability is the bottleneck. Stores with part-time-heavy rosters are 15% less compliant on planogram execution.',
+        risk: 'If planogram reset is not completed by week-end, promotional tie-ins for next month launch will be compromised.',
+        action: 'Accelerate visual reset with temp staffing. Schedule DM walk-throughs at Charlotte North and Raleigh Commons.',
+      },
+      quarter: {
+        situation: 'Q1 performance for Carolina at DPI 82 is mid-pack but declining. Execution scores dragged the average down despite reasonable sales performance.',
+        pattern: 'Consistent staff turnover in Q1 correlates with compliance dips. Onboarding gaps are visible in audit scores for stores with >30% new hires.',
+        risk: 'Staff retention issues threaten Q2 execution if not addressed. District risks falling to bottom quartile.',
+        action: 'Present retention incentive proposal at regional review. Pair underperforming stores with top-performer mentors from District 14.',
+      },
+    },
+    d11: {
+      week: {
+        situation: 'Florida district has 7 of 9 stores affected by product availability issues this week. OOS rate spiked to 6.2%—highest in the chain.',
+        pattern: 'Perishable and cooler categories drive 65% of OOS incidents. Distribution center delays are compounding local replenishment failures.',
+        risk: 'High OOS rate is directly impacting VoC (71% satisfaction) and driving customers to competitors. Revenue leakage estimated at $28K this week.',
+        action: 'Escalate DC delivery issues to supply chain leadership. Deploy emergency stock transfers from adjacent districts for top-20 OOS SKUs.',
+      },
+      month: {
+        situation: 'Florida district has the highest sales volume ($1.52M) but also the worst execution scores in the region—a classic "busy but broken" pattern.',
+        pattern: 'High foot traffic stores are overwhelmed—staffing ratios are 20% below optimal during peak hours. Cooler temperature compliance failures recurring weekly.',
+        risk: 'Spoilage losses are 3x the chain average. VoC at 71% risks triggering a formal regional review if not improved within 2 weeks.',
+        action: 'Reallocate staffing budget to peak-hour coverage. Install cooler monitoring alerts at Miami Beach and Orlando Central.',
+      },
+      quarter: {
+        situation: 'Q1 shows Florida as a high-revenue, low-efficiency district. DPI 79 masks significant variance—top store at 91, bottom at 54.',
+        pattern: 'Store performance is bimodal: coastal flagship stores excel on sales, inland stores struggle on every metric. No middle ground.',
+        risk: 'Bottom-3 stores are consuming disproportionate DM time without improvement. Q2 seasonal surge will amplify existing gaps.',
+        action: 'Consider restructuring district—separate coastal and inland into sub-clusters with dedicated support. Present plan at half-year review.',
+      },
+    },
+    d19: {
+      week: {
+        situation: 'Alabama district is performing well this week—DPI 85, only 1 of 5 stores flagged for minor audit backlog. Overall execution is healthy.',
+        pattern: 'Small district size enables tighter DM oversight. Audit completion rates are highest in the region at 92%.',
+        risk: 'Low risk this week. Minor concern: Huntsville South audit backlog could cascade if not cleared by Friday.',
+        action: 'Clear Huntsville South audit backlog. Otherwise, maintain current cadence—this district can serve as a best-practice benchmark.',
+      },
+      month: {
+        situation: 'Alabama district continues to outperform on efficiency metrics despite being the smallest district. VoC at 85% leads the region.',
+        pattern: 'Staff friendliness and store cleanliness are consistent strengths. The focused store count allows deep attention per location.',
+        risk: 'Minimal. The only watch item is a slight OOS uptick (+0.2pts) driven by a single supplier delay.',
+        action: 'Document the Alabama playbook for replication. Nominate David Park for the best-practice sharing session at regional meeting.',
+      },
+      quarter: {
+        situation: 'Q1 at DPI 85 places Alabama in the top quartile. Consistent performance across all three months with no crisis moments.',
+        pattern: 'Stable staffing, low turnover, and strong DM engagement are the differentiators. Margin health at 35.1% is best in class.',
+        risk: 'Growth ceiling—small store count limits revenue upside. Risk of complacency if not given stretch targets.',
+        action: 'Propose expansion plan for Alabama district. Use Q1 results to build the business case for 2 additional stores.',
+      },
+    },
+  };
+
+  const getAISummaryContent = () => {
+    const districtSummary = DISTRICT_AI_SUMMARIES[selectedDistrictId] || DISTRICT_AI_SUMMARIES['d14'];
+    if (calendarMode === 'month') return districtSummary.month;
+    if (calendarMode === 'quarter') return districtSummary.quarter;
+    return districtSummary.week;
+  };
+  const aiSummary = getAISummaryContent();
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 800);
@@ -652,7 +1112,7 @@ export const DistrictIntelligence: React.FC = () => {
     const q = leaderboardSearch.trim().toLowerCase();
     const trendOrder: Record<string, number> = { up: 2, flat: 1, down: 0 };
     const statusOrder: Record<string, number> = { excellent: 0, stable: 1, warning: 2, critical: 3 };
-    const sorters: Record<SortKey, (a: typeof mockStores[0], b: typeof mockStores[0]) => number> = {
+    const sorters: Record<SortKey, (a: typeof activeStores[0], b: typeof activeStores[0]) => number> = {
       rank: (a, b) => a.rank - b.rank,
       store: (a, b) => a.storeName.localeCompare(b.storeName),
       dpi: (a, b) => a.dpi - b.dpi,
@@ -664,7 +1124,7 @@ export const DistrictIntelligence: React.FC = () => {
       trend: (a, b) => (trendOrder[a.trend] ?? 0) - (trendOrder[b.trend] ?? 0),
       status: (a, b) => (statusOrder[a.status] ?? 0) - (statusOrder[b.status] ?? 0),
     };
-    return mockStores
+    return adjustedStores
       .filter(store => {
         if (leaderboardFilter === 'risk' && !(store.status === 'critical' || store.status === 'warning')) return false;
         if (leaderboardFilter === 'top' && store.status !== 'excellent') return false;
@@ -713,10 +1173,42 @@ export const DistrictIntelligence: React.FC = () => {
             <h1>District Intelligence Center</h1>
           </div>
           <div className="header-meta">
-            <span className="district-badge">
-              <MapPin size={14} />
-              District 14 — Tennessee
-            </span>
+            {isHQ ? (
+              <div className="di-district-picker-wrap">
+                <button className="di-district-picker" onClick={() => setShowDistrictDropdown(prev => !prev)}>
+                  <MapPin size={14} />
+                  <span>{selectedDistrictOption.label}</span>
+                  <span className="di-district-dm">DM: {selectedDistrictOption.dm}</span>
+                  <ChevronDown size={14} className={showDistrictDropdown ? 'rotated' : ''} />
+                </button>
+                {showDistrictDropdown && (
+                  <div className="di-district-dropdown">
+                    {HQ_DISTRICT_OPTIONS.map(d => (
+                      <button
+                        key={d.id}
+                        className={`di-district-option ${d.id === selectedDistrictId ? 'active' : ''}`}
+                        onClick={() => { setSelectedDistrictId(d.id); setShowDistrictDropdown(false); }}
+                      >
+                        <div className="di-district-option-main">
+                          <MapPin size={13} />
+                          <span className="di-district-option-label">{d.label}</span>
+                        </div>
+                        <div className="di-district-option-meta">
+                          <span>DM: {d.dm}</span>
+                          <span>{d.storeCount} stores</span>
+                        </div>
+                        {d.id === selectedDistrictId && <Check size={14} className="di-district-check" />}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <span className="district-badge">
+                <MapPin size={14} />
+                District 14 — Tennessee
+              </span>
+            )}
             <div className="calendar-picker-wrapper">
               <button 
                 className="period-selector"
@@ -732,74 +1224,120 @@ export const DistrictIntelligence: React.FC = () => {
                   <div className="calendar-mode-toggle">
                     <button 
                       className={`mode-btn ${calendarMode === 'week' ? 'active' : ''}`}
-                      onClick={() => setCalendarMode('week')}
+                      onClick={() => {
+                        setCalendarMode('week');
+                        if (selectedWeekStart) {
+                          setViewingMonth(selectedWeekStart.getMonth());
+                          setViewingYear(selectedWeekStart.getFullYear());
+                        }
+                      }}
                     >
                       Week
                     </button>
                     <button 
                       className={`mode-btn ${calendarMode === 'month' ? 'active' : ''}`}
-                      onClick={() => setCalendarMode('month')}
+                      onClick={() => {
+                        setCalendarMode('month');
+                        if (selectedMonth) {
+                          setViewingMonth(selectedMonth.getMonth());
+                          setViewingYear(selectedMonth.getFullYear());
+                        }
+                      }}
                     >
                       Month
                     </button>
-                  </div>
-                  
-                  <div className="calendar-nav">
-                    <button className="nav-btn" onClick={() => navigateMonth('prev')}>
-                      <ChevronDown size={16} style={{ transform: 'rotate(90deg)' }} />
-                    </button>
-                    <div className="calendar-month-year">
-                      <span className="calendar-month">{monthNames[viewingMonth]}</span>
-                      <span className="calendar-year">{viewingYear}</span>
-                    </div>
-                    <button className="nav-btn" onClick={() => navigateMonth('next')}>
-                      <ChevronDown size={16} style={{ transform: 'rotate(-90deg)' }} />
+                    <button 
+                      className={`mode-btn ${calendarMode === 'quarter' ? 'active' : ''}`}
+                      onClick={() => setCalendarMode('quarter')}
+                    >
+                      Quarter
                     </button>
                   </div>
                   
-                  <div className="calendar-grid">
-                    <div className="calendar-weekdays">
-                      <span>Su</span>
-                      <span>Mo</span>
-                      <span>Tu</span>
-                      <span>We</span>
-                      <span>Th</span>
-                      <span>Fr</span>
-                      <span>Sa</span>
+                  {calendarMode === 'quarter' ? (
+                    <div className="quarter-list">
+                      {availableQuarters.map((q, idx) => (
+                        <button
+                          key={idx}
+                          className={`quarter-option ${selectedQuarter?.quarter === q.quarter && selectedQuarter?.year === q.year ? 'selected' : ''}`}
+                          onClick={() => {
+                            setSelectedQuarter(q);
+                            setShowCalendar(false);
+                          }}
+                        >
+                          <span className="quarter-label">Q{q.quarter} {q.year}</span>
+                          <span className="quarter-range">{q.label.match(/\((.+)\)/)?.[1]}</span>
+                        </button>
+                      ))}
                     </div>
-                    <div className="calendar-days">
-                      {calendarDays.map((day, index) => {
-                        const date = day ? new Date(viewingYear, viewingMonth, day) : null;
-                        const isDisabledWeek = date ? (isDateInFuture(date) || isDateInCurrentWeek(date)) : true;
-                        const isDisabledMonth = viewingYear > new Date().getFullYear() || 
-                          (viewingYear === new Date().getFullYear() && viewingMonth >= new Date().getMonth());
-                        const isDisabled = calendarMode === 'week' ? isDisabledWeek : isDisabledMonth;
-                        const isSelectedWeek = isInSelectedWeek(day);
-                        const isSelectedMonth = selectedMonth && 
-                          viewingYear === selectedMonth.getFullYear() && 
-                          viewingMonth === selectedMonth.getMonth() && day !== null;
-                        const isSelected = calendarMode === 'week' ? isSelectedWeek : isSelectedMonth;
-                        
-                        return (
-                          <button
-                            key={index}
-                            className={`calendar-day ${!day ? 'empty' : ''} ${isDisabled ? 'disabled' : ''} ${isSelected ? 'selected' : ''}`}
-                            onClick={() => {
-                              if (calendarMode === 'week') {
-                                handleDayClick(day);
-                              } else if (day && !isDisabledMonth) {
-                                setSelectedMonth(new Date(viewingYear, viewingMonth, 1));
-                                setShowCalendar(false);
-                              }
-                            }}
-                            disabled={!day || isDisabled}
-                          >
-                            {day}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
+                  ) : (
+                    <>
+                      <div className="calendar-nav">
+                        <button className="nav-btn" onClick={() => navigateMonth('prev')}>
+                          <ChevronDown size={16} style={{ transform: 'rotate(90deg)' }} />
+                        </button>
+                        <div className="calendar-month-year">
+                          <span className="calendar-month">{monthNames[viewingMonth]}</span>
+                          <span className="calendar-year">{viewingYear}</span>
+                        </div>
+                        <button className="nav-btn" onClick={() => navigateMonth('next')}>
+                          <ChevronDown size={16} style={{ transform: 'rotate(-90deg)' }} />
+                        </button>
+                      </div>
+                      
+                      <div className="calendar-grid">
+                        <div className="calendar-weekdays">
+                          <span>Su</span>
+                          <span>Mo</span>
+                          <span>Tu</span>
+                          <span>We</span>
+                          <span>Th</span>
+                          <span>Fr</span>
+                          <span>Sa</span>
+                        </div>
+                        <div className="calendar-days">
+                          {calendarDays.map((entry, index) => {
+                            if (entry.trailing) {
+                              return (
+                                <button key={index} className="calendar-day trailing" disabled>
+                                  {entry.day}
+                                </button>
+                              );
+                            }
+                            const day = entry.day;
+                            const date = new Date(viewingYear, viewingMonth, day);
+                            const isDisabledWeek = isDateInFuture(date) || isDateInCurrentWeek(date);
+                            const isDisabledMonth = viewingYear > new Date().getFullYear() || 
+                              (viewingYear === new Date().getFullYear() && viewingMonth >= new Date().getMonth());
+                            const isDisabled = calendarMode === 'week' ? isDisabledWeek : isDisabledMonth;
+                            const isSelectedWeek = isInSelectedWeek(day);
+                            const isSelectedMonth = selectedMonth && 
+                              viewingYear === selectedMonth.getFullYear() && 
+                              viewingMonth === selectedMonth.getMonth();
+                            const isSelected = calendarMode === 'week' ? isSelectedWeek : isSelectedMonth;
+                            
+                            return (
+                              <button
+                                key={index}
+                                className={`calendar-day ${isDisabled ? 'disabled' : ''} ${isSelected ? 'selected' : ''}`}
+                                onClick={() => {
+                                  if (calendarMode === 'week') {
+                                    handleDayClick(day);
+                                  } else if (!isDisabledMonth) {
+                                    setSelectedMonth(new Date(viewingYear, viewingMonth, 1));
+                                    setShowCalendar(false);
+                                  }
+                                }}
+                                disabled={isDisabled}
+                              >
+                                {day}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
             </div>
@@ -830,6 +1368,7 @@ export const DistrictIntelligence: React.FC = () => {
         <div className="dpi-card-v2">
           {/* Hero Score Section */}
           <div className="dpi-hero-section">
+            {isAnyFilterActive && <Filter size={12} className="filter-active-icon dpi-card-filter" />}
             <div className="dpi-gauge-wrapper-v2">
               <svg className="dpi-gauge-v2" viewBox="0 0 160 160">
                 {/* Background track */}
@@ -890,7 +1429,7 @@ export const DistrictIntelligence: React.FC = () => {
                   <TrendingUp size={18} />
                   <span>{dpiChange >= 0 ? '+' : ''}{dpiChange}%</span>
                 </div>
-                <span className="dpi-change-label">{calendarMode === 'week' ? 'this week' : 'this month'}</span>
+                <span className="dpi-change-label">{calendarMode === 'week' ? 'this week' : calendarMode === 'month' ? 'this month' : 'this quarter'}</span>
               </div>
             </div>
 
@@ -900,24 +1439,24 @@ export const DistrictIntelligence: React.FC = () => {
             </div>
             <div className="dpi-breakdown-grid">
               <div className="breakdown-card">
-                <div className="breakdown-value">92</div>
+                <div className="breakdown-value">{currentData.scoreSales}</div>
                 <div className="breakdown-label">Sales</div>
                 <div className="breakdown-bar">
-                  <div className="breakdown-fill" style={{ width: '92%' }}></div>
+                  <div className="breakdown-fill" style={{ width: `${currentData.scoreSales}%` }}></div>
                 </div>
               </div>
               <div className="breakdown-card">
-                <div className="breakdown-value">85</div>
+                <div className="breakdown-value">{currentData.scoreExecution}</div>
                 <div className="breakdown-label">Execution</div>
                 <div className="breakdown-bar">
-                  <div className="breakdown-fill" style={{ width: '85%' }}></div>
+                  <div className="breakdown-fill" style={{ width: `${currentData.scoreExecution}%` }}></div>
                 </div>
               </div>
               <div className="breakdown-card">
-                <div className="breakdown-value">84</div>
+                <div className="breakdown-value">{currentData.scoreVoC}</div>
                 <div className="breakdown-label">VoC</div>
                 <div className="breakdown-bar">
-                  <div className="breakdown-fill" style={{ width: '84%' }}></div>
+                  <div className="breakdown-fill" style={{ width: `${currentData.scoreVoC}%` }}></div>
                 </div>
               </div>
             </div>
@@ -947,53 +1486,26 @@ export const DistrictIntelligence: React.FC = () => {
             <div className="ai-summary-label" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 600, color: '#64748b', textTransform: 'uppercase' as const, letterSpacing: '0.5px', marginBottom: 6 }}>
               <AlertCircle size={12} style={{ color: '#6366f1', width: 12, height: 12 }} />
               <span>Triage Summary</span>
+              {isAnyFilterActive && <Filter size={10} className="filter-active-icon" />}
             </div>
             <div className="triage-items">
-              <div className="triage-item" onClick={() => setShowTriageDetail('voc-messy')}>
-                <div className="triage-item-content">
-                  <div className="triage-item-header">
-                    <span className="triage-item-title">VoC: Messy Aisles</span>
-                    <span className="triage-item-priority high">High</span>
-                  </div>
-                  <p className="triage-item-stores">Hamburg South · Cologne East · Berlin Mitte</p>
-                  <div className="triage-item-footer">
-                    <span className="triage-item-metric">+22% theme spike</span>
-                    <button className="triage-action-btn" onClick={(e) => { e.stopPropagation(); setShowTriageDetail('voc-messy'); }}>
-                      View Details <ChevronRight size={14} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div className="triage-item" onClick={() => setShowTriageDetail('sea-fire')}>
-                <div className="triage-item-content">
-                  <div className="triage-item-header">
-                    <span className="triage-item-title">SEA Auto-Fail: Fire Exit</span>
-                    <span className="triage-item-priority critical">Critical</span>
-                  </div>
-                  <p className="triage-item-stores">Hamburg South — Display blocking exit</p>
-                  <div className="triage-item-footer">
-                    <span className="triage-item-metric">Escalated to DM · Pending</span>
-                    <button className="triage-action-btn" onClick={(e) => { e.stopPropagation(); setShowTriageDetail('sea-fire'); }}>
-                      View Details <ChevronRight size={14} />
-                    </button>
+              {activeTriageItems.map(item => (
+                <div key={item.id} className="triage-item" onClick={() => setShowTriageDetail(item.id)}>
+                  <div className="triage-item-content">
+                    <div className="triage-item-header">
+                      <span className="triage-item-title">{item.title}</span>
+                      <span className={`triage-item-priority ${item.priority}`}>{item.priority.charAt(0).toUpperCase() + item.priority.slice(1)}</span>
+                    </div>
+                    <p className="triage-item-stores">{item.stores}</p>
+                    <div className="triage-item-footer">
+                      <span className="triage-item-metric">{item.metric}</span>
+                      <button className="triage-action-btn" onClick={(e) => { e.stopPropagation(); setShowTriageDetail(item.id); }}>
+                        View Details <ChevronRight size={14} />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="triage-item" onClick={() => setShowTriageDetail('oos-risk')}>
-                <div className="triage-item-content">
-                  <div className="triage-item-header">
-                    <span className="triage-item-title">Inbound OOS Risk</span>
-                    <span className="triage-item-priority medium">Medium</span>
-                  </div>
-                  <p className="triage-item-stores">Cologne East — 3 SKUs delayed 48h</p>
-                  <div className="triage-item-footer">
-                    <span className="triage-item-metric">Adaptation pending approval</span>
-                    <button className="triage-action-btn" onClick={(e) => { e.stopPropagation(); setShowTriageDetail('oos-risk'); }}>
-                      View Details <ChevronRight size={14} />
-                    </button>
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
 
@@ -1002,23 +1514,24 @@ export const DistrictIntelligence: React.FC = () => {
             <div className="ai-summary-label">
               <Sparkles size={12} />
               <span>AI Summary</span>
+              {isAnyFilterActive && <Filter size={10} className="filter-active-icon" />}
             </div>
             <div className="ai-summary-points">
               <div className="ai-summary-point">
                 <span className="point-label">Overall situation</span>
-                <span className="point-text">Three concurrent triage issues across Hamburg South, Cologne East, and Berlin Mitte show execution stability slipping this week.</span>
+                <span className="point-text">{aiSummary.situation}</span>
               </div>
               <div className="ai-summary-point">
                 <span className="point-label">Pattern spotted</span>
-                <span className="point-text">VoC complaints and the SEA violation both originate at Hamburg South, pointing to a shared root cause—messy aisles blocking emergency paths during peak hours.</span>
+                <span className="point-text">{aiSummary.pattern}</span>
               </div>
               <div className="ai-summary-point">
                 <span className="point-label">Biggest risk</span>
-                <span className="point-text">The SEA fire-exit block is a regulatory and safety exposure; any delay risks store closure and penalties.</span>
+                <span className="point-text">{aiSummary.risk}</span>
               </div>
               <div className="ai-summary-point">
                 <span className="point-label">Manager's first move</span>
-                <span className="point-text">Deploy Hamburg South team now to clear the exit, confirm compliance, then approve Cologne East adaptation plan to protect sales.</span>
+                <span className="point-text">{aiSummary.action}</span>
               </div>
             </div>
           </div>
@@ -1031,6 +1544,7 @@ export const DistrictIntelligence: React.FC = () => {
           <div className="broadcast-section-header">
             <Megaphone size={16} className="broadcast-icon" />
             <span>District Broadcasting</span>
+            {isAnyFilterActive && <Filter size={12} className="filter-active-icon" />}
           </div>
           <button
             className="create-broadcast-btn-sm"
@@ -1049,15 +1563,15 @@ export const DistrictIntelligence: React.FC = () => {
           <div className="broadcast-col broadcast-col-stats">
             <div className="broadcast-stats-vertical">
               <div className="broadcast-stat-compact">
-                <span className="stat-number">3</span>
+                <span className="stat-number">{activeBroadcasts.active}</span>
                 <span className="stat-label">Active</span>
               </div>
               <div className="broadcast-stat-compact">
-                <span className="stat-number">12</span>
+                <span className="stat-number">{activeBroadcasts.thisWeek}</span>
                 <span className="stat-label">This Week</span>
               </div>
               <div className="broadcast-stat-compact">
-                <span className="stat-number">94%</span>
+                <span className="stat-number">{activeBroadcasts.ackRate}</span>
                 <span className="stat-label">Acknowledged</span>
               </div>
             </div>
@@ -1065,37 +1579,27 @@ export const DistrictIntelligence: React.FC = () => {
           {/* Column 2 — Recent Broadcasts */}
           <div className="broadcast-col broadcast-col-recent">
             <span className="broadcast-col-title">Recent Broadcasts</span>
-            <div className="broadcast-item-compact">
-              <div className="broadcast-item-row">
-                <span className="broadcast-priority high">HIGH</span>
-                <span className="broadcast-title-sm">Safety Protocol Update</span>
-                <span className="broadcast-time">2h ago</span>
+            {activeBroadcasts.broadcasts.map((b, idx) => (
+              <div key={idx} className="broadcast-item-compact">
+                <div className="broadcast-item-row">
+                  <span className={`broadcast-priority ${b.priority}`}>{b.priority.toUpperCase()}</span>
+                  <span className="broadcast-title-sm">{b.title}</span>
+                  <span className="broadcast-time">{b.time}</span>
+                </div>
+                {idx === activeBroadcasts.broadcasts.length - 1 && b.priority === 'low' ? (
+                  <div className="broadcast-item-actions">
+                    <span className="broadcast-ack">{b.ack}</span>
+                    <button className="copilot-link-btn" onClick={() => navigate('/command-center/ai-copilot?mode=pog&context=pog-self-audit')}>
+                      <Bot size={12} />
+                      POG Self Audit in AI Copilot
+                      <ChevronRight size={12} />
+                    </button>
+                  </div>
+                ) : (
+                  <span className="broadcast-ack">{b.ack}</span>
+                )}
               </div>
-              <span className="broadcast-ack">8/8 stores acknowledged</span>
-            </div>
-            <div className="broadcast-item-compact">
-              <div className="broadcast-item-row">
-                <span className="broadcast-priority medium">MEDIUM</span>
-                <span className="broadcast-title-sm">Weekend Staffing Reminder</span>
-                <span className="broadcast-time">Yesterday</span>
-              </div>
-              <span className="broadcast-ack">6/8 stores acknowledged</span>
-            </div>
-            <div className="broadcast-item-compact">
-              <div className="broadcast-item-row">
-                <span className="broadcast-priority low">LOW</span>
-                <span className="broadcast-title-sm">Planogram Refresh Checklist</span>
-                <span className="broadcast-time">3d ago</span>
-              </div>
-              <div className="broadcast-item-actions">
-                <span className="broadcast-ack">5/8 stores acknowledged</span>
-                <button className="copilot-link-btn" onClick={() => navigate('/command-center/ai-copilot?mode=pog&context=pog-self-audit')}>
-                  <Bot size={12} />
-                  POG Self Audit in AI Copilot
-                  <ChevronRight size={12} />
-                </button>
-              </div>
-            </div>
+            ))}
           </div>
           {/* Column 3 — Insights */}
           <div className="broadcast-col broadcast-col-insights">
@@ -1104,7 +1608,7 @@ export const DistrictIntelligence: React.FC = () => {
               <AlertTriangle size={14} />
               <div className="insight-copy">
                 <span className="insight-label">Biggest gap</span>
-                <p>Cologne East — 3 pending acks</p>
+                <p>{activeBroadcasts.gap}</p>
               </div>
               <button className="insight-action" onClick={() => {
                 setShowChatWindow(true);
@@ -1117,8 +1621,8 @@ export const DistrictIntelligence: React.FC = () => {
             <div className="broadcast-insight-compact engagement">
               <Users size={14} />
               <div className="insight-copy">
-                <span className="insight-label">Response speed</span>
-                <p>Ops avg 32 min · Merch avg 59 min</p>
+                <span className="insight-label">Top insight</span>
+                <p>{activeBroadcasts.topInsight}</p>
               </div>
             </div>
             <div className="broadcast-insight-compact planning">
@@ -1138,33 +1642,33 @@ export const DistrictIntelligence: React.FC = () => {
           <div className="esc-header-left">
             <div className="esc-title-row">
               <Shield size={20} />
-              <h2>Escalation Command Center</h2>
+              <h2>Escalation Command Center {isAnyFilterActive && <Filter size={12} className="filter-active-icon" />}</h2>
             </div>
             <p className="esc-subtitle">System-detected compliance escalations requiring DM action</p>
           </div>
           <div className="esc-header-right">
             <div className="esc-impact-badge">
               <Zap size={14} />
-              <span className="esc-impact-count">{escalatedStores.length} stores</span>
+              <span className="esc-impact-count">{activeEscalations.length} stores</span>
               <span className="esc-impact-label">escalated</span>
             </div>
             <div className="esc-impact-badge esc-impact-dpi">
               <TrendingDown size={14} />
-              <span className="esc-impact-count">{escalatedStores.reduce((s, e) => s + e.dpiImpact, 0).toFixed(1)} pts</span>
+              <span className="esc-impact-count">{activeEscalations.reduce((s, e) => s + e.dpiImpact, 0).toFixed(1)} pts</span>
               <span className="esc-impact-label">potential drag</span>
             </div>
           </div>
         </div>
         <div className="esc-context-strip">
           <Sparkles size={13} />
-          <span>Despite +2.4% overall growth, escalations are limiting performance — execution issues reducing DPI by {Math.abs(escalatedStores.reduce((s, e) => s + e.dpiImpact, 0)).toFixed(1)} pts</span>
+          <span>Despite +2.4% overall growth, escalations are limiting performance — execution issues reducing DPI by {Math.abs(activeEscalations.reduce((s, e) => s + e.dpiImpact, 0)).toFixed(1)} pts</span>
         </div>
 
         <div className="esc-body">
           {/* Store Escalation Snapshot */}
           <div className="esc-snapshot">
             <div className="esc-snapshot-list">
-              {escalatedStores.map(store => (
+              {activeEscalations.map(store => (
                 <div
                   key={store.storeNumber}
                   className={`esc-store-row esc-stage--${store.stage}`}
@@ -1255,20 +1759,20 @@ export const DistrictIntelligence: React.FC = () => {
         <div className="kpi-cards-header">
           <div className="kpi-header-title-row">
             <div className="kpi-title-group">
-              <h2><BarChart3 size={20} /> District KPIs</h2>
+              <h2><BarChart3 size={20} /> District KPIs {isAnyFilterActive && <Filter size={12} className="filter-active-icon" />}</h2>
               <span className="kpi-header-subtitle">Click any metric to explore 52-week trend</span>
             </div>
             <div className="kpi-header-stats">
               <div className="kpi-stat-pill kpi-stat-positive">
-                <span className="kpi-stat-value">{districtKPIs.filter(k => k.status === 'positive').length}</span>
+                <span className="kpi-stat-value">{adjustedKPIs.filter(k => k.status === 'positive').length}</span>
                 <span className="kpi-stat-label">On Track</span>
               </div>
               <div className="kpi-stat-pill kpi-stat-warning">
-                <span className="kpi-stat-value">{districtKPIs.filter(k => k.status === 'warning').length}</span>
+                <span className="kpi-stat-value">{adjustedKPIs.filter(k => k.status === 'warning').length}</span>
                 <span className="kpi-stat-label">Watch</span>
               </div>
               <div className="kpi-stat-pill kpi-stat-negative">
-                <span className="kpi-stat-value">{districtKPIs.filter(k => k.status === 'negative').length}</span>
+                <span className="kpi-stat-value">{adjustedKPIs.filter(k => k.status === 'negative').length}</span>
                 <span className="kpi-stat-label">Needs Attention</span>
               </div>
             </div>
@@ -1276,7 +1780,7 @@ export const DistrictIntelligence: React.FC = () => {
         </div>
         <div className="kpi-cards-grid">
           {/* 1. Commercial */}
-          {districtKPIs.filter(k => k.category === 'commercial').map(kpi => (
+          {adjustedKPIs.filter(k => k.category === 'commercial').map(kpi => (
             <div
               key={kpi.id}
               className={`kpi-tile kpi-tile--${kpi.status} ${kpi.clickable ? 'kpi-tile--clickable' : ''} ${activeKPIPanel?.id === kpi.id ? 'kpi-tile--active' : ''}`}
@@ -1308,33 +1812,28 @@ export const DistrictIntelligence: React.FC = () => {
                 const min = Math.min(...data);
                 const max = Math.max(...data);
                 const range = max - min || 1;
-                const W = 100, H = 32, P = 2;
+                const W = 120, H = 44, P = 3;
                 const points = data.map((v, i) => ({
                   x: (i / (data.length - 1)) * W,
                   y: H - P - ((v - min) / range) * (H - P * 2),
                 }));
-                // Smooth catmull-rom-ish bezier path
-                const path = points.reduce((acc, p, i, arr) => {
-                  if (i === 0) return `M ${p.x},${p.y}`;
-                  const prev = arr[i - 1];
-                  const cx = (prev.x + p.x) / 2;
-                  return `${acc} C ${cx},${prev.y} ${cx},${p.y} ${p.x},${p.y}`;
-                }, '');
+                // Linear (straight-line) path — sharp angles convey precision
+                const path = points.map((p, i) => i === 0 ? `M ${p.x},${p.y}` : `L ${p.x},${p.y}`).join(' ');
                 const areaPath = `${path} L ${W},${H} L 0,${H} Z`;
                 const last = points[points.length - 1];
-                const color = kpi.status === 'positive' ? '#10b981' : kpi.status === 'negative' ? '#ef4444' : kpi.status === 'warning' ? '#f59e0b' : '#6366f1';
+                const color = kpi.status === 'positive' ? '#047857' : kpi.status === 'negative' ? '#991b1b' : kpi.status === 'warning' ? '#b45309' : '#4338ca';
                 return (
                   <div className="kpi-tile-sparkline">
                     <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
                       <defs>
                         <linearGradient id={`spark-${kpi.id}`} x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor={color} stopOpacity="0.28" />
+                          <stop offset="0%" stopColor={color} stopOpacity="0.06" />
                           <stop offset="100%" stopColor={color} stopOpacity="0" />
                         </linearGradient>
                       </defs>
                       <path d={areaPath} fill={`url(#spark-${kpi.id})`} />
-                      <path d={path} fill="none" stroke={color} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
-                      <circle cx={last.x} cy={last.y} r="2" fill="#ffffff" stroke={color} strokeWidth="1.5" />
+                      <path d={path} fill="none" stroke={color} strokeWidth="1.3" strokeLinecap="square" strokeLinejoin="miter" />
+                      <circle cx={last.x} cy={last.y} r="1.8" fill={color} stroke="#ffffff" strokeWidth="1" />
                     </svg>
                   </div>
                 );
@@ -1344,7 +1843,7 @@ export const DistrictIntelligence: React.FC = () => {
           ))}
 
           {/* 2. Customer */}
-          {districtKPIs.filter(k => k.category === 'customer').map(kpi => (
+          {adjustedKPIs.filter(k => k.category === 'customer').map(kpi => (
             <div
               key={kpi.id}
               className={`kpi-tile kpi-tile--${kpi.status} ${kpi.clickable ? 'kpi-tile--clickable' : ''} ${activeKPIPanel?.id === kpi.id ? 'kpi-tile--active' : ''}`}
@@ -1370,33 +1869,28 @@ export const DistrictIntelligence: React.FC = () => {
                 const min = Math.min(...data);
                 const max = Math.max(...data);
                 const range = max - min || 1;
-                const W = 100, H = 32, P = 2;
+                const W = 120, H = 44, P = 3;
                 const points = data.map((v, i) => ({
                   x: (i / (data.length - 1)) * W,
                   y: H - P - ((v - min) / range) * (H - P * 2),
                 }));
-                // Smooth catmull-rom-ish bezier path
-                const path = points.reduce((acc, p, i, arr) => {
-                  if (i === 0) return `M ${p.x},${p.y}`;
-                  const prev = arr[i - 1];
-                  const cx = (prev.x + p.x) / 2;
-                  return `${acc} C ${cx},${prev.y} ${cx},${p.y} ${p.x},${p.y}`;
-                }, '');
+                // Linear (straight-line) path — sharp angles convey precision
+                const path = points.map((p, i) => i === 0 ? `M ${p.x},${p.y}` : `L ${p.x},${p.y}`).join(' ');
                 const areaPath = `${path} L ${W},${H} L 0,${H} Z`;
                 const last = points[points.length - 1];
-                const color = kpi.status === 'positive' ? '#10b981' : kpi.status === 'negative' ? '#ef4444' : kpi.status === 'warning' ? '#f59e0b' : '#6366f1';
+                const color = kpi.status === 'positive' ? '#047857' : kpi.status === 'negative' ? '#991b1b' : kpi.status === 'warning' ? '#b45309' : '#4338ca';
                 return (
                   <div className="kpi-tile-sparkline">
                     <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
                       <defs>
                         <linearGradient id={`spark-${kpi.id}`} x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor={color} stopOpacity="0.28" />
+                          <stop offset="0%" stopColor={color} stopOpacity="0.06" />
                           <stop offset="100%" stopColor={color} stopOpacity="0" />
                         </linearGradient>
                       </defs>
                       <path d={areaPath} fill={`url(#spark-${kpi.id})`} />
-                      <path d={path} fill="none" stroke={color} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
-                      <circle cx={last.x} cy={last.y} r="2" fill="#ffffff" stroke={color} strokeWidth="1.5" />
+                      <path d={path} fill="none" stroke={color} strokeWidth="1.3" strokeLinecap="square" strokeLinejoin="miter" />
+                      <circle cx={last.x} cy={last.y} r="1.8" fill={color} stroke="#ffffff" strokeWidth="1" />
                     </svg>
                   </div>
                 );
@@ -1406,7 +1900,7 @@ export const DistrictIntelligence: React.FC = () => {
           ))}
 
           {/* 3. Execution */}
-          {districtKPIs.filter(k => k.category === 'execution').map(kpi => (
+          {adjustedKPIs.filter(k => k.category === 'execution').map(kpi => (
             <div
               key={kpi.id}
               className={`kpi-tile kpi-tile--${kpi.status} ${kpi.clickable ? 'kpi-tile--clickable' : ''} ${activeKPIPanel?.id === kpi.id ? 'kpi-tile--active' : ''}`}
@@ -1432,33 +1926,28 @@ export const DistrictIntelligence: React.FC = () => {
                 const min = Math.min(...data);
                 const max = Math.max(...data);
                 const range = max - min || 1;
-                const W = 100, H = 32, P = 2;
+                const W = 120, H = 44, P = 3;
                 const points = data.map((v, i) => ({
                   x: (i / (data.length - 1)) * W,
                   y: H - P - ((v - min) / range) * (H - P * 2),
                 }));
-                // Smooth catmull-rom-ish bezier path
-                const path = points.reduce((acc, p, i, arr) => {
-                  if (i === 0) return `M ${p.x},${p.y}`;
-                  const prev = arr[i - 1];
-                  const cx = (prev.x + p.x) / 2;
-                  return `${acc} C ${cx},${prev.y} ${cx},${p.y} ${p.x},${p.y}`;
-                }, '');
+                // Linear (straight-line) path — sharp angles convey precision
+                const path = points.map((p, i) => i === 0 ? `M ${p.x},${p.y}` : `L ${p.x},${p.y}`).join(' ');
                 const areaPath = `${path} L ${W},${H} L 0,${H} Z`;
                 const last = points[points.length - 1];
-                const color = kpi.status === 'positive' ? '#10b981' : kpi.status === 'negative' ? '#ef4444' : kpi.status === 'warning' ? '#f59e0b' : '#6366f1';
+                const color = kpi.status === 'positive' ? '#047857' : kpi.status === 'negative' ? '#991b1b' : kpi.status === 'warning' ? '#b45309' : '#4338ca';
                 return (
                   <div className="kpi-tile-sparkline">
                     <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
                       <defs>
                         <linearGradient id={`spark-${kpi.id}`} x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor={color} stopOpacity="0.28" />
+                          <stop offset="0%" stopColor={color} stopOpacity="0.06" />
                           <stop offset="100%" stopColor={color} stopOpacity="0" />
                         </linearGradient>
                       </defs>
                       <path d={areaPath} fill={`url(#spark-${kpi.id})`} />
-                      <path d={path} fill="none" stroke={color} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
-                      <circle cx={last.x} cy={last.y} r="2" fill="#ffffff" stroke={color} strokeWidth="1.5" />
+                      <path d={path} fill="none" stroke={color} strokeWidth="1.3" strokeLinecap="square" strokeLinejoin="miter" />
+                      <circle cx={last.x} cy={last.y} r="1.8" fill={color} stroke="#ffffff" strokeWidth="1" />
                     </svg>
                   </div>
                 );
@@ -1468,7 +1957,7 @@ export const DistrictIntelligence: React.FC = () => {
           ))}
 
           {/* 4. Profitability */}
-          {districtKPIs.filter(k => k.category === 'profitability').map(kpi => (
+          {adjustedKPIs.filter(k => k.category === 'profitability').map(kpi => (
             <div
               key={kpi.id}
               className={`kpi-tile kpi-tile--${kpi.status} ${kpi.clickable ? 'kpi-tile--clickable' : ''} ${activeKPIPanel?.id === kpi.id ? 'kpi-tile--active' : ''}`}
@@ -1500,33 +1989,28 @@ export const DistrictIntelligence: React.FC = () => {
                 const min = Math.min(...data);
                 const max = Math.max(...data);
                 const range = max - min || 1;
-                const W = 100, H = 32, P = 2;
+                const W = 120, H = 44, P = 3;
                 const points = data.map((v, i) => ({
                   x: (i / (data.length - 1)) * W,
                   y: H - P - ((v - min) / range) * (H - P * 2),
                 }));
-                // Smooth catmull-rom-ish bezier path
-                const path = points.reduce((acc, p, i, arr) => {
-                  if (i === 0) return `M ${p.x},${p.y}`;
-                  const prev = arr[i - 1];
-                  const cx = (prev.x + p.x) / 2;
-                  return `${acc} C ${cx},${prev.y} ${cx},${p.y} ${p.x},${p.y}`;
-                }, '');
+                // Linear (straight-line) path — sharp angles convey precision
+                const path = points.map((p, i) => i === 0 ? `M ${p.x},${p.y}` : `L ${p.x},${p.y}`).join(' ');
                 const areaPath = `${path} L ${W},${H} L 0,${H} Z`;
                 const last = points[points.length - 1];
-                const color = kpi.status === 'positive' ? '#10b981' : kpi.status === 'negative' ? '#ef4444' : kpi.status === 'warning' ? '#f59e0b' : '#6366f1';
+                const color = kpi.status === 'positive' ? '#047857' : kpi.status === 'negative' ? '#991b1b' : kpi.status === 'warning' ? '#b45309' : '#4338ca';
                 return (
                   <div className="kpi-tile-sparkline">
                     <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
                       <defs>
                         <linearGradient id={`spark-${kpi.id}`} x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor={color} stopOpacity="0.28" />
+                          <stop offset="0%" stopColor={color} stopOpacity="0.06" />
                           <stop offset="100%" stopColor={color} stopOpacity="0" />
                         </linearGradient>
                       </defs>
                       <path d={areaPath} fill={`url(#spark-${kpi.id})`} />
-                      <path d={path} fill="none" stroke={color} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
-                      <circle cx={last.x} cy={last.y} r="2" fill="#ffffff" stroke={color} strokeWidth="1.5" />
+                      <path d={path} fill="none" stroke={color} strokeWidth="1.3" strokeLinecap="square" strokeLinejoin="miter" />
+                      <circle cx={last.x} cy={last.y} r="1.8" fill={color} stroke="#ffffff" strokeWidth="1" />
                     </svg>
                   </div>
                 );
@@ -1550,8 +2034,8 @@ export const DistrictIntelligence: React.FC = () => {
               <svg viewBox="0 0 400 120" preserveAspectRatio="none" className="kpi-trend-svg">
                 <defs>
                   <linearGradient id={`grad-${activeKPIPanel.id}`} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={activeKPIPanel.status === 'positive' ? '#22c55e' : activeKPIPanel.status === 'negative' ? '#ef4444' : '#f59e0b'} stopOpacity="0.15" />
-                    <stop offset="100%" stopColor={activeKPIPanel.status === 'positive' ? '#22c55e' : activeKPIPanel.status === 'negative' ? '#ef4444' : '#f59e0b'} stopOpacity="0" />
+                    <stop offset="0%" stopColor={activeKPIPanel.status === 'positive' ? '#047857' : activeKPIPanel.status === 'negative' ? '#991b1b' : '#92400e'} stopOpacity="0.06" />
+                    <stop offset="100%" stopColor={activeKPIPanel.status === 'positive' ? '#047857' : activeKPIPanel.status === 'negative' ? '#991b1b' : '#92400e'} stopOpacity="0" />
                   </linearGradient>
                 </defs>
                 {activeKPIPanel.trendData && (
@@ -1567,10 +2051,10 @@ export const DistrictIntelligence: React.FC = () => {
                     />
                     <polyline
                       fill="none"
-                      stroke={activeKPIPanel.status === 'positive' ? '#22c55e' : activeKPIPanel.status === 'negative' ? '#ef4444' : '#f59e0b'}
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                      stroke={activeKPIPanel.status === 'positive' ? '#047857' : activeKPIPanel.status === 'negative' ? '#991b1b' : '#92400e'}
+                      strokeWidth="1.5"
+                      strokeLinecap="square"
+                      strokeLinejoin="miter"
                       points={activeKPIPanel.trendData.map((v, i) => {
                         const min = Math.min(...activeKPIPanel.trendData!);
                         const max = Math.max(...activeKPIPanel.trendData!);
@@ -1609,20 +2093,20 @@ export const DistrictIntelligence: React.FC = () => {
         <div className="leaderboard-header-premium">
           <div className="header-title-row">
             <div className="title-group">
-              <h2><Store size={20} /> Store Leaderboard</h2>
+              <h2><Store size={20} /> Store Leaderboard {isAnyFilterActive && <Filter size={12} className="filter-active-icon" />}</h2>
               <span className="header-subtitle">Performance ranking across all stores</span>
             </div>
             <div className="header-stats">
               <div className="stat-pill">
-                <span className="stat-value">{mockStores.length}</span>
+                <span className="stat-value">{activeStores.length}</span>
                 <span className="stat-label">Stores</span>
               </div>
               <div className="stat-pill success">
-                <span className="stat-value">{mockStores.filter(s => s.status === 'excellent').length}</span>
+                <span className="stat-value">{activeStores.filter(s => s.status === 'excellent').length}</span>
                 <span className="stat-label">Excellent</span>
               </div>
               <div className="stat-pill warning">
-                <span className="stat-value">{mockStores.filter(s => s.status === 'warning' || s.status === 'critical').length}</span>
+                <span className="stat-value">{activeStores.filter(s => s.status === 'warning' || s.status === 'critical').length}</span>
                 <span className="stat-label">Needs Attention</span>
               </div>
             </div>
@@ -1685,7 +2169,7 @@ export const DistrictIntelligence: React.FC = () => {
                 <th className="th-issue th-sortable" onClick={() => handleLeaderboardSort('seaIssue')}><span>Top SEA Issue</span><SortIcon col="seaIssue" /></th>
                 <th className="th-trend th-sortable" onClick={() => handleLeaderboardSort('trend')}><span>Trend</span><SortIcon col="trend" /></th>
                 <th className="th-status th-sortable" onClick={() => handleLeaderboardSort('status')}><span>Status</span><SortIcon col="status" /></th>
-                <th className="th-action"></th>
+                {!isHQ && <th className="th-action"></th>}
               </tr>
             </thead>
             <tbody>
@@ -1699,8 +2183,8 @@ export const DistrictIntelligence: React.FC = () => {
               {filteredStores.map((store) => (
                 <tr 
                   key={store.id} 
-                  className={`row-${store.status.toLowerCase()} clickable-row ${navigatingStore === store.storeNumber ? 'navigating' : ''}`}
-                  onClick={() => !isNavigating && handleStoreClick(store)}
+                  className={`row-${store.status.toLowerCase()} ${!isHQ ? 'clickable-row' : ''} ${navigatingStore === store.storeNumber ? 'navigating' : ''}`}
+                  onClick={() => !isHQ && !isNavigating && handleStoreClick(store)}
                 >
                   <td className="td-rank">
                     <span className="rank-text">{store.rank}</span>
@@ -1742,21 +2226,23 @@ export const DistrictIntelligence: React.FC = () => {
                   <td className="td-status">
                     <span className={`status-pill ${store.status.toLowerCase()}`}>{store.status}</span>
                   </td>
-                  <td className="td-action">
-                    <span className={`view-store-link ${navigatingStore === store.storeNumber ? 'loading' : ''}`}>
-                      {navigatingStore === store.storeNumber ? (
-                        <>
-                          <RefreshCw size={13} className="spinning" />
-                          <span>Loading…</span>
-                        </>
-                      ) : (
-                        <>
-                          <span>View store</span>
-                          <ChevronRight size={14} />
-                        </>
-                      )}
-                    </span>
-                  </td>
+                  {!isHQ && (
+                    <td className="td-action">
+                      <span className={`view-store-link ${navigatingStore === store.storeNumber ? 'loading' : ''}`}>
+                        {navigatingStore === store.storeNumber ? (
+                          <>
+                            <RefreshCw size={13} className="spinning" />
+                            <span>Loading…</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>View store</span>
+                            <ChevronRight size={14} />
+                          </>
+                        )}
+                      </span>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
@@ -1769,7 +2255,7 @@ export const DistrictIntelligence: React.FC = () => {
         <div className="heatmap-header">
           <div className="header-title-row">
             <div className="title-group">
-              <h2><ClipboardCheck size={20} /> Audit Compliance Heatmap</h2>
+              <h2><ClipboardCheck size={20} /> Audit Compliance Heatmap {isAnyFilterActive && <Filter size={12} className="filter-active-icon" />}</h2>
               <span className="header-subtitle">Store-level compliance across audit categories</span>
             </div>
             <div className="heatmap-legend">
@@ -1801,12 +2287,12 @@ export const DistrictIntelligence: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {mockStores.map(store => {
-                const scores = auditComplianceData[store.storeNumber];
+              {activeStores.map(store => {
+                const scores = adjustedAuditData[store.storeNumber];
                 const avg = Math.round(auditCategories.reduce((sum, cat) => sum + (scores?.[cat] || 0), 0) / auditCategories.length);
                 return (
                   <tr key={store.id}>
-                    <td className="heatmap-store-cell heatmap-store-clickable" onClick={() => handleStoreClick(store)}>
+                    <td className={`heatmap-store-cell ${!isHQ ? 'heatmap-store-clickable' : ''}`} onClick={() => !isHQ && handleStoreClick(store)}>
                       <span className="heatmap-store-number">#{store.storeNumber}</span>
                       <span className="heatmap-store-name">{store.storeName}</span>
                     </td>
@@ -1815,33 +2301,49 @@ export const DistrictIntelligence: React.FC = () => {
                       const cellKey = `${store.storeNumber}-${cat}`;
                       const detail = cellKey in auditCellDetails ? auditCellDetails[cellKey] : generateAutoDetail(store.storeNumber, cat, val);
                       const skillMap = getSkillForDimension(cat);
+                      const isActive = chipPopover?.cellKey === cellKey;
                       return (
                         <td key={cat} className="heatmap-cell">
                           <div
-                            className="heatmap-cell-inner heatmap-cell-clickable"
+                            className={`heatmap-chip ${isActive ? 'heatmap-chip--active' : ''}`}
                             style={{
                               background: getComplianceColor(val),
                               color: getComplianceTextColor(val),
                             }}
                             onMouseEnter={(e) => {
-                              const rect = e.currentTarget.getBoundingClientRect();
-                              setHeatmapTip({ x: rect.left + rect.width / 2, y: rect.top, store: store.storeName, cat, val });
+                              if (!chipPopover) {
+                                const rect = e.currentTarget.getBoundingClientRect();
+                                setHeatmapTip({ x: rect.left + rect.width / 2, y: rect.top, store: store.storeName, cat, val });
+                              }
                             }}
                             onMouseLeave={() => setHeatmapTip(null)}
-                            onClick={() => {
+                            onClick={(e) => {
                               setHeatmapTip(null);
-                              setHeatmapDetail({
-                                storeNumber: store.storeNumber,
-                                storeName: store.storeName,
-                                category: cat,
-                                score: val,
-                                detail,
-                                skill: skillMap.skill,
-                                skillLogic: skillMap.logic,
-                              });
+                              if (isActive) {
+                                setChipPopover(null);
+                              } else {
+                                const rect = e.currentTarget.getBoundingClientRect();
+                                const spaceBelow = window.innerHeight - rect.bottom;
+                                const popoverHeight = 220;
+                                const flipAbove = spaceBelow < popoverHeight;
+                                setChipPopover({
+                                  cellKey,
+                                  storeNumber: store.storeNumber,
+                                  storeName: store.storeName,
+                                  category: cat,
+                                  score: val,
+                                  detail,
+                                  skill: skillMap.skill,
+                                  skillLogic: skillMap.logic,
+                                  rect: { top: flipAbove ? rect.top : rect.bottom, left: rect.left + rect.width / 2, width: rect.width, height: rect.height },
+                                });
+                              }
                             }}
                           >
                             <span className="heatmap-value">{val}%</span>
+                            <span className={`heatmap-chip-trend heatmap-chip-trend--${detail.trend}`}>
+                              {detail.trend === 'improving' ? '↑' : detail.trend === 'declining' ? '↓' : '—'}
+                            </span>
                           </div>
                         </td>
                       );
@@ -1891,6 +2393,69 @@ export const DistrictIntelligence: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Chip Popover — inline detail on heatmap cell click */}
+      {chipPopover && (() => {
+        const spaceBelow = window.innerHeight - chipPopover.rect.top;
+        const isFlipped = spaceBelow < 230;
+        return (
+        <div className="chip-popover-backdrop" onClick={() => setChipPopover(null)}>
+          <div
+            className={`chip-popover ${isFlipped ? 'chip-popover--above' : ''}`}
+            style={isFlipped
+              ? { bottom: window.innerHeight - chipPopover.rect.top + 6, left: chipPopover.rect.left }
+              : { top: chipPopover.rect.top + 6, left: chipPopover.rect.left }
+            }
+            onClick={(e) => e.stopPropagation()}
+          >
+            {!isFlipped && <div className="chip-popover-arrow" />}
+            {isFlipped && <div className="chip-popover-arrow chip-popover-arrow--bottom" />}
+            <div className="chip-popover-header">
+              <span className="chip-popover-title">{chipPopover.category}</span>
+              <span className="chip-popover-score" style={{ background: getComplianceColor(chipPopover.score), color: getComplianceTextColor(chipPopover.score) }}>
+                {chipPopover.score}%
+              </span>
+            </div>
+            <div className="chip-popover-rows">
+              <div className="chip-popover-row">
+                <span className="chip-popover-label">Trend</span>
+                <span className={`chip-popover-trend chip-popover-trend--${chipPopover.detail.trend}`}>
+                  {chipPopover.detail.trend === 'improving' && <TrendingUp size={12} />}
+                  {chipPopover.detail.trend === 'declining' && <TrendingDown size={12} />}
+                  {chipPopover.detail.trend === 'stable' && <Minus size={12} />}
+                  {chipPopover.detail.trend.charAt(0).toUpperCase() + chipPopover.detail.trend.slice(1)}
+                </span>
+              </div>
+              <div className="chip-popover-row">
+                <span className="chip-popover-label">Owner</span>
+                <span className="chip-popover-value">{chipPopover.detail.auditor}</span>
+              </div>
+              <div className="chip-popover-row chip-popover-row--intervention">
+                <span className="chip-popover-label">Intervention</span>
+                <span className="chip-popover-value chip-popover-value--rec">{chipPopover.detail.recommendation}</span>
+              </div>
+            </div>
+            <div className="chip-popover-actions">
+              <button className="chip-popover-btn" onClick={() => {
+                const cp = chipPopover;
+                setChipPopover(null);
+                setHeatmapDetail({
+                  storeNumber: cp.storeNumber,
+                  storeName: cp.storeName,
+                  category: cp.category,
+                  score: cp.score,
+                  detail: cp.detail,
+                  skill: cp.skill,
+                  skillLogic: cp.skillLogic,
+                });
+              }}>
+                View Full Details <ChevronRight size={12} />
+              </button>
+            </div>
+          </div>
+        </div>
+        );
+      })()}
 
       {/* Heatmap Cell Detail Modal */}
       {heatmapDetail && (
@@ -1969,13 +2534,15 @@ export const DistrictIntelligence: React.FC = () => {
                 Investigate in AI Copilot
                 <ChevronRight size={14} />
               </button>
-              <button className="heatmap-action-btn heatmap-action-secondary" onClick={() => {
-                setHeatmapDetail(null);
-                navigate(`/store-operations/store-deep-dive?store=${heatmapDetail.storeNumber}`);
-              }}>
-                <Store size={14} />
-                View Store
-              </button>
+              {!isHQ && (
+                <button className="heatmap-action-btn heatmap-action-secondary" onClick={() => {
+                  setHeatmapDetail(null);
+                  navigate(`/store-operations/store-deep-dive?store=${heatmapDetail.storeNumber}`);
+                }}>
+                  <Store size={14} />
+                  View Store
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -2428,11 +2995,7 @@ export const DistrictIntelligence: React.FC = () => {
             <div className="investigation-panel-header">
               <div className="panel-header-title">
                 <AlertTriangle size={20} />
-                <h3>
-                  {showTriageDetail === 'voc-messy' && 'VoC: Messy Aisles'}
-                  {showTriageDetail === 'sea-fire' && 'SEA Auto-Fail: Fire Exit'}
-                  {showTriageDetail === 'oos-risk' && 'Inbound OOS Risk'}
-                </h3>
+                <h3>{activeTriageItems.find(t => t.id === showTriageDetail)?.title || 'Triage Detail'}</h3>
               </div>
               <button className="panel-close-btn" onClick={() => setShowTriageDetail(null)}>
                 <X size={20} />
@@ -2603,6 +3166,60 @@ export const DistrictIntelligence: React.FC = () => {
                   </div>
                 </>
               )}
+
+              {/* Generic fallback for non-d14 triage items */}
+              {showTriageDetail && !['voc-messy', 'sea-fire', 'oos-risk'].includes(showTriageDetail) && (() => {
+                const triageItem = activeTriageItems.find(t => t.id === showTriageDetail);
+                if (!triageItem) return null;
+                const priorityLabel = triageItem.priority === 'critical' ? 'CRITICAL' : triageItem.priority === 'high' ? 'HIGH PRIORITY' : 'MEDIUM PRIORITY';
+                return (
+                  <>
+                    <div className="investigation-summary">
+                      <div className={`summary-badge ${triageItem.priority}`}>{priorityLabel}</div>
+                      <h4>{triageItem.title}</h4>
+                      <p>{triageItem.stores}. Current status: {triageItem.metric}. Requires immediate DM review and action.</p>
+                    </div>
+                    
+                    <div className="investigation-stores">
+                      <div className="section-label">Affected Locations</div>
+                      <div className="store-list">
+                        {triageItem.stores.split(' · ').map((s, i) => (
+                          <div key={i} className="store-item">
+                            <span className="store-name">{s.split(' — ')[0]}</span>
+                            <span className="store-metric negative">{triageItem.metric}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="investigation-actions">
+                      <button className="action-btn primary" onClick={() => {
+                        setShowTriageDetail(null);
+                        showToast('Assigning task to store managers...');
+                      }}>
+                        <Store size={14} />
+                        Assign to Store
+                      </button>
+                      <button className="action-btn secondary" onClick={() => {
+                        setShowTriageDetail(null);
+                        showToast('Escalating to Regional Manager...');
+                      }}>
+                        <AlertTriangle size={14} />
+                        Escalate
+                      </button>
+                      <button className="action-btn tertiary" onClick={() => {
+                        setShowTriageDetail(null);
+                        setShowChatWindow(true);
+                        setChatExpanded(true);
+                        setShowBroadcastComposer(true);
+                      }}>
+                        <Megaphone size={14} />
+                        Send Broadcast
+                      </button>
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           </div>
         </div>

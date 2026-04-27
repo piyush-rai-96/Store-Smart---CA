@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   CheckCircle, 
-  Circle, 
-  Lock,
   Play,
   ChevronRight,
   ChevronDown,
@@ -863,10 +861,25 @@ export const POGLocalizationEngine: React.FC = () => {
     dateFilter !== 'all',
   ].filter(Boolean).length;
 
+  const getStepSummary = (stepId: WorkflowStep): string | null => {
+    if (getStepStatus(stepId) !== 'completed') return null;
+    if (stepId === 'category' && selectedCategory) {
+      const cat = categories.find(c => c.id === selectedCategory);
+      return cat ? cat.name : null;
+    }
+    if (stepId === 'corporate' && selectedPOG) return selectedPOG.name;
+    if (stepId === 'storeGroup' && selectedStoreGroup) {
+      const sg = storeGroups.find(g => g.id === selectedStoreGroup);
+      return sg ? sg.name : null;
+    }
+    return null;
+  };
+
   const renderWorkflowProgress = () => (
     <div className="loc-workflow-progress">
       {workflowSteps.map((step, index) => {
         const status = getStepStatus(step.id);
+        const summary = getStepSummary(step.id);
         return (
           <React.Fragment key={step.id}>
             <div 
@@ -876,13 +889,16 @@ export const POGLocalizationEngine: React.FC = () => {
               <div className="loc-workflow-step-indicator">
                 {status === 'completed' ? (
                   <CheckCircle size={20} />
-                ) : status === 'current' ? (
-                  <Circle size={20} className="current-circle" />
                 ) : (
-                  <Lock size={16} />
+                  <span className="loc-step-number">{step.number}</span>
                 )}
               </div>
-              <span className="loc-workflow-step-label">{step.label}</span>
+              <div className="loc-workflow-step-text">
+                <span className="loc-workflow-step-label">{step.label}</span>
+                {status === 'completed' && summary && (
+                  <span className="loc-workflow-step-summary">{summary}</span>
+                )}
+              </div>
             </div>
             {index < workflowSteps.length - 1 && (
               <div className={`loc-workflow-connector ${status === 'completed' ? 'completed' : ''}`} />
@@ -986,26 +1002,45 @@ export const POGLocalizationEngine: React.FC = () => {
               <div className="loc-rules-section premium">
                 <div className="loc-rules-header">
                   <ShieldCheck size={16} />
-                  <span>Applicable Rules ({selectedPOG.rules.length})</span>
+                  <span>Applicable Rules</span>
+                  <span className="loc-rules-count">{selectedPOG.rules.length}</span>
                 </div>
-                <div className="loc-rules-list-premium">
-                  {selectedPOG.rules.map((rule, idx) => (
-                    <div key={idx} className="loc-rule-card">
-                      <div className="loc-rule-card-header">
-                        <span className="loc-rule-name">{rule.name}</span>
-                        <div className="loc-rule-badges">
-                          <span className="loc-rule-type-badge">{rule.type}</span>
-                          <span className={`loc-rule-status-badge ${rule.status.toLowerCase()}`}>
-                            {rule.status === 'Warning' && <AlertCircle size={10} />}
-                            {rule.status}
-                          </span>
+                <div className="loc-rules-grid">
+                  {selectedPOG.rules.map((rule, idx) => {
+                    const typeIcon = rule.type.toLowerCase().includes('facing') ? <Eye size={16} />
+                      : rule.type.toLowerCase().includes('priority') ? <Target size={16} />
+                      : rule.type.toLowerCase().includes('adjacency') ? <Layers size={16} />
+                      : rule.type.toLowerCase().includes('capacity') || rule.type.toLowerCase().includes('fit') ? <Package size={16} />
+                      : rule.type.toLowerCase().includes('brand') || rule.type.toLowerCase().includes('block') ? <BarChart3 size={16} />
+                      : rule.type.toLowerCase().includes('compliance') ? <ShieldCheck size={16} />
+                      : rule.type.toLowerCase().includes('visual') ? <Sparkles size={16} />
+                      : rule.type.toLowerCase().includes('space') ? <Layers size={16} />
+                      : rule.type.toLowerCase().includes('price') ? <TrendingUp size={16} />
+                      : <FileText size={16} />;
+                    return (
+                      <div key={idx} className={`loc-rule-card-v2 ${rule.status.toLowerCase()}`}>
+                        <div className="loc-rule-icon" style={{ color: rule.status === 'Warning' ? '#d97706' : '#818cf8', background: rule.status === 'Warning' ? '#fef9c3' : '#eef2ff' }}>
+                          {typeIcon}
+                        </div>
+                        <div className="loc-rule-content">
+                          <div className="loc-rule-top-row">
+                            <span className="loc-rule-name-v2">{rule.name}</span>
+                            <span className={`loc-rule-status-dot ${rule.status.toLowerCase()}`} />
+                          </div>
+                          {rule.description && (
+                            <p className="loc-rule-desc-v2">{rule.description}</p>
+                          )}
+                          <div className="loc-rule-meta-row">
+                            <span className="loc-rule-type-label">{rule.type}</span>
+                            <span className={`loc-rule-status-label ${rule.status.toLowerCase()}`}>
+                              {rule.status === 'Warning' && <AlertCircle size={9} />}
+                              {rule.status}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                      {rule.description && (
-                        <p className="loc-rule-description">{rule.description}</p>
-                      )}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -1105,6 +1140,24 @@ export const POGLocalizationEngine: React.FC = () => {
               <span>
                 <strong>Implication:</strong> {generateDemandImplication(categoryDemandIndex[selectedCategory]?.[selectedStoreGroup!] || [])}
               </span>
+            </div>
+
+            {/* Pre-Engine Forecast — compact inline */}
+            <div className="loc-forecast-strip">
+              <div className="loc-forecast-item">
+                <span className="loc-forecast-val lift">+{selectedGroup.id === 'urban' ? '8.2' : selectedGroup.id === 'family' ? '5.4' : '6.1'}%</span>
+                <span className="loc-forecast-lbl">Expected Lift</span>
+              </div>
+              <div className="loc-forecast-divider" />
+              <div className="loc-forecast-item">
+                <span className="loc-forecast-val">{selectedGroup.id === 'urban' ? '3.5' : selectedGroup.id === 'family' ? '2.8' : '2.2'} hrs</span>
+                <span className="loc-forecast-lbl">Impl. Effort / Store</span>
+              </div>
+              <div className="loc-forecast-divider" />
+              <div className="loc-forecast-item">
+                <span className="loc-forecast-val">{selectedGroup.storeCount}</span>
+                <span className="loc-forecast-lbl">Affected Stores</span>
+              </div>
             </div>
 
             <button className="loc-continue-btn" onClick={() => transitionToStep('engine')}>

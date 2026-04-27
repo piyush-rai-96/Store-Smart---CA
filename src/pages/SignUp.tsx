@@ -23,7 +23,7 @@ export const SignUp: React.FC = () => {
   const roleOptions = [
     { label: 'Store Manager (SM)', value: 'SM' },
     { label: 'District Manager (DM)', value: 'DM' },
-    { label: 'Regional Director (RD)', value: 'RD' },
+    { label: 'HQ Merchandising (HQ)', value: 'HQ' },
     { label: 'Administrator', value: 'ADMIN' },
   ];
 

@@ -4,7 +4,7 @@ import { UserRole } from '../types';
 export const ROLE_NAMES: Record<UserRole, string> = {
   DM: 'District Manager',
   SM: 'Store Manager',
-  RD: 'Regional Director',
+  HQ: 'HQ Merchandising',
   ADMIN: 'Administrator',
 };
 
@@ -12,7 +12,7 @@ export const ROLE_NAMES: Record<UserRole, string> = {
 export const ROLE_COLORS: Record<UserRole, string> = {
   DM: '#1976d2',      // Blue
   SM: '#388e3c',      // Green
-  RD: '#7b1fa2',      // Purple
+  HQ: '#7b1fa2',      // Purple
   ADMIN: '#f57c00',   // Orange
 };
 
@@ -20,6 +20,6 @@ export const ROLE_COLORS: Record<UserRole, string> = {
 export const ROLE_ABBR: Record<UserRole, string> = {
   DM: 'DM',
   SM: 'SM',
-  RD: 'RD',
+  HQ: 'HQ',
   ADMIN: 'ADMIN',
 };

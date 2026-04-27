@@ -1,5 +1,21 @@
 // User role types
-export type UserRole = 'DM' | 'SM' | 'RD' | 'ADMIN';
+export type UserRole = 'DM' | 'SM' | 'HQ' | 'ADMIN';
+
+// User status
+export type UserStatus = 'active' | 'invited';
+
+// Screen access identifiers — map to sidebar sub-module IDs
+export type ScreenAccess =
+  | 'home'
+  | 'district_intelligence'
+  | 'store_deep_dive'
+  | 'master_pog_management'
+  | 'pog_rule_management'
+  | 'pog_localization_engine'
+  | 'ai_copilot'
+  | 'operations_queue'
+  | 'communications'
+  | 'user_access_management';
 
 // User type
 export interface User {
@@ -7,10 +23,13 @@ export interface User {
   email: string;
   name: string;
   role: UserRole;
+  accessRoutes: ScreenAccess[];
+  status: UserStatus;
   district?: string;
   districtId?: string;
   store?: string;
   storeId?: string;
+  region?: string;
   avatar?: string;
 }
 
@@ -18,8 +37,11 @@ export interface User {
 export interface AuthContextType {
   isAuthenticated: boolean;
   user: User | null;
+  allUsers: User[];
   login: (email: string, password: string) => boolean;
   logout: () => void;
+  addUser: (user: User) => void;
+  updateUser: (userId: string, updates: Partial<User>) => void;
 }
 
 // Login form data
@@ -27,6 +49,14 @@ export interface LoginFormData {
   email: string;
   password: string;
 }
+
+// Role display labels
+export const ROLE_LABELS: Record<UserRole, string> = {
+  ADMIN: 'Platform Administrator',
+  DM: 'District Manager',
+  SM: 'Store Manager',
+  HQ: 'HQ Merchandising',
+};
 
 // Route paths - centralized for easy management
 export const ROUTES = {
@@ -38,3 +68,39 @@ export const ROUTES = {
   // Store Operations Hub
   STORE_OPS_HOME: '/store-operations/home',
 } as const;
+
+// Map screen access IDs to actual route paths
+export const SCREEN_TO_PATH: Record<ScreenAccess, string> = {
+  home: '/store-operations/home',
+  district_intelligence: '/store-operations/district-intelligence',
+  store_deep_dive: '/store-operations/store-deep-dive',
+  master_pog_management: '/planogram/master-pog',
+  pog_rule_management: '/planogram/rule-management',
+  pog_localization_engine: '/planogram/localization-engine',
+  ai_copilot: '/command-center/ai-copilot',
+  operations_queue: '/command-center/operations-queue',
+  communications: '/command-center/communications',
+  user_access_management: '/app-config/user-access',
+};
+
+// Default access routes per role
+export const ROLE_ACCESS: Record<UserRole, ScreenAccess[]> = {
+  ADMIN: [
+    'home', 'district_intelligence', 'store_deep_dive',
+    'master_pog_management', 'pog_rule_management', 'pog_localization_engine',
+    'ai_copilot', 'operations_queue', 'communications', 'user_access_management',
+  ],
+  DM: [
+    'home', 'district_intelligence', 'store_deep_dive',
+    'ai_copilot', 'operations_queue', 'communications',
+  ],
+  SM: [
+    'home', 'store_deep_dive',
+    'ai_copilot', 'operations_queue', 'communications',
+  ],
+  HQ: [
+    'home', 'district_intelligence',
+    'master_pog_management', 'pog_rule_management', 'pog_localization_engine',
+    'ai_copilot', 'operations_queue', 'communications',
+  ],
+};
