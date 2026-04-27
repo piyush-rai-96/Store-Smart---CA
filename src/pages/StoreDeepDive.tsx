@@ -147,6 +147,8 @@ interface KPIData {
   variance: string;
   varianceType: 'positive' | 'negative' | 'neutral';
   secondaryVariance?: string;
+  yoyPercent?: string;
+  yoyDirection?: 'up' | 'down' | 'flat';
   trend: number[];
   tier?: 'excellent' | 'stable' | 'atrisk' | 'critical' | 'warning';
 }
@@ -255,13 +257,18 @@ const getStoreKPIs = (store: DistrictStore): KPIData[] => {
     for (let i = 0; i < 7; i++) arr.push(+(base + (trendDir === 'up' ? -6 + i : 6 - i)).toFixed(1));
     return arr;
   };
+  const salesYoY = +(salesVar * 0.8).toFixed(1);
+  const vocYoY = isGood ? 2.1 : -4.6;
+  const seaYoY = isGood ? 1.2 : -3.1;
+  const gmYoY = +(gm * 0.7).toFixed(0);
+  const pogYoY = isGood ? 2.4 : -5.8;
   return [
-    { id: 'sales', label: 'Net Sales Comp', value: `$${netSales}K`, variance: `${isGood ? '+' : ''}${salesVar}%`, varianceType: isGood ? 'positive' : 'negative', secondaryVariance: 'vs LY', trend: mk(netSales * 0.5, isGood ? 'up' : 'down'), tier: tierKey as KPIData['tier'] },
-    { id: 'voc', label: 'VoC % Satisfied', value: `${voc}%`, variance: `${isGood ? '+' : '-'}${isGood ? 2.8 : 5.1}%`, varianceType: isGood ? 'positive' : 'negative', secondaryVariance: 'vs LM', trend: mk(voc, isGood ? 'up' : 'down'), tier: tierKey as KPIData['tier'] },
-    { id: 'sea', label: 'SEA Score', value: `${sea}.4`, variance: `${isGood ? '+' : '-'}${isGood ? 1.6 : 2.8}`, varianceType: isGood ? 'positive' : 'negative', secondaryVariance: 'vs LM', trend: mk(sea, isGood ? 'up' : 'down'), tier: tierKey as KPIData['tier'] },
-    { id: 'salesVar', label: 'Sales $ % Var', value: `${isGood ? '+' : ''}${salesVar}%`, variance: `${isGood ? '+' : '-'}1.4pp`, varianceType: isGood ? 'positive' : 'negative', secondaryVariance: 'vs LY', trend: mk(salesVar, isGood ? 'up' : 'down'), tier: tierKey as KPIData['tier'] },
-    { id: 'gm', label: 'GM% bps Var', value: `${gm >= 0 ? '+' : ''}${gm} bps`, variance: `${gm >= 0 ? '+' : ''}${Math.round(gm * 0.6)} bps`, varianceType: gm >= 0 ? 'positive' : 'negative', secondaryVariance: 'vs LY', trend: mk(gm, gm >= 0 ? 'up' : 'down'), tier: tierKey as KPIData['tier'] },
-    { id: 'pog', label: 'POG Compliance', value: `${pog}%`, variance: `${isGood ? '+' : '-'}${isGood ? 3 : 8}%`, varianceType: isGood ? 'positive' : 'negative', secondaryVariance: 'vs LM', trend: mk(pog, isGood ? 'up' : 'down'), tier: tierKey as KPIData['tier'] },
+    { id: 'sales', label: 'Net Sales Comp', value: `$${netSales}K`, variance: `${isGood ? '+' : ''}${salesVar}%`, varianceType: isGood ? 'positive' : 'negative', secondaryVariance: 'vs LY', yoyPercent: `${salesYoY >= 0 ? '+' : ''}${salesYoY}%`, yoyDirection: (salesYoY >= 0 ? 'up' : 'down') as 'up' | 'down', trend: mk(netSales * 0.5, isGood ? 'up' : 'down'), tier: tierKey as KPIData['tier'] },
+    { id: 'voc', label: 'VoC % Satisfied', value: `${voc}%`, variance: `${isGood ? '+' : '-'}${isGood ? 2.8 : 5.1}%`, varianceType: isGood ? 'positive' : 'negative', secondaryVariance: 'vs LM', yoyPercent: `${vocYoY >= 0 ? '+' : ''}${vocYoY}%`, yoyDirection: (vocYoY >= 0 ? 'up' : 'down') as 'up' | 'down', trend: mk(voc, isGood ? 'up' : 'down'), tier: tierKey as KPIData['tier'] },
+    { id: 'sea', label: 'SEA Score', value: `${sea}.4`, variance: `${isGood ? '+' : '-'}${isGood ? 1.6 : 2.8}`, varianceType: isGood ? 'positive' : 'negative', secondaryVariance: 'vs LM', yoyPercent: `${seaYoY >= 0 ? '+' : ''}${seaYoY}`, yoyDirection: (seaYoY >= 0 ? 'up' : 'down') as 'up' | 'down', trend: mk(sea, isGood ? 'up' : 'down'), tier: tierKey as KPIData['tier'] },
+    { id: 'salesVar', label: 'Sales $ % Var', value: `${isGood ? '+' : ''}${salesVar}%`, variance: `${isGood ? '+' : '-'}1.4pp`, varianceType: isGood ? 'positive' : 'negative', secondaryVariance: 'vs LY', yoyPercent: `${salesYoY >= 0 ? '+' : ''}${salesYoY}%`, yoyDirection: (salesYoY >= 0 ? 'up' : 'down') as 'up' | 'down', trend: mk(salesVar, isGood ? 'up' : 'down'), tier: tierKey as KPIData['tier'] },
+    { id: 'gm', label: 'GM% bps Var', value: `${gm >= 0 ? '+' : ''}${gm} bps`, variance: `${gm >= 0 ? '+' : ''}${Math.round(gm * 0.6)} bps`, varianceType: gm >= 0 ? 'positive' : 'negative', secondaryVariance: 'vs LY', yoyPercent: `${gmYoY >= 0 ? '+' : ''}${gmYoY} bps`, yoyDirection: (gmYoY >= 0 ? 'up' : 'down') as 'up' | 'down', trend: mk(gm, gm >= 0 ? 'up' : 'down'), tier: tierKey as KPIData['tier'] },
+    { id: 'pog', label: 'POG Compliance', value: `${pog}%`, variance: `${isGood ? '+' : '-'}${isGood ? 3 : 8}%`, varianceType: isGood ? 'positive' : 'negative', secondaryVariance: 'vs LM', yoyPercent: `${pogYoY >= 0 ? '+' : ''}${pogYoY}%`, yoyDirection: (pogYoY >= 0 ? 'up' : 'down') as 'up' | 'down', trend: mk(pog, isGood ? 'up' : 'down'), tier: tierKey as KPIData['tier'] },
   ];
 };
 
@@ -917,6 +924,12 @@ export const StoreDeepDive: React.FC = () => {
                   <span className="variance-secondary">{kpi.secondaryVariance}</span>
                 )}
               </div>
+              {kpi.yoyPercent && (
+                <div className={`kpi-yoy-row yoy-${kpi.yoyDirection}`}>
+                  <span className="kpi-yoy-label">YoY</span>
+                  <span className="kpi-yoy-value">{kpi.yoyPercent}</span>
+                </div>
+              )}
               <div className="kpi-sparkline">
                 <svg viewBox="0 0 100 30" preserveAspectRatio="none">
                   <polyline

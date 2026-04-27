@@ -55,6 +55,7 @@ interface StoreData {
   dpiTier: 'Excellence' | 'Stable' | 'AtRisk' | 'Crisis';
   netSales: number;
   netSalesVar: number;
+  netSalesYoY: number;
   seaScore: number;
   vocSatisfied: number;
   topVocIssue: string;
@@ -69,14 +70,14 @@ type MomentumType = 'Improving' | 'Slipping' | 'Flat';
 
 // Mock Data
 const mockStores: StoreData[] = [
-  { id: '1', rank: 1, storeNumber: '2034', storeName: 'Downtown Plaza', dpi: 94, dpiTier: 'Excellence', netSales: 245000, netSalesVar: 8.2, seaScore: 96, vocSatisfied: 92, topVocIssue: 'Wait times', topSeaIssue: '-', trend: 'up', status: 'excellent' },
-  { id: '2', rank: 2, storeNumber: '1876', storeName: 'Riverside Mall', dpi: 91, dpiTier: 'Excellence', netSales: 198000, netSalesVar: 5.4, seaScore: 94, vocSatisfied: 89, topVocIssue: 'Product availability', topSeaIssue: '-', trend: 'up', status: 'excellent' },
-  { id: '3', rank: 3, storeNumber: '3421', storeName: 'Central Station', dpi: 85, dpiTier: 'Stable', netSales: 176000, netSalesVar: 2.1, seaScore: 88, vocSatisfied: 85, topVocIssue: 'Staff friendliness', topSeaIssue: 'Signage', trend: 'flat', status: 'stable' },
-  { id: '4', rank: 4, storeNumber: '2198', storeName: 'Westfield Center', dpi: 82, dpiTier: 'Stable', netSales: 165000, netSalesVar: -1.2, seaScore: 85, vocSatisfied: 82, topVocIssue: 'Checkout speed', topSeaIssue: 'Planogram', trend: 'down', status: 'stable' },
-  { id: '5', rank: 5, storeNumber: '4532', storeName: 'Harbor View', dpi: 78, dpiTier: 'Stable', netSales: 142000, netSalesVar: -3.5, seaScore: 82, vocSatisfied: 78, topVocIssue: 'Product quality', topSeaIssue: 'Cleanliness', trend: 'down', status: 'warning' },
-  { id: '6', rank: 6, storeNumber: '1234', storeName: 'Oak Street', dpi: 72, dpiTier: 'AtRisk', netSales: 128000, netSalesVar: -6.8, seaScore: 75, vocSatisfied: 71, topVocIssue: 'Staff availability', topSeaIssue: 'Planogram', trend: 'down', status: 'warning' },
-  { id: '7', rank: 7, storeNumber: '5678', storeName: 'Pine Grove', dpi: 65, dpiTier: 'AtRisk', netSales: 112000, netSalesVar: -9.2, seaScore: 68, vocSatisfied: 65, topVocIssue: 'Long queues', topSeaIssue: 'Safety', trend: 'down', status: 'critical' },
-  { id: '8', rank: 8, storeNumber: '9012', storeName: 'Maple Heights', dpi: 58, dpiTier: 'Crisis', netSales: 95000, netSalesVar: -12.4, seaScore: 62, vocSatisfied: 58, topVocIssue: 'Overall experience', topSeaIssue: 'Multiple', trend: 'down', status: 'critical' },
+  { id: '1', rank: 1, storeNumber: '2034', storeName: 'Downtown Plaza', dpi: 94, dpiTier: 'Excellence', netSales: 245000, netSalesVar: 8.2, netSalesYoY: 6.4, seaScore: 96, vocSatisfied: 92, topVocIssue: 'Wait times', topSeaIssue: '-', trend: 'up', status: 'excellent' },
+  { id: '2', rank: 2, storeNumber: '1876', storeName: 'Riverside Mall', dpi: 91, dpiTier: 'Excellence', netSales: 198000, netSalesVar: 5.4, netSalesYoY: 4.8, seaScore: 94, vocSatisfied: 89, topVocIssue: 'Product availability', topSeaIssue: '-', trend: 'up', status: 'excellent' },
+  { id: '3', rank: 3, storeNumber: '3421', storeName: 'Central Station', dpi: 85, dpiTier: 'Stable', netSales: 176000, netSalesVar: 2.1, netSalesYoY: 3.1, seaScore: 88, vocSatisfied: 85, topVocIssue: 'Staff friendliness', topSeaIssue: 'Signage', trend: 'flat', status: 'stable' },
+  { id: '4', rank: 4, storeNumber: '2198', storeName: 'Westfield Center', dpi: 82, dpiTier: 'Stable', netSales: 165000, netSalesVar: -1.2, netSalesYoY: 1.2, seaScore: 85, vocSatisfied: 82, topVocIssue: 'Checkout speed', topSeaIssue: 'Planogram', trend: 'down', status: 'stable' },
+  { id: '5', rank: 5, storeNumber: '4532', storeName: 'Harbor View', dpi: 78, dpiTier: 'Stable', netSales: 142000, netSalesVar: -3.5, netSalesYoY: -1.8, seaScore: 82, vocSatisfied: 78, topVocIssue: 'Product quality', topSeaIssue: 'Cleanliness', trend: 'down', status: 'warning' },
+  { id: '6', rank: 6, storeNumber: '1234', storeName: 'Oak Street', dpi: 72, dpiTier: 'AtRisk', netSales: 128000, netSalesVar: -6.8, netSalesYoY: -4.2, seaScore: 75, vocSatisfied: 71, topVocIssue: 'Staff availability', topSeaIssue: 'Planogram', trend: 'down', status: 'warning' },
+  { id: '7', rank: 7, storeNumber: '5678', storeName: 'Pine Grove', dpi: 65, dpiTier: 'AtRisk', netSales: 112000, netSalesVar: -9.2, netSalesYoY: -7.6, seaScore: 68, vocSatisfied: 65, topVocIssue: 'Long queues', topSeaIssue: 'Safety', trend: 'down', status: 'critical' },
+  { id: '8', rank: 8, storeNumber: '9012', storeName: 'Maple Heights', dpi: 58, dpiTier: 'Crisis', netSales: 95000, netSalesVar: -12.4, netSalesYoY: -10.8, seaScore: 62, vocSatisfied: 58, topVocIssue: 'Overall experience', topSeaIssue: 'Multiple', trend: 'down', status: 'critical' },
 ];
 
 // Audit Compliance Heatmap Data
@@ -139,6 +140,7 @@ const getDistrictStores = (seedOffset: number): StoreData[] => {
       dpiTier: (dpi >= 90 ? 'Excellence' : dpi >= 75 ? 'Stable' : dpi >= 60 ? 'AtRisk' : 'Crisis') as StoreData['dpiTier'],
       netSales: Math.max(80000, (salesBase[i % salesBase.length] || 120000) + salesShift * 5000),
       netSalesVar: parseFloat(((i < 3 ? 5 : i < 5 ? 0 : -5) + shift * 0.5).toFixed(1)),
+      netSalesYoY: parseFloat(((i < 3 ? 4 : i < 5 ? 1 : -4) + shift * 0.3).toFixed(1)),
       seaScore: Math.max(55, Math.min(98, dpi + ((i * 3 + seedOffset) % 7) - 3)),
       vocSatisfied: Math.max(50, Math.min(95, dpi - 5 + ((i * 2 + seedOffset) % 6))),
       topVocIssue: ['Wait times', 'Product availability', 'Staff friendliness', 'Checkout speed', 'Product quality', 'Staff availability', 'Long queues', 'Overall experience'][i % 8],
@@ -482,6 +484,8 @@ interface DistrictKPI {
   delta?: string;
   deltaDirection?: 'up' | 'down' | 'flat';
   deltaContext?: string;
+  yoyPercent?: string;
+  yoyDirection?: 'up' | 'down' | 'flat';
   status: 'positive' | 'negative' | 'neutral' | 'warning';
   clickable: boolean;
   trendData?: number[];
@@ -502,6 +506,8 @@ const districtKPIs: DistrictKPI[] = [
     delta: '+4.2%',
     deltaDirection: 'up',
     deltaContext: 'vs LY',
+    yoyPercent: '+4.2%',
+    yoyDirection: 'up',
     status: 'positive',
     clickable: true,
     trendData: [980, 1020, 1050, 1010, 1080, 1120, 1060, 1100, 1150, 1180, 1200, 1260],
@@ -524,6 +530,8 @@ const districtKPIs: DistrictKPI[] = [
     delta: '-1.4pts',
     deltaDirection: 'down',
     deltaContext: 'WoW',
+    yoyPercent: '-3.5%',
+    yoyDirection: 'down',
     status: 'warning',
     clickable: true,
     trendData: [88, 87, 86, 85, 84, 85, 83, 84, 82, 83, 82, 82],
@@ -547,6 +555,8 @@ const districtKPIs: DistrictKPI[] = [
     delta: '+0.6',
     deltaDirection: 'up',
     deltaContext: 'WoW',
+    yoyPercent: '+18.8%',
+    yoyDirection: 'up',
     status: 'negative',
     clickable: true,
     trendData: [2.8, 2.9, 3.0, 3.1, 2.9, 3.2, 3.4, 3.2, 3.5, 3.6, 3.4, 3.8],
@@ -569,6 +579,8 @@ const districtKPIs: DistrictKPI[] = [
     delta: '-6pts',
     deltaDirection: 'down',
     deltaContext: 'vs target',
+    yoyPercent: '-2.2%',
+    yoyDirection: 'down',
     status: 'warning',
     clickable: true,
     trendData: [92, 93, 91, 90, 92, 91, 89, 90, 88, 89, 90, 89],
@@ -591,6 +603,8 @@ const districtKPIs: DistrictKPI[] = [
     delta: '+0.8pts',
     deltaDirection: 'up',
     deltaContext: 'WoW',
+    yoyPercent: '+24.2%',
+    yoyDirection: 'up',
     status: 'negative',
     clickable: true,
     trendData: [3.0, 2.8, 3.1, 3.3, 3.0, 3.2, 3.5, 3.3, 3.6, 3.8, 3.5, 4.1],
@@ -614,6 +628,8 @@ const districtKPIs: DistrictKPI[] = [
     delta: '-40 bps',
     deltaDirection: 'down',
     deltaContext: 'vs LY',
+    yoyPercent: '-1.2%',
+    yoyDirection: 'down',
     status: 'warning',
     clickable: true,
     trendData: [35.1, 35.0, 34.8, 34.9, 34.6, 34.7, 34.5, 34.4, 34.3, 34.2, 34.3, 34.2],
@@ -714,7 +730,7 @@ export const DistrictIntelligence: React.FC = () => {
   const [navigatingStore, setNavigatingStore] = useState<string | null>(null);
   const [leaderboardFilter, setLeaderboardFilter] = useState<'all' | 'risk' | 'top' | 'revenue'>('all');
   const [leaderboardSearch, setLeaderboardSearch] = useState('');
-  type SortKey = 'rank' | 'store' | 'dpi' | 'sales' | 'sea' | 'voc' | 'vocIssue' | 'seaIssue' | 'trend' | 'status';
+  type SortKey = 'rank' | 'store' | 'dpi' | 'sales' | 'salesYoY' | 'sea' | 'voc' | 'vocIssue' | 'seaIssue' | 'trend' | 'status';
   const [leaderboardSort, setLeaderboardSort] = useState<{ key: SortKey; dir: 'asc' | 'desc' }>({ key: 'rank', dir: 'asc' });
 
   const handleLeaderboardSort = (key: SortKey) => {
@@ -1116,6 +1132,7 @@ export const DistrictIntelligence: React.FC = () => {
       rank: (a, b) => a.rank - b.rank,
       store: (a, b) => a.storeName.localeCompare(b.storeName),
       dpi: (a, b) => a.dpi - b.dpi,
+      salesYoY: (a, b) => a.netSalesYoY - b.netSalesYoY,
       sales: (a, b) => a.netSales - b.netSales,
       sea: (a, b) => a.seaScore - b.seaScore,
       voc: (a, b) => a.vocSatisfied - b.vocSatisfied,
@@ -1807,6 +1824,12 @@ export const DistrictIntelligence: React.FC = () => {
                 <span>{kpi.delta}</span>
                 {kpi.deltaContext && <span className="kpi-delta-ctx">{kpi.deltaContext}</span>}
               </div>
+              {kpi.yoyPercent && (
+                <div className={`kpi-tile-yoy yoy-${kpi.yoyDirection}`}>
+                  <span className="yoy-label">YoY</span>
+                  <span className="yoy-value">{kpi.yoyPercent}</span>
+                </div>
+              )}
               {kpi.trendData && (() => {
                 const data = kpi.trendData;
                 const min = Math.min(...data);
@@ -1864,6 +1887,12 @@ export const DistrictIntelligence: React.FC = () => {
                 <span>{kpi.delta}</span>
                 {kpi.deltaContext && <span className="kpi-delta-ctx">{kpi.deltaContext}</span>}
               </div>
+              {kpi.yoyPercent && (
+                <div className={`kpi-tile-yoy yoy-${kpi.yoyDirection}`}>
+                  <span className="yoy-label">YoY</span>
+                  <span className="yoy-value">{kpi.yoyPercent}</span>
+                </div>
+              )}
               {kpi.trendData && (() => {
                 const data = kpi.trendData;
                 const min = Math.min(...data);
@@ -1921,6 +1950,12 @@ export const DistrictIntelligence: React.FC = () => {
                 <span>{kpi.delta}</span>
                 {kpi.deltaContext && <span className="kpi-delta-ctx">{kpi.deltaContext}</span>}
               </div>
+              {kpi.yoyPercent && (
+                <div className={`kpi-tile-yoy yoy-${kpi.yoyDirection}`}>
+                  <span className="yoy-label">YoY</span>
+                  <span className="yoy-value">{kpi.yoyPercent}</span>
+                </div>
+              )}
               {kpi.trendData && (() => {
                 const data = kpi.trendData;
                 const min = Math.min(...data);
@@ -1984,6 +2019,12 @@ export const DistrictIntelligence: React.FC = () => {
                 <span>{kpi.delta}</span>
                 {kpi.deltaContext && <span className="kpi-delta-ctx">{kpi.deltaContext}</span>}
               </div>
+              {kpi.yoyPercent && (
+                <div className={`kpi-tile-yoy yoy-${kpi.yoyDirection}`}>
+                  <span className="yoy-label">YoY</span>
+                  <span className="yoy-value">{kpi.yoyPercent}</span>
+                </div>
+              )}
               {kpi.trendData && (() => {
                 const data = kpi.trendData;
                 const min = Math.min(...data);
@@ -2163,6 +2204,7 @@ export const DistrictIntelligence: React.FC = () => {
                 <th className="th-store th-sortable" onClick={() => handleLeaderboardSort('store')}><span>Store</span><SortIcon col="store" /></th>
                 <th className="th-dpi th-sortable" onClick={() => handleLeaderboardSort('dpi')}><span>DPI</span><SortIcon col="dpi" /></th>
                 <th className="th-sales th-sortable" onClick={() => handleLeaderboardSort('sales')}><span>Net Sales</span><SortIcon col="sales" /></th>
+                <th className="th-yoy th-sortable" onClick={() => handleLeaderboardSort('salesYoY')}><span>Sales YoY %</span><SortIcon col="salesYoY" /></th>
                 <th className="th-sea th-sortable" onClick={() => handleLeaderboardSort('sea')}><span>SEA Score</span><SortIcon col="sea" /></th>
                 <th className="th-voc th-sortable" onClick={() => handleLeaderboardSort('voc')}><span>VoC %</span><SortIcon col="voc" /></th>
                 <th className="th-issue th-sortable" onClick={() => handleLeaderboardSort('vocIssue')}><span>Top VoC Issue</span><SortIcon col="vocIssue" /></th>
@@ -2175,7 +2217,7 @@ export const DistrictIntelligence: React.FC = () => {
             <tbody>
               {filteredStores.length === 0 && (
                 <tr>
-                  <td colSpan={11} className="leaderboard-empty">
+                  <td colSpan={12} className="leaderboard-empty">
                     No stores match your search or filters.
                   </td>
                 </tr>
@@ -2207,6 +2249,11 @@ export const DistrictIntelligence: React.FC = () => {
                         {store.netSalesVar >= 0 ? '+' : ''}{store.netSalesVar}%
                       </span>
                     </div>
+                  </td>
+                  <td className="td-yoy">
+                    <span className={`yoy-cell ${store.netSalesYoY >= 0 ? 'positive' : 'negative'}`}>
+                      {store.netSalesYoY >= 0 ? '+' : ''}{store.netSalesYoY}%
+                    </span>
                   </td>
                   <td className="td-sea">{store.seaScore}</td>
                   <td className="td-voc">
