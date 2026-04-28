@@ -467,16 +467,16 @@
 
 .uam-modal {
   background: #ffffff;
-  border-radius: 18px;
-  width: 580px;
+  border-radius: 20px;
+  width: 760px;
   max-width: 94vw;
-  max-height: 88vh;
+  max-height: 90vh;
   /* overflow visible so dropdown menus can escape the modal box */
   overflow: visible;
   box-shadow:
-    0 0 0 1px rgba(0,0,0,0.04),
-    0 8px 16px rgba(0,0,0,0.06),
-    0 24px 56px rgba(0,0,0,0.12);
+    0 0 0 1px rgba(15, 23, 42, 0.04),
+    0 12px 24px rgba(15, 23, 42, 0.08),
+    0 32px 72px rgba(15, 23, 42, 0.16);
   animation: uamModalUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   flex-direction: column;
@@ -491,21 +491,22 @@
 .uam-m-header {
   display: flex;
   align-items: flex-start;
-  gap: 14px;
-  padding: 22px 24px 18px;
+  gap: 16px;
+  padding: 26px 32px 22px;
   border-bottom: 1px solid #f1f5f9;
 }
 
 .uam-m-header-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
   background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
   color: #4f46e5;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(67, 56, 202, 0.08);
 }
 
 .uam-m-header-text {
@@ -514,7 +515,7 @@
 }
 
 .uam-m-header-text h3 {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
   color: #0f172a;
   margin: 0;
@@ -522,9 +523,9 @@
 }
 
 .uam-m-header-text p {
-  font-size: 12px;
+  font-size: 13px;
   color: #94a3b8;
-  margin: 3px 0 0;
+  margin: 4px 0 0;
   font-weight: 400;
 }
 
@@ -548,11 +549,12 @@
 
 /* Modal body — overflow visible so absolute-positioned dropdowns can escape */
 .uam-m-body {
-  padding: 20px 24px;
+  padding: 28px 32px;
   overflow: visible;
   display: flex;
   flex-direction: column;
   gap: 0;
+  min-height: 280px;
 }
 
 /* Error */
@@ -811,11 +813,12 @@
 /* Modal footer */
 .uam-m-footer {
   display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  padding: 16px 24px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 32px;
   border-top: 1px solid #f1f5f9;
   background: #fafbfc;
+  border-radius: 0 0 20px 20px;
 }
 
 .uam-m-cancel {
@@ -1114,9 +1117,9 @@
 .uam-m-steps {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 14px 24px;
-  background: #f8fafc;
+  gap: 12px;
+  padding: 18px 32px;
+  background: linear-gradient(180deg, #fafbff 0%, #f8fafc 100%);
   border-bottom: 1px solid #e2e8f0;
 }
 
@@ -1147,18 +1150,18 @@
 }
 
 .uam-m-step-num {
-  width: 22px;
-  height: 22px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   background: #e2e8f0;
   color: #64748b;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   flex-shrink: 0;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .uam-m-step--done .uam-m-step-num {
@@ -1169,16 +1172,17 @@
 .uam-m-step-label {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  font-size: 12px;
+  gap: 6px;
+  font-size: 13px;
   font-weight: 600;
 }
 
 .uam-m-step-divider {
   flex: 1;
-  height: 1px;
+  height: 2px;
+  border-radius: 2px;
   background: #e2e8f0;
-  max-width: 60px;
+  max-width: 80px;
 }
 
 /* Required-field asterisk */
