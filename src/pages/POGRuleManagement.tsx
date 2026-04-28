@@ -1355,7 +1355,7 @@ export const POGRuleManagement: React.FC = () => {
           </div>
 
           <div className="premium-table-container">
-            <table className="premium-table">
+            <table className="premium-table wow-table">
               <thead>
                 <tr>
                   <th>Rule ID</th>

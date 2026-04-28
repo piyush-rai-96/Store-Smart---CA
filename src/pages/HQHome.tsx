@@ -717,7 +717,7 @@ export const HQHome: React.FC = () => {
           )}
 
           <div className="hq-district-table-wrap">
-            <table className="hq-district-table">
+            <table className="hq-district-table wow-table">
               <thead>
                 <tr>
                   <th className="hq-th-check">

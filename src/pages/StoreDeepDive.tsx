@@ -1341,7 +1341,7 @@ export const StoreDeepDive: React.FC = () => {
 
               {/* Category Audit Table */}
               <div className="audit-table-wrapper">
-                <table className="audit-table">
+                <table className="audit-table wow-table">
                   <thead>
                     <tr>
                       <th>Category</th>

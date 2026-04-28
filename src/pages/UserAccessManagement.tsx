@@ -206,7 +206,7 @@ export const UserAccessManagement: React.FC = () => {
 
       {/* Premium Table */}
       <div className="uam-table-card">
-        <table className="uam-table">
+        <table className="uam-table wow-table">
           <thead>
             <tr>
               <th className="uam-th-name">User</th>

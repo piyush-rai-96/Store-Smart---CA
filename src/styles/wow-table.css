@@ -1,0 +1,190 @@
+/* ============================================================
+   WOW Premium Table — Global Reusable Style
+   ------------------------------------------------------------
+   Apply class .wow-table to any <table> for the unified
+   premium look (visible column separators, soft headers,
+   alt rows, hover, highlighted row, numeric accents).
+
+   Wrap with .wow-table-wrap for the rounded card shell.
+   ============================================================ */
+
+.wow-table-wrap {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: auto;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+table.wow-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+  color: #0f172a;
+  background: #ffffff;
+  table-layout: auto;
+}
+
+/* ── Header ─────────────────────────────────────────────── */
+table.wow-table thead {
+  background: #f1f5f9;
+}
+
+table.wow-table thead th {
+  padding: 14px 16px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 700;
+  color: #1e293b;
+  letter-spacing: 0.01em;
+  background: #f1f5f9;
+  border-right: 1px solid #e2e8f0;
+  border-bottom: 1px solid #cbd5e1;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+table.wow-table thead th:last-child {
+  border-right: none;
+}
+
+/* Subtitle inside header (for grouped headers) */
+table.wow-table thead th .wow-th-sub {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+/* Active / sortable header indicator */
+table.wow-table thead th.wow-th-active {
+  color: #4f46e5;
+  box-shadow: inset 0 -2px 0 0 #f59e0b;
+}
+
+table.wow-table thead th.wow-th-sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+table.wow-table thead th.wow-th-sortable:hover {
+  background: #e2e8f0;
+}
+
+/* ── Body cells ─────────────────────────────────────────── */
+table.wow-table tbody td {
+  padding: 14px 16px;
+  border-right: 1px solid #e2e8f0;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+  color: #0f172a;
+  font-size: 13px;
+  background: inherit;
+}
+
+table.wow-table tbody td:last-child {
+  border-right: none;
+}
+
+table.wow-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Alt row banding */
+table.wow-table tbody tr:nth-child(even) {
+  background: #fafbfc;
+}
+
+table.wow-table tbody tr:nth-child(odd) {
+  background: #ffffff;
+}
+
+/* Hover */
+table.wow-table tbody tr:hover {
+  background: #eef2ff;
+  transition: background 0.12s ease;
+}
+
+/* Highlighted / selected row */
+table.wow-table tbody tr.wow-row-highlight,
+table.wow-table tbody tr.selected,
+table.wow-table tbody tr[data-selected="true"] {
+  background: #f5f3ff;
+}
+
+/* Numeric / link-style cell accent */
+table.wow-table tbody td.wow-td-num,
+table.wow-table tbody td .wow-num {
+  color: #4f46e5;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Tabular numbers globally for any td that is purely numeric */
+table.wow-table tbody td {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Compact density variant */
+table.wow-table.wow-table--compact thead th,
+table.wow-table.wow-table--compact tbody td {
+  padding: 10px 12px;
+  font-size: 12px;
+}
+
+/* ── Footer / Pagination ────────────────────────────────── */
+.wow-table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #ffffff;
+  border-top: 1px solid #e2e8f0;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.wow-table-pager {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wow-table-pager button {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #475569;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.wow-table-pager button:hover:not(:disabled) {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.wow-table-pager button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Empty state ────────────────────────────────────────── */
+table.wow-table tbody tr.wow-row-empty td {
+  text-align: center;
+  padding: 32px 16px;
+  color: #94a3b8;
+  font-style: italic;
+  background: #ffffff !important;
+}
+
+/* Inline row bg styles win automatically (higher specificity) — no override needed */

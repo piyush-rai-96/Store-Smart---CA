@@ -4,6 +4,7 @@ import { Provider } from 'react-redux';
 import { store } from './store';
 import App from './App';
 import './App.css';
+import './styles/wow-table.css';
 
 // Import Impact UI styles
 import 'impact-ui/dist/styles/style.css';

@@ -1741,7 +1741,7 @@ export const DistrictIntelligence: React.FC = () => {
         {/* Broadcast List */}
         <div className="bca-sub-section">
           <div className="bca-table-wrapper">
-            <table className="bca-table">
+            <table className="bca-table wow-table">
               <thead>
                 <tr>
                   <th>Broadcast</th>
@@ -2124,7 +2124,7 @@ export const DistrictIntelligence: React.FC = () => {
           </div>
         </div>
         <div className="leaderboard-table-premium">
-          <table>
+          <table className="wow-table">
             <thead>
               <tr>
                 <th className="th-rank th-sortable" onClick={() => handleLeaderboardSort('rank')}><span>Rank</span><SortIcon col="rank" /></th>
@@ -2251,7 +2251,7 @@ export const DistrictIntelligence: React.FC = () => {
           </div>
         </div>
         <div className="heatmap-table-wrapper">
-          <table className="heatmap-table">
+          <table className="heatmap-table wow-table">
             <thead>
               <tr>
                 <th className="heatmap-th-store">Store</th>
@@ -3447,7 +3447,7 @@ export const DistrictIntelligence: React.FC = () => {
                   Store-Level Compliance
                 </h3>
                 <div className="bca-panel-table-wrapper">
-                  <table className="bca-panel-table">
+                  <table className="bca-panel-table wow-table">
                     <thead>
                       <tr>
                         <th>Store</th>

@@ -1619,7 +1619,7 @@ export const StoreCenter: React.FC = () => {
             {/* Inventory Tab */}
             {activeTab === 'inventory' && (
               <div className="sc-inventory-tab">
-                <table className="sc-inv-table">
+                <table className="sc-inv-table wow-table">
                   <thead>
                     <tr>
                       <th>SKU</th>

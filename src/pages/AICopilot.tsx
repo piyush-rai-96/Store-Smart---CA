@@ -1245,7 +1245,7 @@ export const AICopilot: React.FC = () => {
                 if (sepIdx < 0) sepIdx = 1; // fallback
                 const headerCells = tableRows[sepIdx > 0 ? 0 : 0].split('|').map(c => c.trim()).filter(Boolean);
                 const dataRows = tableRows.filter((_, idx) => idx !== 0 && idx !== sepIdx);
-                let t = '<div class="cop-md-table-wrap"><table class="cop-md-table"><thead><tr>';
+                let t = '<div class="cop-md-table-wrap wow-table-wrap"><table class="cop-md-table wow-table"><thead><tr>';
                 headerCells.forEach(c => { t += `<th>${fmtCell(c)}</th>`; });
                 t += '</tr></thead><tbody>';
                 dataRows.forEach(row => {
