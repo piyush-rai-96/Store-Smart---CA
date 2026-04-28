@@ -150,20 +150,6 @@ export const UserAccessManagement: React.FC = () => {
           </div>
         </div>
         <div className="uam-header-right">
-          <div className="uam-search-bar">
-            <Search size={15} />
-            <input
-              type="text"
-              placeholder="Search by name, email, or role..."
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-            />
-            {searchQuery && (
-              <button className="uam-search-clear" onClick={() => setSearchQuery('')}>
-                <X size={13} />
-              </button>
-            )}
-          </div>
           <button className="uam-create-btn" onClick={() => { resetForm(); setShowCreateModal(true); }}>
             <UserPlus size={15} />
             <span>Create User</span>
@@ -189,12 +175,12 @@ export const UserAccessManagement: React.FC = () => {
           </div>
           <div className="bca-kpi-card">
             <span className="bca-kpi-label">Active</span>
-            <span className="bca-kpi-value" style={{ color: '#16a34a' }}>{statCounts.active}</span>
+            <span className="bca-kpi-value">{statCounts.active}</span>
             <span className="bca-kpi-context">currently signed in</span>
           </div>
           <div className="bca-kpi-card">
             <span className="bca-kpi-label">Pending</span>
-            <span className="bca-kpi-value" style={{ color: '#d97706' }}>{statCounts.invited}</span>
+            <span className="bca-kpi-value">{statCounts.invited}</span>
             <span className="bca-kpi-context">invite not accepted</span>
           </div>
           <div className="bca-kpi-card">
@@ -208,6 +194,25 @@ export const UserAccessManagement: React.FC = () => {
             <span className="bca-kpi-context">matching search</span>
           </div>
         </div>
+      </div>
+
+      {/* ── Search toolbar (above table, mirrors DI Leaderboard) ── */}
+      <div className="uam-table-toolbar">
+        <div className="uam-search-bar">
+          <Search size={15} />
+          <input
+            type="text"
+            placeholder="Search by name, email, or role..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <button className="uam-search-clear" onClick={() => setSearchQuery('')}>
+              <X size={13} />
+            </button>
+          )}
+        </div>
+        <span className="uam-toolbar-count">{filteredUsers.length} of {allUsers.length} users</span>
       </div>
 
       {/* ── Users Table ── */}
