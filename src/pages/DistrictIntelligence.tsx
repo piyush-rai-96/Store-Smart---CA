@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Activity,
@@ -35,14 +35,11 @@ import {
   Target,
   ArrowUpRight,
   ArrowDownRight,
-  Shield,
-  FileText,
-  Zap,
-  ArrowRight,
-  Bot,
-  Filter
+  Filter,
+  CheckCircle2
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { AIDailyBrief } from '../components/common/AIDailyBrief';
 import './DistrictIntelligence.css';
 
 // Types
@@ -244,61 +241,158 @@ const DISTRICT_TRIAGE: Record<string, TriageItem[]> = {
   ],
 };
 
-// Per-district escalation data
-const getDistrictEscalations = (seedOffset: number): EscalatedStore[] => {
-  if (seedOffset === 0) return escalatedStores;
-  const stores = getDistrictStores(seedOffset);
-  const worstStores = [...stores].sort((a, b) => a.dpi - b.dpi).slice(0, Math.min(3, stores.length));
-  const stages: EscalatedStore['stage'][] = ['critical', 'escalated', 'early-warning'];
-  const reasons = [
-    'Multiple audit categories below acceptable threshold',
-    'Consecutive compliance misses across 2+ weeks',
-    'DPI declined for 3 straight weeks',
-  ];
-  return worstStores.map((s, i) => ({
-    storeNumber: s.storeNumber,
-    storeName: s.storeName,
-    stage: stages[i % 3],
-    reason: reasons[i % 3],
-    missStreak: 3 - i,
-    lastAuditDate: [`2 days ago`, `4 days ago`, `1 day ago`][i % 3],
-    dpiImpact: parseFloat((-4.2 + i * 1.1).toFixed(1)),
-    categories: [['Safety', 'Planogram'], ['Cleanliness', 'Stock Rotation', 'Backroom'], ['Planogram']][i % 3],
-  }));
-};
-
-// Per-district broadcast stats
-interface DistrictBroadcastData {
-  active: number; thisWeek: number; ackRate: string;
-  broadcasts: { priority: 'high' | 'medium' | 'low'; title: string; time: string; ack: string }[];
-  gap: string; topInsight: string;
+// Per-district broadcast analytics
+interface BroadcastOverview { active: number; sentThisWeek: number; ackPct: number; avgAckTime: string; trendVsLast: number }
+interface BroadcastGapItem { store: string; storeId: string; pending: number; overdue: number; lastAck: string }
+interface BroadcastEffectivenessRow {
+  id: string; name: string; priority: 'high' | 'medium' | 'low'; ackRate: number; avgAckTime: string;
+  status: 'good' | 'at-risk'; type: 'Action Required' | 'Informational'; sentAt: string; stores: number; acked: number;
 }
-const DISTRICT_BROADCASTS: Record<string, DistrictBroadcastData> = {
-  d14: { active: 3, thisWeek: 12, ackRate: '94%', broadcasts: [
-    { priority: 'high', title: 'Safety Protocol Update', time: '2h ago', ack: '8/8 stores acknowledged' },
-    { priority: 'medium', title: 'Weekend Staffing Reminder', time: 'Yesterday', ack: '6/8 stores acknowledged' },
-    { priority: 'low', title: 'Planogram Refresh Checklist', time: '3d ago', ack: '5/8 stores acknowledged' },
-  ], gap: 'Cologne East — 3 pending acks', topInsight: 'Safety broadcasts get 98% ack rate within 2h' },
-  d08: { active: 2, thisWeek: 8, ackRate: '88%', broadcasts: [
-    { priority: 'high', title: 'Shrinkage Prevention Alert', time: '1h ago', ack: '5/6 stores acknowledged' },
-    { priority: 'medium', title: 'Holiday Staffing Plan', time: '4h ago', ack: '4/6 stores acknowledged' },
-    { priority: 'low', title: 'New POS Training Schedule', time: '2d ago', ack: '6/6 stores acknowledged' },
-  ], gap: 'Macon Point — 2 pending acks', topInsight: 'Training broadcasts get 100% ack within 48h' },
-  d22: { active: 4, thisWeek: 15, ackRate: '82%', broadcasts: [
-    { priority: 'high', title: 'Wet Floor Safety Reminder', time: '30m ago', ack: '5/7 stores acknowledged' },
-    { priority: 'high', title: 'Planogram Reset Deadline', time: '3h ago', ack: '4/7 stores acknowledged' },
-    { priority: 'medium', title: 'Stock Rotation Checklist', time: 'Yesterday', ack: '6/7 stores acknowledged' },
-  ], gap: 'Chapel Hill — 4 pending acks', topInsight: 'Compliance-related broadcasts have lowest ack rate (78%)' },
-  d11: { active: 5, thisWeek: 18, ackRate: '79%', broadcasts: [
-    { priority: 'high', title: 'Cooler Maintenance Alert', time: '45m ago', ack: '7/9 stores acknowledged' },
-    { priority: 'high', title: 'Promo Execution Deadline', time: '2h ago', ack: '5/9 stores acknowledged' },
-    { priority: 'medium', title: 'Product Recall Notice', time: 'Yesterday', ack: '8/9 stores acknowledged' },
-  ], gap: 'Naples Point — 5 pending acks', topInsight: 'Recall notices get 89% ack within 1h' },
-  d19: { active: 2, thisWeek: 6, ackRate: '91%', broadcasts: [
-    { priority: 'high', title: 'Audit Compliance Reminder', time: '1h ago', ack: '4/5 stores acknowledged' },
-    { priority: 'medium', title: 'Cleanliness Checklist Update', time: '5h ago', ack: '5/5 stores acknowledged' },
-    { priority: 'low', title: 'Monthly Team Meeting', time: '2d ago', ack: '5/5 stores acknowledged' },
-  ], gap: 'Birmingham Center — 1 pending ack', topInsight: 'Smaller district shows faster ack rates (avg 45min)' },
+interface StoreComplianceRow { store: string; storeId: string; ackRate: number; avgTime: string; tier: 'top' | 'at-risk' | 'defaulter'; missedCount: number }
+interface BroadcastInsight { pattern: string; recommendation: string }
+interface DistrictBroadcastAnalytics {
+  overview: BroadcastOverview;
+  gaps: BroadcastGapItem[];
+  effectiveness: BroadcastEffectivenessRow[];
+  storeCompliance: StoreComplianceRow[];
+  insights: BroadcastInsight[];
+}
+const DISTRICT_BROADCAST_ANALYTICS: Record<string, DistrictBroadcastAnalytics> = {
+  d14: {
+    overview: { active: 3, sentThisWeek: 12, ackPct: 94, avgAckTime: '1h 12m', trendVsLast: 3 },
+    gaps: [
+      { store: 'Cologne East', storeId: '3456', pending: 3, overdue: 1, lastAck: '18h ago' },
+      { store: 'Pine Grove', storeId: '6789', pending: 2, overdue: 2, lastAck: '26h ago' },
+      { store: 'Berlin Mitte', storeId: '2345', pending: 1, overdue: 0, lastAck: '4h ago' },
+    ],
+    effectiveness: [
+      { id: 'b1', name: 'Safety Protocol Update', priority: 'high', ackRate: 100, avgAckTime: '32m', status: 'good', type: 'Action Required', sentAt: '2h ago', stores: 8, acked: 8 },
+      { id: 'b2', name: 'Weekend Staffing Reminder', priority: 'medium', ackRate: 75, avgAckTime: '2h 15m', status: 'at-risk', type: 'Action Required', sentAt: 'Yesterday', stores: 8, acked: 6 },
+      { id: 'b3', name: 'Planogram Refresh Checklist', priority: 'low', ackRate: 63, avgAckTime: '4h 30m', status: 'at-risk', type: 'Informational', sentAt: '3d ago', stores: 8, acked: 5 },
+      { id: 'b4', name: 'Monthly Performance Summary', priority: 'low', ackRate: 100, avgAckTime: '1h 05m', status: 'good', type: 'Informational', sentAt: '5d ago', stores: 8, acked: 8 },
+      { id: 'b5', name: 'Fire Exit Compliance Alert', priority: 'high', ackRate: 88, avgAckTime: '45m', status: 'good', type: 'Action Required', sentAt: '1d ago', stores: 8, acked: 7 },
+    ],
+    storeCompliance: [
+      { store: 'Amsterdam Central', storeId: '1234', ackRate: 100, avgTime: '28m', tier: 'top', missedCount: 0 },
+      { store: 'Brussels Nord', storeId: '2156', ackRate: 100, avgTime: '35m', tier: 'top', missedCount: 0 },
+      { store: 'Hamburg South', storeId: '5678', ackRate: 92, avgTime: '1h 10m', tier: 'top', missedCount: 1 },
+      { store: 'Berlin Mitte', storeId: '2345', ackRate: 88, avgTime: '1h 45m', tier: 'at-risk', missedCount: 2 },
+      { store: 'Maple Heights', storeId: '4567', ackRate: 83, avgTime: '2h 20m', tier: 'at-risk', missedCount: 3 },
+      { store: 'Cologne East', storeId: '3456', ackRate: 75, avgTime: '3h 40m', tier: 'defaulter', missedCount: 5 },
+      { store: 'Pine Grove', storeId: '6789', ackRate: 67, avgTime: '5h 10m', tier: 'defaulter', missedCount: 7 },
+      { store: 'Frankfurt West', storeId: '7890', ackRate: 96, avgTime: '42m', tier: 'top', missedCount: 0 },
+    ],
+    insights: [
+      { pattern: 'Safety and compliance broadcasts achieve 98% ack within 2 hours — significantly faster than informational ones (avg 4h).', recommendation: 'Tag operational broadcasts as "Action Required" to leverage the urgency pattern and improve ack rates.' },
+      { pattern: 'Pine Grove and Cologne East are repeat defaulters — combined 12 missed acks in the last 2 weeks, correlating with their low DPI scores.', recommendation: 'Schedule a focused 1:1 with store managers at both locations. Consider linking broadcast compliance to performance reviews.' },
+      { pattern: 'Broadcasts sent before 9 AM get 22% faster acknowledgement vs those sent after 2 PM.', recommendation: 'Shift non-urgent broadcasts to early morning delivery windows for better engagement.' },
+    ],
+  },
+  d08: {
+    overview: { active: 2, sentThisWeek: 8, ackPct: 88, avgAckTime: '1h 45m', trendVsLast: -2 },
+    gaps: [
+      { store: 'Macon Point', storeId: '8901', pending: 2, overdue: 1, lastAck: '22h ago' },
+      { store: 'Athens Center', storeId: '9012', pending: 1, overdue: 0, lastAck: '6h ago' },
+    ],
+    effectiveness: [
+      { id: 'b1', name: 'Shrinkage Prevention Alert', priority: 'high', ackRate: 83, avgAckTime: '55m', status: 'good', type: 'Action Required', sentAt: '1h ago', stores: 6, acked: 5 },
+      { id: 'b2', name: 'Holiday Staffing Plan', priority: 'medium', ackRate: 67, avgAckTime: '3h 10m', status: 'at-risk', type: 'Action Required', sentAt: '4h ago', stores: 6, acked: 4 },
+      { id: 'b3', name: 'New POS Training Schedule', priority: 'low', ackRate: 100, avgAckTime: '1h 30m', status: 'good', type: 'Informational', sentAt: '2d ago', stores: 6, acked: 6 },
+      { id: 'b4', name: 'Loss Prevention Walkthrough', priority: 'high', ackRate: 100, avgAckTime: '40m', status: 'good', type: 'Action Required', sentAt: '3d ago', stores: 6, acked: 6 },
+    ],
+    storeCompliance: [
+      { store: 'Savannah Square', storeId: '8234', ackRate: 100, avgTime: '30m', tier: 'top', missedCount: 0 },
+      { store: 'Macon Center', storeId: '8345', ackRate: 100, avgTime: '38m', tier: 'top', missedCount: 0 },
+      { store: 'Peachtree Plaza', storeId: '8456', ackRate: 88, avgTime: '1h 50m', tier: 'at-risk', missedCount: 2 },
+      { store: 'Augusta Mall', storeId: '8567', ackRate: 83, avgTime: '2h 05m', tier: 'at-risk', missedCount: 3 },
+      { store: 'Athens Center', storeId: '9012', ackRate: 79, avgTime: '2h 40m', tier: 'at-risk', missedCount: 3 },
+      { store: 'Macon Point', storeId: '8901', ackRate: 63, avgTime: '4h 20m', tier: 'defaulter', missedCount: 6 },
+    ],
+    insights: [
+      { pattern: 'Ack rate dropped 2% vs last week — driven by Macon Point missing 2 consecutive high-priority broadcasts.', recommendation: 'Send a direct nudge to Macon Point manager. Consider escalating if pattern continues next week.' },
+      { pattern: 'Training-type broadcasts achieve 100% ack — stores treat them as mandatory. Operational alerts lag at 75%.', recommendation: 'Reframe operational alerts with clearer deadlines and consequences to improve urgency.' },
+    ],
+  },
+  d22: {
+    overview: { active: 4, sentThisWeek: 15, ackPct: 82, avgAckTime: '2h 30m', trendVsLast: -5 },
+    gaps: [
+      { store: 'Chapel Hill', storeId: '2201', pending: 4, overdue: 3, lastAck: '32h ago' },
+      { store: 'Raleigh Commons', storeId: '2202', pending: 3, overdue: 1, lastAck: '14h ago' },
+      { store: 'Wilmington Bay', storeId: '2203', pending: 2, overdue: 0, lastAck: '8h ago' },
+    ],
+    effectiveness: [
+      { id: 'b1', name: 'Wet Floor Safety Reminder', priority: 'high', ackRate: 71, avgAckTime: '1h 40m', status: 'at-risk', type: 'Action Required', sentAt: '30m ago', stores: 7, acked: 5 },
+      { id: 'b2', name: 'Planogram Reset Deadline', priority: 'high', ackRate: 57, avgAckTime: '3h 20m', status: 'at-risk', type: 'Action Required', sentAt: '3h ago', stores: 7, acked: 4 },
+      { id: 'b3', name: 'Stock Rotation Checklist', priority: 'medium', ackRate: 86, avgAckTime: '2h 05m', status: 'good', type: 'Action Required', sentAt: 'Yesterday', stores: 7, acked: 6 },
+      { id: 'b4', name: 'Safety Incident Follow-up', priority: 'high', ackRate: 100, avgAckTime: '25m', status: 'good', type: 'Action Required', sentAt: '1d ago', stores: 7, acked: 7 },
+    ],
+    storeCompliance: [
+      { store: 'Charlotte Hub', storeId: '2204', ackRate: 100, avgTime: '32m', tier: 'top', missedCount: 0 },
+      { store: 'Durham Heights', storeId: '2205', ackRate: 93, avgTime: '55m', tier: 'top', missedCount: 1 },
+      { store: 'Greensboro Mall', storeId: '2206', ackRate: 87, avgTime: '1h 30m', tier: 'at-risk', missedCount: 2 },
+      { store: 'Wilmington Bay', storeId: '2203', ackRate: 80, avgTime: '2h 10m', tier: 'at-risk', missedCount: 3 },
+      { store: 'Raleigh Commons', storeId: '2202', ackRate: 67, avgTime: '3h 50m', tier: 'defaulter', missedCount: 6 },
+      { store: 'Chapel Hill', storeId: '2201', ackRate: 53, avgTime: '5h 30m', tier: 'defaulter', missedCount: 9 },
+      { store: 'Raleigh Court', storeId: '2207', ackRate: 93, avgTime: '48m', tier: 'top', missedCount: 1 },
+    ],
+    insights: [
+      { pattern: 'Ack rate dropped 5% WoW — worst decline across all districts. Chapel Hill has not acknowledged any broadcast in 32 hours.', recommendation: 'Escalate Chapel Hill immediately. The store may have a staffing or device access issue preventing acknowledgements.' },
+      { pattern: 'High-priority broadcasts in Carolina are only achieving 64% avg ack — compared to 95% in District 14.', recommendation: 'Review broadcast delivery method. Consider requiring read-receipts or adding SMS fallback for critical alerts.' },
+    ],
+  },
+  d11: {
+    overview: { active: 5, sentThisWeek: 18, ackPct: 79, avgAckTime: '2h 55m', trendVsLast: -4 },
+    gaps: [
+      { store: 'Naples Point', storeId: '1101', pending: 5, overdue: 3, lastAck: '28h ago' },
+      { store: 'Gainesville', storeId: '1102', pending: 3, overdue: 2, lastAck: '20h ago' },
+      { store: 'Fort Lauderdale', storeId: '1103', pending: 2, overdue: 0, lastAck: '6h ago' },
+    ],
+    effectiveness: [
+      { id: 'b1', name: 'Cooler Maintenance Alert', priority: 'high', ackRate: 78, avgAckTime: '1h 20m', status: 'at-risk', type: 'Action Required', sentAt: '45m ago', stores: 9, acked: 7 },
+      { id: 'b2', name: 'Promo Execution Deadline', priority: 'high', ackRate: 56, avgAckTime: '3h 45m', status: 'at-risk', type: 'Action Required', sentAt: '2h ago', stores: 9, acked: 5 },
+      { id: 'b3', name: 'Product Recall Notice', priority: 'medium', ackRate: 89, avgAckTime: '55m', status: 'good', type: 'Action Required', sentAt: 'Yesterday', stores: 9, acked: 8 },
+      { id: 'b4', name: 'Weekly Ops Summary', priority: 'low', ackRate: 100, avgAckTime: '1h 40m', status: 'good', type: 'Informational', sentAt: '3d ago', stores: 9, acked: 9 },
+      { id: 'b5', name: 'Emergency OOS Protocol', priority: 'high', ackRate: 100, avgAckTime: '18m', status: 'good', type: 'Action Required', sentAt: '2d ago', stores: 9, acked: 9 },
+    ],
+    storeCompliance: [
+      { store: 'Miami Central', storeId: '1104', ackRate: 100, avgTime: '22m', tier: 'top', missedCount: 0 },
+      { store: 'Tampa Bay Mall', storeId: '1105', ackRate: 100, avgTime: '30m', tier: 'top', missedCount: 0 },
+      { store: 'Orlando Gateway', storeId: '1106', ackRate: 89, avgTime: '1h 15m', tier: 'top', missedCount: 1 },
+      { store: 'St. Petersburg', storeId: '1107', ackRate: 83, avgTime: '2h 00m', tier: 'at-risk', missedCount: 3 },
+      { store: 'Jacksonville Hub', storeId: '1108', ackRate: 78, avgTime: '2h 30m', tier: 'at-risk', missedCount: 4 },
+      { store: 'Fort Lauderdale', storeId: '1103', ackRate: 72, avgTime: '3h 10m', tier: 'at-risk', missedCount: 4 },
+      { store: 'Gainesville', storeId: '1102', ackRate: 56, avgTime: '5h 00m', tier: 'defaulter', missedCount: 8 },
+      { store: 'Naples Point', storeId: '1101', ackRate: 44, avgTime: '6h 20m', tier: 'defaulter', missedCount: 11 },
+      { store: 'Tallahassee', storeId: '1109', ackRate: 94, avgTime: '40m', tier: 'top', missedCount: 0 },
+    ],
+    insights: [
+      { pattern: 'Naples Point has the worst ack rate in the entire chain (44%). 11 missed acks in 2 weeks — indicating systemic disengagement.', recommendation: 'Flag for formal performance review. Consider requiring the store manager to confirm device functionality and staffing levels.' },
+      { pattern: 'Emergency-tagged broadcasts get 100% ack within 18 minutes — even from low-performing stores.', recommendation: 'Use the "Emergency" tag sparingly but leverage its effectiveness for truly critical communications.' },
+      { pattern: 'Inland stores (Naples, Gainesville, Jacksonville) average 4h ack time vs coastal stores at 35m — a 7x gap.', recommendation: 'Investigate root cause: could be device access, shift overlap gaps, or manager engagement. Schedule targeted check-ins.' },
+    ],
+  },
+  d19: {
+    overview: { active: 2, sentThisWeek: 6, ackPct: 96, avgAckTime: '42m', trendVsLast: 2 },
+    gaps: [
+      { store: 'Birmingham Center', storeId: '1901', pending: 1, overdue: 0, lastAck: '3h ago' },
+    ],
+    effectiveness: [
+      { id: 'b1', name: 'Audit Compliance Reminder', priority: 'high', ackRate: 80, avgAckTime: '50m', status: 'good', type: 'Action Required', sentAt: '1h ago', stores: 5, acked: 4 },
+      { id: 'b2', name: 'Cleanliness Checklist Update', priority: 'medium', ackRate: 100, avgAckTime: '35m', status: 'good', type: 'Action Required', sentAt: '5h ago', stores: 5, acked: 5 },
+      { id: 'b3', name: 'Monthly Team Meeting', priority: 'low', ackRate: 100, avgAckTime: '28m', status: 'good', type: 'Informational', sentAt: '2d ago', stores: 5, acked: 5 },
+    ],
+    storeCompliance: [
+      { store: 'Huntsville South', storeId: '1902', ackRate: 100, avgTime: '18m', tier: 'top', missedCount: 0 },
+      { store: 'Mobile Bay', storeId: '1903', ackRate: 100, avgTime: '25m', tier: 'top', missedCount: 0 },
+      { store: 'Montgomery Mall', storeId: '1904', ackRate: 100, avgTime: '30m', tier: 'top', missedCount: 0 },
+      { store: 'Tuscaloosa', storeId: '1905', ackRate: 96, avgTime: '38m', tier: 'top', missedCount: 0 },
+      { store: 'Birmingham Center', storeId: '1901', ackRate: 88, avgTime: '1h 10m', tier: 'at-risk', missedCount: 1 },
+    ],
+    insights: [
+      { pattern: 'Alabama has the best ack rate (96%) and fastest avg time (42m) across all districts — a benchmark for communication effectiveness.', recommendation: 'Document Alabama\'s broadcast practices for replication. Key factor: small district size enables direct DM–SM relationships.' },
+      { pattern: 'All stores except Birmingham Center are at 96%+ ack. Birmingham\'s single miss was a low-priority informational broadcast.', recommendation: 'No action required — this is healthy performance. Continue current broadcast cadence and format.' },
+    ],
+  },
 };
 
 const getComplianceColor = (value: number): string => {
@@ -446,30 +540,6 @@ const auditCellDetails: Record<string, AuditCellDetail> = {
     recommendation: 'Maintain current protocols. Eligible for "Clean Store" recognition.',
   },
 };
-
-// Escalation Command Center Data
-interface EscalatedStore {
-  storeNumber: string;
-  storeName: string;
-  stage: 'early-warning' | 'escalated' | 'critical';
-  reason: string;
-  missStreak: number;
-  lastAuditDate: string;
-  dpiImpact: number;
-  categories: string[];
-}
-
-const escalatedStores: EscalatedStore[] = [
-  { storeNumber: '5678', storeName: 'Pine Grove', stage: 'critical', reason: 'Safety audit failed 3 consecutive weeks', missStreak: 3, lastAuditDate: '2 days ago', dpiImpact: -4.2, categories: ['Safety', 'Planogram'] },
-  { storeNumber: '9012', storeName: 'Maple Heights', stage: 'escalated', reason: 'Multiple compliance categories below 40%', missStreak: 2, lastAuditDate: '4 days ago', dpiImpact: -3.1, categories: ['Cleanliness', 'Stock Rotation', 'Backroom'] },
-  { storeNumber: '1234', storeName: 'Oak Street', stage: 'early-warning', reason: 'Planogram compliance dropped below 60% this week', missStreak: 1, lastAuditDate: '1 day ago', dpiImpact: -1.5, categories: ['Planogram'] },
-];
-
-const escalationRules = [
-  { week: 'Week 1', trigger: 'Compliance < 60% in any category', action: 'Early warning flagged', stage: 'early-warning' as const },
-  { week: 'Week 2', trigger: 'No improvement or additional miss', action: 'Auto-escalated to DM', stage: 'escalated' as const },
-  { week: 'Week 3+', trigger: 'Consecutive misses across categories', action: 'Critical — DM action required', stage: 'critical' as const },
-];
 
 // KPI Cards Data
 interface DistrictKPI {
@@ -706,8 +776,7 @@ export const DistrictIntelligence: React.FC = () => {
   const activeStores = isHQ ? getDistrictStores(selectedDistrictOption.seedOffset) : mockStores;
   const activeAuditData = isHQ ? getDistrictAuditData(selectedDistrictOption.seedOffset) : auditComplianceData;
   const activeTriageItems = DISTRICT_TRIAGE[selectedDistrictId] || DISTRICT_TRIAGE['d14'];
-  const activeEscalations = isHQ ? getDistrictEscalations(selectedDistrictOption.seedOffset) : escalatedStores;
-  const activeBroadcasts = DISTRICT_BROADCASTS[selectedDistrictId] || DISTRICT_BROADCASTS['d14'];
+  const activeBroadcasts = DISTRICT_BROADCAST_ANALYTICS[selectedDistrictId] || DISTRICT_BROADCAST_ANALYTICS['d14'];
   const activeMetricsSet = isHQ ? getDistrictMetrics(selectedDistrictOption.seedOffset) : undefined;
   const [isLoading, setIsLoading] = useState(true);
   const [isNavigating, setIsNavigating] = useState(false);
@@ -757,15 +826,10 @@ export const DistrictIntelligence: React.FC = () => {
     return { label: `Q${q} ${y} (${qMonths[startM]}–${qMonths[startM + 2]})`, quarter: q, year: y };
   });
   
-  // Escalation policy modal
-  const [showEscPolicy, setShowEscPolicy] = useState(false);
-
   // Heatmap tooltip state
   const [heatmapTip, setHeatmapTip] = useState<{ x: number; y: number; store: string; cat: string; val: number } | null>(null);
   // Heatmap cell detail modal
   const [heatmapDetail, setHeatmapDetail] = useState<{ storeNumber: string; storeName: string; category: string; score: number; detail: AuditCellDetail; skill: string; skillLogic: string } | null>(null);
-  // Heatmap chip popover (inline on-click)
-  const [chipPopover, setChipPopover] = useState<{ cellKey: string; storeNumber: string; storeName: string; category: string; score: number; detail: AuditCellDetail; skill: string; skillLogic: string; rect: { top: number; left: number; width: number; height: number } } | null>(null);
 
   // Chat Window States (same as Home Screen)
   const [showChatWindow, setShowChatWindow] = useState(false);
@@ -780,7 +844,21 @@ export const DistrictIntelligence: React.FC = () => {
   const [showSeaPanel, setShowSeaPanel] = useState(false);
   const [showTriageDetail, setShowTriageDetail] = useState<string | null>(null);
   const [activeKPIPanel, setActiveKPIPanel] = useState<DistrictKPI | null>(null);
-  
+  const dpiCardRef = useRef<HTMLDivElement | null>(null);
+  const [dpiCardHeight, setDpiCardHeight] = useState<number | null>(null);
+  const [bcaSelectedBroadcast, setBcaSelectedBroadcast] = useState<BroadcastEffectivenessRow | null>(null);
+
+  const closeBcaPanel = () => { setBcaSelectedBroadcast(null); };
+
+  // Build per-broadcast store compliance: top `acked` stores are Acknowledged, rest Pending
+  const getBroadcastStoreCompliance = (bc: BroadcastEffectivenessRow) => {
+    const stores = [...activeBroadcasts.storeCompliance].sort((a, b) => b.ackRate - a.ackRate);
+    return stores.slice(0, bc.stores).map((s, i) => ({
+      ...s,
+      acknowledged: i < bc.acked,
+    }));
+  };
+
   // Toast notification helper
   const showToast = (message: string) => {
     setToastMessage(message);
@@ -891,17 +969,16 @@ export const DistrictIntelligence: React.FC = () => {
   const currentData = calendarMode === 'quarter' ? quarterData : calendarMode === 'month' ? monthData : weekData;
 
   // Transform KPI data based on selected district + time period
-  // Default deltaContext is YoY; time filter swaps to WoW / MoM / QoQ
+  // KPI tiles always show YoY; period comparison (WoW/MoM/QoQ) is shown in the right-side panel.
   const periodLabel = calendarMode === 'week' ? 'WoW' : calendarMode === 'month' ? 'MoM' : 'QoQ';
-  const swapContext = (ctx?: string) => (ctx === 'YoY' ? periodLabel : ctx);
 
   const getAdjustedKPIs = (): DistrictKPI[] => {
     // Step 1: apply district overrides to base KPIs
     const districtOverrides = DISTRICT_KPI_OVERRIDES[selectedDistrictId] || {};
     const baseKPIs = districtKPIs.map(kpi => {
       const ov = districtOverrides[kpi.id];
-      if (!ov) return { ...kpi, deltaContext: swapContext(kpi.deltaContext) };
-      return { ...kpi, primaryValue: ov.primaryValue, delta: ov.delta, deltaDirection: ov.deltaDirection, microInsight: ov.microInsight, status: ov.status, deltaContext: swapContext(kpi.deltaContext) };
+      if (!ov) return { ...kpi };
+      return { ...kpi, primaryValue: ov.primaryValue, delta: ov.delta, deltaDirection: ov.deltaDirection, microInsight: ov.microInsight, status: ov.status };
     });
     if (calendarMode === 'week') return baseKPIs;
     
@@ -988,117 +1065,210 @@ export const DistrictIntelligence: React.FC = () => {
   };
   const adjustedAuditData = getAdjustedAuditData();
 
-  // Period-adjusted + district-aware AI Summary
-  const DISTRICT_AI_SUMMARIES: Record<string, { week: { situation: string; pattern: string; risk: string; action: string }; month: { situation: string; pattern: string; risk: string; action: string }; quarter: { situation: string; pattern: string; risk: string; action: string } }> = {
+  // District-specific AI Daily Brief content (detailed paragraphs + bullets)
+  interface DIBriefSection { title: string; icon: 'triage' | 'performance' | 'ops' | 'customer' | 'recommendations'; bullets: string[] }
+  interface DIBrief { greeting: string; sections: DIBriefSection[]; closing: string }
+  const DISTRICT_BRIEFS: Record<string, DIBrief> = {
     d14: {
-      week: {
-        situation: 'Three concurrent triage issues across Hamburg South, Cologne East, and Berlin Mitte show execution stability slipping this week.',
-        pattern: 'VoC complaints and the SEA violation both originate at Hamburg South, pointing to a shared root cause—messy aisles blocking emergency paths during peak hours.',
-        risk: 'The SEA fire-exit block is a regulatory and safety exposure; any delay risks store closure and penalties.',
-        action: 'Deploy Hamburg South team now to clear the exit, confirm compliance, then approve Cologne East adaptation plan to protect sales.',
-      },
-      month: {
-        situation: 'Monthly analysis reveals systemic execution gaps in 3 of 8 stores. Hamburg South and Pine Grove consistently lag on audit compliance across all 4 weeks.',
-        pattern: 'VoC "Messy Aisles" theme correlates strongly with declining audit scores in Cleanliness and Customer Area categories—month-long pattern, not a one-off.',
-        risk: 'Sustained underperformance at Pine Grove (DPI 63) risks sliding into Crisis tier. Monthly NPS trending -4pts with no recovery signal.',
-        action: 'Schedule a focused DM visit to Pine Grove and Hamburg South. Assign dedicated reset crews for Cleanliness category improvement plan.',
-      },
-      quarter: {
-        situation: 'Quarterly view shows the district stabilizing at DPI 80 after a Q4 dip. Two stores (Pine Grove, Maple Heights) remain chronically underperforming across all quarters.',
-        pattern: 'Seasonal markdown pressure drove 30bps margin erosion. VoC satisfaction follows a consistent Q1 dip pattern across the last 3 years—likely weather and staffing-related.',
-        risk: 'If Pine Grove and Maple Heights remain in Crisis through Q2, district tier risks downgrade from Stable to AtRisk at the half-year review.',
-        action: 'Present quarterly turnaround plan for bottom-2 stores at regional review. Lock in staffing uplift for Q2 peak season to prevent repeat VoC decline.',
-      },
+      greeting: `3 active triage items this week across Hamburg South, Cologne East, and Berlin Mitte. Here's the full district intelligence picture with root causes, trend analysis, and recommended actions.`,
+      sections: [
+        {
+          title: 'Triage & Critical Issues',
+          icon: 'triage',
+          bullets: [
+            '<strong>VoC: Messy Aisles</strong> — +22% theme spike across 3 stores (Hamburg South +45%, Cologne East +38%, Berlin Mitte +31%). WoW trend is accelerating; last week was +14%. Root cause: cleaning staff hours were cut by 2hrs/day at these locations last month.',
+            '<strong>SEA Auto-Fail: Fire Exit</strong> at Hamburg South is a <strong>CRITICAL</strong> regulatory exposure. Display fixture blocking emergency Exit B. Auto-escalated to DM 2 hours ago; store manager acknowledgment still pending. Any delay risks store closure and penalties.',
+            '<strong>Inbound OOS Risk</strong> at Cologne East — 3 SKUs (Summer Dress, Linen Pants, Cotton Blouse) delayed 48h from DC. Revenue impact estimated at €2,400. Adaptation plan awaiting DM approval.',
+          ],
+        },
+        {
+          title: 'Performance & Trends',
+          icon: 'performance',
+          bullets: [
+            'District DPI moved from <strong>76 → 78</strong> (+2pts MoM), placing in the <strong>top 10% — Excellence Tier</strong>. However, the triage items above represent emerging risks that could reverse this trajectory.',
+            'Weekly revenue at <strong>$2.4M</strong> (+8% vs target, +5% WoW). 6 of 8 stores exceeded plan. Amsterdam Central and Hamburg South are the leading revenue contributors, but Hamburg South\'s operational issues are offsetting sales performance.',
+            'Gross margin held at <strong>34.2%</strong> (+0.3pp WoW). YoY comparison shows a <strong>+1.8pp improvement</strong> driven by markdown optimization. Seasonal clearance contributed an estimated $18K margin recovery this period.',
+            'Store-level variance is widening: top store (Amsterdam Central) at DPI 91 vs bottom (Pine Grove) at DPI 63. The gap increased by 4pts this month — requires targeted intervention.',
+          ],
+        },
+        {
+          title: 'Operational Analysis',
+          icon: 'ops',
+          bullets: [
+            '<strong>Compliance:</strong> District-wide POG adherence at <strong>97%</strong> (up from 94%). Brussels Nord at 100% Camera Shelf Audit for 3 consecutive weeks. However, Hamburg South dropped to 88% — directly linked to the messy aisles / fire exit issues.',
+            '<strong>Cross-metric relationship:</strong> The VoC "Messy Aisles" complaints correlate 0.87 with declining Cleanliness audit scores. Both map to the same 3 stores. This is not a coincidence — it\'s a staffing execution failure.',
+            '<strong>Task execution:</strong> 87% on-time completion. 2 critical overdue items are the fire exit resolution and the Cologne East adaptation approval — both in your triage queue.',
+          ],
+        },
+        {
+          title: 'Customer Experience',
+          icon: 'customer',
+          bullets: [
+            'NPS improved to <strong>72 (+12 pts)</strong> district-wide, but this masks a divergence: stores without triage issues are at NPS 81, while Hamburg South / Cologne East average NPS 58.',
+            '"Messy Aisles" is now the <strong>#1 negative VoC theme</strong> (+34% WoW, +22% overall). If not addressed within 2 weeks, NPS modeling projects a <strong>-6pt district-wide impact</strong>.',
+            'Positive signal: "Helpful staff" remains the top positive theme. Staff friendliness scores are stable across all stores — the issue is purely operational (cleanliness, stocking), not service attitude.',
+          ],
+        },
+        {
+          title: 'Recommendations & Next Steps',
+          icon: 'recommendations',
+          bullets: [
+            '<strong>Immediate (today):</strong> Deploy Hamburg South team to clear fire exit and confirm compliance. This is a zero-tolerance safety item — escalate to Regional if not resolved by EOD.',
+            '<strong>This week:</strong> Restore cleaning hours at Hamburg South, Cologne East, and Berlin Mitte (+2hrs/day). Model shows this alone could reverse the Messy Aisles trend within 10 days.',
+            '<strong>Approve:</strong> Cologne East adaptation plan for the 3 delayed SKUs — estimated to recover €2,400 in at-risk revenue.',
+            '<strong>Forward-looking:</strong> Amsterdam Central\'s execution playbook should be templated for Pine Grove turnaround. Schedule a best-practices session and consider pairing store managers.',
+          ],
+        },
+      ],
+      closing: 'Overall, the district is in a strong position at DPI 78 / Excellence Tier, but the 3 active triage items need rapid resolution to prevent backsliding. Priority: fire exit (safety), messy aisles (VoC trend), OOS adaptation (revenue protection).',
     },
     d08: {
-      week: {
-        situation: 'Shrinkage spike at Peachtree Plaza and Savannah Square is the dominant risk this week—+18% above 4-week average with checkout speed complaints rising in parallel.',
-        pattern: 'Shrinkage increase coincides with reduced floor staffing during afternoon shifts. Checkout speed complaints map to the same 2–5 PM window.',
-        risk: 'Uncontrolled shrinkage erodes GM by an estimated 85 bps this month. Checkout delays are dragging VoC satisfaction below the 80% threshold.',
-        action: 'Increase afternoon floor coverage at Peachtree Plaza immediately. Deploy loss-prevention audit at Savannah Square within 48 hours.',
-      },
-      month: {
-        situation: 'Georgia district shows persistent margin pressure—clearance markdowns drove GM down 85 bps. Peachtree Plaza and Augusta Mall underperforming on SEA scores for 3 straight weeks.',
-        pattern: 'Shrinkage and clearance issues are concentrated in high-traffic stores. Smaller-format stores (Savannah Square, Macon Center) are outperforming on compliance.',
-        risk: 'Continued shrinkage trend at current rate projects a $42K loss for the quarter. DPI at risk of dropping below Stable tier.',
-        action: 'Implement targeted loss prevention measures at top-2 stores. Review clearance markdown strategy with merchandising team.',
-      },
-      quarter: {
-        situation: 'District 08 closed Q1 at DPI 84 with mixed signals—strong sales growth (+2.1%) but compliance gaps pulling the average down.',
-        pattern: 'Urban flagship stores consistently outperform on sales but lag on execution metrics. Shrinkage is a structural issue, not seasonal.',
-        risk: 'Without addressing the shrinkage root cause, Q2 margin target is at risk. Two stores trending toward AtRisk tier.',
-        action: 'Propose shrinkage reduction initiative at regional review. Benchmark against District 14 playbook for execution improvement.',
-      },
+      greeting: `3 active triage items in Georgia district this week. Shrinkage and checkout speed are the dominant concerns. Here's your detailed intelligence brief with store-level analysis and action plan.`,
+      sections: [
+        {
+          title: 'Triage & Critical Issues',
+          icon: 'triage',
+          bullets: [
+            '<strong>Shrinkage Spike</strong> at Peachtree Plaza (+23%) and Savannah Square (+15%) — combined +18% vs 4-week average. Loss-prevention data indicates afternoon shift (2–5 PM) as the highest-risk window. Estimated monthly impact: <strong>$14K in lost inventory</strong>.',
+            '<strong>VoC: Checkout Speed</strong> — +31% complaint volume across Augusta Mall and Athens Center. Average wait time increased from 3.2min to 5.1min during peak hours. Directly correlated with reduced register staffing.',
+            '<strong>Labor Coverage Gap</strong> at Macon Point — 3 weekend shifts remain uncovered. Weekend foot traffic is 40% higher, making this a revenue-risk staffing failure.',
+          ],
+        },
+        {
+          title: 'Performance & Trends',
+          icon: 'performance',
+          bullets: [
+            'District DPI at <strong>84</strong> (Stable tier). WoW trend is flat, but the shrinkage spike is a leading indicator of potential decline. YoY comparison shows DPI is +3pts vs Q1 last year.',
+            'Revenue at <strong>$1.38M</strong> (+2.1% WoW). Strong top-line performance masks the margin erosion from shrinkage and clearance markdowns (<strong>GM down 85 bps</strong>).',
+            'Urban flagship stores (Peachtree, Augusta) drive 62% of revenue but also 78% of shrinkage losses — a classic volume-vs-loss tradeoff that needs targeted intervention.',
+          ],
+        },
+        {
+          title: 'Operational Analysis',
+          icon: 'ops',
+          bullets: [
+            '<strong>Cross-metric relationship:</strong> Shrinkage increase at Peachtree correlates with a 30% reduction in floor staff during 2–5 PM. The same staffing gap explains checkout speed complaints — fewer associates means fewer open registers.',
+            '<strong>Smaller stores outperforming:</strong> Savannah Square, Macon Center have best compliance scores in the district. The "less traffic, better control" pattern suggests flagship stores need fundamentally different staffing models.',
+            '<strong>SEA compliance:</strong> District average at 89%. Peachtree Plaza dropped to 82% — the shrinkage issue is likely masking broader execution lapses.',
+          ],
+        },
+        {
+          title: 'Recommendations & Next Steps',
+          icon: 'recommendations',
+          bullets: [
+            '<strong>Immediate:</strong> Increase afternoon floor coverage at Peachtree Plaza by reassigning 2 associates from back-of-house during 2–5 PM peak window.',
+            '<strong>48 hours:</strong> Deploy loss-prevention audit at Savannah Square. Investigate whether shrinkage is shoplifting, internal, or process-related.',
+            '<strong>This week:</strong> Fill 3 weekend shifts at Macon Point — use the overtime budget or cross-district coverage to prevent revenue loss.',
+            '<strong>Forward-looking:</strong> Propose a differentiated staffing model for flagship vs neighborhood stores at the next regional review. Current one-size-fits-all approach is failing.',
+          ],
+        },
+      ],
+      closing: 'Georgia district has strong revenue momentum but is bleeding margin through shrinkage and staffing gaps. The root cause is a single issue — afternoon understaffing at flagship stores — that manifests as both shrinkage and checkout complaints. Fix the staffing, fix both problems.',
     },
     d22: {
-      week: {
-        situation: 'Carolina district faces a planogram compliance drop across 5 of 7 stores—worst at Raleigh Commons (62%). A safety incident at Durham Hub adds to the urgency.',
-        pattern: 'Planogram non-compliance spikes correlate with the seasonal reset that began last week. Stores without dedicated visual teams are falling behind.',
-        risk: 'Safety incident at Durham Hub is unresolved—potential regulatory exposure. Planogram gaps are costing an estimated $8K/week in lost impulse sales.',
-        action: 'Prioritize safety resolution at Durham Hub today. Dispatch visual merchandising support to bottom-3 stores for planogram reset completion.',
-      },
-      month: {
-        situation: 'Monthly trend shows Carolina district struggling with seasonal transition—POG compliance at 81% is the lowest across all districts.',
-        pattern: 'Staff availability is the bottleneck. Stores with part-time-heavy rosters are 15% less compliant on planogram execution.',
-        risk: 'If planogram reset is not completed by week-end, promotional tie-ins for next month launch will be compromised.',
-        action: 'Accelerate visual reset with temp staffing. Schedule DM walk-throughs at Charlotte North and Raleigh Commons.',
-      },
-      quarter: {
-        situation: 'Q1 performance for Carolina at DPI 82 is mid-pack but declining. Execution scores dragged the average down despite reasonable sales performance.',
-        pattern: 'Consistent staff turnover in Q1 correlates with compliance dips. Onboarding gaps are visible in audit scores for stores with >30% new hires.',
-        risk: 'Staff retention issues threaten Q2 execution if not addressed. District risks falling to bottom quartile.',
-        action: 'Present retention incentive proposal at regional review. Pair underperforming stores with top-performer mentors from District 14.',
-      },
+      greeting: `Carolina district has 3 active issues led by a planogram compliance drop and an unresolved safety incident. Here's the full district intelligence with root cause analysis and resolution path.`,
+      sections: [
+        {
+          title: 'Triage & Critical Issues',
+          icon: 'triage',
+          bullets: [
+            '<strong>Planogram Compliance Drop</strong> — 5 of 7 stores below target. Charlotte Hub at 65%, Durham Heights at 68%. Root cause: seasonal reset began last week but stores without dedicated visual teams are falling behind. Estimated lost impulse sales: <strong>$8K/week</strong>.',
+            '<strong>Safety Incident</strong> at Raleigh Court — wet floor slip reported. Investigation required within 24 hours per compliance protocol. Currently unresolved.',
+            '<strong>Stock Expiry Alert</strong> at Wilmington Bay — 28 items near expiry within 48h window. Clearance markdown or donation action needed to avoid write-off.',
+          ],
+        },
+        {
+          title: 'Performance & Trends',
+          icon: 'performance',
+          bullets: [
+            'District DPI at <strong>82</strong> (mid-pack). WoW trend is <strong>-2pts</strong>, driven entirely by the compliance drop. YoY, the district is flat vs Q1 last year — no growth trajectory.',
+            'Revenue at <strong>$1.15M</strong> (+0.8% WoW). Modest growth but planogram gaps are suppressing impulse purchase conversion. Stores with compliant POGs show <strong>+12% basket size</strong> vs non-compliant.',
+            'Staff turnover at <strong>18% quarterly</strong> — highest in the region. Stores with >30% new hires have 15% lower audit scores, confirming onboarding gaps as a systemic issue.',
+          ],
+        },
+        {
+          title: 'Recommendations & Next Steps',
+          icon: 'recommendations',
+          bullets: [
+            '<strong>Today:</strong> Resolve safety incident at Raleigh Court — dispatch investigation team and document findings before 24h deadline.',
+            '<strong>48 hours:</strong> Dispatch visual merchandising support to Charlotte Hub, Durham Heights, and Raleigh Commons for planogram reset completion.',
+            '<strong>This week:</strong> Clear 28 expiring items at Wilmington Bay via markdown or donation. Set up automated expiry alerts to prevent recurrence.',
+            '<strong>Forward-looking:</strong> Present retention incentive proposal at regional review. Pair underperforming stores with mentors from District 14 (best-in-class execution).',
+          ],
+        },
+      ],
+      closing: 'Carolina\'s core challenge is staffing stability. High turnover → onboarding gaps → compliance failures → declining DPI. The planogram drop is a symptom, not the disease. Address retention to fix execution.',
     },
     d11: {
-      week: {
-        situation: 'Florida district has 7 of 9 stores affected by product availability issues this week. OOS rate spiked to 6.2%—highest in the chain.',
-        pattern: 'Perishable and cooler categories drive 65% of OOS incidents. Distribution center delays are compounding local replenishment failures.',
-        risk: 'High OOS rate is directly impacting VoC (71% satisfaction) and driving customers to competitors. Revenue leakage estimated at $28K this week.',
-        action: 'Escalate DC delivery issues to supply chain leadership. Deploy emergency stock transfers from adjacent districts for top-20 OOS SKUs.',
-      },
-      month: {
-        situation: 'Florida district has the highest sales volume ($1.52M) but also the worst execution scores in the region—a classic "busy but broken" pattern.',
-        pattern: 'High foot traffic stores are overwhelmed—staffing ratios are 20% below optimal during peak hours. Cooler temperature compliance failures recurring weekly.',
-        risk: 'Spoilage losses are 3x the chain average. VoC at 71% risks triggering a formal regional review if not improved within 2 weeks.',
-        action: 'Reallocate staffing budget to peak-hour coverage. Install cooler monitoring alerts at Miami Beach and Orlando Central.',
-      },
-      quarter: {
-        situation: 'Q1 shows Florida as a high-revenue, low-efficiency district. DPI 79 masks significant variance—top store at 91, bottom at 54.',
-        pattern: 'Store performance is bimodal: coastal flagship stores excel on sales, inland stores struggle on every metric. No middle ground.',
-        risk: 'Bottom-3 stores are consuming disproportionate DM time without improvement. Q2 seasonal surge will amplify existing gaps.',
-        action: 'Consider restructuring district—separate coastal and inland into sub-clusters with dedicated support. Present plan at half-year review.',
-      },
+      greeting: `Florida district has the highest revenue in the region but also the worst execution scores — a "busy but broken" pattern. 3 active triage items require immediate attention.`,
+      sections: [
+        {
+          title: 'Triage & Critical Issues',
+          icon: 'triage',
+          bullets: [
+            '<strong>VoC: Product Availability</strong> — +26% theme spike across Miami Central, Orlando Gateway, and Tampa Bay Mall. OOS rate hit <strong>6.2%</strong> (highest in chain). Perishable and cooler categories drive 65% of incidents.',
+            '<strong>Cooler Temp Deviation</strong> at Jacksonville Hub — dairy cooler at 48°F (above 41°F threshold). Maintenance dispatched but estimated 4-hour repair window. Spoilage risk: <strong>$3.2K in at-risk inventory</strong>.',
+            '<strong>Promo Execution Miss</strong> — 4 endcaps incomplete at Fort Lauderdale and St. Petersburg. Promotional tie-in for weekend sale is at risk. Revenue impact: estimated $6K if not resolved by Friday.',
+          ],
+        },
+        {
+          title: 'Performance & Trends',
+          icon: 'performance',
+          bullets: [
+            'District DPI at <strong>79</strong> — lowest in region despite <strong>$1.52M revenue</strong> (highest). The disconnect between sales volume and execution quality is the defining challenge.',
+            'Store performance is <strong>bimodal</strong>: coastal flagships (Miami Central DPI 91, Tampa Bay 87) vs inland stores (Jacksonville 54, Gainesville 61). No middle ground — this isn\'t a normal distribution.',
+            'YoY: Revenue up +4.2% but DPI down -3pts. The district is <strong>growing but deteriorating operationally</strong>. Spoilage losses are 3x chain average.',
+          ],
+        },
+        {
+          title: 'Recommendations & Next Steps',
+          icon: 'recommendations',
+          bullets: [
+            '<strong>Immediate:</strong> Escalate DC delivery issues to supply chain leadership. Deploy emergency stock transfers from adjacent districts for top-20 OOS SKUs.',
+            '<strong>Today:</strong> Monitor Jacksonville cooler repair. If not resolved in 4 hours, activate spoilage protocol and transfer at-risk inventory to nearest store.',
+            '<strong>This week:</strong> Complete 4 endcaps at Fort Lauderdale / St. Petersburg before weekend sale launch. Assign dedicated setup crew.',
+            '<strong>Structural:</strong> Consider restructuring district into coastal and inland sub-clusters with dedicated support. Present plan at half-year review — current one-DM model can\'t manage this variance.',
+          ],
+        },
+      ],
+      closing: 'Florida is a tale of two districts in one. Coastal stores are excellent; inland stores are in crisis. No amount of operational fixes will solve this without structural changes to how the district is managed and resourced.',
     },
     d19: {
-      week: {
-        situation: 'Alabama district is performing well this week—DPI 85, only 1 of 5 stores flagged for minor audit backlog. Overall execution is healthy.',
-        pattern: 'Small district size enables tighter DM oversight. Audit completion rates are highest in the region at 92%.',
-        risk: 'Low risk this week. Minor concern: Huntsville South audit backlog could cascade if not cleared by Friday.',
-        action: 'Clear Huntsville South audit backlog. Otherwise, maintain current cadence—this district can serve as a best-practice benchmark.',
-      },
-      month: {
-        situation: 'Alabama district continues to outperform on efficiency metrics despite being the smallest district. VoC at 85% leads the region.',
-        pattern: 'Staff friendliness and store cleanliness are consistent strengths. The focused store count allows deep attention per location.',
-        risk: 'Minimal. The only watch item is a slight OOS uptick (+0.2pts) driven by a single supplier delay.',
-        action: 'Document the Alabama playbook for replication. Nominate David Park for the best-practice sharing session at regional meeting.',
-      },
-      quarter: {
-        situation: 'Q1 at DPI 85 places Alabama in the top quartile. Consistent performance across all three months with no crisis moments.',
-        pattern: 'Stable staffing, low turnover, and strong DM engagement are the differentiators. Margin health at 35.1% is best in class.',
-        risk: 'Growth ceiling—small store count limits revenue upside. Risk of complacency if not given stretch targets.',
-        action: 'Propose expansion plan for Alabama district. Use Q1 results to build the business case for 2 additional stores.',
-      },
+      greeting: `Alabama district continues to lead the region on efficiency. Only 1 minor triage item this week. Here's your district intelligence summary with benchmark insights.`,
+      sections: [
+        {
+          title: 'Triage & Active Items',
+          icon: 'triage',
+          bullets: [
+            '<strong>Audit Backlog</strong> at Huntsville South — minor backlog of 3 overdue audits. Low risk but should be cleared by Friday to maintain the district\'s 92% completion rate.',
+            'No critical or high-priority issues this week. Alabama is the only district with a clean triage slate.',
+          ],
+        },
+        {
+          title: 'Performance & Trends',
+          icon: 'performance',
+          bullets: [
+            'District DPI at <strong>85</strong> — <strong>top quartile</strong>, consistent across all 3 months of Q1. WoW trend is +1pt. YoY improvement of +4pts confirms sustained execution quality.',
+            'Revenue at <strong>$820K</strong> (+1.2% WoW). Modest volume due to 5-store district, but <strong>margin health at 35.1%</strong> is best in class — proving efficiency drives profitability.',
+            'VoC satisfaction at <strong>85%</strong> — leads the region. Top themes: "Staff friendliness" and "Clean stores." Zero negative theme spikes in the past 4 weeks.',
+          ],
+        },
+        {
+          title: 'Recommendations & Next Steps',
+          icon: 'recommendations',
+          bullets: [
+            '<strong>This week:</strong> Clear Huntsville South audit backlog. Otherwise, maintain current operational cadence.',
+            '<strong>Strategic:</strong> Document the Alabama execution playbook for replication across underperforming districts. Key differentiators: small store count, stable staffing, low turnover, strong DM engagement.',
+            '<strong>Growth:</strong> Propose expansion plan — use Q1 DPI 85 results to build the business case for 2 additional stores in the Alabama market.',
+            '<strong>Recognition:</strong> Nominate David Park for best-practice sharing session at regional meeting. This district\'s approach is a scalable template.',
+          ],
+        },
+      ],
+      closing: 'Alabama is the benchmark district. The playbook here — focused store count, stable staffing, deep DM engagement — should be the template for turning around underperforming districts like Florida (D11) and Carolina (D22).',
     },
   };
 
-  const getAISummaryContent = () => {
-    const districtSummary = DISTRICT_AI_SUMMARIES[selectedDistrictId] || DISTRICT_AI_SUMMARIES['d14'];
-    if (calendarMode === 'month') return districtSummary.month;
-    if (calendarMode === 'quarter') return districtSummary.quarter;
-    return districtSummary.week;
-  };
-  const aiSummary = getAISummaryContent();
+  const activeBrief = DISTRICT_BRIEFS[selectedDistrictId] || DISTRICT_BRIEFS['d14'];
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 800);
@@ -1144,6 +1314,37 @@ export const DistrictIntelligence: React.FC = () => {
         return leaderboardSort.dir === 'asc' ? cmp : -cmp;
       });
   })();
+
+  useLayoutEffect(() => {
+    if (typeof window === 'undefined') return;
+    const updateHeight = () => {
+      if (!dpiCardRef.current) return;
+      const nextHeight = dpiCardRef.current.getBoundingClientRect().height;
+      setDpiCardHeight(prev => (prev && Math.abs(prev - nextHeight) < 1 ? prev : nextHeight));
+    };
+
+    updateHeight();
+
+    const handleResize = () => updateHeight();
+    window.addEventListener('resize', handleResize);
+
+    let observer: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined' && dpiCardRef.current) {
+      observer = new ResizeObserver(entries => {
+        if (!entries.length) return;
+        const nextHeight = entries[0].contentRect.height;
+        setDpiCardHeight(prev => (prev && Math.abs(prev - nextHeight) < 1 ? prev : nextHeight));
+      });
+      observer.observe(dpiCardRef.current);
+    }
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      observer?.disconnect();
+    };
+  }, []);
+
+  const briefHeightStyle = dpiCardHeight ? { height: dpiCardHeight, maxHeight: dpiCardHeight } : undefined;
 
   const SortIcon: React.FC<{ col: SortKey }> = ({ col }) => (
     leaderboardSort.key !== col
@@ -1366,7 +1567,7 @@ export const DistrictIntelligence: React.FC = () => {
       {/* Executive Pulse Hero Section - Matching Home Screen DPI Card */}
       <div className="executive-pulse">
         {/* DPI Card - Home Screen Style */}
-        <div className="dpi-card-v2">
+        <div className="dpi-card-v2" ref={dpiCardRef}>
           {/* Hero Score Section */}
           <div className="dpi-hero-section">
             {isAnyFilterActive && <Filter size={12} className="filter-active-icon dpi-card-filter" />}
@@ -1480,278 +1681,107 @@ export const DistrictIntelligence: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Panel — Triage + AI Summary combined */}
+        {/* Right Panel — AI Daily Brief (shared component) */}
         <div className="pulse-right-panel">
-          {/* Triage Summary */}
-          <div className="triage-section">
-            <div className="ai-summary-label" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 600, color: '#64748b', textTransform: 'uppercase' as const, letterSpacing: '0.5px', marginBottom: 6 }}>
-              <AlertCircle size={12} style={{ color: '#6366f1', width: 12, height: 12 }} />
-              <span>Triage Summary</span>
-              {isAnyFilterActive && <Filter size={10} className="filter-active-icon" />}
-            </div>
-            <div className="triage-items">
-              {activeTriageItems.map(item => (
-                <div key={item.id} className="triage-item" onClick={() => setShowTriageDetail(item.id)}>
-                  <div className="triage-item-content">
-                    <div className="triage-item-header">
-                      <span className="triage-item-title">{item.title}</span>
-                      <span className={`triage-item-priority ${item.priority}`}>{item.priority.charAt(0).toUpperCase() + item.priority.slice(1)}</span>
-                    </div>
-                    <p className="triage-item-stores">{item.stores}</p>
-                    <div className="triage-item-footer">
-                      <span className="triage-item-metric">{item.metric}</span>
-                      <button className="triage-action-btn" onClick={(e) => { e.stopPropagation(); setShowTriageDetail(item.id); }}>
-                        View Details <ChevronRight size={14} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* AI Summary */}
-          <div className="ai-summary-section">
-            <div className="ai-summary-label">
-              <Sparkles size={12} />
-              <span>AI Summary</span>
-              {isAnyFilterActive && <Filter size={10} className="filter-active-icon" />}
-            </div>
-            <div className="ai-summary-points">
-              <div className="ai-summary-point">
-                <span className="point-label">Overall situation</span>
-                <span className="point-text">{aiSummary.situation}</span>
-              </div>
-              <div className="ai-summary-point">
-                <span className="point-label">Pattern spotted</span>
-                <span className="point-text">{aiSummary.pattern}</span>
-              </div>
-              <div className="ai-summary-point">
-                <span className="point-label">Biggest risk</span>
-                <span className="point-text">{aiSummary.risk}</span>
-              </div>
-              <div className="ai-summary-point">
-                <span className="point-label">Manager's first move</span>
-                <span className="point-text">{aiSummary.action}</span>
-              </div>
-            </div>
-          </div>
+          <AIDailyBrief
+            brief={activeBrief}
+            userName={user?.name}
+            metaSuffix={`${activeTriageItems.length} triage items`}
+            heightStyle={briefHeightStyle}
+          />
         </div>
       </div>
 
-      {/* District Broadcasting — full width below executive pulse */}
-      <div className="broadcast-section-fw">
-        <div className="broadcast-fw-header">
-          <div className="broadcast-section-header">
-            <Megaphone size={16} className="broadcast-icon" />
-            <span>District Broadcasting</span>
-            {isAnyFilterActive && <Filter size={12} className="filter-active-icon" />}
+      {/* District Broadcasting Analytics — full width below executive pulse */}
+      <div className="bca-section">
+        <div className="bca-header">
+          <div className="bca-header-left">
+            <div className="bca-title-row">
+              <Megaphone size={20} />
+              <h2>Broadcast Analytics {isAnyFilterActive && <Filter size={12} className="filter-active-icon" />}</h2>
+            </div>
+            <p className="bca-subtitle">Communication effectiveness, compliance gaps, and engagement insights</p>
           </div>
-          <button
-            className="create-broadcast-btn-sm"
-            onClick={() => {
-              setShowChatWindow(true);
-              setChatExpanded(true);
-              setShowBroadcastComposer(true);
-            }}
-          >
-            <Megaphone size={12} />
-            Create Broadcast
+          <button className="bca-create-btn" onClick={() => { setShowChatWindow(true); setChatExpanded(true); setShowBroadcastComposer(true); }}>
+            <Megaphone size={13} /> Create Broadcast
           </button>
         </div>
-        <div className="broadcast-grid">
-          {/* Column 1 — Stats */}
-          <div className="broadcast-col broadcast-col-stats">
-            <div className="broadcast-stats-vertical">
-              <div className="broadcast-stat-compact">
-                <span className="stat-number">{activeBroadcasts.active}</span>
-                <span className="stat-label">Active</span>
-              </div>
-              <div className="broadcast-stat-compact">
-                <span className="stat-number">{activeBroadcasts.thisWeek}</span>
-                <span className="stat-label">This Week</span>
-              </div>
-              <div className="broadcast-stat-compact">
-                <span className="stat-number">{activeBroadcasts.ackRate}</span>
-                <span className="stat-label">Acknowledged</span>
-              </div>
-            </div>
-          </div>
-          {/* Column 2 — Recent Broadcasts */}
-          <div className="broadcast-col broadcast-col-recent">
-            <span className="broadcast-col-title">Recent Broadcasts</span>
-            {activeBroadcasts.broadcasts.map((b, idx) => (
-              <div key={idx} className="broadcast-item-compact">
-                <div className="broadcast-item-row">
-                  <span className={`broadcast-priority ${b.priority}`}>{b.priority.toUpperCase()}</span>
-                  <span className="broadcast-title-sm">{b.title}</span>
-                  <span className="broadcast-time">{b.time}</span>
-                </div>
-                {idx === activeBroadcasts.broadcasts.length - 1 && b.priority === 'low' ? (
-                  <div className="broadcast-item-actions">
-                    <span className="broadcast-ack">{b.ack}</span>
-                    <button className="copilot-link-btn" onClick={() => navigate('/command-center/ai-copilot?mode=pog&context=pog-self-audit')}>
-                      <Bot size={12} />
-                      POG Self Audit in AI Copilot
-                      <ChevronRight size={12} />
-                    </button>
-                  </div>
-                ) : (
-                  <span className="broadcast-ack">{b.ack}</span>
-                )}
-              </div>
-            ))}
-          </div>
-          {/* Column 3 — Insights */}
-          <div className="broadcast-col broadcast-col-insights">
-            <span className="broadcast-col-title">Insights</span>
-            <div className="broadcast-insight-compact risk">
-              <AlertTriangle size={14} />
-              <div className="insight-copy">
-                <span className="insight-label">Biggest gap</span>
-                <p>{activeBroadcasts.gap}</p>
-              </div>
-              <button className="insight-action" onClick={() => {
-                setShowChatWindow(true);
-                setChatExpanded(true);
-                setShowBroadcastComposer(true);
-              }}>
-                Nudge <ChevronRight size={12} />
-              </button>
-            </div>
-            <div className="broadcast-insight-compact engagement">
-              <Users size={14} />
-              <div className="insight-copy">
-                <span className="insight-label">Top insight</span>
-                <p>{activeBroadcasts.topInsight}</p>
-              </div>
-            </div>
-            <div className="broadcast-insight-compact planning">
-              <Megaphone size={14} />
-              <div className="insight-copy">
-                <span className="insight-label">Next broadcast</span>
-                <p>Safety refresher — Friday AM</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Escalation Command Center */}
-      <div className="esc-command-center">
-        <div className="esc-header">
-          <div className="esc-header-left">
-            <div className="esc-title-row">
-              <Shield size={20} />
-              <h2>Escalation Command Center {isAnyFilterActive && <Filter size={12} className="filter-active-icon" />}</h2>
-            </div>
-            <p className="esc-subtitle">System-detected compliance escalations requiring DM action</p>
+        {/* A. Performance Overview — KPI Cards */}
+        <div className="bca-overview-grid">
+          <div className="bca-kpi-card">
+            <span className="bca-kpi-label">Active Broadcasts</span>
+            <span className="bca-kpi-value">{activeBroadcasts.overview.active}</span>
+            <span className="bca-kpi-context">currently live</span>
           </div>
-          <div className="esc-header-right">
-            <div className="esc-impact-badge">
-              <Zap size={14} />
-              <span className="esc-impact-count">{activeEscalations.length} stores</span>
-              <span className="esc-impact-label">escalated</span>
-            </div>
-            <div className="esc-impact-badge esc-impact-dpi">
-              <TrendingDown size={14} />
-              <span className="esc-impact-count">{activeEscalations.reduce((s, e) => s + e.dpiImpact, 0).toFixed(1)} pts</span>
-              <span className="esc-impact-label">potential drag</span>
-            </div>
+          <div className="bca-kpi-card">
+            <span className="bca-kpi-label">Sent This Week</span>
+            <span className="bca-kpi-value">{activeBroadcasts.effectiveness.length}</span>
+            <span className="bca-kpi-context">broadcasts</span>
           </div>
-        </div>
-        <div className="esc-context-strip">
-          <Sparkles size={13} />
-          <span>Despite +2.4% overall growth, escalations are limiting performance — execution issues reducing DPI by {Math.abs(activeEscalations.reduce((s, e) => s + e.dpiImpact, 0)).toFixed(1)} pts</span>
-        </div>
-
-        <div className="esc-body">
-          {/* Store Escalation Snapshot */}
-          <div className="esc-snapshot">
-            <div className="esc-snapshot-list">
-              {activeEscalations.map(store => (
-                <div
-                  key={store.storeNumber}
-                  className={`esc-store-row esc-stage--${store.stage}`}
-                  onClick={() => {
-                    navigate(`/store-operations/store-deep-dive?store=${store.storeNumber}`);
-                  }}
-                >
-                  <div className="esc-store-indicator">
-                    <div className="esc-stage-dot" />
-                    <div className="esc-streak-line">
-                      {Array.from({ length: store.missStreak }).map((_, i) => (
-                        <span key={i} className="esc-streak-mark" />
-                      ))}
-                    </div>
-                  </div>
-                  <div className="esc-store-info">
-                    <div className="esc-store-name-row">
-                      <span className="esc-store-name">{store.storeName}</span>
-                      <span className="esc-store-id">#{store.storeNumber}</span>
-                    </div>
-                    <p className="esc-store-reason">{store.reason}</p>
-                    <div className="esc-store-meta">
-                      <span className="esc-meta-tag">{store.lastAuditDate}</span>
-                      {store.categories.map(cat => (
-                        <span key={cat} className="esc-meta-cat">{cat}</span>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="esc-store-right">
-                    <span className={`esc-stage-label esc-stage-label--${store.stage}`}>
-                      {store.stage === 'early-warning' ? 'Early Warning' : store.stage === 'escalated' ? 'Escalated' : 'Critical'}
-                    </span>
-                    <span className="esc-dpi-impact">{store.dpiImpact} DPI</span>
-                    <ChevronRight size={14} className="esc-row-arrow" />
-                  </div>
-                </div>
-              ))}
-            </div>
+          <div className="bca-kpi-card">
+            <span className="bca-kpi-label">Acknowledged</span>
+            <span className="bca-kpi-value">{activeBroadcasts.overview.ackPct}%</span>
+            <span className="bca-kpi-context">of all recipients</span>
           </div>
-
-          {/* Escalation Logic */}
-          <div className="esc-logic">
-            <div className="esc-logic-header">
-              <span className="esc-logic-title">Escalation Logic</span>
-              <span className="esc-logic-desc">How the system progresses stores through stages</span>
-            </div>
-            <div className="esc-logic-steps">
-              {escalationRules.map((rule, i) => (
-                <div key={rule.week} className={`esc-logic-step esc-stage--${rule.stage}`}>
-                  <div className="esc-logic-step-marker">
-                    <span className="esc-logic-week">{rule.week}</span>
-                    {i < escalationRules.length - 1 && <div className="esc-logic-connector" />}
-                  </div>
-                  <div className="esc-logic-step-content">
-                    <span className="esc-logic-trigger">{rule.trigger}</span>
-                    <span className="esc-logic-action">{rule.action}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
+          <div className="bca-kpi-card">
+            <span className="bca-kpi-label">Avg Ack Time</span>
+            <span className="bca-kpi-value">{activeBroadcasts.overview.avgAckTime}</span>
+            <span className="bca-kpi-context">time to acknowledge</span>
+          </div>
+          <div className="bca-kpi-card">
+            <span className="bca-kpi-label">Trend vs Last</span>
+            <span className={`bca-kpi-value ${activeBroadcasts.overview.trendVsLast >= 0 ? 'positive' : 'negative'}`}>
+              {activeBroadcasts.overview.trendVsLast >= 0 ? '+' : ''}{activeBroadcasts.overview.trendVsLast}%
+            </span>
+            <span className="bca-kpi-context">vs last period</span>
           </div>
         </div>
 
-        {/* Action Bar */}
-        <div className="esc-actions">
-          <button className="esc-action-btn esc-action-primary" onClick={() => navigate('/command-center/operations-queue')}>
-            <Target size={14} />
-            View DM Action Queue
-            <ArrowRight size={14} />
-          </button>
-          <button className="esc-action-btn esc-action-secondary" onClick={() => {
-            setShowChatWindow(true);
-            setChatExpanded(true);
-            setShowBroadcastComposer(true);
-          }}>
-            <Send size={14} />
-            Send Reminder
-          </button>
-          <button className="esc-action-btn esc-action-tertiary" onClick={() => setShowEscPolicy(true)}>
-            <FileText size={14} />
-            View Policy
-          </button>
+        {/* Broadcast List */}
+        <div className="bca-sub-section">
+          <div className="bca-table-wrapper">
+            <table className="bca-table">
+              <thead>
+                <tr>
+                  <th>Broadcast</th>
+                  <th>Priority</th>
+                  <th>Ack Rate</th>
+                  <th>Avg Ack Time</th>
+                  <th>Pending</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {activeBroadcasts.effectiveness.map(bc => {
+                  const pending = bc.stores - bc.acked;
+                  return (
+                    <tr key={bc.id} className="bca-table-row" onClick={() => setBcaSelectedBroadcast(bc)}>
+                      <td>
+                        <div className="bca-bc-name">{bc.name}</div>
+                        <span className="bca-bc-sent">{bc.type} · Sent {bc.sentAt}</span>
+                      </td>
+                      <td>
+                        <span className={`bca-priority-badge ${bc.priority}`}>{bc.priority}</span>
+                      </td>
+                      <td>
+                        <span className={`bca-bc-metric-val ${bc.ackRate >= 90 ? 'high' : bc.ackRate >= 75 ? 'medium' : 'low'}`}>{bc.ackRate}%</span>
+                      </td>
+                      <td className="bca-td-time">{bc.avgAckTime}</td>
+                      <td>
+                        <span className={`bca-pending-count ${pending > 2 ? 'high' : pending > 0 ? 'medium' : 'zero'}`}>{pending}</span>
+                      </td>
+                      <td>
+                        <span className={`bca-status-badge ${bc.status === 'good' ? 'good' : 'at-risk'}`}>
+                          {bc.status === 'good' ? 'Good' : 'Needs Attention'}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -2022,69 +2052,6 @@ export const DistrictIntelligence: React.FC = () => {
 
         </div>
 
-        {/* KPI Trend Panel (slide-open) */}
-        {activeKPIPanel && (
-          <div className="kpi-trend-panel">
-            <div className="kpi-trend-panel-header">
-              <h3>{activeKPIPanel.panelTitle}</h3>
-              <button className="kpi-trend-close" onClick={() => setActiveKPIPanel(null)}>
-                <X size={16} />
-              </button>
-            </div>
-            <div className="kpi-trend-chart">
-              <svg viewBox="0 0 400 120" preserveAspectRatio="none" className="kpi-trend-svg">
-                <defs>
-                  <linearGradient id={`grad-${activeKPIPanel.id}`} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={activeKPIPanel.status === 'positive' ? '#047857' : activeKPIPanel.status === 'negative' ? '#991b1b' : '#92400e'} stopOpacity="0.06" />
-                    <stop offset="100%" stopColor={activeKPIPanel.status === 'positive' ? '#047857' : activeKPIPanel.status === 'negative' ? '#991b1b' : '#92400e'} stopOpacity="0" />
-                  </linearGradient>
-                </defs>
-                {activeKPIPanel.trendData && (
-                  <>
-                    <polygon
-                      fill={`url(#grad-${activeKPIPanel.id})`}
-                      points={`0,120 ${activeKPIPanel.trendData.map((v, i) => {
-                        const min = Math.min(...activeKPIPanel.trendData!);
-                        const max = Math.max(...activeKPIPanel.trendData!);
-                        const range = max - min || 1;
-                        return `${(i / (activeKPIPanel.trendData!.length - 1)) * 400},${120 - ((v - min) / range) * 100}`;
-                      }).join(' ')} 400,120`}
-                    />
-                    <polyline
-                      fill="none"
-                      stroke={activeKPIPanel.status === 'positive' ? '#047857' : activeKPIPanel.status === 'negative' ? '#991b1b' : '#92400e'}
-                      strokeWidth="1.5"
-                      strokeLinecap="square"
-                      strokeLinejoin="miter"
-                      points={activeKPIPanel.trendData.map((v, i) => {
-                        const min = Math.min(...activeKPIPanel.trendData!);
-                        const max = Math.max(...activeKPIPanel.trendData!);
-                        const range = max - min || 1;
-                        return `${(i / (activeKPIPanel.trendData!.length - 1)) * 400},${120 - ((v - min) / range) * 100}`;
-                      }).join(' ')}
-                    />
-                  </>
-                )}
-              </svg>
-            </div>
-            {activeKPIPanel.trendInsight && (
-              <div className="kpi-trend-insight">
-                <Sparkles size={13} />
-                <p>{activeKPIPanel.trendInsight}</p>
-              </div>
-            )}
-            {activeKPIPanel.panelDetails && (
-              <div className="kpi-trend-details">
-                {activeKPIPanel.panelDetails.map((detail, i) => (
-                  <div key={i} className={`kpi-trend-detail-row status-${detail.status}`}>
-                    <span className="kpi-detail-label">{detail.label}</span>
-                    <span className="kpi-detail-value">{detail.value}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
       </div>
 
 
@@ -2191,7 +2158,14 @@ export const DistrictIntelligence: React.FC = () => {
                     <span className="rank-text">{store.rank}</span>
                   </td>
                   <td className="td-store">
-                    <div className="store-info">
+                    <div
+                      className="store-info store-info--clickable"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/store-operations/store-deep-dive?store=${store.storeNumber}&name=${encodeURIComponent(store.storeName)}`);
+                      }}
+                      title={`Open ${store.storeName} in Store Deep Dive`}
+                    >
                       <span className="store-id">#{store.storeNumber}</span>
                       <span className="store-name">{store.storeName}</span>
                     </div>
@@ -2302,7 +2276,7 @@ export const DistrictIntelligence: React.FC = () => {
                       const cellKey = `${store.storeNumber}-${cat}`;
                       const detail = cellKey in auditCellDetails ? auditCellDetails[cellKey] : generateAutoDetail(store.storeNumber, cat, val);
                       const skillMap = getSkillForDimension(cat);
-                      const isActive = chipPopover?.cellKey === cellKey;
+                      const isActive = heatmapDetail?.storeNumber === store.storeNumber && heatmapDetail?.category === cat;
                       return (
                         <td key={cat} className="heatmap-cell">
                           <div
@@ -2312,33 +2286,21 @@ export const DistrictIntelligence: React.FC = () => {
                               color: getComplianceTextColor(val),
                             }}
                             onMouseEnter={(e) => {
-                              if (!chipPopover) {
-                                const rect = e.currentTarget.getBoundingClientRect();
-                                setHeatmapTip({ x: rect.left + rect.width / 2, y: rect.top, store: store.storeName, cat, val });
-                              }
+                              const rect = e.currentTarget.getBoundingClientRect();
+                              setHeatmapTip({ x: rect.left + rect.width / 2, y: rect.top, store: store.storeName, cat, val });
                             }}
                             onMouseLeave={() => setHeatmapTip(null)}
-                            onClick={(e) => {
+                            onClick={() => {
                               setHeatmapTip(null);
-                              if (isActive) {
-                                setChipPopover(null);
-                              } else {
-                                const rect = e.currentTarget.getBoundingClientRect();
-                                const spaceBelow = window.innerHeight - rect.bottom;
-                                const popoverHeight = 220;
-                                const flipAbove = spaceBelow < popoverHeight;
-                                setChipPopover({
-                                  cellKey,
-                                  storeNumber: store.storeNumber,
-                                  storeName: store.storeName,
-                                  category: cat,
-                                  score: val,
-                                  detail,
-                                  skill: skillMap.skill,
-                                  skillLogic: skillMap.logic,
-                                  rect: { top: flipAbove ? rect.top : rect.bottom, left: rect.left + rect.width / 2, width: rect.width, height: rect.height },
-                                });
-                              }
+                              setHeatmapDetail({
+                                storeNumber: store.storeNumber,
+                                storeName: store.storeName,
+                                category: cat,
+                                score: val,
+                                detail,
+                                skill: skillMap.skill,
+                                skillLogic: skillMap.logic,
+                              });
                             }}
                           >
                             <span className="heatmap-value">{val}%</span>
@@ -2395,158 +2357,294 @@ export const DistrictIntelligence: React.FC = () => {
         )}
       </div>
 
-      {/* Chip Popover — inline detail on heatmap cell click */}
-      {chipPopover && (() => {
-        const spaceBelow = window.innerHeight - chipPopover.rect.top;
-        const isFlipped = spaceBelow < 230;
-        return (
-        <div className="chip-popover-backdrop" onClick={() => setChipPopover(null)}>
-          <div
-            className={`chip-popover ${isFlipped ? 'chip-popover--above' : ''}`}
-            style={isFlipped
-              ? { bottom: window.innerHeight - chipPopover.rect.top + 6, left: chipPopover.rect.left }
-              : { top: chipPopover.rect.top + 6, left: chipPopover.rect.left }
-            }
-            onClick={(e) => e.stopPropagation()}
-          >
-            {!isFlipped && <div className="chip-popover-arrow" />}
-            {isFlipped && <div className="chip-popover-arrow chip-popover-arrow--bottom" />}
-            <div className="chip-popover-header">
-              <span className="chip-popover-title">{chipPopover.category}</span>
-              <span className="chip-popover-score" style={{ background: getComplianceColor(chipPopover.score), color: getComplianceTextColor(chipPopover.score) }}>
-                {chipPopover.score}%
-              </span>
-            </div>
-            <div className="chip-popover-rows">
-              <div className="chip-popover-row">
-                <span className="chip-popover-label">Trend</span>
-                <span className={`chip-popover-trend chip-popover-trend--${chipPopover.detail.trend}`}>
-                  {chipPopover.detail.trend === 'improving' && <TrendingUp size={12} />}
-                  {chipPopover.detail.trend === 'declining' && <TrendingDown size={12} />}
-                  {chipPopover.detail.trend === 'stable' && <Minus size={12} />}
-                  {chipPopover.detail.trend.charAt(0).toUpperCase() + chipPopover.detail.trend.slice(1)}
-                </span>
-              </div>
-              <div className="chip-popover-row">
-                <span className="chip-popover-label">Owner</span>
-                <span className="chip-popover-value">{chipPopover.detail.auditor}</span>
-              </div>
-              <div className="chip-popover-row chip-popover-row--intervention">
-                <span className="chip-popover-label">Intervention</span>
-                <span className="chip-popover-value chip-popover-value--rec">{chipPopover.detail.recommendation}</span>
-              </div>
-            </div>
-            <div className="chip-popover-actions">
-              <button className="chip-popover-btn" onClick={() => {
-                const cp = chipPopover;
-                setChipPopover(null);
-                setHeatmapDetail({
-                  storeNumber: cp.storeNumber,
-                  storeName: cp.storeName,
-                  category: cp.category,
-                  score: cp.score,
-                  detail: cp.detail,
-                  skill: cp.skill,
-                  skillLogic: cp.skillLogic,
-                });
-              }}>
-                View Full Details <ChevronRight size={12} />
-              </button>
-            </div>
-          </div>
-        </div>
-        );
-      })()}
-
-      {/* Heatmap Cell Detail Modal */}
+      {/* Heatmap Cell Detail Panel — Right-side */}
       {heatmapDetail && (
-        <div className="heatmap-detail-overlay" onClick={() => setHeatmapDetail(null)}>
-          <div className="heatmap-detail-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="heatmap-detail-header">
-              <div className="heatmap-detail-title-row">
-                <div className="heatmap-detail-badge" style={{ background: getComplianceColor(heatmapDetail.score), color: getComplianceTextColor(heatmapDetail.score) }}>
-                  {heatmapDetail.score}%
-                </div>
-                <div className="heatmap-detail-title">
-                  <h3>{heatmapDetail.category} Audit</h3>
-                  <span className="heatmap-detail-store">#{heatmapDetail.storeNumber} — {heatmapDetail.storeName}</span>
-                </div>
-              </div>
-              <button className="heatmap-detail-close" onClick={() => setHeatmapDetail(null)}>
+        <>
+          <div className="detail-panel-overlay" onClick={() => setHeatmapDetail(null)} />
+          <div className="detail-panel">
+            <div className="detail-panel-header">
+              <button className="detail-panel-close" onClick={() => setHeatmapDetail(null)}>
                 <X size={18} />
               </button>
             </div>
+            <div className="detail-panel-body">
+              {/* Severity / Source Row */}
+              <div className="dp-severity-row">
+                <span
+                  className="dp-severity-badge"
+                  style={{ background: getComplianceColor(heatmapDetail.score), color: getComplianceTextColor(heatmapDetail.score) }}
+                >
+                  {heatmapDetail.score}% COMPLIANCE
+                </span>
+                <span className="dp-source">
+                  <ClipboardCheck size={11} />
+                  Audit Heatmap
+                </span>
+              </div>
 
-            <div className="heatmap-detail-meta">
-              <div className="heatmap-detail-meta-item">
-                <Clock size={13} />
+              {/* Title */}
+              <h2 className="dp-title">{heatmapDetail.category} Audit</h2>
+              <p className="dp-description">
+                #{heatmapDetail.storeNumber} — {heatmapDetail.storeName} · Last audit {heatmapDetail.detail.lastAudit} · Auditor: {heatmapDetail.detail.auditor}
+              </p>
+
+              {/* Trend pill */}
+              <div className="dp-impact-summary">
+                {heatmapDetail.detail.trend === 'improving' && <TrendingUp size={14} />}
+                {heatmapDetail.detail.trend === 'declining' && <TrendingDown size={14} />}
+                {heatmapDetail.detail.trend === 'stable' && <Minus size={14} />}
+                <span>Trend: {heatmapDetail.detail.trend.charAt(0).toUpperCase() + heatmapDetail.detail.trend.slice(1)}</span>
+              </div>
+
+              {/* Performance Comparison — Store vs District Avg vs Top */}
+              {(() => {
+                const cat = heatmapDetail.category;
+                const storeScores = Object.values(activeAuditData)
+                  .map(s => (cat === 'Avg'
+                    ? Math.round(Object.values(s).reduce((a, b) => a + b, 0) / Object.values(s).length)
+                    : (s as Record<string, number>)[cat] || 0))
+                  .filter(v => v > 0);
+                const districtAvg = storeScores.length
+                  ? Math.round(storeScores.reduce((a, b) => a + b, 0) / storeScores.length)
+                  : heatmapDetail.score;
+                const topScore = storeScores.length ? Math.max(...storeScores) : heatmapDetail.score;
+                const vsAvg = heatmapDetail.score - districtAvg;
+                return (
+                  <div className="dp-section">
+                    <h3 className="dp-section-title">
+                      <BarChart3 size={14} />
+                      Performance Comparison
+                    </h3>
+                    <div className="kpi-period-metrics">
+                      <div className="kpi-period-metric">
+                        <span className="kpi-period-label">This Store</span>
+                        <span className="kpi-period-val">{heatmapDetail.score}%</span>
+                        <span className="kpi-period-sub">current score</span>
+                      </div>
+                      <div className="kpi-period-metric">
+                        <span className="kpi-period-label">District Avg</span>
+                        <span className="kpi-period-val">{districtAvg}%</span>
+                        <span className={`kpi-period-sub delta-${vsAvg > 0 ? 'up' : vsAvg < 0 ? 'down' : 'flat'}`}>
+                          {vsAvg > 0 ? '+' : ''}{vsAvg} pts vs district
+                        </span>
+                      </div>
+                      <div className="kpi-period-metric">
+                        <span className="kpi-period-label">Top Performer</span>
+                        <span className="kpi-period-val">{topScore}%</span>
+                        <span className="kpi-period-sub">{topScore - heatmapDetail.score} pts to close gap</span>
+                      </div>
+                      <div className="kpi-period-metric">
+                        <span className="kpi-period-label">Target</span>
+                        <span className="kpi-period-val">95%</span>
+                        <span className={`kpi-period-sub delta-${heatmapDetail.score >= 95 ? 'up' : 'down'}`}>
+                          {heatmapDetail.score >= 95 ? 'on target' : `${95 - heatmapDetail.score} pts below`}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Score History — 12-week sparkline */}
+              {(() => {
+                const seed = parseInt(heatmapDetail.storeNumber.slice(-3), 10) || 1;
+                const trend = heatmapDetail.detail.trend;
+                const base = heatmapDetail.score;
+                // Synthesize 12 weeks ending at current score, biased by trend direction
+                const history: number[] = [];
+                for (let i = 0; i < 12; i++) {
+                  const t = i / 11;
+                  const trendOffset = trend === 'improving' ? -8 * (1 - t) : trend === 'declining' ? 8 * (1 - t) : 0;
+                  const jitter = ((seed * (i + 1)) % 7) - 3;
+                  history.push(Math.max(40, Math.min(100, Math.round(base + trendOffset + jitter))));
+                }
+                history[history.length - 1] = base;
+                const min = Math.min(...history);
+                const max = Math.max(...history);
+                const range = max - min || 1;
+                const W = 400, H = 100, P = 6;
+                const points = history.map((v, i) => ({
+                  x: (i / (history.length - 1)) * W,
+                  y: H - P - ((v - min) / range) * (H - P * 2),
+                }));
+                const linePath = points.map((p, i) => i === 0 ? `M ${p.x},${p.y}` : `L ${p.x},${p.y}`).join(' ');
+                const areaPath = `${linePath} L ${W},${H} L 0,${H} Z`;
+                const last = points[points.length - 1];
+                const accent = base >= 90 ? '#16a34a' : base >= 75 ? '#d97706' : '#dc2626';
+                return (
+                  <div className="dp-section">
+                    <h3 className="dp-section-title">
+                      <Activity size={14} />
+                      Score History (12 weeks)
+                    </h3>
+                    <div className="kpi-panel-chart">
+                      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ width: '100%', height: 100, display: 'block' }}>
+                        <defs>
+                          <linearGradient id={`hm-grad-${heatmapDetail.storeNumber}-${heatmapDetail.category}`} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor={accent} stopOpacity="0.18" />
+                            <stop offset="100%" stopColor={accent} stopOpacity="0" />
+                          </linearGradient>
+                        </defs>
+                        <path d={areaPath} fill={`url(#hm-grad-${heatmapDetail.storeNumber}-${heatmapDetail.category})`} />
+                        <path d={linePath} fill="none" stroke={accent} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                        <circle cx={last.x} cy={last.y} r="3" fill={accent} stroke="#ffffff" strokeWidth="1.5" />
+                      </svg>
+                    </div>
+                    <div className="kpi-panel-details" style={{ marginTop: 8 }}>
+                      <div className="kpi-panel-detail-row status-neutral">
+                        <span className="kpi-panel-detail-label">12-Week Range</span>
+                        <span className="kpi-panel-detail-value">{min}% – {max}%</span>
+                      </div>
+                      <div className="kpi-panel-detail-row status-neutral">
+                        <span className="kpi-panel-detail-label">12-Week Avg</span>
+                        <span className="kpi-panel-detail-value">{Math.round(history.reduce((a, b) => a + b, 0) / history.length)}%</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Prior Audits */}
+              {(() => {
+                const dates = ['1 week ago', '2 weeks ago', '4 weeks ago', '8 weeks ago'];
+                const seed = parseInt(heatmapDetail.storeNumber.slice(-3), 10) || 1;
+                const baseScore = heatmapDetail.score;
+                const priors = dates.map((d, i) => {
+                  const drift = heatmapDetail.detail.trend === 'improving' ? -(i + 1) * 2
+                    : heatmapDetail.detail.trend === 'declining' ? (i + 1) * 2 : 0;
+                  const jitter = ((seed * (i + 3)) % 5) - 2;
+                  return {
+                    date: d,
+                    score: Math.max(40, Math.min(100, baseScore + drift + jitter)),
+                    auditor: auditors[(seed + i) % auditors.length],
+                  };
+                });
+                return (
+                  <div className="dp-section">
+                    <h3 className="dp-section-title">
+                      <Clock size={14} />
+                      Prior Audits
+                    </h3>
+                    <div className="kpi-panel-details">
+                      {priors.map((p, i) => (
+                        <div key={i} className={`kpi-panel-detail-row status-${p.score >= 90 ? 'positive' : p.score >= 75 ? 'warning' : 'negative'}`}>
+                          <span className="kpi-panel-detail-label">{p.date} · {p.auditor}</span>
+                          <span className="kpi-panel-detail-value" style={{ color: p.score >= 90 ? '#047857' : p.score >= 75 ? '#b45309' : '#b91c1c' }}>
+                            {p.score}%
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Findings */}
+              <div className="dp-section">
+                <h3 className="dp-section-title">
+                  <AlertCircle size={14} />
+                  Findings ({heatmapDetail.detail.findings.length})
+                </h3>
+                <div className="dp-stores-list">
+                  {heatmapDetail.detail.findings.map((finding, idx) => (
+                    <div key={idx} className="dp-store-card warning">
+                      <div className="dp-store-header">
+                        <span className="dp-store-name">Finding {idx + 1}</span>
+                      </div>
+                      <p className="dp-store-detail">{finding}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* AI Recommendation */}
+              <div className="dp-section">
+                <h3 className="dp-section-title">
+                  <Sparkles size={14} />
+                  AI Recommendation
+                </h3>
+                <div className="kpi-ai-insight">
+                  <Sparkles size={14} className="kpi-ai-insight-icon" />
+                  <p>{heatmapDetail.detail.recommendation}</p>
+                </div>
+              </div>
+
+              {/* Action Plan — derived from findings */}
+              {heatmapDetail.detail.findings.length > 0 && (
+                <div className="dp-section">
+                  <h3 className="dp-section-title">
+                    <CheckCircle2 size={14} />
+                    Action Plan
+                  </h3>
+                  <div className="hm-action-plan">
+                    {heatmapDetail.detail.findings.map((finding, idx) => {
+                      const owners = ['Store Manager', 'Dept Lead', 'Asst Manager', 'Floor Lead'];
+                      const dueDays = [1, 2, 3, 5];
+                      const owner = owners[idx % owners.length];
+                      const due = dueDays[idx % dueDays.length];
+                      return (
+                        <div key={idx} className="hm-action-item">
+                          <div className="hm-action-checkbox" />
+                          <div className="hm-action-content">
+                            <span className="hm-action-title">{finding}</span>
+                            <div className="hm-action-meta">
+                              <span className="hm-action-owner"><Users size={11} /> {owner}</span>
+                              <span className={`hm-action-due ${due <= 2 ? 'urgent' : ''}`}>
+                                <Clock size={11} /> Due in {due} day{due > 1 ? 's' : ''}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* AI Copilot Skill mapping */}
+              <div className="dp-section">
+                <h3 className="dp-section-title">
+                  <Activity size={14} />
+                  AI Copilot Skill
+                </h3>
+                <div className="kpi-panel-detail-row status-neutral">
+                  <span className="kpi-panel-detail-label">
+                    {heatmapDetail.skill === 'pog' ? 'POG' : heatmapDetail.skill === 'knowledge' ? 'Knowledge' : heatmapDetail.skill === 'actions' ? 'Action' : 'Analytics'}
+                  </span>
+                  <span className="kpi-panel-detail-value" style={{ fontWeight: 500, fontSize: 11, color: '#475569' }}>
+                    {heatmapDetail.skillLogic}
+                  </span>
+                </div>
+              </div>
+
+              {/* Action CTAs */}
+              <div className="dp-actions">
+                <button className="dp-action-btn outlined" onClick={() => {
+                  const d = heatmapDetail;
+                  setHeatmapDetail(null);
+                  navigate(`/command-center/ai-copilot?mode=${d.skill}&context=audit-${d.category.toLowerCase().replace(/ /g, '-')}&store=${d.storeNumber}&storeName=${encodeURIComponent(d.storeName)}&score=${d.score}`);
+                }}>
+                  <Sparkles size={14} />
+                  <span>Investigate in AI Copilot</span>
+                </button>
+                <button className="dp-action-btn outlined navigate" onClick={() => {
+                  const d = heatmapDetail;
+                  setHeatmapDetail(null);
+                  navigate(`/store-operations/store-deep-dive?store=${d.storeNumber}&name=${encodeURIComponent(d.storeName)}`);
+                }}>
+                  <span>View Store Deep Dive</span>
+                  <ExternalLink size={14} />
+                </button>
+              </div>
+
+              {/* Timestamp */}
+              <div className="dp-timestamp">
+                <Clock size={11} />
                 <span>Last audit: {heatmapDetail.detail.lastAudit}</span>
               </div>
-              <div className="heatmap-detail-meta-item">
-                <Users size={13} />
-                <span>Auditor: {heatmapDetail.detail.auditor}</span>
-              </div>
-              <div className={`heatmap-detail-trend heatmap-trend--${heatmapDetail.detail.trend}`}>
-                {heatmapDetail.detail.trend === 'improving' && <TrendingUp size={13} />}
-                {heatmapDetail.detail.trend === 'declining' && <TrendingDown size={13} />}
-                {heatmapDetail.detail.trend === 'stable' && <Minus size={13} />}
-                <span>{heatmapDetail.detail.trend.charAt(0).toUpperCase() + heatmapDetail.detail.trend.slice(1)}</span>
-              </div>
-            </div>
-
-            <div className="heatmap-detail-findings">
-              <span className="heatmap-detail-section-label">
-                <AlertCircle size={13} />
-                Findings ({heatmapDetail.detail.findings.length})
-              </span>
-              <div className="heatmap-detail-findings-list">
-                {heatmapDetail.detail.findings.map((finding, idx) => (
-                  <div key={idx} className="heatmap-finding-item">
-                    <span className="heatmap-finding-num">{idx + 1}</span>
-                    <span className="heatmap-finding-text">{finding}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="heatmap-detail-recommendation">
-              <span className="heatmap-detail-section-label">
-                <Sparkles size={13} />
-                AI Recommendation
-              </span>
-              <p>{heatmapDetail.detail.recommendation}</p>
-            </div>
-
-            <div className="heatmap-detail-skill-tag">
-              <span className="heatmap-skill-label">AI Copilot Skill:</span>
-              <span className={`heatmap-skill-pill heatmap-skill--${heatmapDetail.skill}`}>
-                {heatmapDetail.skill === 'pog' ? 'POG' : heatmapDetail.skill === 'knowledge' ? 'Knowledge' : heatmapDetail.skill === 'actions' ? 'Action' : 'Analytics'}
-              </span>
-              <span className="heatmap-skill-logic">{heatmapDetail.skillLogic}</span>
-            </div>
-
-            <div className="heatmap-detail-actions">
-              <button className="heatmap-action-btn heatmap-action-primary" onClick={() => {
-                const d = heatmapDetail;
-                setHeatmapDetail(null);
-                navigate(`/command-center/ai-copilot?mode=${d.skill}&context=audit-${d.category.toLowerCase().replace(/ /g, '-')}&store=${d.storeNumber}&storeName=${encodeURIComponent(d.storeName)}&score=${d.score}`);
-              }}>
-                <Sparkles size={14} />
-                Investigate in AI Copilot
-                <ChevronRight size={14} />
-              </button>
-              {!isHQ && (
-                <button className="heatmap-action-btn heatmap-action-secondary" onClick={() => {
-                  setHeatmapDetail(null);
-                  navigate(`/store-operations/store-deep-dive?store=${heatmapDetail.storeNumber}`);
-                }}>
-                  <Store size={14} />
-                  View Store
-                </button>
-              )}
             </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* Floating Chat Button */}
@@ -2758,101 +2856,6 @@ export const DistrictIntelligence: React.FC = () => {
                   </div>
                 </div>
               )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Escalation Policy Modal */}
-      {showEscPolicy && (
-        <div className="esc-policy-overlay" onClick={() => setShowEscPolicy(false)}>
-          <div className="esc-policy-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="esc-policy-modal-header">
-              <div className="esc-policy-modal-title">
-                <Shield size={20} />
-                <div>
-                  <h3>Escalation Policy</h3>
-                  <span className="esc-policy-modal-sub">Progressive compliance enforcement framework</span>
-                </div>
-              </div>
-              <button className="esc-policy-close" onClick={() => setShowEscPolicy(false)}>
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="esc-policy-modal-body">
-              <div className="esc-policy-timeline">
-                <div className="esc-policy-stage esc-policy-stage--warning">
-                  <div className="esc-policy-stage-bar" />
-                  <div className="esc-policy-stage-header">
-                    <span className="esc-policy-stage-badge warning">Week 1</span>
-                    <span className="esc-policy-stage-name">Early Warning</span>
-                  </div>
-                  <div className="esc-policy-stage-details">
-                    <div className="esc-policy-rule">
-                      <span className="esc-policy-rule-label">Trigger</span>
-                      <span className="esc-policy-rule-value">Any audit category drops below 60% compliance</span>
-                    </div>
-                    <div className="esc-policy-rule">
-                      <span className="esc-policy-rule-label">System Action</span>
-                      <span className="esc-policy-rule-value">Flag raised in DM dashboard, store tagged for monitoring</span>
-                    </div>
-                    <div className="esc-policy-rule">
-                      <span className="esc-policy-rule-label">DM Expectation</span>
-                      <span className="esc-policy-rule-value">Acknowledge flag, review store audit details within 48 hours</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="esc-policy-stage esc-policy-stage--escalated">
-                  <div className="esc-policy-stage-bar" />
-                  <div className="esc-policy-stage-header">
-                    <span className="esc-policy-stage-badge escalated">Week 2</span>
-                    <span className="esc-policy-stage-name">Auto-Escalated</span>
-                  </div>
-                  <div className="esc-policy-stage-details">
-                    <div className="esc-policy-rule">
-                      <span className="esc-policy-rule-label">Trigger</span>
-                      <span className="esc-policy-rule-value">No improvement or additional category miss in second consecutive week</span>
-                    </div>
-                    <div className="esc-policy-rule">
-                      <span className="esc-policy-rule-label">System Action</span>
-                      <span className="esc-policy-rule-value">Auto-escalated to DM action queue, reminder sent to store manager</span>
-                    </div>
-                    <div className="esc-policy-rule">
-                      <span className="esc-policy-rule-label">DM Expectation</span>
-                      <span className="esc-policy-rule-value">Direct intervention required — assign corrective task within 24 hours</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="esc-policy-stage esc-policy-stage--critical">
-                  <div className="esc-policy-stage-bar" />
-                  <div className="esc-policy-stage-header">
-                    <span className="esc-policy-stage-badge critical">Week 3+</span>
-                    <span className="esc-policy-stage-name">Critical</span>
-                  </div>
-                  <div className="esc-policy-stage-details">
-                    <div className="esc-policy-rule">
-                      <span className="esc-policy-rule-label">Trigger</span>
-                      <span className="esc-policy-rule-value">Consecutive misses across multiple categories, no corrective action logged</span>
-                    </div>
-                    <div className="esc-policy-rule">
-                      <span className="esc-policy-rule-label">System Action</span>
-                      <span className="esc-policy-rule-value">Critical flag, regional visibility enabled, DPI impact tracked</span>
-                    </div>
-                    <div className="esc-policy-rule">
-                      <span className="esc-policy-rule-label">DM Expectation</span>
-                      <span className="esc-policy-rule-value">Immediate store visit, documented action plan, regional review scheduled</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="esc-policy-footer-note">
-                <Sparkles size={13} />
-                <span>Escalation stages reset automatically when a store achieves two consecutive weeks of 75%+ compliance across all categories.</span>
-              </div>
             </div>
           </div>
         </div>
@@ -3227,6 +3230,309 @@ export const DistrictIntelligence: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* KPI — Right-Side Detail Panel */}
+      {activeKPIPanel && (() => {
+        const td = activeKPIPanel.trendData || [];
+        const isPctOrPts = /%|pts|bps|\//i.test(activeKPIPanel.delta || '') || /%/.test(activeKPIPanel.primaryValue);
+        // Compute period comparison from trendData
+        const computePeriodDelta = (): { value: string; direction: 'up' | 'down' | 'flat' } => {
+          if (td.length < 2) return { value: '—', direction: 'flat' };
+          let curr: number, prev: number;
+          if (calendarMode === 'week') {
+            curr = td[td.length - 1];
+            prev = td[td.length - 2];
+          } else if (calendarMode === 'month') {
+            const last4 = td.slice(-4);
+            const prior4 = td.slice(-8, -4);
+            curr = last4.reduce((a, b) => a + b, 0) / last4.length;
+            prev = prior4.length ? prior4.reduce((a, b) => a + b, 0) / prior4.length : curr;
+          } else {
+            const last6 = td.slice(-6);
+            const prior6 = td.slice(0, 6);
+            curr = last6.reduce((a, b) => a + b, 0) / last6.length;
+            prev = prior6.reduce((a, b) => a + b, 0) / prior6.length;
+          }
+          const diff = curr - prev;
+          const pct = prev !== 0 ? (diff / prev) * 100 : 0;
+          const direction: 'up' | 'down' | 'flat' = Math.abs(diff) < 0.01 ? 'flat' : diff > 0 ? 'up' : 'down';
+          if (isPctOrPts) {
+            return { value: `${diff >= 0 ? '+' : ''}${diff.toFixed(1)} pts`, direction };
+          }
+          return { value: `${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%`, direction };
+        };
+        const periodDelta = computePeriodDelta();
+        const accent = activeKPIPanel.status === 'positive' ? '#047857' : activeKPIPanel.status === 'negative' ? '#991b1b' : activeKPIPanel.status === 'warning' ? '#b45309' : '#4338ca';
+        return (
+          <>
+            <div className="detail-panel-overlay" onClick={() => setActiveKPIPanel(null)} />
+            <div className="detail-panel">
+              <div className="detail-panel-header">
+                <button className="detail-panel-close" onClick={() => setActiveKPIPanel(null)}>
+                  <X size={18} />
+                </button>
+              </div>
+              <div className="detail-panel-body">
+                {/* Severity / Category Row */}
+                <div className="dp-severity-row">
+                  <span className={`dp-severity-badge ${activeKPIPanel.status === 'negative' ? 'critical' : activeKPIPanel.status === 'warning' ? 'warning' : activeKPIPanel.status === 'positive' ? 'risk' : 'risk'}`}>
+                    {activeKPIPanel.category.toUpperCase()}
+                  </span>
+                  <span className="dp-source">
+                    <BarChart3 size={11} />
+                    52-Week Trend
+                  </span>
+                </div>
+
+                {/* Title */}
+                <h2 className="dp-title">{activeKPIPanel.label}</h2>
+                <p className="dp-description">
+                  Current: <strong>{activeKPIPanel.primaryValue}</strong>{activeKPIPanel.primaryUnit ? ` ${activeKPIPanel.primaryUnit}` : ''}
+                  {activeKPIPanel.microInsight && <> · {activeKPIPanel.microInsight}</>}
+                </p>
+
+                {/* Period Comparison Metrics */}
+                <div className="dp-section">
+                  <h3 className="dp-section-title">
+                    <Activity size={14} />
+                    Period Comparison
+                  </h3>
+                  <div className="kpi-period-metrics">
+                    <div className="kpi-period-metric">
+                      <span className="kpi-period-label">{periodLabel}</span>
+                      <span className={`kpi-period-val delta-${periodDelta.direction}`}>
+                        {periodDelta.direction === 'up' && <ArrowUpRight size={14} />}
+                        {periodDelta.direction === 'down' && <ArrowDownRight size={14} />}
+                        {periodDelta.value}
+                      </span>
+                      <span className="kpi-period-sub">vs prior {calendarMode}</span>
+                    </div>
+                    <div className="kpi-period-metric">
+                      <span className="kpi-period-label">YoY</span>
+                      <span className={`kpi-period-val delta-${activeKPIPanel.deltaDirection || 'flat'}`}>
+                        {activeKPIPanel.deltaDirection === 'up' && <ArrowUpRight size={14} />}
+                        {activeKPIPanel.deltaDirection === 'down' && <ArrowDownRight size={14} />}
+                        {activeKPIPanel.delta}
+                      </span>
+                      <span className="kpi-period-sub">{activeKPIPanel.deltaContext || 'Year over Year'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Trend Graph */}
+                {td.length > 0 && (
+                  <div className="dp-section">
+                    <h3 className="dp-section-title">
+                      <BarChart3 size={14} />
+                      Trend
+                    </h3>
+                    <div className="kpi-panel-chart">
+                      <svg viewBox="0 0 400 140" preserveAspectRatio="none" className="kpi-panel-svg">
+                        <defs>
+                          <linearGradient id={`kpi-grad-${activeKPIPanel.id}`} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor={accent} stopOpacity="0.18" />
+                            <stop offset="100%" stopColor={accent} stopOpacity="0" />
+                          </linearGradient>
+                        </defs>
+                        {(() => {
+                          const min = Math.min(...td);
+                          const max = Math.max(...td);
+                          const range = max - min || 1;
+                          const W = 400, H = 140, P = 8;
+                          const points = td.map((v, i) => ({
+                            x: (i / (td.length - 1)) * W,
+                            y: H - P - ((v - min) / range) * (H - P * 2),
+                          }));
+                          const linePath = points.map((p, i) => i === 0 ? `M ${p.x},${p.y}` : `L ${p.x},${p.y}`).join(' ');
+                          const areaPath = `${linePath} L ${W},${H} L 0,${H} Z`;
+                          const last = points[points.length - 1];
+                          return (
+                            <>
+                              <path d={areaPath} fill={`url(#kpi-grad-${activeKPIPanel.id})`} />
+                              <path d={linePath} fill="none" stroke={accent} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                              <circle cx={last.x} cy={last.y} r="3" fill={accent} stroke="#ffffff" strokeWidth="1.5" />
+                            </>
+                          );
+                        })()}
+                      </svg>
+                    </div>
+                  </div>
+                )}
+
+                {/* AI Insight */}
+                {activeKPIPanel.trendInsight && (
+                  <div className="dp-section">
+                    <h3 className="dp-section-title">
+                      <Sparkles size={14} />
+                      AI Insight
+                    </h3>
+                    <div className="kpi-ai-insight">
+                      <Sparkles size={14} className="kpi-ai-insight-icon" />
+                      <p>{activeKPIPanel.trendInsight}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Panel Details */}
+                {activeKPIPanel.panelDetails && activeKPIPanel.panelDetails.length > 0 && (
+                  <div className="dp-section">
+                    <h3 className="dp-section-title">
+                      <Activity size={14} />
+                      Key Details
+                    </h3>
+                    <div className="kpi-panel-details">
+                      {activeKPIPanel.panelDetails.map((detail, i) => (
+                        <div key={i} className={`kpi-panel-detail-row status-${detail.status || 'neutral'}`}>
+                          <span className="kpi-panel-detail-label">{detail.label}</span>
+                          <span className="kpi-panel-detail-value">{detail.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Timestamp */}
+                <div className="dp-timestamp">
+                  <Clock size={11} />
+                  <span>Updated just now · Showing {calendarMode === 'week' ? 'weekly' : calendarMode === 'month' ? 'monthly' : 'quarterly'} comparison</span>
+                </div>
+              </div>
+            </div>
+          </>
+        );
+      })()}
+
+      {/* Broadcast Analytics — Right-Side Detail Panel (same pattern as Home Screen alerts) */}
+      {bcaSelectedBroadcast && (
+        <>
+          <div className="detail-panel-overlay" onClick={closeBcaPanel} />
+          <div className="detail-panel">
+            <div className="detail-panel-header">
+              <button className="detail-panel-close" onClick={closeBcaPanel}>
+                <X size={18} />
+              </button>
+            </div>
+            <div className="detail-panel-body">
+              {/* Severity / Status Row */}
+              <div className="dp-severity-row">
+                <span className={`dp-severity-badge ${bcaSelectedBroadcast.priority === 'high' ? 'critical' : bcaSelectedBroadcast.priority === 'medium' ? 'warning' : 'risk'}`}>
+                  {bcaSelectedBroadcast.priority.toUpperCase()} PRIORITY
+                </span>
+                <span className="dp-source">
+                  <Megaphone size={11} />
+                  {bcaSelectedBroadcast.type}
+                </span>
+              </div>
+
+              {/* Title */}
+              <h2 className="dp-title">{bcaSelectedBroadcast.name}</h2>
+              <p className="dp-description">
+                Sent {bcaSelectedBroadcast.sentAt} · {bcaSelectedBroadcast.acked}/{bcaSelectedBroadcast.stores} stores acknowledged · Avg ack time: {bcaSelectedBroadcast.avgAckTime}
+              </p>
+
+              {/* Impact Summary */}
+              {bcaSelectedBroadcast.status === 'at-risk' && (
+                <div className="dp-impact-summary">
+                  <AlertCircle size={14} />
+                  <span>
+                    {bcaSelectedBroadcast.stores - bcaSelectedBroadcast.acked} stores still pending · {bcaSelectedBroadcast.ackRate}% ack rate — needs follow-up to meet compliance target
+                  </span>
+                </div>
+              )}
+
+              {/* Store-Level Compliance Table */}
+              <div className="dp-section">
+                <h3 className="dp-section-title">
+                  <Store size={14} />
+                  Store-Level Compliance
+                </h3>
+                <div className="bca-panel-table-wrapper">
+                  <table className="bca-panel-table">
+                    <thead>
+                      <tr>
+                        <th>Store</th>
+                        <th>Status</th>
+                        <th>Ack Time</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {getBroadcastStoreCompliance(bcaSelectedBroadcast).map(s => (
+                        <tr
+                          key={s.storeId}
+                          className="bca-panel-table-row"
+                          onClick={() => { closeBcaPanel(); navigate(`/store-operations/store-deep-dive?store=${s.storeId}`); }}
+                        >
+                          <td>
+                            <div className="bca-panel-store-name">{s.store}</div>
+                            <span className="bca-panel-store-id">#{s.storeId}</span>
+                          </td>
+                          <td>
+                            <span className={`bca-panel-ack-badge ${s.acknowledged ? 'acked' : 'pending'}`}>
+                              {s.acknowledged ? 'Acknowledged' : 'Pending'}
+                            </span>
+                          </td>
+                          <td className="bca-panel-td-time">{s.acknowledged ? s.avgTime : '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Smart Insights */}
+              <div className="dp-section">
+                <h3 className="dp-section-title">
+                  <Sparkles size={14} />
+                  Smart Insights
+                </h3>
+                <div className="dp-stores-list">
+                  {activeBroadcasts.insights.map((insight, idx) => (
+                    <div key={idx} className="dp-store-card info">
+                      <div className="dp-store-header">
+                        <span className="dp-store-name" style={{ fontSize: 12 }}>
+                          <Activity size={12} style={{ marginRight: 6, verticalAlign: 'middle' }} />
+                          Pattern
+                        </span>
+                      </div>
+                      <p className="dp-store-detail">{insight.pattern}</p>
+                      <div className="dp-store-header" style={{ marginTop: 8 }}>
+                        <span className="dp-store-name" style={{ fontSize: 12, color: '#7c3aed' }}>
+                          <Sparkles size={12} style={{ marginRight: 6, verticalAlign: 'middle' }} />
+                          Recommendation
+                        </span>
+                      </div>
+                      <p className="dp-store-detail" style={{ color: '#6d28d9', fontStyle: 'italic' }}>{insight.recommendation}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Action CTAs */}
+              <div className="dp-actions">
+                <button className="dp-action-btn outlined" onClick={() => { closeBcaPanel(); showToast(`Nudge sent to ${bcaSelectedBroadcast.stores - bcaSelectedBroadcast.acked} pending stores`); }}>
+                  <Send size={14} />
+                  <span>Send Nudge</span>
+                </button>
+                <button className="dp-action-btn outlined" onClick={() => { closeBcaPanel(); showToast(`Follow-up assigned for "${bcaSelectedBroadcast.name}"`); }}>
+                  <ClipboardCheck size={14} />
+                  <span>Assign Follow-up</span>
+                </button>
+                <button className="dp-action-btn outlined" onClick={() => { closeBcaPanel(); showToast(`Escalated "${bcaSelectedBroadcast.name}" to Regional`); }}>
+                  <AlertTriangle size={14} />
+                  <span>Escalate</span>
+                </button>
+              </div>
+
+              {/* Timestamp */}
+              <div className="dp-timestamp">
+                <Clock size={11} />
+                <span>Sent {bcaSelectedBroadcast.sentAt}</span>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
     </div>
   );
 };

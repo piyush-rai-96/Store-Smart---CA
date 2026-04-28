@@ -51,7 +51,7 @@
 .sidebar-brand-text {
   font-size: 18px;
   font-weight: 700;
-  color: #111827;
+  color: #0f172a;
   letter-spacing: -0.5px;
 }
 
@@ -188,7 +188,7 @@
 .sidebar-user-name {
   font-size: 13px;
   font-weight: 600;
-  color: #111827;
+  color: #0f172a;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

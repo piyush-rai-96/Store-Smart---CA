@@ -8,7 +8,6 @@ import {
   Minus,
   AlertTriangle,
   AlertCircle,
-  Shield,
   Sparkles,
   X,
   ChevronRight,
@@ -22,9 +21,9 @@ import {
   ArrowDownRight,
   Bell,
   Search,
+  Download,
+  RefreshCw,
   Clock,
-  Eye,
-  CheckCircle,
   CheckCircle2,
   Info,
   Megaphone,
@@ -39,6 +38,8 @@ import {
   Calendar,
   Filter
 } from 'lucide-react';
+import { AIDailyBrief, AIDailyBriefData } from '../components/common/AIDailyBrief';
+import { useAuth } from '../context/AuthContext';
 import './StoreCenter.css';
 import './DistrictIntelligence.css';
 
@@ -117,6 +118,326 @@ interface AlertItem {
   source: string;
 }
 
+// ── Store-level AI Daily Brief — tier-aware narrative ──────────
+const getStoreBrief = (store: StoreMeta): AIDailyBriefData => {
+  const isExcellent = store.dpi >= 88;
+  const isStable = store.dpi >= 78 && store.dpi < 88;
+  const isAtRisk = store.dpi >= 65 && store.dpi < 78;
+  if (isExcellent) {
+    return {
+      greeting: `${store.name} (#${store.number}) is leading the district at SPI ${store.dpi} — benchmark performance with all streams in green.`,
+      sections: [
+        { title: 'Performance Highlights', icon: 'performance', bullets: [
+          `SPI of <strong>${store.dpi}</strong> ranks <strong>#${store.rank} of ${store.totalStores}</strong> — Excellence tier sustained.`,
+          'Net sales tracking <strong>+4.2% vs plan</strong> consistently for 6 weeks.',
+          'VoC satisfaction at <strong>4.3/5</strong> — top theme \"Friendly Staff\" mentioned in 38% of positive reviews.',
+        ]},
+        { title: 'Operational Excellence', icon: 'ops', bullets: [
+          'Shelf audit compliance <strong>91/100</strong>, planogram adherence at 96% — no critical SEA findings open.',
+          'Stock availability <strong>96.8%</strong> with zero OOS-risk SKUs flagged for the week.',
+          'Margin held at <strong>42.1%</strong> with markdown discipline preserved through season.',
+        ]},
+        { title: 'Recommended Actions', icon: 'recommendations', bullets: [
+          'Codify your playbook — schedule a knowledge-share with peer-store managers next week.',
+          'Begin preparing for seasonal transition: review markdown plan and pre-stage incoming Spring assortment.',
+        ]},
+      ],
+      closing: 'Sustain momentum and protect against complacency. Consider mentoring a peer store currently in At-Risk tier.',
+    };
+  }
+  if (isStable) {
+    return {
+      greeting: `${store.name} (#${store.number}) is tracking plan at SPI ${store.dpi} — execution steady with minor opportunities to push into Excellence.`,
+      sections: [
+        { title: 'Performance & Trends', icon: 'performance', bullets: [
+          `SPI of <strong>${store.dpi}</strong> places you mid-pack at #${store.rank} of ${store.totalStores} — momentum is ${store.momentum}.`,
+          'Net sales at <strong>+1.2% vs plan</strong> — opportunity in Footwear which is trailing district by 3.4 pts.',
+          'VoC satisfaction at <strong>4.0/5</strong>, slight dip from 4.2 — \"Checkout Speed\" mentions trending up.',
+        ]},
+        { title: 'Operational Notes', icon: 'ops', bullets: [
+          'Shelf audit compliance <strong>86/100</strong> — Cleanliness category needs attention (-4 pts vs target).',
+          '2 OOS-risk SKUs in Basics — replenishment scheduled for tomorrow.',
+        ]},
+        { title: 'Recommended Actions', icon: 'recommendations', bullets: [
+          'Run a Footwear category review with the dept lead to identify the assortment gap vs peer stores.',
+          'Increase checkout coverage during peak (12-2pm, 5-7pm) to address the rising VoC theme.',
+        ]},
+      ],
+      closing: 'Small, focused interventions on Footwear and Checkout Speed could lift SPI 2-3 points within 2 weeks.',
+    };
+  }
+  if (isAtRisk) {
+    return {
+      greeting: `${store.name} (#${store.number}) is in At-Risk territory at SPI ${store.dpi} — trend declining over the last 4 weeks. Targeted intervention required this week.`,
+      sections: [
+        { title: 'Triage & Critical Issues', icon: 'triage', bullets: [
+          '<strong>VoC: Fitting Room Wait</strong> — complaints up <strong>+34%</strong> over 2 weeks, hitting conversion rate.',
+          '<strong>OOS Risk</strong>: 8 size-run gaps in Basics, 4 SKUs critical. Replenishment delayed 36h from DC.',
+          '<strong>Planogram Drift</strong>: Women\'s Wall Display 78% compliance — featured items missing or misplaced.',
+        ]},
+        { title: 'Performance & Trends', icon: 'performance', bullets: [
+          `SPI declined <strong>${store.dpiDelta} pts</strong> over 4 weeks — trajectory points to Crisis tier within 2 weeks if uncorrected.`,
+          'Net sales at <strong>-3.8% vs plan</strong>, conversion rate down 2.1 pts.',
+          `Currently ranked <strong>#${store.rank} of ${store.totalStores}</strong> in district peer cluster.`,
+        ]},
+        { title: 'Recommended Actions', icon: 'recommendations', bullets: [
+          'Increase fitting room staffing during 11am–3pm peak — biggest sales recovery lever.',
+          'Expedite the 4 critical Basics SKUs from regional DC; clear backroom for inbound.',
+          'Reset Women\'s Wall Display tonight — POG team can deploy in 90 minutes.',
+        ]},
+      ],
+      closing: 'This is a recoverable position — focused execution on the three actions above should stabilize SPI within 1 week.',
+    };
+  }
+  // Crisis
+  return {
+    greeting: `${store.name} (#${store.number}) is in CRISIS at SPI ${store.dpi} — multiple compounding failures across SEA, VoC, OOS and Sales. District Manager intervention today is required.`,
+    sections: [
+      { title: 'Triage & Critical Issues', icon: 'triage', bullets: [
+        '<strong>SEA Auto-Fail</strong>: Fire exit blocked in Zone B — <strong>regulatory exposure</strong>. Must be cleared before close today.',
+        '<strong>VoC Crisis</strong>: \"Messy Aisles\" and \"Staff Unavailable\" complaints up <strong>+38%</strong> in 2 weeks. NPS dropped 14 pts.',
+        '<strong>OOS Surge</strong>: 14 SKUs out-of-stock, 4 shipments delayed. Estimated revenue impact €4,200 this week.',
+        '<strong>Sales Miss</strong>: 4 consecutive weeks of comp sales -12%. Apparel leading the decline.',
+      ]},
+      { title: 'Performance & Trends', icon: 'performance', bullets: [
+        `SPI dropped <strong>${store.dpiDelta} pts</strong> in 4 weeks — momentum strongly negative.`,
+        'Net sales at <strong>-9.1% vs district avg</strong>; conversion rate at lowest level in 12 months.',
+        `Ranked <strong>last (#${store.rank} of ${store.totalStores})</strong> in district peer cluster.`,
+      ]},
+      { title: 'Recommended Actions', icon: 'recommendations', bullets: [
+        'Dispatch DM for on-site intervention today — escalation protocol triggered.',
+        'Clear SEA auto-fail before close. Document remediation; submit to Compliance.',
+        'Expedite top-10 OOS SKUs from RDC; restore baseline staffing for next 48h.',
+        'Deep-clean store overnight; reset planograms in priority categories before tomorrow open.',
+      ]},
+    ],
+    closing: 'This store requires hands-on leadership today. Escalation to Regional VP recommended if conditions persist by end of week.',
+  };
+};
+
+// ── KPI Data — mirrors DI's 6 categories (Sales / VoC Sat / VoC Issue / Shelf Audit / OOS / Margin) ──
+interface StoreKPI {
+  id: string;
+  category: 'commercial' | 'customer' | 'execution' | 'profitability' | 'operations';
+  label: string;
+  primaryValue: string;
+  primaryUnit?: string;
+  microInsight?: string;
+  delta?: string;
+  deltaDirection?: 'up' | 'down' | 'flat';
+  deltaContext?: string;
+  status: 'positive' | 'negative' | 'neutral' | 'warning';
+  clickable: boolean;
+  trendData?: number[];
+  trendInsight?: string;
+  panelTitle?: string;
+  panelDetails?: { label: string; value: string; status?: string }[];
+}
+
+const getStoreKPIs = (store: StoreMeta): StoreKPI[] => {
+  const isStrong = store.dpi >= 85;
+  const isOk = store.dpi >= 75 && store.dpi < 85;
+  // Use same shape and values as DI districtKPIs, lightly adjusted to store tier
+  return [
+    {
+      id: 'sales-performance',
+      category: 'commercial',
+      label: 'Sales Performance',
+      primaryValue: isStrong ? '$1.32M' : isOk ? '$1.18M' : '$0.94M',
+      primaryUnit: 'MTD',
+      microInsight: isStrong ? '4W avg $1.24M' : isOk ? '4W avg $1.12M' : '4W avg $0.97M',
+      delta: isStrong ? '+4.2%' : isOk ? '+1.1%' : '-5.8%',
+      deltaDirection: isStrong || isOk ? 'up' : 'down',
+      deltaContext: 'YoY',
+      status: isStrong ? 'positive' : isOk ? 'neutral' : 'negative',
+      clickable: true,
+      trendData: isStrong
+        ? [980, 1020, 1050, 1010, 1080, 1120, 1060, 1100, 1150, 1180, 1200, 1320]
+        : isOk
+          ? [960, 970, 1000, 990, 1020, 1030, 1010, 1050, 1080, 1090, 1100, 1180]
+          : [1010, 990, 980, 970, 980, 960, 950, 950, 940, 945, 935, 940],
+      trendInsight: isStrong
+        ? 'Consistent upward trend. Q4 seasonality effect visible. Rolling 4-week avg: $1.24M.'
+        : isOk
+          ? 'Plan tracking, mild upward bias. Footwear lagging peer-store contribution.'
+          : 'Sales softening for 6 weeks. Conversion rate the primary drag; weekend traffic flat.',
+      panelTitle: 'Sales $ — 52-Week Trend',
+      panelDetails: [
+        { label: 'Best Week', value: isStrong ? '$1.40M (Mar 23)' : '$1.18M (Mar 23)', status: 'positive' },
+        { label: 'Worst Week', value: isStrong ? '$1.04M (Jun 23)' : '$0.92M (Jun 23)', status: 'negative' },
+        { label: 'Rolling 4W Avg', value: isStrong ? '$1.24M' : '$1.05M', status: 'neutral' },
+        { label: 'YoY Δ', value: isStrong ? '+4.2%' : isOk ? '+1.1%' : '-5.8%', status: isStrong || isOk ? 'positive' : 'negative' },
+      ],
+    },
+    {
+      id: 'voc-satisfaction',
+      category: 'customer',
+      label: 'VoC Satisfaction',
+      primaryValue: isStrong ? '88%' : isOk ? '82%' : '74%',
+      microInsight: isStrong ? 'Top theme: Friendly Staff' : isOk ? 'Top theme: Checkout Speed' : 'Top theme: Messy Aisles',
+      delta: isStrong ? '+2.1 pts' : isOk ? '-1.4 pts' : '-4.8 pts',
+      deltaDirection: isStrong ? 'up' : 'down',
+      deltaContext: 'YoY',
+      status: isStrong ? 'positive' : isOk ? 'warning' : 'negative',
+      clickable: true,
+      trendData: isStrong
+        ? [82, 83, 84, 85, 84, 86, 86, 87, 86, 87, 88, 88]
+        : isOk
+          ? [86, 85, 85, 84, 84, 83, 84, 83, 83, 82, 82, 82]
+          : [80, 79, 78, 77, 76, 76, 75, 75, 74, 75, 74, 74],
+      trendInsight: isStrong
+        ? 'Steady positive trend over 12 weeks. "Friendly Staff" mentioned in 38% of positive reviews.'
+        : 'Gradual decline. "Messy Aisles" and "Staff Availability" emerging as top negative themes.',
+      panelTitle: 'VoC Satisfaction — 52-Week Trend',
+      panelDetails: [
+        { label: 'Peak', value: isStrong ? '93% (Jul 21)' : '85% (Jul 21)', status: 'positive' },
+        { label: 'Low', value: isStrong ? '82% (Jan 5)' : '74% (Jan 5)', status: 'negative' },
+        { label: 'Top Theme (↑)', value: isStrong ? 'Friendly Staff' : 'Messy Aisles (+34%)', status: isStrong ? 'positive' : 'negative' },
+        { label: 'Top Theme (↓)', value: 'Checkout Speed (improved)', status: 'positive' },
+      ],
+    },
+    {
+      id: 'voc-issue-rate',
+      category: 'customer',
+      label: 'VoC Issue Rate',
+      primaryValue: isStrong ? '2.4' : isOk ? '3.6' : '5.1',
+      primaryUnit: '/ 100 visits',
+      microInsight: isStrong ? 'Below district avg' : isOk ? 'In-line with peer cluster' : 'Top quartile of issues',
+      delta: isStrong ? '-0.4' : isOk ? '+0.6' : '+1.4',
+      deltaDirection: isStrong ? 'down' : 'up',
+      deltaContext: 'YoY',
+      status: isStrong ? 'positive' : isOk ? 'warning' : 'negative',
+      clickable: true,
+      trendData: isStrong
+        ? [2.9, 2.8, 2.7, 2.8, 2.6, 2.7, 2.5, 2.6, 2.4, 2.5, 2.4, 2.4]
+        : isOk
+          ? [2.8, 2.9, 3.0, 3.1, 2.9, 3.2, 3.4, 3.2, 3.5, 3.6, 3.4, 3.6]
+          : [4.0, 4.2, 4.3, 4.4, 4.6, 4.7, 4.8, 4.9, 4.9, 5.0, 5.1, 5.1],
+      trendInsight: isStrong
+        ? 'Issue rate trending down. Strong staff coverage during peak windows.'
+        : 'Spike detected in last 2 weeks. Driven primarily by "Messy Aisles" theme.',
+      panelTitle: 'VoC Issue Rate — 52-Week Trend',
+      panelDetails: [
+        { label: 'Best', value: isStrong ? '1.9 / 100 (Jun 2)' : '2.4 / 100 (Jun 2)', status: 'positive' },
+        { label: 'Worst', value: isStrong ? '3.0 / 100 (Feb 2)' : '5.1 / 100 (Feb 2)', status: 'negative' },
+        { label: 'Spike Driver', value: isStrong ? 'None — stable' : 'Messy Aisles (+34%)', status: isStrong ? 'positive' : 'negative' },
+        { label: 'Vs District Avg', value: isStrong ? '-1.4 (better)' : '+1.3 (worse)', status: isStrong ? 'positive' : 'warning' },
+      ],
+    },
+    {
+      id: 'shelf-audit',
+      category: 'execution',
+      label: 'Shelf Audit Compliance',
+      primaryValue: isStrong ? '94%' : isOk ? '89%' : '78%',
+      microInsight: isStrong ? 'Above target' : isOk ? '6th week below target' : 'Critical — well below target',
+      delta: isStrong ? '+1 pt' : isOk ? '-6 pts' : '-17 pts',
+      deltaDirection: isStrong ? 'up' : 'down',
+      deltaContext: 'vs target',
+      status: isStrong ? 'positive' : isOk ? 'warning' : 'negative',
+      clickable: true,
+      trendData: isStrong
+        ? [92, 93, 91, 90, 92, 91, 93, 90, 92, 93, 94, 94]
+        : isOk
+          ? [92, 93, 91, 90, 92, 91, 89, 90, 88, 89, 90, 89]
+          : [86, 84, 82, 80, 81, 79, 80, 78, 79, 78, 78, 78],
+      trendInsight: isStrong
+        ? 'Above target consistently. Cleanliness and Planogram dimensions leading.'
+        : 'Below target for 6 consecutive weeks. Safety and Cleanliness pulling overall score down.',
+      panelTitle: 'Shelf Audit Compliance — 52-Week Trend',
+      panelDetails: [
+        { label: 'Target', value: '95%', status: 'neutral' },
+        { label: 'Gap', value: isStrong ? '-1pt' : isOk ? '-6pts' : '-17pts', status: isStrong ? 'warning' : 'negative' },
+        { label: 'Top Category', value: 'Pricing (97%)', status: 'positive' },
+        { label: 'Bottom Category', value: 'Backroom (78%)', status: 'negative' },
+      ],
+    },
+    {
+      id: 'oos-rate',
+      category: 'operations',
+      label: 'OOS Rate',
+      primaryValue: isStrong ? '1.8%' : isOk ? '3.2%' : '6.4%',
+      microInsight: isStrong ? 'Apparel 0.8%, Home 1.2%' : isOk ? 'Apparel drives 55%' : 'Apparel drives 62%',
+      delta: isStrong ? '-0.3 pts' : isOk ? '+0.5 pts' : '+2.1 pts',
+      deltaDirection: isStrong ? 'down' : 'up',
+      deltaContext: 'WoW',
+      status: isStrong ? 'positive' : isOk ? 'warning' : 'negative',
+      clickable: true,
+      trendData: isStrong
+        ? [2.4, 2.2, 2.1, 2.0, 1.9, 2.0, 1.9, 1.8, 1.9, 1.8, 1.8, 1.8]
+        : isOk
+          ? [2.6, 2.7, 2.8, 2.9, 2.8, 3.0, 3.1, 3.0, 3.1, 3.2, 3.1, 3.2]
+          : [4.1, 4.4, 4.7, 5.0, 5.2, 5.4, 5.6, 5.9, 6.1, 6.2, 6.3, 6.4],
+      trendInsight: isStrong
+        ? 'OOS contained. Replenishment SLA met 100% over last 30 days.'
+        : 'Driven by Basics size-runs and delayed inbound. 4 SKUs critical this week.',
+      panelTitle: 'OOS Rate — 52-Week Trend',
+      panelDetails: [
+        { label: 'Best', value: isStrong ? '1.4% (Jun 9)' : '2.1% (Jun 9)', status: 'positive' },
+        { label: 'Worst', value: isStrong ? '2.8% (Jan 19)' : '6.8% (Jan 19)', status: 'negative' },
+        { label: 'Top Driver', value: 'Basics size-run gaps', status: 'warning' },
+        { label: 'Inbound Delays', value: isStrong ? '0 shipments' : '4 shipments', status: isStrong ? 'positive' : 'negative' },
+      ],
+    },
+    {
+      id: 'margin-health',
+      category: 'profitability',
+      label: 'Margin Health',
+      primaryValue: isStrong ? '36.4%' : isOk ? '34.2%' : '31.8%',
+      primaryUnit: 'GM',
+      microInsight: isStrong ? 'Markdown discipline strong' : isOk ? 'In-line with district' : 'Markdown pressure rising',
+      delta: isStrong ? '+30 bps' : isOk ? '+10 bps' : '-90 bps',
+      deltaDirection: isStrong || isOk ? 'up' : 'down',
+      deltaContext: 'WoW',
+      status: isStrong ? 'positive' : isOk ? 'neutral' : 'negative',
+      clickable: true,
+      trendData: isStrong
+        ? [35.4, 35.6, 35.8, 36.0, 35.9, 36.1, 36.0, 36.2, 36.1, 36.3, 36.2, 36.4]
+        : isOk
+          ? [33.8, 33.9, 34.0, 34.0, 34.1, 34.0, 34.1, 34.0, 34.1, 34.2, 34.1, 34.2]
+          : [33.6, 33.4, 33.2, 33.0, 32.8, 32.6, 32.4, 32.2, 32.0, 31.9, 31.8, 31.8],
+      trendInsight: isStrong
+        ? 'Margin expanding through markdown discipline and full-price mix.'
+        : 'Markdown pressure driving compression. Apparel category leading the decline.',
+      panelTitle: 'Margin Health — 52-Week Trend',
+      panelDetails: [
+        { label: 'Peak', value: isStrong ? '37.0% (Aug 18)' : '34.8% (Aug 18)', status: 'positive' },
+        { label: 'Low', value: isStrong ? '34.9% (Feb 9)' : '31.8% (Feb 9)', status: 'negative' },
+        { label: 'Markdown Mix', value: isStrong ? '12.4%' : '18.6%', status: isStrong ? 'positive' : 'warning' },
+        { label: 'Full-Price Mix', value: isStrong ? '74.2%' : '64.8%', status: isStrong ? 'positive' : 'warning' },
+      ],
+    },
+  ];
+};
+
+// ── Audit cell findings + recommendations (mirror DI's autoFindingsMap structure) ──
+const scAuditFindings: Record<string, string[]> = {
+  Overall: ['Multiple sub-dimensions trending below target', 'Cross-category execution gaps observed', 'Score driven by 2-3 weak dimensions'],
+  Safety: ['Fire extinguisher inspection overdue', 'Emergency exit signage faded in Zone B', 'Wet floor sign protocol inconsistent', 'First aid kit needs restocking'],
+  Planogram: ['Shelf facings deviating from authorized POG', 'Endcap promotion not fully set', 'Adjacency disruption in Women\'s Wall', 'Missing labels for 3 newly added SKUs'],
+  Signage: ['Price signage outdated on 6+ items', 'Promotional banner not visible from main aisle', 'Department wayfinding misaligned', 'Sale end-date signage still live post-promo'],
+  Cleanliness: ['Aisle floor needs deeper clean (3, 5, 7)', 'Fitting room mirrors smudged', 'Restroom restocking schedule lapsed', 'Customer-facing endcaps dusty'],
+  Availability: ['8 size-run gaps in Basics', '4 OOS-risk SKUs flagged this week', 'Backroom replenishment lagging', 'Featured promo SKU low stock'],
+  Staffing: ['Coverage thin during 11am–3pm peak', 'Fitting room attendant absent during weekend', 'Cashier coverage 1 short on Fri evening', 'New hire onboarding behind schedule'],
+  'Stock Rotation': ['FIFO violations in Grocery aisles', 'Date-coded items not rotated weekly', 'Backstock organization needs reset', 'Aged inventory increasing in Footwear'],
+  Pricing: ['Shelf-tag mismatches on 4 SKUs', 'Promo pricing not loaded for Tuesday refresh', 'Multi-buy signage confusing in Snacks', 'Markdown stickers obscuring base price'],
+  Backroom: ['Receiving area cluttered, blocking aisle access', 'Pallet rotation not following SLA', 'Hazmat segregation needs review', 'Empty cardboard buildup at dock'],
+  'Customer Area': ['Shopping cart availability below 80%', 'Checkout queue exceeded 5-min wait', 'Customer service desk unstaffed during peak', 'Store entrance cleanliness needs attention'],
+};
+
+const scCategorySkill: Record<string, { skill: string; logic: string }> = {
+  Overall: { skill: 'analytics', logic: 'Aggregated KPI derived from all audit dimensions' },
+  Safety: { skill: 'knowledge', logic: 'Compliance-driven; surfaces the relevant safety SOP and remediation steps' },
+  Planogram: { skill: 'pog', logic: 'POG drift detected; AI generates corrective shelf-set' },
+  Signage: { skill: 'knowledge', logic: 'Surfaces signage standards and missing-asset checklist' },
+  Cleanliness: { skill: 'actions', logic: 'Triggers cleaning task with assigned owner and SLA' },
+  Availability: { skill: 'analytics', logic: 'Cross-references OOS feed to identify root cause' },
+  Staffing: { skill: 'actions', logic: 'Recommends shift adjustments based on traffic forecast' },
+  'Stock Rotation': { skill: 'knowledge', logic: 'Reinforces FIFO and rotation SOP for relevant team' },
+  Pricing: { skill: 'pog', logic: 'Validates shelf-tag against master price file' },
+  Backroom: { skill: 'actions', logic: 'Generates reset task with priority based on aisle blockage risk' },
+  'Customer Area': { skill: 'actions', logic: 'Auto-creates tasks targeting peak coverage windows' },
+};
+
 // ── Mock Data ──────────────────────────────────────────
 const storesData: StoreMeta[] = [
   { id: 's1', name: 'Downtown Plaza', number: '2034', cluster: 'Metro North', format: 'Flagship', dpi: 94, dpiDelta: 3.2, momentum: 'rising', rank: 1, totalStores: 8, risk: 'low', lastRefresh: '5 min ago', tier: 'Excellence' },
@@ -127,15 +448,6 @@ const storesData: StoreMeta[] = [
   { id: 's6', name: 'Oak Street', number: '1234', cluster: 'East Region', format: 'Compact', dpi: 72, dpiDelta: -6.8, momentum: 'declining', rank: 6, totalStores: 8, risk: 'high', lastRefresh: '9 min ago', tier: 'Needs Attention' },
   { id: 's7', name: 'Pine Grove', number: '5678', cluster: 'South Bay', format: 'Compact', dpi: 65, dpiDelta: -9.2, momentum: 'declining', rank: 7, totalStores: 8, risk: 'high', lastRefresh: '20 min ago', tier: 'Needs Attention' },
   { id: 's8', name: 'Maple Heights', number: '9012', cluster: 'East Region', format: 'Compact', dpi: 58, dpiDelta: -12.4, momentum: 'declining', rank: 8, totalStores: 8, risk: 'high', lastRefresh: '14 min ago', tier: 'Needs Attention' },
-];
-
-const getKPIsForStore = (store: StoreMeta): KPITile[] => [
-  { id: 'sales', label: 'Sales vs Plan', value: store.dpi >= 85 ? '104.2%' : store.dpi >= 75 ? '97.8%' : '91.3%', delta: store.dpi >= 85 ? '+4.2%' : store.dpi >= 75 ? '-2.2%' : '-8.7%', deltaDir: store.dpi >= 85 ? 'up' : 'down', deltaContext: 'YoY', status: store.dpi >= 85 ? 'positive' : 'negative', icon: <DollarSign size={16} />, trendData: [96, 98, 97, 101, 99, 103, 104, 102, 105, 104, 103, 106], trendLabels: ['Feb 3','Feb 10','Feb 17','Feb 24','Mar 3','Mar 10','Mar 17','Mar 24','Mar 31','Apr 6','Apr 13','Apr 20'], insight: store.dpi >= 85 ? 'Consistently above plan for 6 weeks' : 'Below plan — weekend traffic declining' },
-  { id: 'sea', label: 'SEA Score', value: store.dpi >= 80 ? '91' : '76', unit: '/100', delta: store.dpi >= 80 ? '+3 pts' : '-5 pts', deltaDir: store.dpi >= 80 ? 'up' : 'down', deltaContext: 'YoY', status: store.dpi >= 80 ? 'positive' : 'negative', icon: <Shield size={16} />, trendData: [85, 87, 88, 86, 89, 90, 88, 91, 90, 92, 91, 91], trendLabels: ['Feb 3','Feb 10','Feb 17','Feb 24','Mar 3','Mar 10','Mar 17','Mar 24','Mar 31','Apr 6','Apr 13','Apr 20'], insight: store.dpi >= 80 ? 'Audit scores improving steadily' : 'Safety category pulling score down' },
-  { id: 'voc', label: 'VoC Score', value: store.dpi >= 80 ? '4.3' : '3.6', unit: '/5', delta: store.dpi >= 80 ? '+0.2 pts' : '-0.4 pts', deltaDir: store.dpi >= 80 ? 'up' : 'down', deltaContext: 'YoY', status: store.dpi >= 80 ? 'positive' : 'negative', icon: <Heart size={16} />, trendData: [4.0, 4.1, 4.0, 4.2, 4.1, 4.3, 4.2, 4.3, 4.4, 4.3, 4.2, 4.3], trendLabels: ['Feb 3','Feb 10','Feb 17','Feb 24','Mar 3','Mar 10','Mar 17','Mar 24','Mar 31','Apr 6','Apr 13','Apr 20'], insight: store.dpi >= 80 ? 'Customer satisfaction trending positively' : '"Messy aisles" theme rising — needs attention' },
-  { id: 'avail', label: 'Availability', value: store.dpi >= 80 ? '96.8%' : '89.2%', delta: store.dpi >= 80 ? '+1.1%' : '-3.4%', deltaDir: store.dpi >= 80 ? 'up' : 'down', deltaContext: 'YoY', status: store.dpi >= 80 ? 'positive' : 'negative', icon: <Package size={16} />, trendData: [94, 95, 94, 96, 95, 97, 96, 97, 96, 97, 97, 97], trendLabels: ['Feb 3','Feb 10','Feb 17','Feb 24','Mar 3','Mar 10','Mar 17','Mar 24','Mar 31','Apr 6','Apr 13','Apr 20'], insight: store.dpi >= 80 ? 'Near-target availability maintained' : '3 SKUs out-of-stock contributing to drop' },
-  { id: 'gm', label: 'Gross Margin', value: store.dpi >= 85 ? '42.1%' : store.dpi >= 75 ? '39.8%' : '37.2%', delta: store.dpi >= 85 ? '+80 bps' : '-120 bps', deltaDir: store.dpi >= 85 ? 'up' : 'down', deltaContext: 'YoY', status: store.dpi >= 85 ? 'positive' : 'negative', icon: <BarChart3 size={16} />, trendData: [40, 41, 40, 41, 42, 41, 42, 41, 42, 42, 42, 42], trendLabels: ['Feb 3','Feb 10','Feb 17','Feb 24','Mar 3','Mar 10','Mar 17','Mar 24','Mar 31','Apr 6','Apr 13','Apr 20'], insight: store.dpi >= 85 ? 'Margin improvement from better mix' : 'Markdown pressure from slow movers' },
-  { id: 'alerts', label: 'Open Alerts', value: store.risk === 'high' ? '7' : store.risk === 'moderate' ? '3' : '1', delta: store.risk === 'high' ? '+4' : store.risk === 'moderate' ? '+1' : '-1', deltaDir: store.risk === 'high' ? 'up' : store.risk === 'moderate' ? 'up' : 'down', deltaContext: 'YoY', status: store.risk === 'high' ? 'negative' : store.risk === 'moderate' ? 'neutral' : 'positive', icon: <Bell size={16} />, trendData: [2, 3, 2, 4, 3, 5, 4, 3, 2, 3, 2, 1], trendLabels: ['Feb 3','Feb 10','Feb 17','Feb 24','Mar 3','Mar 10','Mar 17','Mar 24','Mar 31','Apr 6','Apr 13','Apr 20'], insight: store.risk === 'high' ? 'Alert volume spiking — 4 new this week' : 'Alert volume under control' },
 ];
 
 const getAuditData = (store: StoreMeta): AuditWeek[] => {
@@ -366,6 +678,7 @@ const getComplianceTextColor = (val: number) => {
 
 // ── Component ──────────────────────────────────────────
 export const StoreCenter: React.FC = () => {
+  const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [selectedStoreId, setSelectedStoreId] = useState(storesData[0].id);
@@ -373,8 +686,18 @@ export const StoreCenter: React.FC = () => {
   const [storeSearch, setStoreSearch] = useState('');
   const [trendModal, setTrendModal] = useState<KPITile | null>(null);
   const [auditWeekDetail, setAuditWeekDetail] = useState<AuditWeek | null>(null);
+  const [activeKPIPanel, setActiveKPIPanel] = useState<StoreKPI | null>(null);
+  const [auditCellDetail, setAuditCellDetail] = useState<{
+    weekLabel: string;
+    weekDate: string;
+    category: string;
+    score: number;
+    findings: string[];
+    skill: string;
+    skillLogic: string;
+    trend: 'improving' | 'declining' | 'stable';
+  } | null>(null);
   const [activeTab, setActiveTab] = useState<'voc' | 'inventory' | 'benchmarking' | 'alerts'>('voc');
-  const [showCausalChain, setShowCausalChain] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   // OCV state
@@ -538,33 +861,6 @@ export const StoreCenter: React.FC = () => {
   }, [searchParams]);
 
   const store = storesData.find(s => s.id === selectedStoreId) || storesData[0];
-  const baseKpis = getKPIsForStore(store);
-  // Period-adjusted KPIs — default deltaContext is YoY; time filter swaps to WoW / MoM / QoQ
-  const kpis = (() => {
-    const ctx = calendarMode === 'week' ? 'WoW' : calendarMode === 'month' ? 'MoM' : 'QoQ';
-    if (calendarMode === 'week') return baseKpis.map(kpi => ({ ...kpi, deltaContext: kpi.deltaContext === 'YoY' ? ctx : kpi.deltaContext }));
-    const monthOverrides: Record<string, Partial<KPITile>> = {
-      sales: { value: store.dpi >= 85 ? '437.6%' : store.dpi >= 75 ? '410.8%' : '383.5%', delta: store.dpi >= 85 ? '+3.8%' : '-1.9%', insight: 'Monthly aggregate vs plan', trendData: [395, 402, 410, 418, 425, 430, 438], trendLabels: ['Sep','Oct','Nov','Dec','Jan','Feb','Mar'] },
-      sea: { value: store.dpi >= 80 ? '89' : '74', delta: store.dpi >= 80 ? '+2 pts' : '-3 pts', insight: 'Monthly avg audit score', trendData: [84, 85, 86, 87, 88, 88, 89], trendLabels: ['Sep','Oct','Nov','Dec','Jan','Feb','Mar'] },
-      voc: { value: store.dpi >= 80 ? '4.2' : '3.5', delta: store.dpi >= 80 ? '+0.1 pts' : '-0.3 pts', insight: 'Monthly avg satisfaction', trendData: [3.9, 4.0, 4.0, 4.1, 4.1, 4.2, 4.2], trendLabels: ['Sep','Oct','Nov','Dec','Jan','Feb','Mar'] },
-      avail: { value: store.dpi >= 80 ? '96.2%' : '88.5%', delta: store.dpi >= 80 ? '+0.8%' : '-2.1%', insight: 'Monthly avg availability', trendData: [94.5, 95.0, 95.2, 95.8, 96.0, 96.1, 96.2], trendLabels: ['Sep','Oct','Nov','Dec','Jan','Feb','Mar'] },
-      gm: { value: store.dpi >= 85 ? '41.8%' : store.dpi >= 75 ? '39.5%' : '36.9%', delta: store.dpi >= 85 ? '+60 bps' : '-90 bps', insight: 'Monthly margin trend', trendData: [40.2, 40.5, 40.8, 41.0, 41.2, 41.5, 41.8], trendLabels: ['Sep','Oct','Nov','Dec','Jan','Feb','Mar'] },
-      alerts: { value: store.risk === 'high' ? '28' : store.risk === 'moderate' ? '12' : '4', delta: store.risk === 'high' ? '+8' : store.risk === 'moderate' ? '+2' : '-2', insight: 'Monthly alert volume', trendData: [8, 6, 10, 5, 7, 4, 4], trendLabels: ['Sep','Oct','Nov','Dec','Jan','Feb','Mar'] },
-    };
-    const quarterOverrides: Record<string, Partial<KPITile>> = {
-      sales: { value: store.dpi >= 85 ? '1,364%' : store.dpi >= 75 ? '1,281%' : '1,196%', delta: store.dpi >= 85 ? '+5.1%' : '-2.8%', insight: 'Quarterly aggregate vs plan', trendData: [1180, 1220, 1280, 1364], trendLabels: ['Q2 2025','Q3 2025','Q4 2025','Q1 2026'] },
-      sea: { value: store.dpi >= 80 ? '88' : '73', delta: store.dpi >= 80 ? '+3 pts' : '-4 pts', insight: 'Quarterly avg audit score', trendData: [82, 84, 86, 88], trendLabels: ['Q2 2025','Q3 2025','Q4 2025','Q1 2026'] },
-      voc: { value: store.dpi >= 80 ? '4.1' : '3.4', delta: store.dpi >= 80 ? '+0.2 pts' : '-0.5 pts', insight: 'Quarterly avg satisfaction', trendData: [3.8, 3.9, 4.0, 4.1], trendLabels: ['Q2 2025','Q3 2025','Q4 2025','Q1 2026'] },
-      avail: { value: store.dpi >= 80 ? '95.8%' : '87.9%', delta: store.dpi >= 80 ? '+1.2%' : '-3.0%', insight: 'Quarterly avg availability', trendData: [93.5, 94.2, 95.0, 95.8], trendLabels: ['Q2 2025','Q3 2025','Q4 2025','Q1 2026'] },
-      gm: { value: store.dpi >= 85 ? '41.5%' : store.dpi >= 75 ? '39.2%' : '36.6%', delta: store.dpi >= 85 ? '+90 bps' : '-140 bps', insight: 'Quarterly margin trend', trendData: [39.8, 40.2, 40.8, 41.5], trendLabels: ['Q2 2025','Q3 2025','Q4 2025','Q1 2026'] },
-      alerts: { value: store.risk === 'high' ? '84' : store.risk === 'moderate' ? '36' : '12', delta: store.risk === 'high' ? '+18' : store.risk === 'moderate' ? '+4' : '-5', insight: 'Quarterly alert volume', trendData: [24, 18, 30, 12], trendLabels: ['Q2 2025','Q3 2025','Q4 2025','Q1 2026'] },
-    };
-    const overrides = calendarMode === 'month' ? monthOverrides : quarterOverrides;
-    return baseKpis.map(kpi => {
-      const ov = overrides[kpi.id];
-      return { ...kpi, deltaContext: ctx, ...ov };
-    });
-  })();
   const auditData = getAuditData(store);
   const aiInsight = getAIInsight(store);
   const vocData = getVoCData(store);
@@ -613,67 +909,57 @@ export const StoreCenter: React.FC = () => {
         </div>
       )}
 
-      {/* ── Page Title ──────────────────────────────────── */}
-      <div className="sc-page-title-bar">
-        <h1 className="sc-page-title">Store Deep Dive</h1>
-      </div>
-
-      {/* ── Context Header ──────────────────────────────── */}
-      <div className="sc-context-header">
-        <div className="sc-ctx-left">
-          <div className="sc-store-selector-wrap">
-            <button className="sc-store-selector" onClick={() => setShowStoreSelector(!showStoreSelector)}>
-              <Store size={18} />
-              <div className="sc-selector-text">
-                <span className="sc-selector-name">{store.name}</span>
-                <span className="sc-selector-meta">#{store.number} · {store.format} · {store.cluster}</span>
-              </div>
-              <ChevronDown size={16} className={`sc-selector-chevron ${showStoreSelector ? 'open' : ''}`} />
-            </button>
-
-            {showStoreSelector && (
-              <div className="sc-store-dropdown">
-                <div className="sc-dropdown-search">
-                  <Search size={14} />
-                  <input
-                    type="text"
-                    placeholder="Search stores..."
-                    value={storeSearch}
-                    onChange={e => setStoreSearch(e.target.value)}
-                    autoFocus
-                  />
-                </div>
-                <div className="sc-dropdown-list">
-                  {filteredStores.map(s => (
-                    <button
-                      key={s.id}
-                      className={`sc-dropdown-item ${s.id === selectedStoreId ? 'active' : ''}`}
-                      onClick={() => { setSelectedStoreId(s.id); setShowStoreSelector(false); setStoreSearch(''); }}
-                    >
-                      <div className="sc-dropdown-item-left">
-                        <span className="sc-dropdown-item-name">{s.name}</span>
-                        <span className="sc-dropdown-item-meta">#{s.number} · {s.format}</span>
-                      </div>
-                      <div className="sc-dropdown-item-right">
-                        <span className={`sc-dropdown-dpi sc-dpi--${s.risk}`}>{s.dpi}</span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+      {/* ── Header (matches District Intelligence look & feel) ─── */}
+      <div className="district-intel-header sc-di-header">
+        <div className="header-left">
+          <div className="header-title">
+            <Store size={24} />
+            <h1>Store Deep Dive</h1>
           </div>
+          <div className="header-meta">
+            <div className="sc-store-selector-wrap">
+              <button className="di-district-picker sc-store-picker" onClick={() => setShowStoreSelector(!showStoreSelector)}>
+                <Store size={14} />
+                <span>{store.name}</span>
+                <span className="di-district-dm">#{store.number} · {store.format}</span>
+                <ChevronDown size={14} className={showStoreSelector ? 'rotated' : ''} />
+              </button>
 
-          <div className="sc-ctx-badges">
-            <span className={`sc-badge sc-badge--tier-${store.tier.toLowerCase().replace(/\s+/g, '-')}`}>{store.tier}</span>
-            <span className={`sc-badge sc-badge--risk-${store.risk}`}>
-              {store.risk === 'high' ? <AlertTriangle size={11} /> : store.risk === 'moderate' ? <AlertCircle size={11} /> : <CheckCircle size={11} />}
-              {store.risk.charAt(0).toUpperCase() + store.risk.slice(1)} Risk
-            </span>
-          </div>
+              {showStoreSelector && (
+                <div className="sc-store-dropdown">
+                  <div className="sc-dropdown-search">
+                    <Search size={14} />
+                    <input
+                      type="text"
+                      placeholder="Search stores..."
+                      value={storeSearch}
+                      onChange={e => setStoreSearch(e.target.value)}
+                      autoFocus
+                    />
+                  </div>
+                  <div className="sc-dropdown-list">
+                    {filteredStores.map(s => (
+                      <button
+                        key={s.id}
+                        className={`sc-dropdown-item ${s.id === selectedStoreId ? 'active' : ''}`}
+                        onClick={() => { setSelectedStoreId(s.id); setShowStoreSelector(false); setStoreSearch(''); }}
+                      >
+                        <div className="sc-dropdown-item-left">
+                          <span className="sc-dropdown-item-name">{s.name}</span>
+                          <span className="sc-dropdown-item-meta">#{s.number} · {s.format}</span>
+                        </div>
+                        <div className="sc-dropdown-item-right">
+                          <span className={`sc-dropdown-dpi sc-dpi--${s.risk}`}>{s.dpi}</span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
 
-          {/* Period Selector — uses same classes as District Intelligence Hub */}
-          <div className="calendar-picker-wrapper">
+            {/* Period Selector — uses same classes as District Intelligence Hub */}
+            <div className="calendar-picker-wrapper">
             <button className="period-selector" onClick={() => setShowCalendar(!showCalendar)}>
               <Calendar size={14} />
               <span>{getSelectedPeriodLabel()}</span>
@@ -762,40 +1048,25 @@ export const StoreCenter: React.FC = () => {
                 )}
               </div>
             )}
+            </div>
+            <span className="last-refresh">
+              <Clock size={12} />
+              Updated {store.lastRefresh}
+            </span>
           </div>
         </div>
-
-        <div className="sc-ctx-right">
-          <div className="sc-ctx-stat sc-ctx-dpi">
-            <span className="sc-ctx-stat-value">{store.dpi}</span>
-            <div className="sc-ctx-stat-info">
-              <span className="sc-ctx-stat-label">DPI</span>
-              <span className={`sc-ctx-stat-delta sc-delta--${store.dpiDelta >= 0 ? 'up' : 'down'}`}>
-                {store.dpiDelta >= 0 ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
-                {store.dpiDelta >= 0 ? '+' : ''}{store.dpiDelta}
-              </span>
-            </div>
+        <div className="header-right">
+          <div className="header-search">
+            <Search size={16} />
+            <input type="text" placeholder="Search stores, metrics..." />
           </div>
-          <div className="sc-ctx-stat">
-            <span className="sc-ctx-stat-value">#{store.rank}</span>
-            <div className="sc-ctx-stat-info">
-              <span className="sc-ctx-stat-label">Rank</span>
-              <span className="sc-ctx-stat-sub">of {store.totalStores}</span>
-            </div>
-          </div>
-          <div className="sc-ctx-stat">
-            <span className={`sc-ctx-momentum sc-momentum--${store.momentum}`}>
-              {store.momentum === 'rising' ? <TrendingUp size={14} /> : store.momentum === 'declining' ? <TrendingDown size={14} /> : <Minus size={14} />}
-            </span>
-            <div className="sc-ctx-stat-info">
-              <span className="sc-ctx-stat-label">Momentum</span>
-              <span className="sc-ctx-stat-sub">{store.momentum}</span>
-            </div>
-          </div>
-          <div className="sc-ctx-refresh">
-            <Clock size={12} />
-            <span>{store.lastRefresh}</span>
-          </div>
+          <button className="header-action-btn secondary">
+            <Download size={16} />
+            Export
+          </button>
+          <button className="header-icon-btn">
+            <RefreshCw size={18} />
+          </button>
         </div>
       </div>
 
@@ -803,58 +1074,223 @@ export const StoreCenter: React.FC = () => {
       {showStoreSelector && <div className="sc-overlay" onClick={() => { setShowStoreSelector(false); setStoreSearch(''); }} />}
 
       <div className="sc-scroll-area" ref={scrollRef}>
-        {/* ── KPI Tiles ──────────────────────────────────── */}
+        {/* ── Hero Pulse: SPI Card + AI Daily Brief (matches DI) ── */}
+        <div className="executive-pulse sc-pulse">
+          {/* SPI Card — reuses DI dpi-card-v2 visuals */}
+          <div className="dpi-card-v2">
+            <div className="dpi-hero-section">
+              <div className="dpi-gauge-wrapper-v2">
+                <svg className="dpi-gauge-v2" viewBox="0 0 160 160">
+                  <circle cx="80" cy="80" r="68" fill="none" stroke="#f1f5f9" strokeWidth="10" />
+                  <defs>
+                    <linearGradient id="spiGradientSC" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor={store.risk === 'high' ? '#ef4444' : store.risk === 'moderate' ? '#f59e0b' : '#10b981'} />
+                      <stop offset="50%" stopColor={store.risk === 'high' ? '#dc2626' : store.risk === 'moderate' ? '#d97706' : '#059669'} />
+                      <stop offset="100%" stopColor={store.risk === 'high' ? '#b91c1c' : store.risk === 'moderate' ? '#b45309' : '#047857'} />
+                    </linearGradient>
+                  </defs>
+                  <circle
+                    cx="80" cy="80" r="68"
+                    fill="none"
+                    stroke="url(#spiGradientSC)"
+                    strokeWidth="10"
+                    strokeLinecap="round"
+                    strokeDasharray={`${(store.dpi / 100) * 427} 427`}
+                    transform="rotate(-90 80 80)"
+                    className="dpi-progress-v2"
+                  />
+                </svg>
+                <div className="dpi-score-center-v2">
+                  <span className="dpi-score-value-v2">{store.dpi}</span>
+                  <span className="dpi-score-label-v2">Performance Index</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="dpi-story-section">
+              <div className="dpi-tier-badge-v2">
+                <div className="tier-text">
+                  <span className="tier-title">{store.tier} Tier</span>
+                  <span className="tier-subtitle">{store.tier === 'Excellence' ? 'Top performer in district' : store.tier === 'Performing' ? 'Tracking plan' : 'Requires intervention'}</span>
+                </div>
+              </div>
+
+              <div className="dpi-rank-stats">
+                <div className="dpi-rank-card">
+                  <span className="dpi-rank-value">#{store.rank}</span>
+                  <span className="dpi-rank-label">of {store.totalStores}</span>
+                </div>
+                <div className="dpi-change-card">
+                  <div className={`dpi-change-value ${store.dpiDelta < 0 ? 'negative' : ''}`}>
+                    {store.dpiDelta >= 0 ? <TrendingUp size={18} /> : <TrendingDown size={18} />}
+                    <span>{store.dpiDelta >= 0 ? '+' : ''}{store.dpiDelta}%</span>
+                  </div>
+                  <span className="dpi-change-label">vs last period</span>
+                </div>
+              </div>
+
+              <div className="dpi-breakdown-header">
+                <span className="breakdown-title">Score Breakdown</span>
+              </div>
+              <div className="dpi-breakdown-grid">
+                {(() => {
+                  const sales = Math.max(45, Math.min(98, store.dpi + 2));
+                  const exec = Math.max(45, Math.min(98, store.dpi - 1));
+                  const voc = Math.max(45, Math.min(98, store.dpi - 3));
+                  return (
+                    <>
+                      <div className="breakdown-card">
+                        <div className="breakdown-value">{sales}</div>
+                        <div className="breakdown-label">Sales</div>
+                        <div className="breakdown-bar"><div className="breakdown-fill" style={{ width: `${sales}%` }} /></div>
+                      </div>
+                      <div className="breakdown-card">
+                        <div className="breakdown-value">{exec}</div>
+                        <div className="breakdown-label">Execution</div>
+                        <div className="breakdown-bar"><div className="breakdown-fill" style={{ width: `${exec}%` }} /></div>
+                      </div>
+                      <div className="breakdown-card">
+                        <div className="breakdown-value">{voc}</div>
+                        <div className="breakdown-label">VoC</div>
+                        <div className="breakdown-bar"><div className="breakdown-fill" style={{ width: `${voc}%` }} /></div>
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
+
+              <div className="dpi-chain-comparison">
+                <div className="chain-comparison-header">
+                  <span className="chain-label-title">vs District Average</span>
+                  <span className={`chain-delta ${store.dpi >= 79 ? 'positive' : 'negative'}`}>{store.dpi >= 79 ? '+' : ''}{store.dpi - 79} pts</span>
+                </div>
+                <div className="chain-comparison-bar">
+                  <div className="chain-bar-track">
+                    <div className="chain-bar-fill" style={{ width: `${store.dpi}%` }} />
+                    <div className="chain-marker" style={{ left: `79%` }}>
+                      <div className="chain-marker-line" />
+                      <span className="chain-marker-label">District: 79</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* AI Daily Brief (shared component) — merges tier narrative + AI Insight */}
+          <div className="pulse-right-panel">
+            {(() => {
+              const baseBrief = getStoreBrief(store);
+              const mergedBrief: AIDailyBriefData = {
+                ...baseBrief,
+                sections: [
+                  {
+                    title: 'Root Cause',
+                    icon: 'triage',
+                    bullets: [
+                      aiInsight.rootCause,
+                      ...aiInsight.causalChain.map(c =>
+                        `<strong>${c.factor}</strong> — ${c.contribution}% contribution <em>(${c.direction})</em>`
+                      ),
+                    ],
+                  },
+                  ...baseBrief.sections,
+                  {
+                    title: 'Ranked Actions',
+                    icon: 'recommendations',
+                    bullets: aiInsight.actions.map(a =>
+                      `<strong>#${a.priority} — ${a.action}</strong> · <em>${a.module}</em> · ${a.impact}`
+                    ),
+                  },
+                ],
+              };
+              return (
+                <AIDailyBrief
+                  brief={mergedBrief}
+                  userName={user?.name}
+                  metaSuffix={`SPI ${store.dpi} · ${store.tier}`}
+                />
+              );
+            })()}
+          </div>
+        </div>
+
+        {/* ── KPI Tiles (matches District Intelligence look/feel) ── */}
         <div className="sc-kpi-section">
           {isDateFilterActive && <div className="sc-section-filter-badge"><Filter size={11} className="filter-active-icon" /><span>{getSelectedPeriodLabel()}</span></div>}
-          <div className="sc-kpi-grid">
-            {kpis.map(kpi => {
-              const data = kpi.trendData;
-              const min = Math.min(...data);
-              const max = Math.max(...data);
-              const range = max - min || 1;
-              const W = 120, H = 44, P = 3;
-              const points = data.map((v, i) => ({
-                x: (i / (data.length - 1)) * W,
-                y: H - P - ((v - min) / range) * (H - P * 2),
-              }));
-              const path = points.map((p, i) => i === 0 ? `M ${p.x},${p.y}` : `L ${p.x},${p.y}`).join(' ');
-              const areaPath = `${path} L ${W},${H} L 0,${H} Z`;
-              const last = points[points.length - 1];
-              const color = kpi.status === 'positive' ? '#047857' : kpi.status === 'negative' ? '#991b1b' : '#4338ca';
+          <div className="kpi-cards-grid">
+            {getStoreKPIs(store).map(kpi => {
+              const categoryIcon =
+                kpi.category === 'commercial' ? <DollarSign size={12} /> :
+                kpi.category === 'customer' ? <Heart size={12} /> :
+                kpi.category === 'execution' ? <ClipboardCheck size={12} /> :
+                kpi.category === 'profitability' ? <Target size={12} /> :
+                <Package size={12} />;
+              const categoryLabel =
+                kpi.category === 'commercial' ? 'Commercial' :
+                kpi.category === 'customer' ? 'Customer' :
+                kpi.category === 'execution' ? 'Execution' :
+                kpi.category === 'profitability' ? 'Profitability' :
+                'Operations';
               return (
-                <button key={kpi.id} className={`sc-kpi-tile sc-kpi--${kpi.status}`} onClick={() => setTrendModal(kpi)}>
-                  <div className="sc-kpi-tile-header">
-                    <span className="sc-kpi-icon">{kpi.icon}</span>
-                    <span className="sc-kpi-label">{kpi.label}</span>
+                <div
+                  key={kpi.id}
+                  className={`kpi-tile kpi-tile--${kpi.status} ${kpi.clickable ? 'kpi-tile--clickable' : ''} ${activeKPIPanel?.id === kpi.id ? 'kpi-tile--active' : ''}`}
+                  onClick={() => kpi.clickable && setActiveKPIPanel(activeKPIPanel?.id === kpi.id ? null : kpi)}
+                >
+                  <div className={`kpi-tile-category kpi-tile-category--${kpi.category}`}>
+                    {categoryIcon}
+                    <span>{categoryLabel}</span>
                   </div>
-                  <div className="sc-kpi-tile-body">
-                    <span className="sc-kpi-value">{kpi.value}<span className="sc-kpi-unit">{kpi.unit}</span></span>
-                    <span className={`sc-kpi-delta sc-delta--${kpi.deltaDir}`}>
-                      {kpi.deltaDir === 'up' ? <ArrowUpRight size={12} /> : kpi.deltaDir === 'down' ? <ArrowDownRight size={12} /> : <Minus size={12} />}
-                      {kpi.delta}
-                      {kpi.deltaContext && <span className="sc-kpi-delta-ctx">{kpi.deltaContext}</span>}
-                    </span>
+                  <div className="kpi-tile-value-row">
+                    <span className="kpi-tile-primary">{kpi.primaryValue}</span>
+                    {kpi.primaryUnit && <span className="kpi-tile-unit">{kpi.primaryUnit}</span>}
                   </div>
-                  {kpi.insight && (
-                    <div className="sc-kpi-insight">
-                      <span className="sc-kpi-insight-dot" />
-                      <span>{kpi.insight}</span>
+                  <span className="kpi-tile-label">{kpi.label}</span>
+                  {kpi.microInsight && (
+                    <div className="kpi-tile-insight">
+                      <span className="kpi-tile-insight-dot" />
+                      <span>{kpi.microInsight}</span>
                     </div>
                   )}
-                  <div className="sc-kpi-spark">
-                    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="sc-spark-svg">
-                      <defs>
-                        <linearGradient id={`sc-spark-${kpi.id}`} x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor={color} stopOpacity="0.08" />
-                          <stop offset="100%" stopColor={color} stopOpacity="0" />
-                        </linearGradient>
-                      </defs>
-                      <path d={areaPath} fill={`url(#sc-spark-${kpi.id})`} />
-                      <path d={path} fill="none" stroke={color} strokeWidth="1.3" strokeLinecap="square" strokeLinejoin="miter" />
-                      <circle cx={last.x} cy={last.y} r="1.8" fill={color} stroke="#ffffff" strokeWidth="1" />
-                    </svg>
+                  <div className={`kpi-tile-delta delta-${kpi.deltaDirection}`}>
+                    {kpi.deltaDirection === 'up' && <ArrowUpRight size={12} />}
+                    {kpi.deltaDirection === 'down' && <ArrowDownRight size={12} />}
+                    <span>{kpi.delta}</span>
+                    {kpi.deltaContext && <span className="kpi-delta-ctx">{kpi.deltaContext}</span>}
                   </div>
-                </button>
+                  {kpi.trendData && (() => {
+                    const data = kpi.trendData;
+                    const min = Math.min(...data);
+                    const max = Math.max(...data);
+                    const range = max - min || 1;
+                    const W = 120, H = 44, P = 3;
+                    const points = data.map((v, i) => ({
+                      x: (i / (data.length - 1)) * W,
+                      y: H - P - ((v - min) / range) * (H - P * 2),
+                    }));
+                    const path = points.map((p, i) => i === 0 ? `M ${p.x},${p.y}` : `L ${p.x},${p.y}`).join(' ');
+                    const areaPath = `${path} L ${W},${H} L 0,${H} Z`;
+                    const last = points[points.length - 1];
+                    const color = kpi.status === 'positive' ? '#047857' : kpi.status === 'negative' ? '#991b1b' : kpi.status === 'warning' ? '#b45309' : '#4338ca';
+                    return (
+                      <div className="kpi-tile-sparkline">
+                        <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+                          <defs>
+                            <linearGradient id={`sc-spark-${kpi.id}`} x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor={color} stopOpacity="0.06" />
+                              <stop offset="100%" stopColor={color} stopOpacity="0" />
+                            </linearGradient>
+                          </defs>
+                          <path d={areaPath} fill={`url(#sc-spark-${kpi.id})`} />
+                          <path d={path} fill="none" stroke={color} strokeWidth="1.3" strokeLinecap="square" strokeLinejoin="miter" />
+                          <circle cx={last.x} cy={last.y} r="1.8" fill={color} stroke="#ffffff" strokeWidth="1" />
+                        </svg>
+                      </div>
+                    );
+                  })()}
+                  {kpi.clickable && <ChevronRight size={14} className="kpi-tile-arrow" />}
+                </div>
               );
             })}
           </div>
@@ -1096,21 +1532,36 @@ export const StoreCenter: React.FC = () => {
               {auditData.map(w => (
                 <button key={w.weekLabel} className="sc-audit-week-btn" onClick={() => setAuditWeekDetail(w)}>
                   <span className="sc-audit-week-label">{w.weekLabel}</span>
-                  <span className="sc-audit-week-date">{w.date}</span>
                 </button>
               ))}
             </div>
             {['overall', 'safety', 'planogram', 'signage', 'cleanliness', 'availability', 'staffing', 'stockRotation', 'pricing', 'backroom', 'customerArea'].map(cat => (
               <div key={cat} className={`sc-audit-row ${cat === 'overall' ? 'sc-audit-row--overall' : ''}`}>
                 <span className="sc-audit-cat-label">{cat === 'stockRotation' ? 'Stock Rotation' : cat === 'customerArea' ? 'Customer Area' : cat.charAt(0).toUpperCase() + cat.slice(1)}</span>
-                {auditData.map(w => {
+                {auditData.map((w, wi) => {
                   const val = w[cat as keyof AuditWeek] as number;
+                  const catLabel = cat === 'stockRotation' ? 'Stock Rotation' : cat === 'customerArea' ? 'Customer Area' : cat.charAt(0).toUpperCase() + cat.slice(1);
+                  // Compare to prior week for trend
+                  const prevVal = wi > 0 ? (auditData[wi - 1][cat as keyof AuditWeek] as number) : val;
+                  const trend: 'improving' | 'declining' | 'stable' = val > prevVal + 1 ? 'improving' : val < prevVal - 1 ? 'declining' : 'stable';
+                  const findings = scAuditFindings[catLabel] || scAuditFindings.Overall;
+                  const skillMap = scCategorySkill[catLabel] || scCategorySkill.Overall;
+                  const isActive = auditCellDetail?.weekLabel === w.weekLabel && auditCellDetail?.category === catLabel;
                   return (
                     <div
                       key={w.weekLabel}
-                      className="sc-audit-cell"
+                      className={`sc-audit-cell ${isActive ? 'sc-audit-cell--active' : ''}`}
                       style={{ background: getComplianceColor(val), color: getComplianceTextColor(val) }}
-                      onClick={() => setAuditWeekDetail(w)}
+                      onClick={() => setAuditCellDetail({
+                        weekLabel: w.weekLabel,
+                        weekDate: w.date,
+                        category: catLabel,
+                        score: val,
+                        findings: findings.slice(0, val >= 90 ? 1 : val >= 75 ? 2 : val >= 50 ? 3 : 4),
+                        skill: skillMap.skill,
+                        skillLogic: skillMap.logic,
+                        trend,
+                      })}
                     >
                       {val}%
                     </div>
@@ -1118,66 +1569,6 @@ export const StoreCenter: React.FC = () => {
                 })}
               </div>
             ))}
-          </div>
-        </div>
-
-        {/* ── AI Insight ─────────────────────────────────── */}
-        <div className="sc-ai-section">
-          <div className="sc-section-header">
-            <div className="sc-section-title-row">
-              <Sparkles size={18} />
-              <h3>AI Insight</h3>
-              {isDateFilterActive && <Filter size={12} className="filter-active-icon" />}
-            </div>
-            <span className="sc-section-subtitle">Root cause analysis and recommended actions</span>
-          </div>
-
-          <div className="sc-ai-body">
-            <div className="sc-ai-narrative">
-              <div className="sc-ai-narrative-label">
-                <Eye size={13} />
-                Root Cause
-              </div>
-              <p>{aiInsight.rootCause}</p>
-              <button className="sc-ai-expand-btn" onClick={() => setShowCausalChain(!showCausalChain)}>
-                {showCausalChain ? 'Hide' : 'Show'} Causal Chain
-                <ChevronDown size={14} className={showCausalChain ? 'rotated' : ''} />
-              </button>
-
-              {showCausalChain && (
-                <div className="sc-causal-chain">
-                  {aiInsight.causalChain.map(item => (
-                    <div key={item.factor} className={`sc-causal-item sc-causal--${item.direction}`}>
-                      <div className="sc-causal-bar" style={{ width: `${item.contribution}%` }} />
-                      <span className="sc-causal-factor">{item.factor}</span>
-                      <span className="sc-causal-pct">{item.contribution}%</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="sc-ai-actions">
-              <div className="sc-ai-actions-label">
-                <Target size={13} />
-                Ranked Actions
-              </div>
-              <div className="sc-ai-action-list">
-                {aiInsight.actions.map(a => (
-                  <div key={a.priority} className="sc-ai-action-item">
-                    <span className="sc-ai-action-rank">#{a.priority}</span>
-                    <div className="sc-ai-action-content">
-                      <span className="sc-ai-action-text">{a.action}</span>
-                      <div className="sc-ai-action-meta">
-                        <span className="sc-ai-action-module">{a.module}</span>
-                        <span className="sc-ai-action-impact">{a.impact}</span>
-                      </div>
-                    </div>
-                    <ChevronRight size={14} className="sc-ai-action-arrow" />
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
 
@@ -1436,6 +1827,382 @@ export const StoreCenter: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* ── KPI Right-Side Detail Panel (mirrors District Intelligence) ── */}
+      {activeKPIPanel && (() => {
+        const td = activeKPIPanel.trendData || [];
+        const accent = activeKPIPanel.status === 'positive' ? '#047857' : activeKPIPanel.status === 'negative' ? '#991b1b' : activeKPIPanel.status === 'warning' ? '#b45309' : '#4338ca';
+        return (
+          <>
+            <div className="detail-panel-overlay" onClick={() => setActiveKPIPanel(null)} />
+            <div className="detail-panel">
+              <div className="detail-panel-header">
+                <button className="detail-panel-close" onClick={() => setActiveKPIPanel(null)}>
+                  <X size={18} />
+                </button>
+              </div>
+              <div className="detail-panel-body">
+                <div className="dp-severity-row">
+                  <span className={`dp-severity-badge ${activeKPIPanel.status === 'negative' ? 'critical' : activeKPIPanel.status === 'warning' ? 'warning' : 'risk'}`}>
+                    {activeKPIPanel.category.toUpperCase()}
+                  </span>
+                  <span className="dp-source">
+                    <BarChart3 size={11} />
+                    52-Week Trend
+                  </span>
+                </div>
+
+                <h2 className="dp-title">{activeKPIPanel.label}</h2>
+                <p className="dp-description">
+                  Current: <strong>{activeKPIPanel.primaryValue}</strong>{activeKPIPanel.primaryUnit ? ` ${activeKPIPanel.primaryUnit}` : ''}
+                  {activeKPIPanel.microInsight && <> · {activeKPIPanel.microInsight}</>}
+                </p>
+
+                {/* Period vs YoY */}
+                <div className="dp-section">
+                  <h3 className="dp-section-title">
+                    <BarChart3 size={14} />
+                    Period Comparison
+                  </h3>
+                  <div className="kpi-period-metrics">
+                    <div className="kpi-period-metric">
+                      <span className="kpi-period-label">YoY</span>
+                      <span className={`kpi-period-val delta-${activeKPIPanel.deltaDirection || 'flat'}`}>
+                        {activeKPIPanel.deltaDirection === 'up' && <ArrowUpRight size={14} />}
+                        {activeKPIPanel.deltaDirection === 'down' && <ArrowDownRight size={14} />}
+                        {activeKPIPanel.delta}
+                      </span>
+                      <span className="kpi-period-sub">{activeKPIPanel.deltaContext || 'Year over Year'}</span>
+                    </div>
+                    {td.length >= 2 && (() => {
+                      const curr = td[td.length - 1];
+                      const prev = td[td.length - 2];
+                      const diff = curr - prev;
+                      const dir: 'up' | 'down' | 'flat' = Math.abs(diff) < 0.01 ? 'flat' : diff > 0 ? 'up' : 'down';
+                      return (
+                        <div className="kpi-period-metric">
+                          <span className="kpi-period-label">WoW</span>
+                          <span className={`kpi-period-val delta-${dir}`}>
+                            {dir === 'up' && <ArrowUpRight size={14} />}
+                            {dir === 'down' && <ArrowDownRight size={14} />}
+                            {diff >= 0 ? '+' : ''}{diff.toFixed(1)}
+                          </span>
+                          <span className="kpi-period-sub">vs prior week</span>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                </div>
+
+                {/* Trend Graph */}
+                {td.length > 0 && (
+                  <div className="dp-section">
+                    <h3 className="dp-section-title">
+                      <BarChart3 size={14} />
+                      Trend
+                    </h3>
+                    <div className="kpi-panel-chart">
+                      <svg viewBox="0 0 400 140" preserveAspectRatio="none" className="kpi-panel-svg">
+                        <defs>
+                          <linearGradient id={`sc-kpi-grad-${activeKPIPanel.id}`} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor={accent} stopOpacity="0.18" />
+                            <stop offset="100%" stopColor={accent} stopOpacity="0" />
+                          </linearGradient>
+                        </defs>
+                        {(() => {
+                          const min = Math.min(...td);
+                          const max = Math.max(...td);
+                          const range = max - min || 1;
+                          const W = 400, H = 140, P = 8;
+                          const points = td.map((v, i) => ({
+                            x: (i / (td.length - 1)) * W,
+                            y: H - P - ((v - min) / range) * (H - P * 2),
+                          }));
+                          const linePath = points.map((p, i) => i === 0 ? `M ${p.x},${p.y}` : `L ${p.x},${p.y}`).join(' ');
+                          const areaPath = `${linePath} L ${W},${H} L 0,${H} Z`;
+                          const last = points[points.length - 1];
+                          return (
+                            <>
+                              <path d={areaPath} fill={`url(#sc-kpi-grad-${activeKPIPanel.id})`} />
+                              <path d={linePath} fill="none" stroke={accent} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                              <circle cx={last.x} cy={last.y} r="3" fill={accent} stroke="#ffffff" strokeWidth="1.5" />
+                            </>
+                          );
+                        })()}
+                      </svg>
+                    </div>
+                  </div>
+                )}
+
+                {/* AI Insight */}
+                {activeKPIPanel.trendInsight && (
+                  <div className="dp-section">
+                    <h3 className="dp-section-title">
+                      <Sparkles size={14} />
+                      AI Insight
+                    </h3>
+                    <div className="kpi-ai-insight">
+                      <Sparkles size={14} className="kpi-ai-insight-icon" />
+                      <p>{activeKPIPanel.trendInsight}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Key Details */}
+                {activeKPIPanel.panelDetails && activeKPIPanel.panelDetails.length > 0 && (
+                  <div className="dp-section">
+                    <h3 className="dp-section-title">
+                      <ClipboardCheck size={14} />
+                      Key Details
+                    </h3>
+                    <div className="kpi-panel-details">
+                      {activeKPIPanel.panelDetails.map((d, i) => (
+                        <div key={i} className={`kpi-panel-detail-row status-${d.status || 'neutral'}`}>
+                          <span className="kpi-panel-detail-label">{d.label}</span>
+                          <span className="kpi-panel-detail-value">{d.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="dp-timestamp">
+                  <Clock size={11} />
+                  <span>Updated just now · Showing weekly comparison</span>
+                </div>
+              </div>
+            </div>
+          </>
+        );
+      })()}
+
+      {/* ── Audit Cell Right-Side Detail Panel (mirrors DI heatmap detail) ── */}
+      {auditCellDetail && (() => {
+        const d = auditCellDetail;
+        const accent = d.score >= 90 ? '#16a34a' : d.score >= 75 ? '#d97706' : '#dc2626';
+        // Synthesize 12-week score history biased by trend
+        const seed = (d.category.length * 7 + d.weekLabel.length * 3) || 1;
+        const history: number[] = [];
+        for (let i = 0; i < 12; i++) {
+          const t = i / 11;
+          const trendOffset = d.trend === 'improving' ? -8 * (1 - t) : d.trend === 'declining' ? 8 * (1 - t) : 0;
+          const jitter = ((seed * (i + 1)) % 7) - 3;
+          history.push(Math.max(40, Math.min(100, Math.round(d.score + trendOffset + jitter))));
+        }
+        history[history.length - 1] = d.score;
+        const min = Math.min(...history);
+        const max = Math.max(...history);
+        const range = max - min || 1;
+        const W = 400, H = 100, P = 6;
+        const points = history.map((v, i) => ({
+          x: (i / (history.length - 1)) * W,
+          y: H - P - ((v - min) / range) * (H - P * 2),
+        }));
+        const linePath = points.map((p, i) => i === 0 ? `M ${p.x},${p.y}` : `L ${p.x},${p.y}`).join(' ');
+        const areaPath = `${linePath} L ${W},${H} L 0,${H} Z`;
+        const last = points[points.length - 1];
+        const recommendation = d.score >= 90
+          ? `${d.category} performance is strong at ${d.score}%. Maintain SOP cadence and codify the playbook for peer-store knowledge sharing.`
+          : d.score >= 75
+            ? `${d.category} at ${d.score}% — ${d.findings.length} findings. Address top 2 in the next audit cycle to lift score above 90%.`
+            : `${d.category} is critical at ${d.score}%. Trigger immediate corrective actions on all ${d.findings.length} findings; assign owner and SLA today.`;
+        return (
+          <>
+            <div className="detail-panel-overlay" onClick={() => setAuditCellDetail(null)} />
+            <div className="detail-panel">
+              <div className="detail-panel-header">
+                <button className="detail-panel-close" onClick={() => setAuditCellDetail(null)}>
+                  <X size={18} />
+                </button>
+              </div>
+              <div className="detail-panel-body">
+                <div className="dp-severity-row">
+                  <span
+                    className="dp-severity-badge"
+                    style={{ background: getComplianceColor(d.score), color: getComplianceTextColor(d.score) }}
+                  >
+                    {d.score}% COMPLIANCE
+                  </span>
+                  <span className="dp-source">
+                    <ClipboardCheck size={11} />
+                    8-Week Audit Lens
+                  </span>
+                </div>
+
+                <h2 className="dp-title">{d.category} Audit</h2>
+                <p className="dp-description">
+                  {store.name} #{store.number} · Week of {d.weekDate} ({d.weekLabel})
+                </p>
+
+                <div className="dp-impact-summary">
+                  {d.trend === 'improving' && <TrendingUp size={14} />}
+                  {d.trend === 'declining' && <TrendingDown size={14} />}
+                  {d.trend === 'stable' && <Minus size={14} />}
+                  <span>Trend: {d.trend.charAt(0).toUpperCase() + d.trend.slice(1)}</span>
+                </div>
+
+                {/* Performance Comparison */}
+                <div className="dp-section">
+                  <h3 className="dp-section-title">
+                    <BarChart3 size={14} />
+                    Performance Comparison
+                  </h3>
+                  <div className="kpi-period-metrics">
+                    <div className="kpi-period-metric">
+                      <span className="kpi-period-label">This Week</span>
+                      <span className="kpi-period-val">{d.score}%</span>
+                      <span className="kpi-period-sub">current score</span>
+                    </div>
+                    <div className="kpi-period-metric">
+                      <span className="kpi-period-label">8W Avg</span>
+                      <span className="kpi-period-val">{Math.round(history.slice(-8).reduce((a, b) => a + b, 0) / 8)}%</span>
+                      <span className="kpi-period-sub">rolling 8-week</span>
+                    </div>
+                    <div className="kpi-period-metric">
+                      <span className="kpi-period-label">Best Week</span>
+                      <span className="kpi-period-val">{max}%</span>
+                      <span className="kpi-period-sub">{max - d.score} pts to close gap</span>
+                    </div>
+                    <div className="kpi-period-metric">
+                      <span className="kpi-period-label">Target</span>
+                      <span className="kpi-period-val">95%</span>
+                      <span className={`kpi-period-sub delta-${d.score >= 95 ? 'up' : 'down'}`}>
+                        {d.score >= 95 ? 'on target' : `${95 - d.score} pts below`}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Score History */}
+                <div className="dp-section">
+                  <h3 className="dp-section-title">
+                    <BarChart3 size={14} />
+                    Score History (12 weeks)
+                  </h3>
+                  <div className="kpi-panel-chart">
+                    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ width: '100%', height: 100, display: 'block' }}>
+                      <defs>
+                        <linearGradient id={`sc-hm-grad-${d.weekLabel}-${d.category}`} x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor={accent} stopOpacity="0.18" />
+                          <stop offset="100%" stopColor={accent} stopOpacity="0" />
+                        </linearGradient>
+                      </defs>
+                      <path d={areaPath} fill={`url(#sc-hm-grad-${d.weekLabel}-${d.category})`} />
+                      <path d={linePath} fill="none" stroke={accent} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                      <circle cx={last.x} cy={last.y} r="3" fill={accent} stroke="#ffffff" strokeWidth="1.5" />
+                    </svg>
+                  </div>
+                  <div className="kpi-panel-details" style={{ marginTop: 8 }}>
+                    <div className="kpi-panel-detail-row status-neutral">
+                      <span className="kpi-panel-detail-label">12-Week Range</span>
+                      <span className="kpi-panel-detail-value">{min}% – {max}%</span>
+                    </div>
+                    <div className="kpi-panel-detail-row status-neutral">
+                      <span className="kpi-panel-detail-label">12-Week Avg</span>
+                      <span className="kpi-panel-detail-value">{Math.round(history.reduce((a, b) => a + b, 0) / history.length)}%</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Findings */}
+                <div className="dp-section">
+                  <h3 className="dp-section-title">
+                    <AlertCircle size={14} />
+                    Findings ({d.findings.length})
+                  </h3>
+                  <div className="dp-stores-list">
+                    {d.findings.map((finding, idx) => (
+                      <div key={idx} className="dp-store-card warning">
+                        <div className="dp-store-header">
+                          <span className="dp-store-name">Finding {idx + 1}</span>
+                        </div>
+                        <p className="dp-store-detail">{finding}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* AI Recommendation */}
+                <div className="dp-section">
+                  <h3 className="dp-section-title">
+                    <Sparkles size={14} />
+                    AI Recommendation
+                  </h3>
+                  <div className="kpi-ai-insight">
+                    <Sparkles size={14} className="kpi-ai-insight-icon" />
+                    <p>{recommendation}</p>
+                  </div>
+                </div>
+
+                {/* Action Plan */}
+                {d.findings.length > 0 && (
+                  <div className="dp-section">
+                    <h3 className="dp-section-title">
+                      <CheckCircle2 size={14} />
+                      Action Plan
+                    </h3>
+                    <div className="hm-action-plan">
+                      {d.findings.map((finding, idx) => {
+                        const owners = ['Store Manager', 'Dept Lead', 'Asst Manager', 'Floor Lead'];
+                        const dueDays = [1, 2, 3, 5];
+                        const owner = owners[idx % owners.length];
+                        const due = dueDays[idx % dueDays.length];
+                        return (
+                          <div key={idx} className="hm-action-item">
+                            <div className="hm-action-checkbox" />
+                            <div className="hm-action-content">
+                              <span className="hm-action-title">{finding}</span>
+                              <div className="hm-action-meta">
+                                <span className="hm-action-owner"><Users size={11} /> {owner}</span>
+                                <span className={`hm-action-due ${due <= 2 ? 'urgent' : ''}`}>
+                                  <Clock size={11} /> Due in {due} day{due > 1 ? 's' : ''}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* AI Copilot Skill */}
+                <div className="dp-section">
+                  <h3 className="dp-section-title">
+                    <BarChart3 size={14} />
+                    AI Copilot Skill
+                  </h3>
+                  <div className="kpi-panel-detail-row status-neutral">
+                    <span className="kpi-panel-detail-label">
+                      {d.skill === 'pog' ? 'POG' : d.skill === 'knowledge' ? 'Knowledge' : d.skill === 'actions' ? 'Action' : 'Analytics'}
+                    </span>
+                    <span className="kpi-panel-detail-value" style={{ fontWeight: 500, fontSize: 11, color: '#475569' }}>
+                      {d.skillLogic}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Action CTAs */}
+                <div className="dp-actions">
+                  <button className="dp-action-btn outlined" onClick={() => {
+                    const cat = d.category;
+                    setAuditCellDetail(null);
+                    navigate(`/command-center/ai-copilot?mode=${d.skill}&context=audit-${cat.toLowerCase().replace(/ /g, '-')}&store=${store.number}&storeName=${encodeURIComponent(store.name)}&score=${d.score}`);
+                  }}>
+                    <Sparkles size={14} />
+                    <span>Investigate in AI Copilot</span>
+                  </button>
+                </div>
+
+                <div className="dp-timestamp">
+                  <Clock size={11} />
+                  <span>Audit week of {d.weekDate}</span>
+                </div>
+              </div>
+            </div>
+          </>
+        );
+      })()}
     </div>
   );
 };

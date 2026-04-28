@@ -16,9 +16,9 @@
 }
 
 .rule-management-title {
-  font-size: 28px;
+  font-size: 18px;
   font-weight: 700;
-  color: #1e293b;
+  color: #0f172a;
   margin: 0 0 4px 0;
 }
 
@@ -628,9 +628,9 @@
 }
 
 .wizard-step-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: #1e293b;
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
   margin: 0 0 8px 0;
 }
 
@@ -1065,8 +1065,8 @@
 
 .rule-modal-header h2 {
   font-size: 18px;
-  font-weight: 600;
-  color: #1e293b;
+  font-weight: 700;
+  color: #0f172a;
   margin: 0;
 }
 
@@ -1474,7 +1474,7 @@
   margin: 0 0 24px 0;
   font-size: 16px;
   font-weight: 600;
-  color: #1e293b;
+  color: #0f172a;
   padding-bottom: 16px;
   border-bottom: 1px solid #f1f5f9;
 }
@@ -2222,9 +2222,9 @@
 }
 
 .rule-detail-header h2 {
-  font-size: 20px;
-  font-weight: 600;
-  color: #1e293b;
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
   margin: 0 0 4px 0;
 }
 

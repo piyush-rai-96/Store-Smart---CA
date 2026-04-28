@@ -18,9 +18,9 @@
 }
 
 .master-pog-title {
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 700;
-  color: #1e1b4b;
+  color: #0f172a;
   margin: 0 0 4px 0;
 }
 
@@ -264,7 +264,7 @@
 }
 
 .custom-dropdown-trigger span.has-value {
-  color: #111827;
+  color: #0f172a;
 }
 
 .custom-dropdown-trigger:hover {

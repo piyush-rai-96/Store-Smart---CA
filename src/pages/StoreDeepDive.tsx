@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { AIDailyBrief, AIDailyBriefData } from '../components/common/AIDailyBrief';
 import {
   Store,
   MapPin,
@@ -327,6 +328,149 @@ const getCrossStreamVerdict = (store: DistrictStore): { discrepancyClass: Discre
     assessment: `${store.storeName} is in crisis: SEA auto-fail, VoC spike, and OOS surge are compounding. Sales are already responding — 4-week comp miss accelerating.`,
     recommendedAction: 'Dispatch DM for on-site intervention today. Clear SEA auto-fail before close, expedite top-10 OOS SKUs, and restore baseline staffing.',
     urgency: 'high' as const,
+  };
+};
+
+// Store-level AI Daily Brief — tier-aware narrative for SPI card companion
+const getStoreBrief = (store: DistrictStore): AIDailyBriefData => {
+  const tier = store.spiTier;
+  if (tier === 'Excellence') {
+    return {
+      greeting: `${store.storeName} (#${store.storeNumber}) is leading the district at SPI ${store.spi} — a benchmark performance with all streams in green.`,
+      sections: [
+        {
+          title: 'Performance Highlights',
+          icon: 'performance',
+          bullets: [
+            `SPI of <strong>${store.spi}</strong> ranks in the top 10% of the district — Excellence Tier maintained for 6 consecutive weeks.`,
+            'Net sales tracking <strong>+8.4% vs plan</strong>, with Apparel and Home both contributing above district average.',
+            'VoC satisfaction at <strong>92%</strong> — top theme is "Friendly Staff" mentioned in 38% of positive reviews.',
+          ],
+        },
+        {
+          title: 'Operational Excellence',
+          icon: 'ops',
+          bullets: [
+            'Shelf audit compliance <strong>97%</strong>, planogram adherence at 96% — no critical SEA findings open.',
+            'Stock availability <strong>99.2%</strong> with zero OOS-risk SKUs flagged for the week.',
+            'Backroom efficiency at top quartile — receiving SLA met 100% of the time over last 30 days.',
+          ],
+        },
+        {
+          title: 'Recommended Actions',
+          icon: 'recommendations',
+          bullets: [
+            'Codify your playbook — schedule a knowledge-share session with peer-store managers next week.',
+            'Begin preparing for seasonal transition: review markdown plan and pre-stage incoming Spring assortment.',
+          ],
+        },
+      ],
+      closing: 'Sustain momentum and protect against complacency. Consider mentoring a peer store currently in At-Risk tier.',
+    };
+  }
+  if (tier === 'Stable') {
+    return {
+      greeting: `${store.storeName} (#${store.storeNumber}) is tracking plan at SPI ${store.spi} — execution steady with minor opportunities to push into Excellence.`,
+      sections: [
+        {
+          title: 'Performance & Trends',
+          icon: 'performance',
+          bullets: [
+            `SPI of <strong>${store.spi}</strong> places you mid-pack in the district — momentum is flat-to-improving.`,
+            'Net sales at <strong>+1.2% vs plan</strong> — opportunity in Footwear which is trailing district by 3.4 pts.',
+            'VoC satisfaction at <strong>84%</strong>, slight dip from 86% — "Checkout Speed" mentions trending up.',
+          ],
+        },
+        {
+          title: 'Operational Notes',
+          icon: 'ops',
+          bullets: [
+            'Shelf audit compliance <strong>91%</strong> — Cleanliness category needs attention (-4 pts vs target).',
+            '2 OOS-risk SKUs in Basics — replenishment scheduled for tomorrow.',
+          ],
+        },
+        {
+          title: 'Recommended Actions',
+          icon: 'recommendations',
+          bullets: [
+            'Run a Footwear category review with the dept lead to identify the assortment gap vs peer stores.',
+            'Increase checkout coverage during peak (12-2pm, 5-7pm) to address the rising VoC theme.',
+          ],
+        },
+      ],
+      closing: 'Small, focused interventions on Footwear and Checkout Speed could lift SPI 2-3 points within 2 weeks.',
+    };
+  }
+  if (tier === 'AtRisk') {
+    return {
+      greeting: `${store.storeName} (#${store.storeNumber}) is in At-Risk territory at SPI ${store.spi} — trend declining over the last 4 weeks. Targeted intervention required this week.`,
+      sections: [
+        {
+          title: 'Triage & Critical Issues',
+          icon: 'triage',
+          bullets: [
+            '<strong>VoC: Fitting Room Wait</strong> — complaints up <strong>+34%</strong> over 2 weeks. Customers abandoning try-ons in Women\'s Dresses, directly impacting conversion.',
+            '<strong>OOS Risk</strong>: 8 size-run gaps in Basics, 4 SKUs critical. Replenishment delayed 36h from DC.',
+            '<strong>Planogram Drift</strong>: Women\'s Wall Display 78% compliance — featured items missing or misplaced.',
+          ],
+        },
+        {
+          title: 'Performance & Trends',
+          icon: 'performance',
+          bullets: [
+            `SPI declined <strong>-${(78 - store.spi).toFixed(1)} pts</strong> over 4 weeks — trajectory points to Crisis tier within 2 weeks if uncorrected.`,
+            'Net sales at <strong>-3.8% vs plan</strong>, conversion rate down 2.1 pts.',
+            'VoC satisfaction <strong>76%</strong>, lowest in district peer cluster.',
+          ],
+        },
+        {
+          title: 'Recommended Actions',
+          icon: 'recommendations',
+          bullets: [
+            'Increase fitting room staffing during 11am–3pm peak window — biggest sales recovery lever.',
+            'Expedite the 4 critical Basics SKUs from regional DC; clear backroom for inbound.',
+            'Reset Women\'s Wall Display tonight — POG team can deploy in 90 minutes.',
+          ],
+        },
+      ],
+      closing: 'This is a recoverable position — focused execution on the three actions above should stabilize SPI within 1 week.',
+    };
+  }
+  // Crisis
+  return {
+    greeting: `${store.storeName} (#${store.storeNumber}) is in CRISIS at SPI ${store.spi} — multiple compounding failures across SEA, VoC, OOS and Sales. District Manager intervention today is required.`,
+    sections: [
+      {
+        title: 'Triage & Critical Issues',
+        icon: 'triage',
+        bullets: [
+          '<strong>SEA Auto-Fail</strong>: Fire exit blocked in Zone B — <strong>regulatory exposure</strong>. Must be cleared before close today; otherwise risk store closure.',
+          '<strong>VoC Crisis</strong>: "Messy Aisles" and "Staff Unavailable" complaints up <strong>+38%</strong> in 2 weeks. Net Promoter Score dropped 14 pts.',
+          '<strong>OOS Surge</strong>: 14 SKUs out-of-stock, 4 shipments delayed. Estimated revenue impact €4,200 this week alone.',
+          '<strong>Sales Miss</strong>: 4 consecutive weeks of comp sales -12%. Apparel leading the decline.',
+        ],
+      },
+      {
+        title: 'Performance & Trends',
+        icon: 'performance',
+        bullets: [
+          `SPI dropped <strong>-6 pts</strong> in 4 weeks — momentum strongly negative, trending further down.`,
+          'Net sales at <strong>-9.1% vs district avg</strong>; conversion rate at lowest level in 12 months.',
+          'Currently ranked <strong>last</strong> in district peer cluster on every diagnostic stream.',
+        ],
+      },
+      {
+        title: 'Recommended Actions',
+        icon: 'recommendations',
+        bullets: [
+          'Dispatch DM for on-site intervention today — escalation protocol triggered.',
+          'Clear SEA auto-fail before close. Document remediation; submit to Compliance.',
+          'Expedite top-10 OOS SKUs from RDC; restore baseline staffing for next 48h.',
+          'Deep-clean store overnight; reset planograms in priority categories before tomorrow open.',
+        ],
+      },
+    ],
+    closing: 'This store requires hands-on leadership today. Escalation to Regional VP recommended if conditions persist by end of week.',
   };
 };
 
@@ -856,6 +1000,15 @@ export const StoreDeepDive: React.FC = () => {
             </p>
           </div>
         </div>
+      </div>
+
+      {/* Store-Level AI Daily Brief — shared component (matches District Intelligence) */}
+      <div className="sdd-pulse-section">
+        <AIDailyBrief
+          brief={getStoreBrief(selectedStore)}
+          userName={user?.name}
+          metaSuffix={`${mockActions.length} priority actions · SPI ${adjustedSPI.spi}`}
+        />
       </div>
 
       {/* Store Action Queue */}

@@ -54,7 +54,7 @@
 .cop-init-content h3 {
   font-size: 18px;
   font-weight: 700;
-  color: #1e293b;
+  color: #0f172a;
   margin: 0;
 }
 
@@ -488,7 +488,7 @@
 
 .cop-msg-text strong {
   font-weight: 700;
-  color: #111827;
+  color: #0f172a;
 }
 
 .cop-msg--user .cop-msg-text {
@@ -2087,9 +2087,9 @@
   align-items: center;
   gap: 8px;
   margin-bottom: 14px;
-  font-size: 14.5px;
+  font-size: 14px;
   font-weight: 700;
-  color: #1e293b;
+  color: #0f172a;
 }
 
 .cop-agentic-section-header svg {
@@ -2331,7 +2331,7 @@
 .cop-oos-title {
   font-size: 16px;
   font-weight: 700;
-  color: #1e293b;
+  color: #0f172a;
   padding: 16px 20px 8px;
   margin: 0;
 }

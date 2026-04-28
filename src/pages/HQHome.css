@@ -6,7 +6,6 @@
   background: #f8fafc;
   padding-bottom: 40px;
   min-height: 100vh;
-  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
 }
 
 /* Loading */
@@ -56,7 +55,7 @@
 .hq-greeting-icon { font-size: 22px; }
 
 .hq-greeting h1 {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
   color: #0f172a;
   margin: 0;
@@ -205,8 +204,8 @@
 }
 
 .hq-section-title h2 {
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 600;
   color: #0f172a;
   margin: 0;
   letter-spacing: -0.01em;
@@ -1581,7 +1580,6 @@
   background: #fafbfc;
   border-bottom: 1px solid #f1f5f9;
   white-space: nowrap;
-  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
 }
 
 .hq-th-sortable {
@@ -1617,7 +1615,6 @@
   font-size: 13px;
   color: #334155;
   vertical-align: middle;
-  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
 }
 
 .hq-district-name {
@@ -1883,7 +1880,7 @@
 }
 
 .hq-modal-title {
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 700;
   color: #0f172a;
   margin: 0 0 12px;

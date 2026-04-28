@@ -3,14 +3,15 @@
 .app-header {
   height: 64px;
   background: #ffffff;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e2e8f0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
+  padding: 0 28px;
   position: sticky;
   top: 0;
   z-index: 50;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .app-header-left {
@@ -28,14 +29,14 @@
 .app-header-divider {
   width: 1px;
   height: 24px;
-  background: #e5e7eb;
+  background: #e2e8f0;
   flex-shrink: 0;
 }
 
 .app-header-title {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
-  color: #111827;
+  color: #0f172a;
   margin: 0;
   letter-spacing: -0.5px;
 }
@@ -49,22 +50,23 @@
 /* Notification Button */
 .app-header-notification {
   position: relative;
-  width: 40px;
-  height: 40px;
-  border: none;
-  background: #f3f4f6;
-  border-radius: 8px;
+  width: 38px;
+  height: 38px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #6b7280;
+  color: #64748b;
   transition: all 0.2s;
 }
 
 .app-header-notification:hover {
-  background: #e5e7eb;
-  color: #374151;
+  background: #eef2ff;
+  border-color: #c7d2fe;
+  color: #6366f1;
 }
 
 .app-header-notification-badge {
@@ -95,22 +97,23 @@
   align-items: center;
   gap: 12px;
   padding: 6px 12px 6px 6px;
-  border: none;
-  background: #f9fafb;
-  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .app-header-user-button:hover {
-  background: #f3f4f6;
+  background: #eef2ff;
+  border-color: #c7d2fe;
 }
 
 .app-header-user-avatar {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -129,7 +132,7 @@
 .app-header-user-name {
   font-size: 13px;
   font-weight: 600;
-  color: #111827;
+  color: #0f172a;
   line-height: 1;
 }
 
@@ -164,9 +167,9 @@
   right: 0;
   min-width: 180px;
   background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
   padding: 6px;
   z-index: 100;
 }
@@ -187,26 +190,27 @@
 
 .app-header-dropdown-item:hover {
   background: #f3f4f6;
-  color: #111827;
+  color: #0f172a;
 }
 
 /* Icon Button (Help) */
 .app-header-icon-btn {
-  width: 40px;
-  height: 40px;
-  border: none;
-  background: #f3f4f6;
-  border-radius: 8px;
+  width: 38px;
+  height: 38px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #6b7280;
+  color: #64748b;
   transition: all 0.2s;
 }
 .app-header-icon-btn:hover {
-  background: #e5e7eb;
-  color: #374151;
+  background: #eef2ff;
+  border-color: #c7d2fe;
+  color: #6366f1;
 }
 
 /* Notification Wrapper */
@@ -242,7 +246,7 @@
 .notif-header-title {
   font-size: 14px;
   font-weight: 700;
-  color: #111827;
+  color: #0f172a;
 }
 .notif-header-count {
   font-size: 11px;
@@ -339,14 +343,14 @@
 }
 .app-header-dropdown-divider {
   height: 1px;
-  background: #e5e7eb;
+  background: #e2e8f0;
   margin: 4px 6px;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
   .app-header {
-    padding: 0 16px;
+    padding: 0 20px;
   }
 
   .app-header-user-info {
