@@ -1129,6 +1129,20 @@
   color: #16a34a;
 }
 
+.uam-m-step--active {
+  color: #4338ca;
+}
+
+.uam-m-step--active .uam-m-step-num {
+  background: #eef2ff;
+  color: #4338ca;
+  box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.12);
+}
+
+.uam-m-step-divider--done {
+  background: #86efac;
+}
+
 .uam-m-step-num {
   width: 22px;
   height: 22px;
@@ -1337,5 +1351,41 @@
   background: #f1f5f9;
   color: #64748b;
   border-radius: 3px;
+}
+
+/* Wizard footer — step-aware buttons */
+.uam-m-footer-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.uam-m-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.uam-m-back:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.uam-m-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 

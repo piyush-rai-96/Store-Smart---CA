@@ -6,6 +6,8 @@ import {
   X,
   Send,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Check,
   AlertCircle,
   User as UserIcon,
@@ -65,6 +67,7 @@ export const UserAccessManagement: React.FC = () => {
   const [fieldErrors, setFieldErrors] = useState<{ name?: string; email?: string; scope?: string }>({});
   const [customizeAccess, setCustomizeAccess] = useState(false);
   const [customAccess, setCustomAccess] = useState<ScreenAccess[]>([]);
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
 
   const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const validateEmail = (v: string) => v.trim().length > 0 && EMAIL_REGEX.test(v.trim());
@@ -93,6 +96,7 @@ export const UserAccessManagement: React.FC = () => {
     setShowScopeDropdown(false);
     setCustomizeAccess(false);
     setCustomAccess([]);
+    setCurrentStep(1);
   };
 
   const effectiveAccess: ScreenAccess[] = customizeAccess && customAccess.length > 0 ? customAccess : ROLE_ACCESS[newRole];
@@ -110,20 +114,48 @@ export const UserAccessManagement: React.FC = () => {
     );
   };
 
-  const handleCreateUser = () => {
-    const errors: { name?: string; email?: string; scope?: string } = {};
-    if (!newName.trim()) errors.name = 'Full name is required';
-    if (!newEmail.trim()) errors.email = 'Email is required';
-    else if (!EMAIL_REGEX.test(newEmail.trim())) errors.email = 'Enter a valid email address';
-    else if (allUsers.some(u => u.email.toLowerCase() === newEmail.trim().toLowerCase())) {
-      errors.email = 'A user with this email already exists';
+  // Validate a specific step; writes fieldErrors and returns true/false
+  const validateStep = (step: 1 | 2 | 3): boolean => {
+    if (step === 1) {
+      const errors: { name?: string; email?: string } = {};
+      if (!newName.trim()) errors.name = 'Full name is required';
+      if (!newEmail.trim()) errors.email = 'Email is required';
+      else if (!EMAIL_REGEX.test(newEmail.trim())) errors.email = 'Enter a valid email address';
+      else if (allUsers.some(u => u.email.toLowerCase() === newEmail.trim().toLowerCase())) {
+        errors.email = 'A user with this email already exists';
+      }
+      if (Object.keys(errors).length > 0) {
+        setFieldErrors(prev => ({ ...prev, ...errors }));
+        return false;
+      }
+      return true;
     }
-    if (newRole !== 'ADMIN' && !newScope) errors.scope = 'Please select a scope assignment';
+    if (step === 2) {
+      if (newRole !== 'ADMIN' && !newScope) {
+        setFieldErrors(prev => ({ ...prev, scope: 'Please select a scope assignment' }));
+        return false;
+      }
+      return true;
+    }
+    // step === 3
+    if (customizeAccess && customAccess.length === 0) return false;
+    return effectiveAccess.length > 0;
+  };
 
-    if (Object.keys(errors).length > 0) {
-      setFieldErrors(errors);
-      return;
-    }
+  const goNext = () => {
+    if (!validateStep(currentStep)) return;
+    if (currentStep < 3) setCurrentStep((currentStep + 1) as 2 | 3);
+  };
+
+  const goBack = () => {
+    if (currentStep > 1) setCurrentStep((currentStep - 1) as 1 | 2);
+  };
+
+  const handleCreateUser = () => {
+    // Re-validate all steps before submitting
+    if (!validateStep(1)) { setCurrentStep(1); return; }
+    if (!validateStep(2)) { setCurrentStep(2); return; }
+    if (!validateStep(3)) { setCurrentStep(3); return; }
 
     const user: User = {
       id: `user-${Date.now()}`,
@@ -342,28 +374,33 @@ export const UserAccessManagement: React.FC = () => {
             {/* Step indicator */}
             <div className="uam-m-steps">
               {[
-                { key: 'identity', label: 'Identity', done: stepState.identity, icon: <UserIcon size={13} /> },
-                { key: 'roleScope', label: 'Role & Scope', done: stepState.roleScope, icon: <Briefcase size={13} /> },
-                { key: 'access', label: 'Screen Access', done: stepState.access, icon: <Shield size={13} /> },
-              ].map((step, idx, arr) => (
-                <React.Fragment key={step.key}>
-                  <div className={`uam-m-step ${step.done ? 'uam-m-step--done' : ''}`}>
-                    <span className="uam-m-step-num">
-                      {step.done ? <CheckCircle2 size={14} /> : idx + 1}
-                    </span>
-                    <span className="uam-m-step-label">
-                      {step.icon}
-                      {step.label}
-                    </span>
-                  </div>
-                  {idx < arr.length - 1 && <span className="uam-m-step-divider" />}
-                </React.Fragment>
-              ))}
+                { num: 1 as const, key: 'identity', label: 'Identity', done: stepState.identity, icon: <UserIcon size={13} /> },
+                { num: 2 as const, key: 'roleScope', label: 'Role & Scope', done: stepState.roleScope, icon: <Briefcase size={13} /> },
+                { num: 3 as const, key: 'access', label: 'Screen Access', done: stepState.access, icon: <Shield size={13} /> },
+              ].map((step, idx, arr) => {
+                const isActive = currentStep === step.num;
+                const isComplete = currentStep > step.num;
+                return (
+                  <React.Fragment key={step.key}>
+                    <div className={`uam-m-step ${isActive ? 'uam-m-step--active' : ''} ${isComplete ? 'uam-m-step--done' : ''}`}>
+                      <span className="uam-m-step-num">
+                        {isComplete ? <CheckCircle2 size={14} /> : step.num}
+                      </span>
+                      <span className="uam-m-step-label">
+                        {step.icon}
+                        {step.label}
+                      </span>
+                    </div>
+                    {idx < arr.length - 1 && <span className={`uam-m-step-divider ${isComplete ? 'uam-m-step-divider--done' : ''}`} />}
+                  </React.Fragment>
+                );
+              })}
             </div>
 
             {/* Modal body */}
             <div className="uam-m-body">
-              {/* Section: Identity */}
+              {/* Section: Identity (Step 1) */}
+              {currentStep === 1 && (
               <div className="uam-m-section">
                 <div className="uam-m-section-label">
                   <UserIcon size={13} />
@@ -405,8 +442,10 @@ export const UserAccessManagement: React.FC = () => {
                   </div>
                 </div>
               </div>
+              )}
 
-              {/* Section: Role & Scope */}
+              {/* Section: Role & Scope (Step 2) */}
+              {currentStep === 2 && (
               <div className="uam-m-section">
                 <div className="uam-m-section-label">
                   <Briefcase size={13} />
@@ -491,8 +530,10 @@ export const UserAccessManagement: React.FC = () => {
                   </div>
                 </div>
               </div>
+              )}
 
-              {/* Section: Screen Access */}
+              {/* Section: Screen Access (Step 3) */}
+              {currentStep === 3 && (
               <div className="uam-m-section uam-m-section--access">
                 <div className="uam-m-section-label">
                   <Shield size={13} />
@@ -567,15 +608,35 @@ export const UserAccessManagement: React.FC = () => {
                   <span className="uam-m-field-error"><AlertCircle size={12} />Select at least one screen</span>
                 )}
               </div>
+              )}
             </div>
 
-            {/* Modal footer */}
+            {/* Modal footer — step-aware navigation */}
             <div className="uam-m-footer">
               <button className="uam-m-cancel" onClick={() => setShowCreateModal(false)}>Cancel</button>
-              <button className="uam-m-submit" onClick={handleCreateUser}>
-                <Send size={13} />
-                <span>Send Invite</span>
-              </button>
+              <div className="uam-m-footer-right">
+                {currentStep > 1 && (
+                  <button className="uam-m-back" onClick={goBack}>
+                    <ChevronLeft size={14} />
+                    <span>Back</span>
+                  </button>
+                )}
+                {currentStep < 3 ? (
+                  <button className="uam-m-submit" onClick={goNext}>
+                    <span>Next</span>
+                    <ChevronRight size={14} />
+                  </button>
+                ) : (
+                  <button
+                    className="uam-m-submit"
+                    onClick={handleCreateUser}
+                    disabled={customizeAccess && customAccess.length === 0}
+                  >
+                    <Send size={13} />
+                    <span>Send Invite</span>
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
