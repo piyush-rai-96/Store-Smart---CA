@@ -130,48 +130,44 @@ export const UserAccessManagement: React.FC = () => {
 
   return (
     <div className="uam-page">
-      {/* Premium Header */}
-      <div className="uam-header-card">
-        <div className="uam-header-accent" />
-        <div className="uam-header-inner">
-          <div className="uam-header-left">
-            <div className="uam-header-icon">
-              <ShieldCheck size={24} />
-            </div>
-            <div>
-              <h1 className="uam-page-title">User Access Management</h1>
-              <p className="uam-page-subtitle">Manage team members, roles, and platform access</p>
-            </div>
+      {/* ── Header (mirrors District Intelligence Center) ── */}
+      <div className="district-intel-header uam-di-header">
+        <div className="header-left">
+          <div className="header-title">
+            <ShieldCheck size={24} />
+            <h1>User Access Management</h1>
+          </div>
+          <div className="header-meta">
+            <span className="district-badge">
+              <Shield size={14} />
+              Team Directory
+            </span>
+            <span className="district-badge uam-meta-pill">
+              <UserIcon size={14} />
+              {statCounts.total} members
+            </span>
+            <span className="uam-meta-updated">Manage roles, scope &amp; platform access</span>
+          </div>
+        </div>
+        <div className="uam-header-right">
+          <div className="uam-search-bar">
+            <Search size={15} />
+            <input
+              type="text"
+              placeholder="Search by name, email, or role..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
+              <button className="uam-search-clear" onClick={() => setSearchQuery('')}>
+                <X size={13} />
+              </button>
+            )}
           </div>
           <button className="uam-create-btn" onClick={() => { resetForm(); setShowCreateModal(true); }}>
             <UserPlus size={15} />
             <span>Create User</span>
           </button>
-        </div>
-
-        {/* Stat pills */}
-        <div className="uam-stats-row">
-          <div className="uam-stat">
-            <span className="uam-stat-value">{statCounts.total}</span>
-            <span className="uam-stat-label">Total Users</span>
-          </div>
-          <div className="uam-stat-divider" />
-          <div className="uam-stat">
-            <span className="uam-stat-dot uam-stat-dot--active" />
-            <span className="uam-stat-value">{statCounts.active}</span>
-            <span className="uam-stat-label">Active</span>
-          </div>
-          <div className="uam-stat-divider" />
-          <div className="uam-stat">
-            <span className="uam-stat-dot uam-stat-dot--invited" />
-            <span className="uam-stat-value">{statCounts.invited}</span>
-            <span className="uam-stat-label">Pending</span>
-          </div>
-          <div className="uam-stat-divider" />
-          <div className="uam-stat">
-            <span className="uam-stat-value">{statCounts.roles}</span>
-            <span className="uam-stat-label">Roles</span>
-          </div>
         </div>
       </div>
 
@@ -183,29 +179,39 @@ export const UserAccessManagement: React.FC = () => {
         </div>
       )}
 
-      {/* Search bar */}
-      <div className="uam-toolbar">
-        <div className="uam-search-bar">
-          <Search size={15} />
-          <input
-            type="text"
-            placeholder="Search by name, email, or role..."
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-          />
-          {searchQuery && (
-            <button className="uam-search-clear" onClick={() => setSearchQuery('')}>
-              <X size={13} />
-            </button>
-          )}
-        </div>
-        <div className="uam-result-count">
-          {filteredUsers.length} of {allUsers.length} users
+      {/* ── Stats Strip (DI bca-overview-grid pattern) ── */}
+      <div className="uam-stats-card">
+        <div className="bca-overview-grid uam-stats-grid">
+          <div className="bca-kpi-card">
+            <span className="bca-kpi-label">Total Users</span>
+            <span className="bca-kpi-value">{statCounts.total}</span>
+            <span className="bca-kpi-context">across all roles</span>
+          </div>
+          <div className="bca-kpi-card">
+            <span className="bca-kpi-label">Active</span>
+            <span className="bca-kpi-value" style={{ color: '#16a34a' }}>{statCounts.active}</span>
+            <span className="bca-kpi-context">currently signed in</span>
+          </div>
+          <div className="bca-kpi-card">
+            <span className="bca-kpi-label">Pending</span>
+            <span className="bca-kpi-value" style={{ color: '#d97706' }}>{statCounts.invited}</span>
+            <span className="bca-kpi-context">invite not accepted</span>
+          </div>
+          <div className="bca-kpi-card">
+            <span className="bca-kpi-label">Roles</span>
+            <span className="bca-kpi-value">{statCounts.roles}</span>
+            <span className="bca-kpi-context">distinct role types</span>
+          </div>
+          <div className="bca-kpi-card">
+            <span className="bca-kpi-label">Filtered</span>
+            <span className="bca-kpi-value">{filteredUsers.length}</span>
+            <span className="bca-kpi-context">matching search</span>
+          </div>
         </div>
       </div>
 
-      {/* Premium Table */}
-      <div className="uam-table-card">
+      {/* ── Users Table ── */}
+      <div className="uam-table-card uam-table-card--modern">
         <table className="uam-table wow-table">
           <thead>
             <tr>

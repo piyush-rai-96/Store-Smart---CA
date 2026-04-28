@@ -854,3 +854,229 @@
 }
 
 .uam-m-submit:active { transform: translateY(0); }
+
+/* ==============================================================
+   DI-style Header (mirrors district-intel-header)
+   ============================================================== */
+.uam-di-header {
+  /* Inherits from .district-intel-header — just space-between layout */
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 16px 32px;
+  margin: 0 0 16px 0;
+  border-radius: 0;
+}
+
+.uam-di-header .header-title svg {
+  color: #4338ca;
+}
+
+.uam-di-header .header-title h1 {
+  color: #0f172a;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.uam-di-header .header-meta {
+  flex-wrap: wrap;
+}
+
+.uam-di-header .district-badge {
+  background: #eef2ff;
+  color: #4338ca;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.uam-di-header .uam-meta-pill {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.uam-meta-updated {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.uam-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.uam-header-right .uam-search-bar {
+  width: 280px;
+  margin: 0;
+}
+
+/* ==============================================================
+   Stats Strip (above table, mirrors DI bca-overview-grid)
+   ============================================================== */
+.uam-stats-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  margin: 0 16px 16px 16px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.uam-stats-grid {
+  grid-template-columns: repeat(5, 1fr) !important;
+  border-bottom: none !important;
+}
+
+.uam-stats-card .bca-kpi-card {
+  padding: 18px 12px;
+  border-right: 1px solid #f1f5f9;
+}
+
+.uam-stats-card .bca-kpi-card:last-child {
+  border-right: none;
+}
+
+/* ==============================================================
+   Modern, less-colored Table (overrides legacy uam-* colors)
+   ============================================================== */
+.uam-table-card.uam-table-card--modern {
+  margin: 0 16px 24px 16px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  overflow: hidden;
+}
+
+/* Tone down avatars to monochrome slate */
+.uam-table-card--modern .uam-avatar,
+.uam-table-card--modern .uam-avatar--admin,
+.uam-table-card--modern .uam-avatar--dm,
+.uam-table-card--modern .uam-avatar--sm,
+.uam-table-card--modern .uam-avatar--hq {
+  background: #f1f5f9;
+  color: #475569;
+  font-weight: 600;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  letter-spacing: 0.02em;
+}
+
+/* Subtle role tags — neutral pill with a small role-colored dot */
+.uam-table-card--modern .uam-role-tag {
+  position: relative;
+  background: #f8fafc;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+  font-weight: 500;
+  padding: 4px 10px 4px 22px;
+  border-radius: 6px;
+}
+
+.uam-table-card--modern .uam-role-tag::before {
+  content: '';
+  position: absolute;
+  left: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #94a3b8;
+}
+
+.uam-table-card--modern .uam-role--admin::before { background: #f97316; }
+.uam-table-card--modern .uam-role--dm::before    { background: #3b82f6; }
+.uam-table-card--modern .uam-role--sm::before    { background: #10b981; }
+.uam-table-card--modern .uam-role--hq::before    { background: #8b5cf6; }
+
+/* Reset background-only role styles to neutral so the tag is uniform */
+.uam-table-card--modern .uam-role--admin,
+.uam-table-card--modern .uam-role--dm,
+.uam-table-card--modern .uam-role--sm,
+.uam-table-card--modern .uam-role--hq {
+  background: #f8fafc;
+  color: #334155;
+  border-color: #e2e8f0;
+}
+
+/* Quieter scope text */
+.uam-table-card--modern .uam-scope-text {
+  color: #475569;
+  font-size: 13px;
+}
+
+/* Status pill softened */
+.uam-table-card--modern .uam-status {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.uam-table-card--modern .uam-status--active { color: #15803d; }
+.uam-table-card--modern .uam-status--invited { color: #b45309; }
+
+/* Screen badge subtle */
+.uam-table-card--modern .uam-screen-badge {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+}
+
+/* Cleaner hover/expand row */
+.uam-table-card--modern .uam-row {
+  cursor: pointer;
+}
+
+.uam-table-card--modern .uam-row--expanded {
+  background: #f5f3ff !important;
+}
+
+.uam-table-card--modern .uam-expand-row td {
+  background: #fafbfc;
+  padding: 12px 16px;
+}
+
+.uam-table-card--modern .uam-expand-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.uam-table-card--modern .uam-expand-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.uam-table-card--modern .uam-expand-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.uam-table-card--modern .uam-expand-chip {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+/* Empty state */
+.uam-table-card--modern .uam-empty {
+  text-align: center;
+  padding: 40px 16px;
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+/* Toolbar elements no longer needed — make sure stale margins don't break layout */
+.uam-toast {
+  margin: 0 16px 12px 16px;
+}
