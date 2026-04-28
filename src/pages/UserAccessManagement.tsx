@@ -14,6 +14,9 @@ import {
   MapPin,
   Monitor,
   Shield,
+  CheckCircle2,
+  Settings2,
+  RotateCcw,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { User, UserRole, ROLE_LABELS, ROLE_ACCESS, ScreenAccess } from '../types';
@@ -59,7 +62,12 @@ export const UserAccessManagement: React.FC = () => {
   const [newScope, setNewScope] = useState('');
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
   const [showScopeDropdown, setShowScopeDropdown] = useState(false);
-  const [formError, setFormError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<{ name?: string; email?: string; scope?: string }>({});
+  const [customizeAccess, setCustomizeAccess] = useState(false);
+  const [customAccess, setCustomAccess] = useState<ScreenAccess[]>([]);
+
+  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const validateEmail = (v: string) => v.trim().length > 0 && EMAIL_REGEX.test(v.trim());
 
   const filteredUsers = allUsers.filter(u =>
     u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -80,22 +88,40 @@ export const UserAccessManagement: React.FC = () => {
     setNewEmail('');
     setNewRole('SM');
     setNewScope('');
-    setFormError('');
+    setFieldErrors({});
     setShowRoleDropdown(false);
     setShowScopeDropdown(false);
+    setCustomizeAccess(false);
+    setCustomAccess([]);
+  };
+
+  const effectiveAccess: ScreenAccess[] = customizeAccess && customAccess.length > 0 ? customAccess : ROLE_ACCESS[newRole];
+
+  // ── Step completion state (used by step indicator) ──
+  const stepState = {
+    identity: newName.trim().length > 0 && validateEmail(newEmail),
+    roleScope: newRole === 'ADMIN' || newScope.length > 0,
+    access: effectiveAccess.length > 0,
+  };
+
+  const toggleCustomScreen = (screen: ScreenAccess) => {
+    setCustomAccess(prev =>
+      prev.includes(screen) ? prev.filter(s => s !== screen) : [...prev, screen]
+    );
   };
 
   const handleCreateUser = () => {
-    if (!newName.trim() || !newEmail.trim()) {
-      setFormError('Name and email are required');
-      return;
+    const errors: { name?: string; email?: string; scope?: string } = {};
+    if (!newName.trim()) errors.name = 'Full name is required';
+    if (!newEmail.trim()) errors.email = 'Email is required';
+    else if (!EMAIL_REGEX.test(newEmail.trim())) errors.email = 'Enter a valid email address';
+    else if (allUsers.some(u => u.email.toLowerCase() === newEmail.trim().toLowerCase())) {
+      errors.email = 'A user with this email already exists';
     }
-    if (allUsers.some(u => u.email.toLowerCase() === newEmail.trim().toLowerCase())) {
-      setFormError('A user with this email already exists');
-      return;
-    }
-    if (newRole !== 'ADMIN' && !newScope) {
-      setFormError('Please select a scope assignment');
+    if (newRole !== 'ADMIN' && !newScope) errors.scope = 'Please select a scope assignment';
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
       return;
     }
 
@@ -104,7 +130,7 @@ export const UserAccessManagement: React.FC = () => {
       email: newEmail.trim(),
       name: newName.trim(),
       role: newRole,
-      accessRoutes: ROLE_ACCESS[newRole],
+      accessRoutes: effectiveAccess,
       status: 'invited',
       ...(newRole === 'SM' && { store: newScope, storeId: newScope.match(/#(\d+)/)?.[1] || '' }),
       ...(newRole === 'DM' && { district: newScope, districtId: newScope.match(/District (\d+)/)?.[1] ? `D${newScope.match(/District (\d+)/)?.[1]}` : '' }),
@@ -313,15 +339,30 @@ export const UserAccessManagement: React.FC = () => {
               </button>
             </div>
 
+            {/* Step indicator */}
+            <div className="uam-m-steps">
+              {[
+                { key: 'identity', label: 'Identity', done: stepState.identity, icon: <UserIcon size={13} /> },
+                { key: 'roleScope', label: 'Role & Scope', done: stepState.roleScope, icon: <Briefcase size={13} /> },
+                { key: 'access', label: 'Screen Access', done: stepState.access, icon: <Shield size={13} /> },
+              ].map((step, idx, arr) => (
+                <React.Fragment key={step.key}>
+                  <div className={`uam-m-step ${step.done ? 'uam-m-step--done' : ''}`}>
+                    <span className="uam-m-step-num">
+                      {step.done ? <CheckCircle2 size={14} /> : idx + 1}
+                    </span>
+                    <span className="uam-m-step-label">
+                      {step.icon}
+                      {step.label}
+                    </span>
+                  </div>
+                  {idx < arr.length - 1 && <span className="uam-m-step-divider" />}
+                </React.Fragment>
+              ))}
+            </div>
+
             {/* Modal body */}
             <div className="uam-m-body">
-              {formError && (
-                <div className="uam-m-error">
-                  <AlertCircle size={14} />
-                  <span>{formError}</span>
-                </div>
-              )}
-
               {/* Section: Identity */}
               <div className="uam-m-section">
                 <div className="uam-m-section-label">
@@ -330,25 +371,37 @@ export const UserAccessManagement: React.FC = () => {
                 </div>
                 <div className="uam-m-fields-row">
                   <div className="uam-m-field">
-                    <label>Full Name</label>
+                    <label>Full Name <span className="uam-m-req">*</span></label>
                     <input
                       type="text"
+                      className={fieldErrors.name ? 'uam-m-input--error' : ''}
                       placeholder="Sarah Johnson"
                       value={newName}
-                      onChange={e => { setNewName(e.target.value); setFormError(''); }}
+                      onChange={e => { setNewName(e.target.value); if (fieldErrors.name) setFieldErrors(prev => ({ ...prev, name: undefined })); }}
+                      onBlur={() => { if (!newName.trim()) setFieldErrors(prev => ({ ...prev, name: 'Full name is required' })); }}
                     />
+                    {fieldErrors.name && (
+                      <span className="uam-m-field-error"><AlertCircle size={12} />{fieldErrors.name}</span>
+                    )}
                   </div>
                   <div className="uam-m-field">
-                    <label>Email Address</label>
-                    <div className="uam-m-input-icon">
+                    <label>Email Address <span className="uam-m-req">*</span></label>
+                    <div className={`uam-m-input-icon ${fieldErrors.email ? 'uam-m-input-icon--error' : ''}`}>
                       <Mail size={14} />
                       <input
                         type="email"
                         placeholder="sarah.johnson@company.co"
                         value={newEmail}
-                        onChange={e => { setNewEmail(e.target.value); setFormError(''); }}
+                        onChange={e => { setNewEmail(e.target.value); if (fieldErrors.email) setFieldErrors(prev => ({ ...prev, email: undefined })); }}
+                        onBlur={() => {
+                          if (!newEmail.trim()) setFieldErrors(prev => ({ ...prev, email: 'Email is required' }));
+                          else if (!EMAIL_REGEX.test(newEmail.trim())) setFieldErrors(prev => ({ ...prev, email: 'Enter a valid email address' }));
+                        }}
                       />
                     </div>
+                    {fieldErrors.email && (
+                      <span className="uam-m-field-error"><AlertCircle size={12} />{fieldErrors.email}</span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -377,7 +430,15 @@ export const UserAccessManagement: React.FC = () => {
                             <button
                               key={r}
                               className={`uam-dd-item ${r === newRole ? 'uam-dd-item--active' : ''}`}
-                              onClick={() => { setNewRole(r); setNewScope(''); setShowRoleDropdown(false); setFormError(''); }}
+                              onClick={() => {
+                                setNewRole(r);
+                                setNewScope('');
+                                setShowRoleDropdown(false);
+                                setFieldErrors(prev => ({ ...prev, scope: undefined }));
+                                // Reset custom access when role changes
+                                setCustomizeAccess(false);
+                                setCustomAccess([]);
+                              }}
                             >
                               <div className="uam-dd-item-left">
                                 <span className={`uam-dd-role-dot uam-dd-role-dot--${r.toLowerCase()}`} />
@@ -394,10 +455,10 @@ export const UserAccessManagement: React.FC = () => {
                     </div>
                   </div>
                   <div className="uam-m-field">
-                    <label>{SCOPE_OPTIONS[newRole].label}</label>
+                    <label>{SCOPE_OPTIONS[newRole].label} {newRole !== 'ADMIN' && <span className="uam-m-req">*</span>}</label>
                     <div className="uam-dd-wrap">
                       <button
-                        className="uam-dd-trigger"
+                        className={`uam-dd-trigger ${fieldErrors.scope ? 'uam-dd-trigger--error' : ''}`}
                         onClick={() => {
                           if (newRole === 'ADMIN') return;
                           setShowScopeDropdown(!showScopeDropdown);
@@ -415,7 +476,7 @@ export const UserAccessManagement: React.FC = () => {
                             <button
                               key={opt}
                               className={`uam-dd-item ${opt === newScope ? 'uam-dd-item--active' : ''}`}
-                              onClick={() => { setNewScope(opt); setShowScopeDropdown(false); setFormError(''); }}
+                              onClick={() => { setNewScope(opt); setShowScopeDropdown(false); setFieldErrors(prev => ({ ...prev, scope: undefined })); }}
                             >
                               <span>{opt}</span>
                               {opt === newScope && <Check size={14} />}
@@ -424,25 +485,87 @@ export const UserAccessManagement: React.FC = () => {
                         </div>
                       )}
                     </div>
+                    {fieldErrors.scope && (
+                      <span className="uam-m-field-error"><AlertCircle size={12} />{fieldErrors.scope}</span>
+                    )}
                   </div>
                 </div>
               </div>
 
-              {/* Section: Access Preview */}
+              {/* Section: Screen Access */}
               <div className="uam-m-section uam-m-section--access">
                 <div className="uam-m-section-label">
                   <Shield size={13} />
                   <span>Screen Access</span>
-                  <span className="uam-m-access-count">{ROLE_ACCESS[newRole].length} screens auto-assigned</span>
+                  <span className="uam-m-access-count">
+                    {effectiveAccess.length} screen{effectiveAccess.length === 1 ? '' : 's'}{' '}
+                    {customizeAccess ? 'selected' : 'auto-assigned'}
+                  </span>
+                  <label className="uam-m-customize-toggle">
+                    <input
+                      type="checkbox"
+                      checked={customizeAccess}
+                      onChange={e => {
+                        const on = e.target.checked;
+                        setCustomizeAccess(on);
+                        if (on) setCustomAccess([...ROLE_ACCESS[newRole]]);
+                        else setCustomAccess([]);
+                      }}
+                    />
+                    <Settings2 size={12} />
+                    <span>Customize Access</span>
+                  </label>
                 </div>
+
+                {customizeAccess && (
+                  <div className="uam-m-customize-hint">
+                    <span>Toggle any screen on or off. Auto-assigned defaults are pre-selected.</span>
+                    <button
+                      type="button"
+                      className="uam-m-reset-btn"
+                      onClick={() => setCustomAccess([...ROLE_ACCESS[newRole]])}
+                    >
+                      <RotateCcw size={11} />
+                      Reset to role defaults
+                    </button>
+                  </div>
+                )}
+
                 <div className="uam-m-access-grid">
-                  {ROLE_ACCESS[newRole].map(screen => (
-                    <div key={screen} className="uam-m-access-item">
-                      <Check size={12} />
-                      <span>{SCREEN_LABELS[screen]}</span>
-                    </div>
-                  ))}
+                  {(Object.keys(SCREEN_LABELS) as ScreenAccess[]).map(screen => {
+                    const isAutoAssigned = ROLE_ACCESS[newRole].includes(screen);
+                    const isChecked = customizeAccess ? customAccess.includes(screen) : isAutoAssigned;
+
+                    if (!customizeAccess && !isAutoAssigned) return null;
+
+                    return customizeAccess ? (
+                      <label
+                        key={screen}
+                        className={`uam-m-access-item uam-m-access-item--interactive ${isChecked ? 'uam-m-access-item--checked' : ''}`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => toggleCustomScreen(screen)}
+                        />
+                        <span className="uam-m-access-check">
+                          {isChecked && <Check size={11} />}
+                        </span>
+                        <span>{SCREEN_LABELS[screen]}</span>
+                        {isAutoAssigned && <span className="uam-m-access-default" title="Default for this role">default</span>}
+                      </label>
+                    ) : (
+                      <div key={screen} className="uam-m-access-item">
+                        <Check size={12} />
+                        <span>{SCREEN_LABELS[screen]}</span>
+                      </div>
+                    );
+                  })}
                 </div>
+
+                {customizeAccess && customAccess.length === 0 && (
+                  <span className="uam-m-field-error"><AlertCircle size={12} />Select at least one screen</span>
+                )}
               </div>
             </div>
 

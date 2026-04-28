@@ -1104,3 +1104,238 @@
 .uam-toast {
   margin: 0 16px 12px 16px;
 }
+
+/* ==============================================================
+   Create User Modal — Step Indicator + Inline Validation
+   ============================================================== */
+.uam-m-steps {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 24px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.uam-m-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #64748b;
+  transition: color 0.15s ease;
+}
+
+.uam-m-step--done {
+  color: #16a34a;
+}
+
+.uam-m-step-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #64748b;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.uam-m-step--done .uam-m-step-num {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.uam-m-step-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.uam-m-step-divider {
+  flex: 1;
+  height: 1px;
+  background: #e2e8f0;
+  max-width: 60px;
+}
+
+/* Required-field asterisk */
+.uam-m-req {
+  color: #dc2626;
+  font-weight: 700;
+  margin-left: 2px;
+}
+
+/* Inline field error */
+.uam-m-field-error {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  font-size: 11.5px;
+  color: #dc2626;
+  font-weight: 500;
+}
+
+.uam-m-input--error,
+.uam-m-input-icon--error,
+.uam-dd-trigger--error {
+  border-color: #fca5a5 !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.08) !important;
+}
+
+/* Customize Access toggle (inline with section label) */
+.uam-m-customize-toggle {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #4338ca;
+  cursor: pointer;
+  padding: 4px 10px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  border-radius: 6px;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.uam-m-customize-toggle:hover {
+  background: #eef2ff;
+  border-color: #c7d2fe;
+}
+
+.uam-m-customize-toggle input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 3px;
+  background: #ffffff;
+  cursor: pointer;
+  position: relative;
+  margin: 0;
+  flex-shrink: 0;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.uam-m-customize-toggle input[type="checkbox"]:checked {
+  background: #4338ca;
+  border-color: #4338ca;
+}
+
+.uam-m-customize-toggle input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 0px;
+  width: 5px;
+  height: 9px;
+  border: solid #ffffff;
+  border-width: 0 1.5px 1.5px 0;
+  transform: rotate(45deg);
+}
+
+.uam-m-customize-hint {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  background: #eef2ff;
+  border: 1px solid #e0e7ff;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  font-size: 11.5px;
+  color: #4338ca;
+}
+
+.uam-m-reset-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  color: #4338ca;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: background 0.12s ease;
+}
+
+.uam-m-reset-btn:hover {
+  background: rgba(67, 56, 202, 0.08);
+}
+
+/* Interactive Screen Access checkbox items */
+.uam-m-access-item--interactive {
+  cursor: pointer;
+  position: relative;
+  padding: 8px 10px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: #475569;
+  transition: all 0.12s ease;
+  user-select: none;
+}
+
+.uam-m-access-item--interactive:hover {
+  border-color: #c7d2fe;
+  background: #f8fafc;
+}
+
+.uam-m-access-item--interactive input[type="checkbox"] {
+  display: none;
+}
+
+.uam-m-access-check {
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 3px;
+  background: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #ffffff;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.uam-m-access-item--checked {
+  border-color: #c7d2fe;
+  background: #eef2ff;
+  color: #1e293b;
+}
+
+.uam-m-access-item--checked .uam-m-access-check {
+  background: #4338ca;
+  border-color: #4338ca;
+}
+
+.uam-m-access-default {
+  margin-left: auto;
+  font-size: 9.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 6px;
+  background: #f1f5f9;
+  color: #64748b;
+  border-radius: 3px;
+}
+
