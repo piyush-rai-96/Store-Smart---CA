@@ -471,7 +471,8 @@
   width: 580px;
   max-width: 94vw;
   max-height: 88vh;
-  overflow: hidden;
+  /* overflow visible so dropdown menus can escape the modal box */
+  overflow: visible;
   box-shadow:
     0 0 0 1px rgba(0,0,0,0.04),
     0 8px 16px rgba(0,0,0,0.06),
@@ -545,10 +546,10 @@
 
 .uam-m-close:hover { background: #f8fafc; color: #475569; border-color: #cbd5e1; }
 
-/* Modal body */
+/* Modal body — overflow visible so absolute-positioned dropdowns can escape */
 .uam-m-body {
   padding: 20px 24px;
-  overflow-y: auto;
+  overflow: visible;
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -721,8 +722,10 @@
   border: 1px solid #e2e8f0;
   border-radius: 10px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.02);
-  z-index: 20;
+  z-index: 1000;
   padding: 4px;
+  max-height: 240px;
+  overflow-y: auto;
   animation: uamDropIn 0.15s ease;
 }
 
