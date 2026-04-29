@@ -120,7 +120,35 @@
 }
 
 /* ========================================
-   HEADER — Skills + Actions
+   DI-style page header (mirrors District Intelligence Center)
+   ======================================== */
+.cop-di-header {
+  flex-shrink: 0;
+  border-radius: 0;
+}
+
+.cop-di-header .header-title svg {
+  color: #4338ca;
+}
+
+.cop-di-header .header-title h1 {
+  color: #0f172a;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+/* Tighten skill pills when nested inside header-meta */
+.cop-di-header .cop-header-skills {
+  display: flex;
+  gap: 6px;
+  flex: 0 0 auto;
+  justify-content: flex-start;
+}
+
+/* ========================================
+   HEADER — Skills + Actions (legacy header retained for any other usage)
    ======================================== */
 
 .cop-chat-header {

@@ -21,6 +21,7 @@ import {
   ClipboardList,
   X,
   RefreshCw,
+  Search,
   ChevronUp,
   ChevronDown,
   ChevronRight,
@@ -1981,29 +1982,45 @@ export const AICopilot: React.FC = () => {
         </div>
       )}
 
-      {/* Header — Skill pills + actions */}
-      <div className="cop-chat-header">
-        <div className="cop-chat-header-left">
-          <span className="cop-chat-header-icon"><Sparkles size={16} /></span>
-          <h3>AI Copilot</h3>
+      {/* Header — DI-style (matches District Intelligence Center look & feel) */}
+      <div className="district-intel-header cop-di-header">
+        <div className="header-left">
+          <div className="header-title">
+            <Sparkles size={24} />
+            <h1>AI Copilot</h1>
+          </div>
+          <div className="header-meta">
+            <div className="cop-header-skills">
+              {skills.map(s => (
+                <button
+                  key={s.id}
+                  className={`cop-header-pill ${activeSkill === s.id ? 'cop-header-pill--active' : ''}`}
+                  onClick={() => setActiveSkill(s.id)}
+                >
+                  {s.icon}
+                  <span>{s.label}</span>
+                </button>
+              ))}
+            </div>
+            <span className="last-refresh">
+              <Clock size={12} />
+              {currentMessages.length > 0
+                ? `${currentMessages.length} message${currentMessages.length === 1 ? '' : 's'}`
+                : 'Ready to chat'}
+            </span>
+          </div>
         </div>
-
-        <div className="cop-header-skills">
-          {skills.map(s => (
-            <button
-              key={s.id}
-              className={`cop-header-pill ${activeSkill === s.id ? 'cop-header-pill--active' : ''}`}
-              onClick={() => setActiveSkill(s.id)}
-            >
-              {s.icon}
-              <span>{s.label}</span>
-            </button>
-          ))}
-        </div>
-
-        <div className="cop-header-actions">
-          <button className="cop-clear-btn" onClick={() => setMessages(prev => ({ ...prev, [activeSkill]: [] }))}>
-            <RefreshCw size={13} /> Clear
+        <div className="header-right">
+          <div className="header-search">
+            <Search size={16} />
+            <input type="text" placeholder="Search conversations..." />
+          </div>
+          <button
+            className="header-action-btn secondary"
+            onClick={() => setMessages(prev => ({ ...prev, [activeSkill]: [] }))}
+          >
+            <RefreshCw size={16} />
+            Clear
           </button>
         </div>
       </div>
