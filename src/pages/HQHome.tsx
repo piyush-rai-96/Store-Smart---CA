@@ -156,14 +156,12 @@ export const HQHome: React.FC = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isBriefCollapsed, setIsBriefCollapsed] = useState(false);
   const [showBriefModal, setShowBriefModal] = useState(false);
-  const [broadcastsExpanded, setBroadcastsExpanded] = useState(true);
-  const [broadcasts, setBroadcasts] = useState<BroadcastItem[]>(MOCK_BROADCASTS);
+  const [, setBroadcasts] = useState<BroadcastItem[]>(MOCK_BROADCASTS);
   const [selectedBroadcast, setSelectedBroadcast] = useState<BroadcastItem | null>(null);
   // District Leaderboard state
-  const [sortField, setSortField] = useState<'dpi' | 'riskLevel'>('dpi');
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
-  const [selectedDistricts, setSelectedDistricts] = useState<string[]>([]);
-  const [broadcastToast, setBroadcastToast] = useState<string | null>(null);
+  const [sortField] = useState<'dpi' | 'riskLevel'>('dpi');
+  const [sortDir] = useState<'asc' | 'desc'>('desc');
+  const [broadcastToast] = useState<string | null>(null);
   const [lbSelectedDistrict, setLbSelectedDistrict] = useState<DistrictRow | null>(null);
   // HQ Alerts right-side detail panel (mirrors StoreOpsHome alert panel pattern)
   const [hqAlertPanel, setHqAlertPanel] = useState<HQAlertItem | null>(null);
@@ -329,26 +327,6 @@ export const HQHome: React.FC = () => {
       : riskOrder[a.riskLevel] - riskOrder[b.riskLevel];
   });
 
-  const handleSort = (field: 'dpi' | 'riskLevel') => {
-    if (sortField === field) setSortDir(d => d === 'desc' ? 'asc' : 'desc');
-    else { setSortField(field); setSortDir('desc'); }
-  };
-
-  const toggleDistrict = (id: string) => {
-    setSelectedDistricts(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
-  };
-
-  const toggleAllDistricts = () => {
-    if (selectedDistricts.length === sortedDistricts.length) setSelectedDistricts([]);
-    else setSelectedDistricts(sortedDistricts.map(d => d.id));
-  };
-
-  const handleBroadcastToSelected = () => {
-    const names = MOCK_DISTRICTS.filter(d => selectedDistricts.includes(d.id)).map(d => d.dm);
-    setBroadcastToast(`Broadcast sent to ${names.join(', ')}`);
-    setSelectedDistricts([]);
-    setTimeout(() => setBroadcastToast(null), 4000);
-  };
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 600);
@@ -362,11 +340,6 @@ export const HQHome: React.FC = () => {
     setIsRefreshing(false);
   };
 
-  const handleBroadcastClick = (broadcast: BroadcastItem) => {
-    setBroadcasts(prev => prev.map(b => b.id === broadcast.id ? { ...b, isRead: true } : b));
-    setSelectedBroadcast(broadcast);
-  };
-
   const closeBroadcastModal = () => setSelectedBroadcast(null);
 
   const handleMarkAsRead = () => {
@@ -376,7 +349,6 @@ export const HQHome: React.FC = () => {
     closeBroadcastModal();
   };
 
-  const unreadBroadcastCount = broadcasts.filter(b => !b.isRead).length;
   const greetingPart = new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening';
 
   if (isLoading) {
