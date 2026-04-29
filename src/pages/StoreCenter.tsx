@@ -25,7 +25,6 @@ import {
   RefreshCw,
   Clock,
   CheckCircle2,
-  Info,
   Megaphone,
   Send,
   ListChecks,
@@ -36,7 +35,9 @@ import {
   Zap,
   Users,
   Calendar,
-  Filter
+  Filter,
+  Award,
+  Grid3X3
 } from 'lucide-react';
 import { AIDailyBrief, AIDailyBriefData } from '../components/common/AIDailyBrief';
 import { useAuth } from '../context/AuthContext';
@@ -107,15 +108,6 @@ interface InventoryItem {
   quantity: number;
   daysOfSupply: number;
   inboundEta?: string;
-}
-
-interface AlertItem {
-  id: string;
-  type: 'critical' | 'warning' | 'info';
-  title: string;
-  detail: string;
-  time: string;
-  source: string;
 }
 
 // ── Store-level AI Daily Brief — tier-aware narrative ──────────
@@ -503,26 +495,46 @@ const getInventoryData = (store: StoreMeta): InventoryItem[] => [
   { sku: 'MEN-PLO-002', name: "Men's Polo Classic", status: store.dpi >= 75 ? 'in-stock' : 'low', quantity: store.dpi >= 75 ? 28 : 4, daysOfSupply: store.dpi >= 75 ? 9 : 1 },
   { sku: 'SEA-JKT-004', name: "Seasonal Rain Jacket", status: 'inbound', quantity: 0, daysOfSupply: 0, inboundEta: '5 days' },
   { sku: 'ACC-SCF-009', name: "Silk Blend Scarf", status: 'in-stock', quantity: 36, daysOfSupply: 18 },
+  { sku: 'WOM-TOP-014', name: "Women's V-Neck Basics", status: store.risk !== 'low' ? 'out-of-stock' : 'low', quantity: store.risk !== 'low' ? 0 : 5, daysOfSupply: store.risk !== 'low' ? 0 : 1 },
+  { sku: 'MEN-CHN-007', name: "Men's Stretch Chino", status: 'inbound', quantity: 4, daysOfSupply: 1, inboundEta: '7 days (delayed)' },
+  { sku: 'KID-SHT-019', name: "Kids Cargo Shorts", status: 'low', quantity: 7, daysOfSupply: 2 },
+  { sku: 'ACC-BLT-011', name: "Leather Belt Classic", status: 'in-stock', quantity: 54, daysOfSupply: 25 },
 ];
 
-const getAlerts = (store: StoreMeta): AlertItem[] => {
-  const base: AlertItem[] = [
-    { id: 'a1', type: 'info', title: 'Weekly audit completed', detail: 'All categories assessed — overall score recorded', time: '2h ago', source: 'Audit System' },
-  ];
-  if (store.risk === 'high') {
-    base.unshift(
-      { id: 'a5', type: 'critical', title: 'SEA Auto-Fail: Fire Exit Blocked', detail: 'Display blocking emergency exit in Zone B — immediate action required', time: '1h ago', source: 'Safety Audit' },
-      { id: 'a4', type: 'critical', title: 'OOS Spike: 3 SKUs depleted', detail: 'Men\'s Slim Denim, Canvas Tote, Men\'s Polo below safety stock', time: '3h ago', source: 'Inventory System' },
-      { id: 'a3', type: 'warning', title: 'VoC Negative Spike', detail: '"Messy aisles" complaints up 28% this week', time: '5h ago', source: 'VoC Engine' },
-    );
+type InventoryRisk = 'critical' | 'at-risk' | 'watch' | 'healthy';
+
+const classifyInventoryRisk = (item: InventoryItem): InventoryRisk => {
+  // Out of stock → critical
+  if (item.status === 'out-of-stock') return 'critical';
+  // Inbound that is delayed (text contains "delayed") and qty is 0/very low → at-risk
+  if (item.status === 'inbound') {
+    const delayed = !!item.inboundEta && /delay/i.test(item.inboundEta);
+    if (delayed) return 'at-risk';
+    if (item.quantity === 0) return 'at-risk';
+    if (item.daysOfSupply > 0 && item.daysOfSupply < 4) return 'watch';
+    return 'watch';
   }
-  if (store.risk === 'moderate') {
-    base.unshift(
-      { id: 'a2', type: 'warning', title: 'Planogram deviation detected', detail: 'Women\'s wall section 40% non-compliant', time: '4h ago', source: 'POG System' },
-      { id: 'a6', type: 'warning', title: 'Staffing gap predicted', detail: 'Saturday coverage 15% below optimal', time: '6h ago', source: 'Workforce Planner' },
-    );
-  }
-  return base;
+  // Low stock with very low DoS → critical
+  if (item.status === 'low' && item.daysOfSupply <= 2) return 'critical';
+  // Low stock → at-risk
+  if (item.status === 'low') return 'at-risk';
+  // In-stock but DoS < 7 → watch
+  if (item.status === 'in-stock' && item.daysOfSupply < 7) return 'watch';
+  return 'healthy';
+};
+
+const RISK_LABELS: Record<InventoryRisk, string> = {
+  critical: 'Critical',
+  'at-risk': 'At Risk',
+  watch: 'Watch',
+  healthy: 'Healthy',
+};
+
+const RISK_RANK: Record<InventoryRisk, number> = {
+  critical: 0,
+  'at-risk': 1,
+  watch: 2,
+  healthy: 3,
 };
 
 const getAIInsight = (store: StoreMeta) => ({
@@ -557,12 +569,13 @@ const getAIInsight = (store: StoreMeta) => ({
 });
 
 const compBenchmarks = [
-  { metric: 'Sales vs Plan', unit: '%', clusterAvg: 99.1, chainAvg: 97.4 },
-  { metric: 'SEA Score', unit: '/100', clusterAvg: 87, chainAvg: 84 },
-  { metric: 'VoC Score', unit: '/5', clusterAvg: 4.1, chainAvg: 3.9 },
-  { metric: 'Availability', unit: '%', clusterAvg: 94.5, chainAvg: 93.1 },
-  { metric: 'Gross Margin', unit: '%', clusterAvg: 40.2, chainAvg: 39.5 },
+  { metric: 'Sales vs Plan', unit: '%', clusterAvg: 99.1, chainAvg: 97.4, clusterMin: 88.2, clusterMax: 112.4, clusterMedian: 98.8, higherIsBetter: true },
+  { metric: 'SEA Score', unit: '/100', clusterAvg: 87, chainAvg: 84, clusterMin: 68, clusterMax: 96, clusterMedian: 86, higherIsBetter: true },
+  { metric: 'VoC Score', unit: '/5', clusterAvg: 4.1, chainAvg: 3.9, clusterMin: 3.2, clusterMax: 4.8, clusterMedian: 4.1, higherIsBetter: true },
+  { metric: 'Availability', unit: '%', clusterAvg: 94.5, chainAvg: 93.1, clusterMin: 82.4, clusterMax: 98.6, clusterMedian: 94.7, higherIsBetter: true },
+  { metric: 'Gross Margin', unit: '%', clusterAvg: 40.2, chainAvg: 39.5, clusterMin: 33.6, clusterMax: 46.8, clusterMedian: 40.1, higherIsBetter: true },
 ];
+const CLUSTER_SIZE = 12;
 
 // ── Operational Compliance View Data ────────────────────
 interface BroadcastAction {
@@ -697,7 +710,9 @@ export const StoreCenter: React.FC = () => {
     skillLogic: string;
     trend: 'improving' | 'declining' | 'stable';
   } | null>(null);
-  const [activeTab, setActiveTab] = useState<'voc' | 'inventory' | 'benchmarking' | 'alerts'>('voc');
+  const [activeTab, setActiveTab] = useState<'voc' | 'inventory' | 'benchmarking'>('inventory');
+  const [inventoryView, setInventoryView] = useState<'at-risk' | 'all'>('at-risk');
+  const [vocExpanded, setVocExpanded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   // OCV state
@@ -865,7 +880,6 @@ export const StoreCenter: React.FC = () => {
   const aiInsight = getAIInsight(store);
   const vocData = getVoCData(store);
   const inventoryData = getInventoryData(store);
-  const alerts = getAlerts(store);
 
   // Filter broadcasts to only those where this store has a non-completed status
   const storeBroadcasts = broadcastActions.filter(bc => {
@@ -885,7 +899,7 @@ export const StoreCenter: React.FC = () => {
     s.number.includes(storeSearch)
   );
 
-  const getBenchmarks = () => compBenchmarks.map(b => {
+  const getBenchmarks = () => compBenchmarks.map((b, idx) => {
     const storeVal = b.metric === 'Sales vs Plan' ? (store.dpi >= 85 ? 104.2 : store.dpi >= 75 ? 97.8 : 91.3)
       : b.metric === 'SEA Score' ? (store.dpi >= 80 ? 91 : 76)
       : b.metric === 'VoC Score' ? (store.dpi >= 80 ? 4.3 : 3.6)
@@ -893,7 +907,22 @@ export const StoreCenter: React.FC = () => {
       : (store.dpi >= 85 ? 42.1 : store.dpi >= 75 ? 39.8 : 37.2);
     const vsCluster = storeVal - b.clusterAvg;
     const vsChain = storeVal - b.chainAvg;
-    return { ...b, storeVal, vsCluster, vsChain };
+
+    // Rank: derive deterministic position within CLUSTER_SIZE based on where storeVal
+    // lies between clusterMin..clusterMax. Position 1 = best (highest when higherIsBetter).
+    const range = Math.max(0.0001, b.clusterMax - b.clusterMin);
+    const clampedPos = Math.max(0, Math.min(1, (storeVal - b.clusterMin) / range));
+    const percentile = b.higherIsBetter ? clampedPos : 1 - clampedPos;
+    const rank = Math.max(1, Math.min(CLUSTER_SIZE, Math.round((1 - percentile) * (CLUSTER_SIZE - 1) + 1)));
+    const quartile = rank <= Math.ceil(CLUSTER_SIZE * 0.25) ? 1
+      : rank <= Math.ceil(CLUSTER_SIZE * 0.5) ? 2
+        : rank <= Math.ceil(CLUSTER_SIZE * 0.75) ? 3 : 4;
+
+    // Rank movement vs last period — deterministic per-metric nudge seeded by idx + store
+    const moveSeed = (store.dpi + idx * 7) % 5; // 0..4
+    const rankDelta = moveSeed === 0 ? 2 : moveSeed === 1 ? 1 : moveSeed === 2 ? 0 : moveSeed === 3 ? -1 : -2;
+
+    return { ...b, storeVal, vsCluster, vsChain, rank, rankTotal: CLUSTER_SIZE, quartile, rankDelta, clampedPos };
   });
 
   return (
@@ -1208,15 +1237,36 @@ export const StoreCenter: React.FC = () => {
                 <AIDailyBrief
                   brief={mergedBrief}
                   userName={user?.name}
-                  metaSuffix={`SPI ${store.dpi} · ${store.tier}`}
                 />
               );
             })()}
           </div>
         </div>
 
-        {/* ── KPI Tiles (matches District Intelligence look/feel) ── */}
-        <div className="sc-kpi-section">
+        {/* ── Store KPIs (mirrors District Intelligence "District KPIs") ── */}
+        <div className="kpi-cards-section sc-kpi-section">
+          <div className="kpi-cards-header">
+            <div className="kpi-header-title-row">
+              <div className="kpi-title-group">
+                <h2><BarChart3 size={20} /> Store KPIs {isDateFilterActive && <Filter size={12} className="filter-active-icon" />}</h2>
+                <span className="kpi-header-subtitle">Click any metric to explore 52-week trend</span>
+              </div>
+              <div className="kpi-header-stats">
+                <div className="kpi-stat-pill kpi-stat-positive">
+                  <span className="kpi-stat-value">{getStoreKPIs(store).filter(k => k.status === 'positive').length}</span>
+                  <span className="kpi-stat-label">On Track</span>
+                </div>
+                <div className="kpi-stat-pill kpi-stat-warning">
+                  <span className="kpi-stat-value">{getStoreKPIs(store).filter(k => k.status === 'warning').length}</span>
+                  <span className="kpi-stat-label">Watch</span>
+                </div>
+                <div className="kpi-stat-pill kpi-stat-negative">
+                  <span className="kpi-stat-value">{getStoreKPIs(store).filter(k => k.status === 'negative').length}</span>
+                  <span className="kpi-stat-label">Needs Attention</span>
+                </div>
+              </div>
+            </div>
+          </div>
           {isDateFilterActive && <div className="sc-section-filter-badge"><Filter size={11} className="filter-active-icon" /><span>{getSelectedPeriodLabel()}</span></div>}
           <div className="kpi-cards-grid">
             {getStoreKPIs(store).map(kpi => {
@@ -1301,7 +1351,7 @@ export const StoreCenter: React.FC = () => {
           <div className="ocv-header">
             <div className="ocv-title-row">
               <div className="ocv-icon-wrap">
-                <ClipboardCheck size={18} />
+                <ClipboardCheck size={20} />
               </div>
               <div className="ocv-title-text">
                 <h3>Operational Compliance View</h3>
@@ -1520,7 +1570,7 @@ export const StoreCenter: React.FC = () => {
         <div className="sc-audit-section">
           <div className="sc-section-header">
             <div className="sc-section-title-row">
-              <ClipboardCheck size={18} />
+              <ClipboardCheck size={20} />
               <h3>8-Week Audit Lens</h3>
               {isDateFilterActive && <Filter size={12} className="filter-active-icon" />}
             </div>
@@ -1572,14 +1622,20 @@ export const StoreCenter: React.FC = () => {
           </div>
         </div>
 
-        {/* ── Multi-Tab Deep Dive ────────────────────────── */}
+        {/* ── Operational Breakdown ──────────────────────── */}
         <div className="sc-deepdive-section">
+          <div className="sc-section-header">
+            <div className="sc-section-title-row">
+              <Grid3X3 size={20} />
+              <h3>Operational Breakdown</h3>
+            </div>
+            <span className="sc-section-subtitle">Inventory, customer voice and benchmarking</span>
+          </div>
           <div className="sc-deepdive-tabs">
             {[
-              { id: 'voc' as const, label: 'VoC Analysis', icon: <Heart size={14} /> },
               { id: 'inventory' as const, label: 'Inventory & Inbound', icon: <Package size={14} /> },
+              { id: 'voc' as const, label: 'VoC Analysis', icon: <Heart size={14} /> },
               { id: 'benchmarking' as const, label: 'Comp Benchmarking', icon: <BarChart3 size={14} /> },
-              { id: 'alerts' as const, label: 'Alert Stream', icon: <Bell size={14} />, count: alerts.filter(a => a.type === 'critical').length },
             ].map(tab => (
               <button
                 key={tab.id}
@@ -1588,144 +1644,431 @@ export const StoreCenter: React.FC = () => {
               >
                 {tab.icon}
                 <span>{tab.label}</span>
-                {tab.count !== undefined && tab.count > 0 && <span className="sc-tab-badge">{tab.count}</span>}
               </button>
             ))}
           </div>
 
           <div className="sc-deepdive-content">
-            {/* VoC Tab */}
-            {activeTab === 'voc' && (
-              <div className="sc-voc-tab">
-                {vocData.map(item => (
-                  <div key={item.theme} className={`sc-voc-card sc-voc--${item.sentiment}`}>
-                    <div className="sc-voc-card-header">
-                      <span className="sc-voc-theme">{item.theme}</span>
-                      <span className={`sc-voc-sentiment sc-sentiment--${item.sentiment}`}>{item.sentiment}</span>
-                    </div>
-                    <div className="sc-voc-stats">
-                      <span className="sc-voc-volume">{item.volume} mentions</span>
-                      <span className={`sc-voc-delta ${item.delta >= 0 ? 'sc-delta--up' : 'sc-delta--down'}`}>
-                        {item.delta >= 0 ? '+' : ''}{item.delta}%
-                      </span>
-                    </div>
-                    <p className="sc-voc-comment">{item.topComment}</p>
-                    <span className="sc-voc-source">{item.source}</span>
-                  </div>
-                ))}
-              </div>
-            )}
+            {/* VoC Tab — decision-oriented view */}
+            {activeTab === 'voc' && (() => {
+              // Priority score: negative + rising delta is most urgent
+              const scored = vocData.map(item => ({
+                ...item,
+                priority:
+                  (item.sentiment === 'negative' ? 1000 : item.sentiment === 'neutral' ? 200 : 0) +
+                  (item.sentiment === 'negative' ? Math.max(0, item.delta) * 8 : 0) +
+                  item.volume * 0.5,
+              }));
+              const sorted = scored.slice().sort((a, b) => b.priority - a.priority);
+              const totalMentions = sorted.reduce((sum, i) => sum + i.volume, 0);
+              const negatives = sorted.filter(i => i.sentiment === 'negative');
+              const positives = sorted.filter(i => i.sentiment === 'positive');
+              const topNegative = negatives[0];
+              const topRising = sorted
+                .filter(i => i.sentiment !== 'positive' && i.delta > 0)
+                .sort((a, b) => b.delta - a.delta)[0];
 
-            {/* Inventory Tab */}
-            {activeTab === 'inventory' && (
-              <div className="sc-inventory-tab">
-                <table className="sc-inv-table wow-table">
-                  <thead>
-                    <tr>
-                      <th>SKU</th>
-                      <th>Product</th>
-                      <th>Status</th>
-                      <th>Qty</th>
-                      <th>Days of Supply</th>
-                      <th>ETA</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {inventoryData.map(item => (
-                      <tr key={item.sku} className={`sc-inv-row sc-inv--${item.status}`}>
-                        <td className="sc-inv-sku">{item.sku}</td>
-                        <td>{item.name}</td>
-                        <td><span className={`sc-inv-status sc-inv-status--${item.status}`}>{item.status.replace('-', ' ')}</span></td>
-                        <td className="sc-inv-qty">{item.quantity}</td>
-                        <td className="sc-inv-dos">{item.daysOfSupply > 0 ? `${item.daysOfSupply}d` : '—'}</td>
-                        <td className="sc-inv-eta">{item.inboundEta || '—'}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+              const visible = vocExpanded ? sorted : sorted.slice(0, 3);
 
-            {/* Benchmarking Tab */}
-            {activeTab === 'benchmarking' && (
-              <div className="sc-bench-tab">
-                <div className="sc-bench-legend">
-                  <span className="sc-bench-legend-item"><span className="sc-legend-dot sc-legend-dot--store" />This Store</span>
-                  <span className="sc-bench-legend-item"><span className="sc-legend-dot sc-legend-dot--cluster" />Cluster Avg</span>
-                  <span className="sc-bench-legend-item"><span className="sc-legend-dot sc-legend-dot--chain" />Chain Avg</span>
-                </div>
-                <div className="sc-bench-cards">
-                  {getBenchmarks().map(b => {
-                    const fmt = (v: number) => (v % 1 !== 0 ? v.toFixed(1) : String(v));
-                    const fmtDelta = (v: number) => (v >= 0 ? '+' : '') + (v % 1 !== 0 ? v.toFixed(1) : String(v));
-                    return (
-                      <div key={b.metric} className="sc-bench-card">
-                        <div className="sc-bench-card-header">
-                          <span className="sc-bench-metric">{b.metric}</span>
-                          <span className="sc-bench-unit">{b.unit}</span>
-                        </div>
-                        <div className="sc-bench-card-body">
-                          <div className="sc-bench-store-val">
-                            <span className="sc-bench-big-num">{fmt(b.storeVal)}</span>
-                            <span className="sc-bench-unit-small">{b.unit}</span>
-                          </div>
-                          <div className="sc-bench-comparisons">
-                            <div className="sc-bench-comp-row">
-                              <span className="sc-bench-comp-label">vs Cluster</span>
-                              <div className="sc-bench-comp-pill-wrap">
-                                <span className={`sc-bench-comp-pill ${b.vsCluster >= 0 ? 'sc-comp-positive' : 'sc-comp-negative'}`}>
-                                  {b.vsCluster >= 0 ? <ArrowUpRight size={11} /> : <ArrowDownRight size={11} />}
-                                  {fmtDelta(b.vsCluster)}
-                                </span>
-                                <span className="sc-bench-comp-avg">{fmt(b.clusterAvg)}</span>
-                              </div>
-                            </div>
-                            <div className="sc-bench-comp-row">
-                              <span className="sc-bench-comp-label">vs Chain</span>
-                              <div className="sc-bench-comp-pill-wrap">
-                                <span className={`sc-bench-comp-pill ${b.vsChain >= 0 ? 'sc-comp-positive' : 'sc-comp-negative'}`}>
-                                  {b.vsChain >= 0 ? <ArrowUpRight size={11} /> : <ArrowDownRight size={11} />}
-                                  {fmtDelta(b.vsChain)}
-                                </span>
-                                <span className="sc-bench-comp-avg">{fmt(b.chainAvg)}</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="sc-bench-visual-bar">
-                          <div className="sc-bench-vbar-track">
-                            <div className="sc-bench-vbar-chain" style={{ left: `${Math.min(95, (b.chainAvg / (Math.max(b.storeVal, b.clusterAvg, b.chainAvg) * 1.15)) * 100)}%` }} />
-                            <div className="sc-bench-vbar-cluster" style={{ left: `${Math.min(95, (b.clusterAvg / (Math.max(b.storeVal, b.clusterAvg, b.chainAvg) * 1.15)) * 100)}%` }} />
-                            <div className={`sc-bench-vbar-store ${b.storeVal >= b.clusterAvg ? 'sc-vbar-ahead' : 'sc-vbar-behind'}`} style={{ width: `${Math.min(98, (b.storeVal / (Math.max(b.storeVal, b.clusterAvg, b.chainAvg) * 1.15)) * 100)}%` }} />
-                          </div>
-                        </div>
+              const summaryLine = negatives.length === 0
+                ? `Sentiment is healthy — ${positives.length} positive themes leading customer feedback this period.`
+                : `${negatives.length} negative theme${negatives.length === 1 ? '' : 's'} dominating feedback${topNegative ? `, led by "${topNegative.theme}"` : ''}${topRising && topRising.theme !== topNegative?.theme ? `; "${topRising.theme}" is rising fast (${topRising.delta >= 0 ? '+' : ''}${topRising.delta}%)` : ''}.`;
+
+              return (
+                <div className="sc-voc-tab">
+                  {/* Summary narrative */}
+                  <div className="sc-voc-summary">
+                    <div className="sc-voc-summary-icon"><Sparkles size={14} /></div>
+                    <div className="sc-voc-summary-body">
+                      <span className="sc-voc-summary-label">Customer Voice Insight</span>
+                      <p className="sc-voc-summary-line">{summaryLine}</p>
+                    </div>
+                    <div className="sc-voc-summary-stats">
+                      <div className="sc-voc-stat">
+                        <span className="sc-voc-stat-value">{totalMentions}</span>
+                        <span className="sc-voc-stat-label">Mentions</span>
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Alerts Tab */}
-            {activeTab === 'alerts' && (
-              <div className="sc-alerts-tab">
-                {alerts.map(alert => (
-                  <div key={alert.id} className={`sc-alert-card sc-alert--${alert.type}`}>
-                    <div className="sc-alert-icon">
-                      {alert.type === 'critical' ? <AlertTriangle size={16} /> : alert.type === 'warning' ? <AlertCircle size={16} /> : <Info size={16} />}
-                    </div>
-                    <div className="sc-alert-body">
-                      <div className="sc-alert-header">
-                        <span className="sc-alert-title">{alert.title}</span>
-                        <span className="sc-alert-time">{alert.time}</span>
+                      <div className="sc-voc-stat">
+                        <span className="sc-voc-stat-value">{negatives.length}</span>
+                        <span className="sc-voc-stat-label">Negative</span>
                       </div>
-                      <p className="sc-alert-detail">{alert.detail}</p>
-                      <span className="sc-alert-source">{alert.source}</span>
+                      <div className="sc-voc-stat">
+                        <span className="sc-voc-stat-value">{positives.length}</span>
+                        <span className="sc-voc-stat-label">Positive</span>
+                      </div>
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
+
+                  {/* Cards */}
+                  <div className="sc-voc-grid">
+                    {visible.map(item => {
+                      const sharePct = totalMentions > 0 ? Math.round((item.volume / totalMentions) * 100) : 0;
+                      const isTopNegative = topNegative && item.theme === topNegative.theme;
+                      const isTopRising = topRising && item.theme === topRising.theme && !isTopNegative;
+                      const accent = isTopNegative ? 'top-negative' : isTopRising ? 'top-risk' : '';
+                      const trendDir = item.delta > 0 ? 'up' : item.delta < 0 ? 'down' : 'flat';
+                      // Trend semantics depend on sentiment: rising negative = bad, rising positive = good
+                      const trendSeverity =
+                        item.sentiment === 'negative'
+                          ? (item.delta > 0 ? 'bad' : 'good')
+                          : item.sentiment === 'positive'
+                            ? (item.delta >= 0 ? 'good' : 'bad')
+                            : 'neutral';
+
+                      return (
+                        <div key={item.theme} className={`sc-voc-card sc-voc--${item.sentiment} ${accent ? `sc-voc-card--${accent}` : ''}`}>
+                          {accent && (
+                            <span className={`sc-voc-priority-tag sc-voc-priority-tag--${accent}`}>
+                              {isTopNegative ? <><AlertCircle size={11} /> Top Negative</> : <><AlertTriangle size={11} /> Top Risk</>}
+                            </span>
+                          )}
+                          <div className="sc-voc-card-header">
+                            <span className="sc-voc-theme">{item.theme}</span>
+                            <span className={`sc-voc-sentiment sc-sentiment--${item.sentiment}`}>{item.sentiment}</span>
+                          </div>
+                          <div className="sc-voc-stats">
+                            <span className="sc-voc-volume">{item.volume} mentions</span>
+                            <span className={`sc-voc-delta sc-voc-delta--${trendSeverity}`}>
+                              {trendDir === 'up' && <ArrowUpRight size={11} />}
+                              {trendDir === 'down' && <ArrowDownRight size={11} />}
+                              {trendDir === 'flat' && <Minus size={11} />}
+                              {item.delta >= 0 ? '+' : ''}{item.delta}%
+                            </span>
+                          </div>
+                          <p className="sc-voc-comment">{item.topComment}</p>
+                          <div className="sc-voc-impact">
+                            <span className="sc-voc-impact-label">Impact</span>
+                            <div className="sc-voc-impact-bar">
+                              <div className={`sc-voc-impact-fill sc-voc-impact-fill--${item.sentiment}`} style={{ width: `${Math.min(100, sharePct * 2)}%` }} />
+                            </div>
+                            <span className="sc-voc-impact-pct">{sharePct}% of feedback</span>
+                          </div>
+                          <div className="sc-voc-card-footer">
+                            <span className="sc-voc-source">{item.source}</span>
+                            <div className="sc-voc-actions">
+                              <button
+                                className="sc-voc-action-btn sc-voc-action--ghost"
+                                onClick={() => setActiveBroadcast(broadcastActions[0])}
+                                title={`View details for ${item.theme}`}
+                              >
+                                View Details
+                                <ChevronRight size={11} />
+                              </button>
+                              {item.sentiment === 'negative' && (
+                                <button
+                                  className="sc-voc-action-btn sc-voc-action--primary"
+                                  onClick={() => setActiveTab('inventory')}
+                                  title={`Take action on ${item.theme}`}
+                                >
+                                  <Zap size={11} />
+                                  Take Action
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Expand toggle */}
+                  {sorted.length > 3 && (
+                    <button className="sc-voc-expand-btn" onClick={() => setVocExpanded(!vocExpanded)}>
+                      {vocExpanded ? (
+                        <>Show top 3 only <ChevronDown size={14} style={{ transform: 'rotate(180deg)' }} /></>
+                      ) : (
+                        <>Show {sorted.length - 3} more theme{sorted.length - 3 === 1 ? '' : 's'} <ChevronDown size={14} /></>
+                      )}
+                    </button>
+                  )}
+                </div>
+              );
+            })()}
+
+            {/* Inventory Tab — decision-support view */}
+            {activeTab === 'inventory' && (() => {
+              const inventoryEnriched = inventoryData.map(item => ({ ...item, risk: classifyInventoryRisk(item) }));
+              const oosCount = inventoryEnriched.filter(i => i.status === 'out-of-stock').length;
+              const lowCount = inventoryEnriched.filter(i => i.status === 'low').length;
+              const delayedInboundCount = inventoryEnriched.filter(i => i.status === 'inbound' && i.inboundEta && /delay/i.test(i.inboundEta)).length;
+              const totalAtRisk = inventoryEnriched.filter(i => i.risk === 'critical' || i.risk === 'at-risk').length;
+
+              const filteredInventory = (inventoryView === 'at-risk'
+                ? inventoryEnriched.filter(i => i.risk !== 'healthy')
+                : inventoryEnriched
+              ).slice().sort((a, b) => RISK_RANK[a.risk] - RISK_RANK[b.risk] || a.daysOfSupply - b.daysOfSupply);
+
+              const criticalSkus = inventoryEnriched.filter(i => i.risk === 'critical');
+              const insightLine = totalAtRisk === 0
+                ? 'All SKUs are healthy. Maintain current replenishment cadence.'
+                : `${totalAtRisk} SKU${totalAtRisk === 1 ? '' : 's'} need attention${criticalSkus.length > 0 ? ` — prioritize ${criticalSkus.slice(0, 2).map(s => s.name).join(' and ')}` : ''}${delayedInboundCount > 0 ? `; ${delayedInboundCount} inbound shipment${delayedInboundCount === 1 ? ' is' : 's are'} delayed` : ''}.`;
+              const recommendation = criticalSkus.length > 0
+                ? `Expedite replenishment for ${criticalSkus.length} OOS SKU${criticalSkus.length === 1 ? '' : 's'}${delayedInboundCount > 0 ? ` and follow up with DC on the ${delayedInboundCount} delayed shipment${delayedInboundCount === 1 ? '' : 's'}` : ''}.`
+                : delayedInboundCount > 0
+                  ? `Follow up with DC on ${delayedInboundCount} delayed shipment${delayedInboundCount === 1 ? '' : 's'} to prevent OOS escalation.`
+                  : `Monitor low-DoS SKUs daily; trigger reorder when DoS drops below safety stock.`;
+
+              return (
+                <div className="sc-inventory-tab">
+                  {/* Summary tiles */}
+                  <div className="sc-inv-summary">
+                    <div className="sc-inv-summary-tile sc-inv-summary--total">
+                      <span className="sc-inv-summary-label">Total SKUs at Risk</span>
+                      <span className="sc-inv-summary-value">{totalAtRisk}</span>
+                      <span className="sc-inv-summary-sub">of {inventoryEnriched.length} tracked</span>
+                    </div>
+                    <div className="sc-inv-summary-tile sc-inv-summary--critical">
+                      <span className="sc-inv-summary-label">Out of Stock</span>
+                      <span className="sc-inv-summary-value">{oosCount}</span>
+                      <span className="sc-inv-summary-sub">requires immediate action</span>
+                    </div>
+                    <div className="sc-inv-summary-tile sc-inv-summary--warn">
+                      <span className="sc-inv-summary-label">Low Stock</span>
+                      <span className="sc-inv-summary-value">{lowCount}</span>
+                      <span className="sc-inv-summary-sub">below safety stock</span>
+                    </div>
+                    <div className="sc-inv-summary-tile sc-inv-summary--info">
+                      <span className="sc-inv-summary-label">Delayed Inbound</span>
+                      <span className="sc-inv-summary-value">{delayedInboundCount}</span>
+                      <span className="sc-inv-summary-sub">shipments behind ETA</span>
+                    </div>
+                  </div>
+
+                  {/* AI Insight banner */}
+                  <div className="sc-inv-insight">
+                    <div className="sc-inv-insight-icon"><Sparkles size={14} /></div>
+                    <div className="sc-inv-insight-body">
+                      <p className="sc-inv-insight-line">{insightLine}</p>
+                      <p className="sc-inv-insight-rec"><strong>Recommended:</strong> {recommendation}</p>
+                    </div>
+                  </div>
+
+                  {/* Toolbar with toggle */}
+                  <div className="sc-inv-toolbar">
+                    <div className="sc-inv-toolbar-title">
+                      <Package size={14} />
+                      <span>{inventoryView === 'at-risk' ? 'SKUs Needing Attention' : 'All SKUs'}</span>
+                      <span className="sc-inv-count-badge">{filteredInventory.length}</span>
+                    </div>
+                    <div className="sc-inv-toggle">
+                      <button
+                        className={`sc-inv-toggle-btn ${inventoryView === 'at-risk' ? 'active' : ''}`}
+                        onClick={() => setInventoryView('at-risk')}
+                      >
+                        <AlertTriangle size={12} /> At Risk
+                      </button>
+                      <button
+                        className={`sc-inv-toggle-btn ${inventoryView === 'all' ? 'active' : ''}`}
+                        onClick={() => setInventoryView('all')}
+                      >
+                        <ListChecks size={12} /> All SKUs
+                      </button>
+                    </div>
+                  </div>
+
+                  {filteredInventory.length === 0 ? (
+                    <div className="sc-inv-empty">
+                      <CheckCircle2 size={20} />
+                      <p>All SKUs are healthy — no action required.</p>
+                    </div>
+                  ) : (
+                    <table className="sc-inv-table wow-table">
+                      <thead>
+                        <tr>
+                          <th>SKU</th>
+                          <th>Product</th>
+                          <th>Risk</th>
+                          <th>Status</th>
+                          <th>Qty</th>
+                          <th>Days of Supply</th>
+                          <th>ETA</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredInventory.map(item => (
+                          <tr key={item.sku} className={`sc-inv-row sc-inv--${item.status} sc-inv-row--${item.risk}`}>
+                            <td className="sc-inv-sku">{item.sku}</td>
+                            <td>{item.name}</td>
+                            <td>
+                              <span className={`sc-inv-risk sc-inv-risk--${item.risk}`}>
+                                {item.risk === 'critical' && <AlertCircle size={11} />}
+                                {item.risk === 'at-risk' && <AlertTriangle size={11} />}
+                                {item.risk === 'watch' && <Clock size={11} />}
+                                {item.risk === 'healthy' && <CheckCircle2 size={11} />}
+                                {RISK_LABELS[item.risk]}
+                              </span>
+                            </td>
+                            <td><span className={`sc-inv-status sc-inv-status--${item.status}`}>{item.status.replace('-', ' ')}</span></td>
+                            <td className="sc-inv-qty">{item.quantity}</td>
+                            <td className="sc-inv-dos">{item.daysOfSupply > 0 ? `${item.daysOfSupply}d` : '—'}</td>
+                            <td className="sc-inv-eta">{item.inboundEta || '—'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              );
+            })()}
+
+            {/* Benchmarking Tab — relative performance intelligence */}
+            {activeTab === 'benchmarking' && (() => {
+              const benchmarks = getBenchmarks();
+              const fmtDelta = (v: number, unit?: string) => (v >= 0 ? '+' : '') + (Math.abs(v) % 1 !== 0 ? v.toFixed(1) : v.toFixed(0)) + (unit && unit !== '/100' && unit !== '/5' ? unit : '');
+              const quartileLabel = (q: number) => q === 1 ? 'Top 25%' : q === 2 ? '2nd Quartile' : q === 3 ? '3rd Quartile' : 'Bottom 25%';
+
+              // Overall rank = average of metric ranks
+              const avgRank = Math.round(benchmarks.reduce((s, b) => s + b.rank, 0) / benchmarks.length);
+              const avgRankDelta = Math.round(benchmarks.reduce((s, b) => s + b.rankDelta, 0) / benchmarks.length);
+              const overallQuartile = avgRank <= Math.ceil(CLUSTER_SIZE * 0.25) ? 1
+                : avgRank <= Math.ceil(CLUSTER_SIZE * 0.5) ? 2
+                  : avgRank <= Math.ceil(CLUSTER_SIZE * 0.75) ? 3 : 4;
+
+              const sortedByRank = benchmarks.slice().sort((a, b) => a.rank - b.rank);
+              const topStrengths = sortedByRank.slice(0, 2);
+              const biggestGaps = sortedByRank.slice().reverse().slice(0, 2);
+
+              return (
+                <div className="sc-bench-tab">
+                  {/* Overall Summary */}
+                  <div className="sc-bench-summary">
+                    <div className="sc-bench-summary-rank">
+                      <span className="sc-bench-summary-label">Overall Cluster Rank</span>
+                      <div className="sc-bench-rank-hero">
+                        <span className="sc-bench-rank-num">#{avgRank}</span>
+                        <span className="sc-bench-rank-of">of {CLUSTER_SIZE}</span>
+                      </div>
+                      <div className="sc-bench-summary-meta">
+                        <span className={`sc-bench-quartile sc-bench-quartile--q${overallQuartile}`}>
+                          {overallQuartile === 1 && <Award size={11} />}
+                          {quartileLabel(overallQuartile)}
+                        </span>
+                        <span className={`sc-bench-rank-delta sc-bench-rank-delta--${avgRankDelta > 0 ? 'up' : avgRankDelta < 0 ? 'down' : 'flat'}`}>
+                          {avgRankDelta > 0 && <ArrowUpRight size={11} />}
+                          {avgRankDelta < 0 && <ArrowDownRight size={11} />}
+                          {avgRankDelta === 0 && <Minus size={11} />}
+                          {avgRankDelta > 0 ? `↑ ${avgRankDelta}` : avgRankDelta < 0 ? `↓ ${Math.abs(avgRankDelta)}` : 'No change'} vs last period
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="sc-bench-summary-pillars">
+                      <div className="sc-bench-pillar sc-bench-pillar--strengths">
+                        <div className="sc-bench-pillar-header">
+                          <Award size={13} />
+                          <span>Top Strengths</span>
+                        </div>
+                        <div className="sc-bench-pillar-list">
+                          {topStrengths.map(s => (
+                            <div key={s.metric} className="sc-bench-pillar-item">
+                              <span className="sc-bench-pillar-rank">#{s.rank}</span>
+                              <span className="sc-bench-pillar-metric">{s.metric}</span>
+                              <span className="sc-bench-pillar-q">{quartileLabel(s.quartile)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="sc-bench-pillar sc-bench-pillar--gaps">
+                        <div className="sc-bench-pillar-header">
+                          <AlertTriangle size={13} />
+                          <span>Biggest Gaps</span>
+                        </div>
+                        <div className="sc-bench-pillar-list">
+                          {biggestGaps.map(g => (
+                            <div key={g.metric} className="sc-bench-pillar-item">
+                              <span className="sc-bench-pillar-rank">#{g.rank}</span>
+                              <span className="sc-bench-pillar-metric">{g.metric}</span>
+                              <span className="sc-bench-pillar-q">{quartileLabel(g.quartile)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Distribution legend */}
+                  <div className="sc-bench-legend">
+                    <span className="sc-bench-legend-item"><span className="sc-legend-dot sc-legend-dot--store" />This Store</span>
+                    <span className="sc-bench-legend-item"><span className="sc-legend-tick sc-legend-tick--cluster" />Cluster Median</span>
+                    <span className="sc-bench-legend-item"><span className="sc-legend-tick sc-legend-tick--chain" />Chain Median</span>
+                    <span className="sc-bench-legend-item"><span className="sc-legend-range" />Cluster Range</span>
+                  </div>
+
+                  {/* Benchmark cards — rank-focused */}
+                  <div className="sc-bench-cards">
+                    {benchmarks.map(b => {
+                      // Distribution bar positions (0..100%)
+                      const range = Math.max(0.0001, b.clusterMax - b.clusterMin);
+                      const storePct = Math.max(0, Math.min(100, ((b.storeVal - b.clusterMin) / range) * 100));
+                      const clusterMedPct = Math.max(0, Math.min(100, ((b.clusterMedian - b.clusterMin) / range) * 100));
+                      const chainPct = Math.max(0, Math.min(100, ((b.chainAvg - b.clusterMin) / range) * 100));
+                      const ahead = b.vsCluster >= 0;
+                      const rankMoveDir = b.rankDelta > 0 ? 'up' : b.rankDelta < 0 ? 'down' : 'flat';
+
+                      return (
+                        <div key={b.metric} className={`sc-bench-card sc-bench-card--q${b.quartile}`}>
+                          <div className="sc-bench-card-header">
+                            <span className="sc-bench-metric">{b.metric}</span>
+                            <span className={`sc-bench-quartile sc-bench-quartile--q${b.quartile}`}>
+                              {b.quartile === 1 && <Award size={10} />}
+                              {quartileLabel(b.quartile)}
+                            </span>
+                          </div>
+
+                          {/* Rank hero */}
+                          <div className="sc-bench-rank-row">
+                            <div className="sc-bench-rank-block">
+                              <span className="sc-bench-rank-num-md">#{b.rank}</span>
+                              <span className="sc-bench-rank-of">of {b.rankTotal}</span>
+                            </div>
+                            <span className={`sc-bench-rank-delta sc-bench-rank-delta--${rankMoveDir}`}>
+                              {rankMoveDir === 'up' && <ArrowUpRight size={11} />}
+                              {rankMoveDir === 'down' && <ArrowDownRight size={11} />}
+                              {rankMoveDir === 'flat' && <Minus size={11} />}
+                              {b.rankDelta > 0 ? `↑ ${b.rankDelta}` : b.rankDelta < 0 ? `↓ ${Math.abs(b.rankDelta)}` : '—'}
+                            </span>
+                          </div>
+
+                          {/* Gap deltas (no absolute KPI duplication) */}
+                          <div className="sc-bench-gaps">
+                            <div className="sc-bench-gap-row">
+                              <span className="sc-bench-gap-label">Gap vs Cluster</span>
+                              <span className={`sc-bench-gap-pill ${ahead ? 'sc-comp-positive' : 'sc-comp-negative'}`}>
+                                {ahead ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />}
+                                {fmtDelta(b.vsCluster, b.unit)}
+                              </span>
+                            </div>
+                            <div className="sc-bench-gap-row">
+                              <span className="sc-bench-gap-label">Gap vs Chain</span>
+                              <span className={`sc-bench-gap-pill ${b.vsChain >= 0 ? 'sc-comp-positive' : 'sc-comp-negative'}`}>
+                                {b.vsChain >= 0 ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />}
+                                {fmtDelta(b.vsChain, b.unit)}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Distribution bar */}
+                          <div className="sc-bench-dist">
+                            <div className="sc-bench-dist-track">
+                              <div className="sc-bench-dist-range" />
+                              <div className="sc-bench-dist-tick sc-bench-dist-tick--chain" style={{ left: `${chainPct}%` }} title={`Chain Median: ${b.chainAvg}${b.unit}`} />
+                              <div className="sc-bench-dist-tick sc-bench-dist-tick--cluster" style={{ left: `${clusterMedPct}%` }} title={`Cluster Median: ${b.clusterMedian}${b.unit}`} />
+                              <div className={`sc-bench-dist-store sc-bench-dist-store--${ahead ? 'ahead' : 'behind'}`} style={{ left: `${storePct}%` }} />
+                            </div>
+                            <div className="sc-bench-dist-axis">
+                              <span>{b.clusterMin}{b.unit}</span>
+                              <span>{b.clusterMax}{b.unit}</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
+
           </div>
         </div>
       </div>
