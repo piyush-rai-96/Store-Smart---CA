@@ -130,7 +130,7 @@ const generateMockInsights = (): EnhancedInsightItem[] => [
     actionCta: 'Review SKUs at Risk',
     isHero: true,
     impactDetail: 'Potential $24K revenue loss if unresolved',
-    topStore: 'Store #1847 most critical',
+    topStore: 'Store #1234 most critical',
     overdueCount: 2,
   },
   {
@@ -643,31 +643,31 @@ export const StoreOpsHome: React.FC = () => {
 
   // Mock data for modals — aligned with StoreCenter broadcastActions bc-001 store breakdown
   const impactedStores = [
-    { id: '1234', name: 'Oak Street #1234', address: '88 Oak Street, East Region', status: 'critical', unitCount: 24, manager: 'Dan Kim', phone: '(615) 555-0123' },
-    { id: '5678', name: 'Pine Grove #5678', address: '220 Pine Grove Blvd, South Bay', status: 'warning', unitCount: 12, manager: 'Rachel Torres', phone: '(901) 555-0456' },
-    { id: '9012', name: 'Maple Heights #9012', address: '45 Maple Heights Dr, East Region', status: 'warning', unitCount: 18, manager: 'Kevin Patel', phone: '(865) 555-0789' },
+    { id: '1234', name: 'Franklin Town Center #1234', address: '88 Main Street, Franklin TN', status: 'critical', unitCount: 24, manager: 'Dan Kim', phone: '(615) 555-0123' },
+    { id: '5678', name: 'Clarksville Crossing #5678', address: '220 Riverside Dr, Clarksville TN', status: 'warning', unitCount: 12, manager: 'Rachel Torres', phone: '(931) 555-0456' },
+    { id: '9012', name: 'Johnson City Mall #9012', address: '45 State of Franklin Rd, Johnson City TN', status: 'warning', unitCount: 18, manager: 'Kevin Patel', phone: '(423) 555-0789' },
   ];
 
   const atRiskSkus = [
-    // Cedar Valley #1847 — 5 SKUs
-    { sku: 'SKU-12345', name: 'Premium Coffee Blend 12oz', currentStock: 2, safetyStock: 15, reorderQty: 50, supplier: 'Coffee Co.', leadTime: '3 days', store: 'Cedar Valley #1847' },
-    { sku: 'SKU-23456', name: 'Organic Milk 1 Gallon', currentStock: 5, safetyStock: 20, reorderQty: 40, supplier: 'Dairy Fresh', leadTime: '1 day', store: 'Cedar Valley #1847' },
-    { sku: 'SKU-11001', name: 'Almond Butter 16oz', currentStock: 1, safetyStock: 10, reorderQty: 25, supplier: 'NutHouse', leadTime: '4 days', store: 'Cedar Valley #1847' },
-    { sku: 'SKU-11002', name: 'Sparkling Water 12pk', currentStock: 6, safetyStock: 30, reorderQty: 80, supplier: 'AquaPure', leadTime: '2 days', store: 'Cedar Valley #1847' },
-    { sku: 'SKU-11003', name: 'Baby Spinach 5oz', currentStock: 3, safetyStock: 18, reorderQty: 35, supplier: 'GreenLeaf', leadTime: '1 day', store: 'Cedar Valley #1847' },
-    // Pine Grove #5678 — 4 SKUs
-    { sku: 'SKU-34567', name: 'Whole Wheat Bread', currentStock: 3, safetyStock: 12, reorderQty: 30, supplier: 'Baker Bros', leadTime: '2 days', store: 'Pine Grove #5678' },
-    { sku: 'SKU-45678', name: 'Free Range Eggs 12ct', currentStock: 8, safetyStock: 25, reorderQty: 60, supplier: 'Farm Direct', leadTime: '2 days', store: 'Pine Grove #5678' },
-    { sku: 'SKU-22001', name: 'Oat Milk 64oz', currentStock: 2, safetyStock: 14, reorderQty: 35, supplier: 'Dairy Fresh', leadTime: '1 day', store: 'Pine Grove #5678' },
-    { sku: 'SKU-22002', name: 'Avocado Oil 500ml', currentStock: 4, safetyStock: 16, reorderQty: 20, supplier: 'OliveTree', leadTime: '5 days', store: 'Pine Grove #5678' },
-    // Maple Heights #9012 — 3 SKUs
-    { sku: 'SKU-56789', name: 'Greek Yogurt 32oz', currentStock: 4, safetyStock: 18, reorderQty: 45, supplier: 'Dairy Fresh', leadTime: '1 day', store: 'Maple Heights #9012' },
-    { sku: 'SKU-33001', name: 'Protein Bar Variety 12pk', currentStock: 1, safetyStock: 12, reorderQty: 30, supplier: 'FitFoods', leadTime: '3 days', store: 'Maple Heights #9012' },
-    { sku: 'SKU-33002', name: 'Cold Brew Coffee 32oz', currentStock: 3, safetyStock: 15, reorderQty: 40, supplier: 'Coffee Co.', leadTime: '3 days', store: 'Maple Heights #9012' },
+    // Franklin Town Center #1234 — 5 SKUs
+    { sku: 'SKU-12345', name: 'Premium Coffee Blend 12oz', currentStock: 2, safetyStock: 15, reorderQty: 50, supplier: 'Coffee Co.', leadTime: '3 days', store: 'Franklin Town Center #1234' },
+    { sku: 'SKU-23456', name: 'Organic Milk 1 Gallon', currentStock: 5, safetyStock: 20, reorderQty: 40, supplier: 'Dairy Fresh', leadTime: '1 day', store: 'Franklin Town Center #1234' },
+    { sku: 'SKU-11001', name: 'Almond Butter 16oz', currentStock: 1, safetyStock: 10, reorderQty: 25, supplier: 'NutHouse', leadTime: '4 days', store: 'Franklin Town Center #1234' },
+    { sku: 'SKU-11002', name: 'Sparkling Water 12pk', currentStock: 6, safetyStock: 30, reorderQty: 80, supplier: 'AquaPure', leadTime: '2 days', store: 'Franklin Town Center #1234' },
+    { sku: 'SKU-11003', name: 'Baby Spinach 5oz', currentStock: 3, safetyStock: 18, reorderQty: 35, supplier: 'GreenLeaf', leadTime: '1 day', store: 'Franklin Town Center #1234' },
+    // Clarksville Crossing #5678 — 4 SKUs
+    { sku: 'SKU-34567', name: 'Whole Wheat Bread', currentStock: 3, safetyStock: 12, reorderQty: 30, supplier: 'Baker Bros', leadTime: '2 days', store: 'Clarksville Crossing #5678' },
+    { sku: 'SKU-45678', name: 'Free Range Eggs 12ct', currentStock: 8, safetyStock: 25, reorderQty: 60, supplier: 'Farm Direct', leadTime: '2 days', store: 'Clarksville Crossing #5678' },
+    { sku: 'SKU-22001', name: 'Oat Milk 64oz', currentStock: 2, safetyStock: 14, reorderQty: 35, supplier: 'Dairy Fresh', leadTime: '1 day', store: 'Clarksville Crossing #5678' },
+    { sku: 'SKU-22002', name: 'Avocado Oil 500ml', currentStock: 4, safetyStock: 16, reorderQty: 20, supplier: 'OliveTree', leadTime: '5 days', store: 'Clarksville Crossing #5678' },
+    // Johnson City Mall #9012 — 3 SKUs
+    { sku: 'SKU-56789', name: 'Greek Yogurt 32oz', currentStock: 4, safetyStock: 18, reorderQty: 45, supplier: 'Dairy Fresh', leadTime: '1 day', store: 'Johnson City Mall #9012' },
+    { sku: 'SKU-33001', name: 'Protein Bar Variety 12pk', currentStock: 1, safetyStock: 12, reorderQty: 30, supplier: 'FitFoods', leadTime: '3 days', store: 'Johnson City Mall #9012' },
+    { sku: 'SKU-33002', name: 'Cold Brew Coffee 32oz', currentStock: 3, safetyStock: 15, reorderQty: 40, supplier: 'Coffee Co.', leadTime: '3 days', store: 'Johnson City Mall #9012' },
   ];
 
   const teamMembers = [
-    { id: '1', name: 'Sarah Johnson', role: 'Store Manager', store: 'Store #1847', avatar: 'SJ' },
+    { id: '1', name: 'Sarah Johnson', role: 'Store Manager', store: 'Store #1234', avatar: 'SJ' },
     { id: '2', name: 'Mike Chen', role: 'Assistant Manager', store: 'Store #2341', avatar: 'MC' },
     { id: '3', name: 'Lisa Park', role: 'Store Manager', store: 'Store #3892', avatar: 'LP' },
     { id: '4', name: 'James Wilson', role: 'District Supervisor', store: 'District 14', avatar: 'JW' },
@@ -966,9 +966,9 @@ export const StoreOpsHome: React.FC = () => {
             description: 'Mentions up +34% over last 2 weeks. Correlates with declining SEA Cleanliness scores and negative sales trajectory.',
             impactSummary: '3 stores affected · NPS impact risk',
             stores: [
-              { id: '2041', name: 'Hamburg South #2041', status: 'warning', detail: '+22% mentions · SEA Cleanliness score dropped 8pts', manager: 'Anna Becker' },
-              { id: '2034', name: 'Cologne East #2034', status: 'warning', detail: '+18% mentions · 2 failed cleanliness audits', manager: 'Thomas Richter' },
-              { id: '2038', name: 'Brussels Nord #2038', status: 'info', detail: '+12% mentions · Cleaning hours reduced last month', manager: 'Marie Laurent' },
+              { id: '4532', name: 'Murfreesboro Plaza #4532', status: 'warning', detail: '+22% mentions · SEA Cleanliness score dropped 8pts', manager: 'Marcus Hill' },
+              { id: '2198', name: 'Chattanooga Riverside #2198', status: 'warning', detail: '+18% mentions · 2 failed cleanliness audits', manager: 'Brandon Cole' },
+              { id: '3421', name: 'Knoxville East #3421', status: 'info', detail: '+12% mentions · Cleaning hours reduced last month', manager: 'Megan Davis' },
             ],
             ctas: [
               { label: 'Open in AI Copilot', icon: 'sparkles', action: 'copilot', kind: 'navigate' as const },
@@ -988,9 +988,9 @@ export const StoreOpsHome: React.FC = () => {
             description: '12 SKUs below safety stock — immediate reorder needed. Potential $24K revenue loss if unresolved.',
             impactSummary: '3 stores impacted · 2 overdue actions · $24K at risk',
             stores: [
-              { id: '1847', name: 'Cedar Valley #1847', status: 'critical', detail: '5 SKUs below safety stock', manager: 'Sarah Johnson' },
-              { id: '5678', name: 'Pine Grove #5678', status: 'warning', detail: '4 SKUs below safety stock', manager: 'Rachel Torres' },
-              { id: '9012', name: 'Maple Heights #9012', status: 'warning', detail: '3 SKUs below safety stock', manager: 'Kevin Patel' },
+              { id: '1234', name: 'Franklin Town Center #1234', status: 'critical', detail: '5 SKUs below safety stock', manager: 'Sarah Johnson' },
+              { id: '5678', name: 'Clarksville Crossing #5678', status: 'warning', detail: '4 SKUs below safety stock', manager: 'Rachel Torres' },
+              { id: '9012', name: 'Johnson City Mall #9012', status: 'warning', detail: '3 SKUs below safety stock', manager: 'Kevin Patel' },
             ],
             ctas: [
               { label: 'Open in Operations Queue', icon: 'zap', action: 'operations', kind: 'navigate' as const },
@@ -1006,10 +1006,23 @@ export const StoreOpsHome: React.FC = () => {
   const handlePanelAction = (action: string) => {
     const parentTitle = detailPanel?.type === 'alert' ? detailPanel.data.title : '';
     switch (action) {
-      case 'operations':
+      case 'operations': {
+        const alertData = detailPanel?.type === 'alert' ? detailPanel.data : null;
         closeDetailPanel();
-        navigate('/store-operations');
+        navigate('/command-center/operations-queue', {
+          state: alertData ? {
+            prefillFromAlert: {
+              alertId: alertData.id,
+              title: alertData.title,
+              description: alertData.description,
+              severity: alertData.severity,
+              source: alertData.source,
+              stores: (alertData.stores || []).map(s => ({ name: s.name, manager: s.manager, detail: s.detail })),
+            },
+          } : undefined,
+        });
         break;
+      }
       case 'assign':
         setPanelSubView({ view: 'assign-task', parentTitle });
         break;
@@ -1138,11 +1151,6 @@ export const StoreOpsHome: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="ai-brief-meta">
-            <span>Today, {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
-            <span className="meta-separator">•</span>
-            <span>5 data streams analysed</span>
-          </div>
         </div>
         <div className="ai-brief-body-wrapper">
           <div className={`ai-brief-body ${isBriefCollapsed ? 'collapsed' : ''}`}>
@@ -1154,7 +1162,7 @@ export const StoreOpsHome: React.FC = () => {
               <div className="ai-brief-section">
                 <h3 className="ai-brief-section-title"><TrendingUp size={14} /> Sales &amp; Margin</h3>
                 <ul className="ai-brief-bullets">
-                  <li>District weekly revenue came in at <strong>$2.4M</strong>, <strong>+8% vs target</strong> and +5% WoW. 6 of 8 stores exceeded plan — Amsterdam Central and Hamburg South are leading contributors.</li>
+                  <li>District weekly revenue came in at <strong>$2.4M</strong>, <strong>+8% vs target</strong> and +5% WoW. 6 of 8 stores exceeded plan — Nashville Flagship and Memphis Central are leading contributors.</li>
                   <li>Gross margin held steady at <strong>34.2%</strong> (+0.3pp vs last week). Markdown optimization on seasonal clearance items contributed an estimated <strong>$18K margin recovery</strong> this period.</li>
                   <li>Average basket size increased to <strong>$47.20</strong> (+3.1%), likely driven by the new cross-sell POG rollout in personal care aisles. <em>Consider expanding this to remaining 3 stores.</em></li>
                 </ul>
@@ -1163,18 +1171,18 @@ export const StoreOpsHome: React.FC = () => {
               <div className="ai-brief-section">
                 <h3 className="ai-brief-section-title"><BarChart3 size={14} /> District Performance Index</h3>
                 <ul className="ai-brief-bullets">
-                  <li>DPI moved from <strong>76 → 78</strong> (+2pts MoM), placing the district in the <strong>top 10% — Excellence Tier</strong>. This is the highest score in 6 months.</li>
+                  <li>DPI moved from <strong>80 → 82</strong> (+2pts MoM), placing the district in the <strong>top 10% — Excellence Tier</strong>. This is the highest score in 6 months.</li>
                   <li>The uplift is causally linked to improved SEA compliance scores (+6pts avg across stores) and a reduction in overdue task backlog (down 40% from last month).</li>
-                  <li>Amsterdam Central leads at <strong>91 DPI</strong>. Cologne East is the laggard at 68, primarily due to supply chain disruptions dragging down in-stock scores.</li>
+                  <li>Nashville Flagship leads at <strong>91 DPI</strong>. Murfreesboro Plaza is the laggard at 68, primarily due to supply chain disruptions dragging down in-stock scores.</li>
                 </ul>
               </div>
 
               <div className="ai-brief-section">
                 <h3 className="ai-brief-section-title"><CheckCircle2 size={14} /> Operational Highlights</h3>
                 <ul className="ai-brief-bullets">
-                  <li><strong>Compliance:</strong> All audits completed — district-wide POG adherence at <strong>97%</strong> (up from 94%). Brussels Nord hit 100% Camera Shelf Audit compliance for the 3rd straight week.</li>
+                  <li><strong>Compliance:</strong> All audits completed — district-wide POG adherence at <strong>97%</strong> (up from 94%). Franklin Town Center hit 100% Camera Shelf Audit compliance for the 3rd straight week.</li>
                   <li><strong>Task Execution:</strong> 87% on-time completion rate. 2 critical overdue items remain and are escalated in your Action Queue.</li>
-                  <li><strong>Staffing:</strong> No open shifts this week. Hamburg South resolved last week's coverage gap by cross-training 2 associates from adjacent departments.</li>
+                  <li><strong>Staffing:</strong> No open shifts this week. Memphis Central resolved last week's coverage gap by cross-training 2 associates from adjacent departments.</li>
                 </ul>
               </div>
 
@@ -1189,14 +1197,14 @@ export const StoreOpsHome: React.FC = () => {
               <div className="ai-brief-section ai-brief-suggestions">
                 <h3 className="ai-brief-section-title"><Sparkles size={14} /> Suggestions</h3>
                 <ul className="ai-brief-bullets">
-                  <li>Amsterdam Central's execution playbook could be a template for underperforming stores — consider scheduling a best-practices share session.</li>
-                  <li>Cross-sell POG in personal care is showing strong lift. <em>Recommend rolling it out to Brussels Nord and Cologne East next week.</em></li>
+                  <li>Nashville Flagship's execution playbook could be a template for underperforming stores — consider scheduling a best-practices share session.</li>
+                  <li>Cross-sell POG in personal care is showing strong lift. <em>Recommend rolling it out to Franklin Town Center and Murfreesboro Plaza next week.</em></li>
                   <li>The "Messy Aisles" VoC trend correlates with stores that reduced cleaning staff hours last month. Restoring 2 hours/day at affected locations could reverse the trend.</li>
                 </ul>
               </div>
 
               <p className="ai-brief-closing">
-                Overall, the district is in a strong position. Primary attention areas: resolve the Cologne East supply chain issue and address the rising "Messy Aisles" customer concern before it impacts NPS trajectory.
+                Overall, the district is in a strong position. Primary attention areas: resolve the Murfreesboro Plaza supply chain issue and address the rising "Messy Aisles" customer concern before it impacts NPS trajectory.
               </p>
             </div>
           </div>
@@ -1254,7 +1262,7 @@ export const StoreOpsHome: React.FC = () => {
                   </div>
                   <div className="hero-top-store">
                     <Store size={12} />
-                    <span>Store #1847 most critical</span>
+                    <span>Store #1234 most critical</span>
                   </div>
                   <div className="hero-actions">
                     <button className="hero-action-primary" onClick={() => openAlertPanel('product-recall')}>
@@ -1282,7 +1290,7 @@ export const StoreOpsHome: React.FC = () => {
                   <p className="hero-context">Mentions up +34% over last 2 weeks across 3 stores. Correlates with declining SEA Cleanliness scores and negative sales trajectory.</p>
                   <div className="hero-impact">
                     <Store size={14} />
-                    <span>Hamburg South #2041 (+22%) · Cologne East #2034 (+18%) · Brussels Nord #2038 (+12%)</span>
+                    <span>Murfreesboro Plaza #4532 (+22%) · Chattanooga Riverside #2198 (+18%) · Knoxville East #3421 (+12%)</span>
                   </div>
                   <div className="hero-top-store">
                     <Sparkles size={12} />
@@ -1599,7 +1607,7 @@ export const StoreOpsHome: React.FC = () => {
                 <div className="ai-brief-section">
                   <h3 className="ai-brief-section-title"><TrendingUp size={14} /> Sales &amp; Margin</h3>
                   <ul className="ai-brief-bullets">
-                    <li>District weekly revenue came in at <strong>$2.4M</strong>, <strong>+8% vs target</strong> and +5% WoW. 6 of 8 stores exceeded plan — Amsterdam Central and Hamburg South are leading contributors.</li>
+                    <li>District weekly revenue came in at <strong>$2.4M</strong>, <strong>+8% vs target</strong> and +5% WoW. 6 of 8 stores exceeded plan — Nashville Flagship and Memphis Central are leading contributors.</li>
                     <li>Gross margin held steady at <strong>34.2%</strong> (+0.3pp vs last week). Markdown optimization on seasonal clearance items contributed an estimated <strong>$18K margin recovery</strong> this period.</li>
                     <li>Average basket size increased to <strong>$47.20</strong> (+3.1%), likely driven by the new cross-sell POG rollout in personal care aisles. <em>Consider expanding this to remaining 3 stores.</em></li>
                   </ul>
@@ -1608,18 +1616,18 @@ export const StoreOpsHome: React.FC = () => {
                 <div className="ai-brief-section">
                   <h3 className="ai-brief-section-title"><BarChart3 size={14} /> District Performance Index</h3>
                   <ul className="ai-brief-bullets">
-                    <li>DPI moved from <strong>76 → 78</strong> (+2pts MoM), placing the district in the <strong>top 10% — Excellence Tier</strong>. This is the highest score in 6 months.</li>
+                    <li>DPI moved from <strong>80 → 82</strong> (+2pts MoM), placing the district in the <strong>top 10% — Excellence Tier</strong>. This is the highest score in 6 months.</li>
                     <li>The uplift is causally linked to improved SEA compliance scores (+6pts avg across stores) and a reduction in overdue task backlog (down 40% from last month).</li>
-                    <li>Amsterdam Central leads at <strong>91 DPI</strong>. Cologne East is the laggard at 68, primarily due to supply chain disruptions dragging down in-stock scores.</li>
+                    <li>Nashville Flagship leads at <strong>91 DPI</strong>. Murfreesboro Plaza is the laggard at 68, primarily due to supply chain disruptions dragging down in-stock scores.</li>
                   </ul>
                 </div>
 
                 <div className="ai-brief-section">
                   <h3 className="ai-brief-section-title"><CheckCircle2 size={14} /> Operational Highlights</h3>
                   <ul className="ai-brief-bullets">
-                    <li><strong>Compliance:</strong> All audits completed — district-wide POG adherence at <strong>97%</strong> (up from 94%). Brussels Nord hit 100% Camera Shelf Audit compliance for the 3rd straight week.</li>
+                    <li><strong>Compliance:</strong> All audits completed — district-wide POG adherence at <strong>97%</strong> (up from 94%). Franklin Town Center hit 100% Camera Shelf Audit compliance for the 3rd straight week.</li>
                     <li><strong>Task Execution:</strong> 87% on-time completion rate. 2 critical overdue items remain and are escalated in your Action Queue.</li>
-                    <li><strong>Staffing:</strong> No open shifts this week. Hamburg South resolved last week's coverage gap by cross-training 2 associates from adjacent departments.</li>
+                    <li><strong>Staffing:</strong> No open shifts this week. Memphis Central resolved last week's coverage gap by cross-training 2 associates from adjacent departments.</li>
                   </ul>
                 </div>
 
@@ -1634,14 +1642,14 @@ export const StoreOpsHome: React.FC = () => {
                 <div className="ai-brief-section ai-brief-suggestions">
                   <h3 className="ai-brief-section-title"><Sparkles size={14} /> Suggestions</h3>
                   <ul className="ai-brief-bullets">
-                    <li>Amsterdam Central's execution playbook could be a template for underperforming stores — consider scheduling a best-practices share session.</li>
-                    <li>Cross-sell POG in personal care is showing strong lift. <em>Recommend rolling it out to Brussels Nord and Cologne East next week.</em></li>
+                    <li>Nashville Flagship's execution playbook could be a template for underperforming stores — consider scheduling a best-practices share session.</li>
+                    <li>Cross-sell POG in personal care is showing strong lift. <em>Recommend rolling it out to Franklin Town Center and Murfreesboro Plaza next week.</em></li>
                     <li>The "Messy Aisles" VoC trend correlates with stores that reduced cleaning staff hours last month. Restoring 2 hours/day at affected locations could reverse the trend.</li>
                   </ul>
                 </div>
 
                 <p className="ai-brief-closing">
-                  Overall, the district is in a strong position. Primary attention areas: resolve the Cologne East supply chain issue and address the rising "Messy Aisles" customer concern before it impacts NPS trajectory.
+                  Overall, the district is in a strong position. Primary attention areas: resolve the Murfreesboro Plaza supply chain issue and address the rising "Messy Aisles" customer concern before it impacts NPS trajectory.
                 </p>
               </div>
             </div>
@@ -3127,7 +3135,7 @@ export const StoreOpsHome: React.FC = () => {
                           )}
                           {store.manager && (
                             <button className="dp-store-assign-btn" onClick={() => {
-                              showToast(`Task assigned to ${store.manager} (${store.name})`);
+                              showToast(`✓ Added to Operations Queue — assigned to ${store.manager} (${store.name})`);
                             }}>
                               <UserPlus size={11} />
                               Assign to Manager

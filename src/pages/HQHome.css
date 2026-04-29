@@ -1241,7 +1241,18 @@
   transform: translateY(-1px);
 }
 
-/* ──── FULL-WIDTH SECTION (District Leaderboard) ──── */
+/* ──── FULL-WIDTH SECTION ──── */
+/* Right-side drawer slide-in for District Leaderboard detail */
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+.hq-district-table tr.hq-row-clickable:hover {
+  background: #f8fafc;
+}
+
+/* ─── District Leaderboard ─── */
 .hq-full-section {
   padding: 0 28px;
   margin-top: 20px;

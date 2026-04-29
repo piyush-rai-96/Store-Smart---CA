@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
-  ShieldCheck,
   TrendingUp,
   TrendingDown,
+  Minus,
   AlertTriangle,
   ChevronRight,
   ChevronDown,
@@ -13,48 +13,31 @@ import {
   Calendar,
   BarChart3,
   Clock,
-  Radio,
-  Eye,
-  Target,
-  Minus,
-  MessageSquare,
-  Send,
-  X,
-  Filter,
-  Store,
-  ThumbsUp,
   Bell,
-  Check,
+  Store,
   Users,
-  ShoppingCart,
-  Zap,
   Star,
+  Zap,
+  X,
+  Send,
+  Filter,
+  Megaphone,
+  MessageSquare,
+  Check,
+  Globe,
+  Moon,
+  Activity,
+  ClipboardCheck,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+// Reuse DM Home styles to mirror the same layout/components on HQ Home
+import './StoreOpsHome.css';
 import './HQHome.css';
+// Reuse Broadcast Analytics + Create Broadcast Wizard styles from District Intelligence
+import './DistrictIntelligence.css';
 
 // ─── Types ───
-interface KPICard {
-  id: string;
-  label: string;
-  value: string;
-  delta: string;
-  deltaType: 'positive' | 'negative' | 'neutral';
-  trend: 'up' | 'down' | 'flat';
-  navigateTo: string;
-}
-
-interface PriorityAction {
-  id: string;
-  title: string;
-  impact: string;
-  sla: string;
-  slaOverdue: boolean;
-  riskContext: string;
-  severity: 'critical' | 'high' | 'medium';
-}
-
 interface DistrictRow {
   id: string;
   name: string;
@@ -73,72 +56,11 @@ interface BroadcastItem {
   type: 'critical' | 'info';
   category: string;
   sender: string;
-  acknowledged: number;
-  totalStores: number;
   timeSent: string;
-  storesAffected: number;
   isRead: boolean;
 }
 
 // ─── Mock Data ───
-const MOCK_KPIS: KPICard[] = [
-  { id: 'exec-compliance', label: 'Execution Compliance', value: '87.2%', delta: '+2.4%', deltaType: 'positive', trend: 'up', navigateTo: '/store-operations/district-intelligence' },
-  { id: 'critical-issues', label: 'Critical Issues', value: '14', delta: '+3', deltaType: 'negative', trend: 'up', navigateTo: '/command-center/operations-queue' },
-  { id: 'broadcast-reach', label: 'Broadcast Reach', value: '94.1%', delta: '+1.8%', deltaType: 'positive', trend: 'up', navigateTo: '/command-center/communications' },
-  { id: 'pog-compliance', label: 'Planogram Compliance', value: '91.6%', delta: '-0.7%', deltaType: 'negative', trend: 'down', navigateTo: '/planogram/master-pog' },
-  { id: 'dpi', label: 'District Perf. Index', value: '78', delta: '+2 pts', deltaType: 'positive', trend: 'up', navigateTo: '/store-operations/district-intelligence' },
-];
-
-const MOCK_PRIORITY_ACTIONS: PriorityAction[] = [
-  { id: 'pa1', title: 'Approve Planogram Reset — Women\'s Wall', impact: '12 stores affected', sla: '3h overdue', slaOverdue: true, riskContext: 'Blocking execution in 3 stores', severity: 'critical' },
-  { id: 'pa2', title: 'Review Safety Audit Exceptions — District 14', impact: '4 stores flagged', sla: '6h remaining', slaOverdue: false, riskContext: 'Compliance deadline approaching', severity: 'high' },
-  { id: 'pa3', title: 'Approve Inventory Rebalance — Southeast Region', impact: '8 stores affected', sla: '12h remaining', slaOverdue: false, riskContext: '$42K inventory exposure', severity: 'medium' },
-];
-
-const ACTION_MODAL_ITEMS: Record<string, { subtitle: string; selectLabel: string; ctaLabel: string; items: { id: string; code: string; name: string; supplier: string; severity: 'critical' | 'high' | 'medium'; progress: number; progressMax: number; units: string }[] }> = {
-  pa1: {
-    subtitle: 'SS26 Floor Reset · 3 stores waiting',
-    selectLabel: 'Select stores to approve',
-    ctaLabel: 'Approve',
-    items: [
-      { id: 's1', code: 'Store #5678', name: 'Women\'s Wall — Section A', supplier: 'District 14', severity: 'critical', progress: 3, progressMax: 15, units: 'Approve' },
-      { id: 's2', code: 'Store #4321', name: 'Women\'s Wall — Section B', supplier: 'District 14', severity: 'critical', progress: 5, progressMax: 20, units: 'Approve' },
-      { id: 's3', code: 'Store #8765', name: 'Women\'s Wall — End Cap', supplier: 'District 08', severity: 'high', progress: 8, progressMax: 25, units: 'Approve' },
-    ],
-  },
-  pa2: {
-    subtitle: 'District 14 · 4 stores flagged',
-    selectLabel: 'Select audit exceptions to review',
-    ctaLabel: 'Clear Exceptions',
-    items: [
-      { id: 'a1', code: 'AUD-2241', name: 'Fire exit signage missing', supplier: 'Store #5678', severity: 'critical', progress: 0, progressMax: 1, units: 'Flag' },
-      { id: 'a2', code: 'AUD-2242', name: 'Expired product on shelf', supplier: 'Store #4321', severity: 'critical', progress: 0, progressMax: 1, units: 'Flag' },
-      { id: 'a3', code: 'AUD-2243', name: 'Temperature log gap (4h)', supplier: 'Store #8765', severity: 'high', progress: 0, progressMax: 1, units: 'Flag' },
-      { id: 'a4', code: 'AUD-2244', name: 'Cleaning schedule incomplete', supplier: 'Store #9012', severity: 'high', progress: 0, progressMax: 1, units: 'Flag' },
-    ],
-  },
-  pa3: {
-    subtitle: 'Southeast Region · $42K exposure',
-    selectLabel: 'Select SKUs to rebalance',
-    ctaLabel: 'Rebalance',
-    items: [
-      { id: 'i1', code: 'SKU-7823', name: 'Organic Milk 1L', supplier: 'DairyFresh Co.', severity: 'critical', progress: 3, progressMax: 15, units: '+50 units' },
-      { id: 'i2', code: 'SKU-4521', name: 'Whole Wheat Bread', supplier: 'BakeryPlus', severity: 'critical', progress: 5, progressMax: 20, units: '+40 units' },
-      { id: 'i3', code: 'SKU-9012', name: 'Free Range Eggs (12pk)', supplier: 'FarmFresh', severity: 'high', progress: 8, progressMax: 25, units: '+60 units' },
-      { id: 'i4', code: 'SKU-3345', name: 'Greek Yogurt 500g', supplier: 'DairyFresh Co.', severity: 'high', progress: 12, progressMax: 30, units: '+45 units' },
-      { id: 'i5', code: 'SKU-6678', name: 'Orange Juice 2L', supplier: 'CitrusBest', severity: 'critical', progress: 6, progressMax: 18, units: '+36 units' },
-    ],
-  },
-};
-
-const MSG_CONTACTS = [
-  { id: 'c1', name: 'Sarah Johnson', role: 'Store Manager', initials: 'SJ', lastMsg: 'Got it! I\'ll review and c...', time: '3:08 PM' },
-  { id: 'c2', name: 'Mike Chen', role: 'Assistant Manager', initials: 'MC', lastMsg: 'Already on it. Will send ...', time: '2:04 PM' },
-  { id: 'c3', name: 'Lisa Park', role: 'Store Manager', initials: 'LP', lastMsg: '', time: '' },
-  { id: 'c4', name: 'James Wilson', role: 'District Supervisor', initials: 'JW', lastMsg: '', time: '' },
-  { id: 'c5', name: 'Emily Davis', role: 'Inventory Specialist', initials: 'ED', lastMsg: '', time: '' },
-];
-
 const MOCK_DISTRICTS: DistrictRow[] = [
   { id: 'd14', name: 'District 14 — Tennessee', dpi: 82, compliance: 91, riskLevel: 'low', trend: 'up', dm: 'John Doe', dmEmail: 'john.doe.dm@impactanalytics.co' },
   { id: 'd08', name: 'District 08 — Georgia', dpi: 76, compliance: 87, riskLevel: 'medium', trend: 'up', dm: 'Sarah Kim', dmEmail: 'sarah.kim@impactanalytics.co' },
@@ -147,83 +69,81 @@ const MOCK_DISTRICTS: DistrictRow[] = [
   { id: 'd19', name: 'District 19 — Alabama', dpi: 73, compliance: 85, riskLevel: 'medium', trend: 'flat', dm: 'David Park', dmEmail: 'david.park@impactanalytics.co' },
 ];
 
+// HQ Broadcast tracking — overview KPIs + effectiveness list of HQ broadcasts to track
+interface HQBroadcastTrackRow {
+  id: string;
+  name: string;
+  priority: 'high' | 'medium' | 'low';
+  ackRate: number;
+  avgAckTime: string;
+  status: 'good' | 'at-risk';
+  type: 'Action Required' | 'Informational';
+  sentAt: string;
+  districts: number;
+  ackedDistricts: number;
+}
+const HQ_BROADCAST_OVERVIEW = {
+  active: 4,
+  sentThisWeek: 7,
+  ackPct: 81,
+  avgAckTime: '4h 48m',
+  trendVsLast: -7,
+};
+interface HQDistrictComplianceRow { district: string; districtId: string; ackRate: number; avgTime: string; tier: 'top' | 'at-risk' | 'defaulter'; missedCount: number }
+interface HQBroadcastInsight { pattern: string; recommendation: string }
+// Network-level district compliance baseline (sorted high → low ack rate)
+const HQ_DISTRICT_COMPLIANCE_BASE: HQDistrictComplianceRow[] = [
+  { district: 'District 14 — Tennessee', districtId: 'd14', ackRate: 98, avgTime: '52m',  tier: 'top',       missedCount: 0 },
+  { district: 'District 08 — Georgia',   districtId: 'd08', ackRate: 92, avgTime: '1h 18m', tier: 'top',     missedCount: 1 },
+  { district: 'District 19 — Alabama',   districtId: 'd19', ackRate: 84, avgTime: '2h 30m', tier: 'at-risk', missedCount: 2 },
+  { district: 'District 22 — Carolina',  districtId: 'd22', ackRate: 72, avgTime: '3h 45m', tier: 'at-risk', missedCount: 4 },
+  { district: 'District 11 — Florida',   districtId: 'd11', ackRate: 60, avgTime: '5h 20m', tier: 'defaulter', missedCount: 6 },
+];
+const HQ_BROADCAST_INSIGHTS: HQBroadcastInsight[] = [
+  { pattern: 'Safety and compliance broadcasts achieve 95%+ ack within 2 hours network-wide — significantly faster than informational ones (avg 5h).', recommendation: 'Tag operational broadcasts as "Action Required" to leverage the urgency pattern and improve ack rates.' },
+  { pattern: 'Districts 11 and 22 are repeat defaulters — combined 10 missed acknowledgements over the last 14 days, correlating with their lower DPI.', recommendation: 'Schedule a focused engagement review with DMs of Districts 11 and 22; consider linking ack-rate to district scorecard.' },
+];
+
+// HQ Alert right-side detail panel data shape (mirrors AlertPanelData on DM Home)
+interface HQAlertEntity { id: string; name: string; status: 'critical' | 'warning' | 'info'; detail: string; manager?: string }
+interface HQAlertCTA { label: string; action: 'district-intel' | 'ai-copilot' | 'communications' | 'message-dm' | 'share-best-practice' | 'scroll-bca' | 'send-reminder' }
+interface HQAlertItem {
+  id: string;
+  severity: 'critical' | 'warning' | 'risk' | 'success';
+  signalLabel: string;
+  title: string;
+  description: string;
+  impactSummary: string;
+  source: string;
+  timestamp: string;
+  entityLabel: 'Districts' | 'Stores';
+  entities: HQAlertEntity[];
+  ctas: HQAlertCTA[];
+}
+
+const HQ_BROADCAST_EFFECTIVENESS: HQBroadcastTrackRow[] = [
+  { id: 'hb1', name: 'Holiday Season Execution Standards', priority: 'high', ackRate: 80, avgAckTime: '1h 45m', status: 'good', type: 'Action Required', sentAt: '2h ago', districts: 5, ackedDistricts: 4 },
+  { id: 'hb2', name: 'New Safety Protocol — Aisle Markings', priority: 'high', ackRate: 60, avgAckTime: '4h 50m', status: 'at-risk', type: 'Action Required', sentAt: '1d ago', districts: 5, ackedDistricts: 3 },
+  { id: 'hb3', name: 'Q4 Compliance Reporting Deadline', priority: 'medium', ackRate: 100, avgAckTime: '1h 10m', status: 'good', type: 'Action Required', sentAt: '6h ago', districts: 5, ackedDistricts: 5 },
+  { id: 'hb4', name: 'SS26 Planogram Guidelines Rollout', priority: 'medium', ackRate: 80, avgAckTime: '3h 20m', status: 'good', type: 'Informational', sentAt: '2d ago', districts: 5, ackedDistricts: 4 },
+  { id: 'hb5', name: 'New Training Module Available', priority: 'low', ackRate: 100, avgAckTime: '2h 15m', status: 'good', type: 'Informational', sentAt: '3d ago', districts: 5, ackedDistricts: 5 },
+  { id: 'hb6', name: 'Regional VoC Trends — Action Plan', priority: 'medium', ackRate: 60, avgAckTime: '5h 05m', status: 'at-risk', type: 'Action Required', sentAt: '4d ago', districts: 5, ackedDistricts: 3 },
+  { id: 'hb7', name: 'Monthly Network Performance Recap', priority: 'low', ackRate: 100, avgAckTime: '1h 30m', status: 'good', type: 'Informational', sentAt: '5d ago', districts: 5, ackedDistricts: 5 },
+];
+
 const MOCK_BROADCASTS: BroadcastItem[] = [
-  { id: 'b1', title: 'Holiday Season Execution Standards', description: 'All districts must complete holiday planogram execution by Dec 15. Updated guidelines attached for seasonal end-caps and promotional displays.', type: 'critical', category: 'Operations', sender: 'Regional Safety', acknowledged: 28, totalStores: 32, timeSent: '2h ago', storesAffected: 32, isRead: false },
-  { id: 'b2', title: 'Q4 Compliance Reporting Deadline', description: 'Q4 compliance reports due by end of week. Please ensure all store audits are completed and submitted through the portal.', type: 'info', category: 'Compliance', sender: 'District Manager', acknowledged: 30, totalStores: 32, timeSent: '6h ago', storesAffected: 32, isRead: true },
-  { id: 'b3', title: 'New Safety Protocol — Aisle Markings', description: 'Updated safety protocol for aisle markings effective immediately. All stores must comply within 48 hours. Training materials available in the portal.', type: 'critical', category: 'Safety', sender: 'Regional Safety', acknowledged: 18, totalStores: 32, timeSent: '1d ago', storesAffected: 32, isRead: false },
+  { id: 'b1', title: 'Holiday Season Execution Standards', description: 'All districts must complete holiday planogram execution by Dec 15. Updated guidelines attached for seasonal end-caps and promotional displays.', type: 'critical', category: 'Operations', sender: 'Regional Safety', timeSent: '2h ago', isRead: false },
+  { id: 'b2', title: 'Q4 Compliance Reporting Deadline', description: 'Q4 compliance reports due by end of week. Please ensure all store audits are completed and submitted through the portal.', type: 'info', category: 'Compliance', sender: 'District Manager', timeSent: '6h ago', isRead: true },
+  { id: 'b3', title: 'New Safety Protocol — Aisle Markings', description: 'Updated safety protocol for aisle markings effective immediately. All stores must comply within 48 hours. Training materials available in the portal.', type: 'critical', category: 'Safety', sender: 'Regional Safety', timeSent: '1d ago', isRead: false },
 ];
-
-const EXECUTION_OVERVIEW = {
-  totalActions: 248,
-  completed: 78,
-  overdue: 12,
-  avgCompletionTime: '4.2h',
-};
-
-const AI_BRIEF_INSIGHTS = [
-  {
-    id: 'ai1',
-    type: 'risk' as const,
-    category: 'Compliance Risk',
-    icon: 'shield' as const,
-    text: 'Execution compliance dropped 6% in District 11 due to audit misses in 3 stores.',
-    detail: '3 stores missed Monday audit window. Revenue impact est. $18K. DM Lisa Nguyen notified.',
-    navigateTo: '/store-operations/district-intelligence',
-    actionType: 'escalate' as const,
-    actionLabel: 'Raise Concern',
-    actionRoute: '/command-center/communications',
-  },
-  {
-    id: 'ai2',
-    type: 'positive' as const,
-    category: 'Performance Win',
-    icon: 'check' as const,
-    text: 'District 14 achieved 100% planogram compliance for 2nd consecutive week.',
-    detail: 'All 8 stores at 100% POG adherence. Camera audit scores averaging 96.2. Top performer: Store #1234.',
-    navigateTo: '/store-operations/district-intelligence',
-    actionType: 'kudos' as const,
-    actionLabel: 'Give Kudos',
-    actionRoute: '/command-center/communications',
-    dm: 'John Doe',
-  },
-  {
-    id: 'ai3',
-    type: 'watch' as const,
-    category: 'Communication Gap',
-    icon: 'alert' as const,
-    text: 'Broadcast acknowledgement rate declining — 3 districts below 85%.',
-    detail: 'Districts 11, 22, 19 below threshold. Avg response time increased from 2.1h to 4.8h over 7 days.',
-    navigateTo: '/command-center/communications',
-    actionType: 'escalate' as const,
-    actionLabel: 'Escalate',
-    actionRoute: '/command-center/communications',
-  },
-];
-
-const HQ_TRENDING_DISTRICTS = [
-  { name: 'District 14 — Tennessee', delta: '+4%' },
-  { name: 'District 08 — Georgia', delta: '+2%' },
-  { name: 'District 22 — Carolina', delta: '-3%' },
-];
-
-const getInsightIcon = (icon: string) => {
-  switch (icon) {
-    case 'shield': return <ShieldCheck size={15} />;
-    case 'check': return <CheckCircle2 size={15} />;
-    case 'alert': return <AlertTriangle size={15} />;
-    case 'trending': return <TrendingUp size={15} />;
-    default: return <AlertCircle size={15} />;
-  }
-};
 
 // ─── Helpers ───
-const getGreeting = () => {
+const getGreeting = (): { text: string; icon: React.ReactNode } => {
   const h = new Date().getHours();
-  if (h < 12) return { text: 'Good morning', icon: '☀️' };
-  if (h < 17) return { text: 'Good afternoon', icon: '🌤️' };
-  return { text: 'Good evening', icon: '🌙' };
+  if (h < 12) return { text: 'Good morning', icon: <Sparkles size={20} /> };
+  if (h < 17) return { text: 'Good afternoon', icon: <Sparkles size={20} /> };
+  return { text: 'Good evening', icon: <Moon size={20} /> };
 };
-
 
 // ─── Component ───
 export const HQHome: React.FC = () => {
@@ -234,31 +154,169 @@ export const HQHome: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [lastRefresh, setLastRefresh] = useState(new Date());
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isBriefCollapsed, setIsBriefCollapsed] = useState(false);
+  const [showBriefModal, setShowBriefModal] = useState(false);
+  const [broadcastsExpanded, setBroadcastsExpanded] = useState(true);
+  const [broadcasts, setBroadcasts] = useState<BroadcastItem[]>(MOCK_BROADCASTS);
+  const [selectedBroadcast, setSelectedBroadcast] = useState<BroadcastItem | null>(null);
+  // District Leaderboard state
   const [sortField, setSortField] = useState<'dpi' | 'riskLevel'>('dpi');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
-  const [aiBriefExpanded, setAiBriefExpanded] = useState(true);
-  const [broadcastsExpanded, setBroadcastsExpanded] = useState(true);
   const [selectedDistricts, setSelectedDistricts] = useState<string[]>([]);
   const [broadcastToast, setBroadcastToast] = useState<string | null>(null);
-  const [kudosToast, setKudosToast] = useState<string | null>(null);
-  const [selectedBroadcast, setSelectedBroadcast] = useState<BroadcastItem | null>(null);
-  const [broadcasts, setBroadcasts] = useState<BroadcastItem[]>(MOCK_BROADCASTS);
-  const [execDistrictFilter, setExecDistrictFilter] = useState<string>('all');
-  const [showExecFilter, setShowExecFilter] = useState(false);
-  const [workflowAction, setWorkflowAction] = useState<PriorityAction | null>(null);
-  const [actionSelectedItems, setActionSelectedItems] = useState<string[]>([]);
-  const [msgPanelOpen, setMsgPanelOpen] = useState(false);
+  const [lbSelectedDistrict, setLbSelectedDistrict] = useState<DistrictRow | null>(null);
+  // HQ Alerts right-side detail panel (mirrors StoreOpsHome alert panel pattern)
+  const [hqAlertPanel, setHqAlertPanel] = useState<HQAlertItem | null>(null);
+  const closeHqAlertPanel = () => setHqAlertPanel(null);
+  // Broadcast Analytics + Create Broadcast Wizard state (mirrors District Intelligence)
+  const [bcaSelectedBroadcast, setBcaSelectedBroadcast] = useState<HQBroadcastTrackRow | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [showBroadcastWizard, setShowBroadcastWizard] = useState(false);
+  const [bwStep, setBwStep] = useState<1 | 2 | 3>(1);
+  const [bwAudience, setBwAudience] = useState<'all-districts' | 'specific-districts' | 'managers'>('all-districts');
+  const [bwSelectedDistrictIds, setBwSelectedDistrictIds] = useState<string[]>([]);
+  const [bwSelectedManagerIds, setBwSelectedManagerIds] = useState<string[]>([]);
+  const [bwPriority, setBwPriority] = useState<'Normal' | 'Important' | 'Urgent'>('Normal');
+  const [bwCategory, setBwCategory] = useState<'Operations' | 'Safety' | 'Compliance' | 'Announcement'>('Operations');
+  const [bwSubject, setBwSubject] = useState('');
+  const [bwMessage, setBwMessage] = useState('');
+  const [bwSending, setBwSending] = useState(false);
 
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 700);
-    return () => clearTimeout(timer);
-  }, []);
+  const openBroadcastWizard = () => {
+    setBwStep(1);
+    setBwAudience('all-districts');
+    setBwSelectedDistrictIds([]);
+    setBwSelectedManagerIds([]);
+    setBwPriority('Normal');
+    setBwCategory('Operations');
+    setBwSubject('');
+    setBwMessage('');
+    setBwSending(false);
+    setShowBroadcastWizard(true);
+  };
 
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    await new Promise(r => setTimeout(r, 800));
-    setLastRefresh(new Date());
-    setIsRefreshing(false);
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  // Build per-broadcast district compliance: top `ackedDistricts` are Acknowledged, rest Pending
+  const getBroadcastDistrictCompliance = (bc: HQBroadcastTrackRow) => {
+    const districts = [...HQ_DISTRICT_COMPLIANCE_BASE].sort((a, b) => b.ackRate - a.ackRate);
+    return districts.slice(0, bc.districts).map((d, i) => ({
+      ...d,
+      acknowledged: i < bc.ackedDistricts,
+    }));
+  };
+
+  const closeBcaPanel = () => setBcaSelectedBroadcast(null);
+
+  // Build the impacted-entity payload for each HQ alert and open the right-side panel
+  const openHqAlertPanel = (id: 'compliance-risk' | 'district-trending' | 'communication-gap' | 'performance-win') => {
+    let data: HQAlertItem;
+    const nowIso = new Date().toISOString();
+    if (id === 'compliance-risk') {
+      data = {
+        id, severity: 'critical', signalLabel: 'COMPLIANCE RISK', source: 'Compliance AI', timestamp: nowIso,
+        title: 'Execution Compliance Dropped 6% — District 11',
+        description: '3 stores missed Monday audit window. Estimated revenue impact $18K. DM Lisa Nguyen has been notified.',
+        impactSummary: 'Compliance gap widening — escalation recommended within 24h',
+        entityLabel: 'Stores',
+        entities: [
+          { id: '4501', name: 'Miami Central #4501', status: 'critical', detail: 'Audit overdue · Compliance dropped 9pts WoW', manager: 'Lisa Nguyen' },
+          { id: '4512', name: 'Orlando Gateway #4512', status: 'warning', detail: 'Audit overdue · 3 missed checklists', manager: 'Lisa Nguyen' },
+          { id: '4523', name: 'Tampa Bay Mall #4523', status: 'warning', detail: 'Compliance dropped 4pts · Cleanliness score down', manager: 'Lisa Nguyen' },
+        ],
+        ctas: [
+          { label: 'Open District Intelligence', action: 'district-intel' },
+          { label: 'Message DM', action: 'message-dm' },
+        ],
+      };
+    } else if (id === 'district-trending') {
+      data = {
+        id, severity: 'warning', signalLabel: 'DISTRICT TRENDING', source: 'District Performance AI', timestamp: nowIso,
+        title: 'Execution Gaps Widening in 2 Districts',
+        description: 'Compliance scores declining in District 11 and District 22. Correlated with audit misses and late broadcast acknowledgements.',
+        impactSummary: 'District 14 +4% · District 08 +2% · District 22 –3%',
+        entityLabel: 'Districts',
+        entities: [
+          { id: 'd11', name: 'District 11 — Florida', status: 'critical', detail: 'DPI 65 · Compliance 78% · Trend declining', manager: 'Lisa Nguyen' },
+          { id: 'd22', name: 'District 22 — Carolina', status: 'warning', detail: 'DPI 71 · Compliance 83% · Trend declining', manager: 'Marcus Reed' },
+          { id: 'd14', name: 'District 14 — Tennessee', status: 'info', detail: 'DPI 82 · Compliance 91% · Trend improving (+4%)', manager: 'John Doe' },
+        ],
+        ctas: [
+          { label: 'Open in AI Copilot', action: 'ai-copilot' },
+          { label: 'Open District Intelligence', action: 'district-intel' },
+        ],
+      };
+    } else if (id === 'communication-gap') {
+      data = {
+        id, severity: 'warning', signalLabel: 'COMMUNICATION GAP', source: 'Broadcast Analytics', timestamp: nowIso,
+        title: 'Broadcast Acknowledgement Rate Declining',
+        description: 'Districts 11, 22, and 19 below the 85% threshold. Average response time has increased from 2.1h to 4.8h over the last 7 days.',
+        impactSummary: '14-store acknowledgement gap on the latest Safety Protocol broadcast',
+        entityLabel: 'Districts',
+        entities: [
+          { id: 'd11', name: 'District 11 — Florida', status: 'critical', detail: '60% ack rate · 6 missed acks · Avg 5h 20m', manager: 'Lisa Nguyen' },
+          { id: 'd22', name: 'District 22 — Carolina', status: 'warning', detail: '72% ack rate · 4 missed acks · Avg 3h 45m', manager: 'Marcus Reed' },
+          { id: 'd19', name: 'District 19 — Alabama', status: 'warning', detail: '84% ack rate · 2 missed acks · Avg 2h 30m', manager: 'David Park' },
+        ],
+        ctas: [
+          { label: 'View Broadcast Analytics', action: 'scroll-bca' },
+          { label: 'Send Reminder', action: 'send-reminder' },
+        ],
+      };
+    } else {
+      data = {
+        id, severity: 'success', signalLabel: 'PERFORMANCE WIN', source: 'Network Analytics', timestamp: nowIso,
+        title: 'District 14 — Network-Leading Planogram Compliance, 2nd Week Running',
+        description: 'Top 3 stores at 100% POG adherence; district-wide average 96%. Camera audit scores averaging 96.2. Top performer: Store #2034.',
+        impactSummary: 'Replicable template for underperforming districts — share-out recommended',
+        entityLabel: 'Stores',
+        entities: [
+          { id: '2034', name: 'Nashville Flagship #2034', status: 'info', detail: '100% POG · 98 audit score · Top performer', manager: 'John Doe' },
+          { id: '1876', name: 'Memphis Central #1876', status: 'info', detail: '100% POG · 96 audit score', manager: 'John Doe' },
+          { id: '3421', name: 'Knoxville East #3421', status: 'info', detail: '100% POG · 95 audit score', manager: 'John Doe' },
+        ],
+        ctas: [
+          { label: 'Open District Intelligence', action: 'district-intel' },
+          { label: 'Share Best Practices', action: 'share-best-practice' },
+        ],
+      };
+    }
+    setHqAlertPanel(data);
+  };
+
+  const handleHqAlertCTA = (cta: HQAlertCTA) => {
+    if (!hqAlertPanel) return;
+    const alert = hqAlertPanel;
+    closeHqAlertPanel();
+    switch (cta.action) {
+      case 'district-intel': {
+        // Pick the first impacted district id; for store-list alerts default to D11/D14 by alert id
+        const districtId = alert.id === 'compliance-risk' ? 'd11' : alert.id === 'performance-win' ? 'd14' : (alert.entities.find(e => e.id.startsWith('d'))?.id || 'd14');
+        navigate(`/store-operations/district-intelligence?district=${districtId}`);
+        break;
+      }
+      case 'ai-copilot':
+        navigate('/command-center/ai-copilot?mode=actions&context=district-gaps');
+        break;
+      case 'communications':
+        navigate('/command-center/communications');
+        break;
+      case 'message-dm':
+        navigate('/command-center/communications');
+        break;
+      case 'share-best-practice':
+        showToast(`Best-practice playbook from "${alert.title}" shared with all DMs`);
+        break;
+      case 'scroll-bca':
+        document.querySelector('.bca-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        break;
+      case 'send-reminder':
+        showToast('Reminder nudge sent to lagging districts');
+        break;
+    }
   };
 
   const sortedDistricts = [...MOCK_DISTRICTS].sort((a, b) => {
@@ -272,12 +330,8 @@ export const HQHome: React.FC = () => {
   });
 
   const handleSort = (field: 'dpi' | 'riskLevel') => {
-    if (sortField === field) {
-      setSortDir(d => d === 'desc' ? 'asc' : 'desc');
-    } else {
-      setSortField(field);
-      setSortDir('desc');
-    }
+    if (sortField === field) setSortDir(d => d === 'desc' ? 'asc' : 'desc');
+    else { setSortField(field); setSortDir('desc'); }
   };
 
   const toggleDistrict = (id: string) => {
@@ -285,18 +339,27 @@ export const HQHome: React.FC = () => {
   };
 
   const toggleAllDistricts = () => {
-    if (selectedDistricts.length === sortedDistricts.length) {
-      setSelectedDistricts([]);
-    } else {
-      setSelectedDistricts(sortedDistricts.map(d => d.id));
-    }
+    if (selectedDistricts.length === sortedDistricts.length) setSelectedDistricts([]);
+    else setSelectedDistricts(sortedDistricts.map(d => d.id));
   };
 
-  const handleBroadcast = () => {
+  const handleBroadcastToSelected = () => {
     const names = MOCK_DISTRICTS.filter(d => selectedDistricts.includes(d.id)).map(d => d.dm);
     setBroadcastToast(`Broadcast sent to ${names.join(', ')}`);
     setSelectedDistricts([]);
     setTimeout(() => setBroadcastToast(null), 4000);
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 600);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await new Promise(r => setTimeout(r, 800));
+    setLastRefresh(new Date());
+    setIsRefreshing(false);
   };
 
   const handleBroadcastClick = (broadcast: BroadcastItem) => {
@@ -313,496 +376,1085 @@ export const HQHome: React.FC = () => {
     closeBroadcastModal();
   };
 
-  const handleGiveKudos = (dmName: string) => {
-    setKudosToast(`🎉 Kudos sent to ${dmName}!`);
-    setTimeout(() => setKudosToast(null), 4000);
-  };
-
-  const handleRaiseConcern = (context: string) => {
-    setBroadcastToast(`Broadcast sent to District Owners: ${context}`);
-    setTimeout(() => setBroadcastToast(null), 4000);
-  };
-
-  const openWorkflow = (action: PriorityAction) => {
-    setWorkflowAction(action);
-    setActionSelectedItems([]);
-  };
-
-  const closeWorkflow = () => {
-    setWorkflowAction(null);
-    setActionSelectedItems([]);
-  };
-
-  const toggleActionItem = (id: string) => {
-    setActionSelectedItems(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
-  };
-
-  const selectAllActionItems = () => {
-    if (!workflowAction) return;
-    const modal = ACTION_MODAL_ITEMS[workflowAction.id];
-    if (!modal) return;
-    if (actionSelectedItems.length === modal.items.length) {
-      setActionSelectedItems([]);
-    } else {
-      setActionSelectedItems(modal.items.map(i => i.id));
-    }
-  };
-
-  const submitAction = () => {
-    if (!workflowAction) return;
-    const modal = ACTION_MODAL_ITEMS[workflowAction.id];
-    setBroadcastToast(`${modal?.ctaLabel || 'Action'} completed for ${actionSelectedItems.length} items`);
-    setTimeout(() => setBroadcastToast(null), 4000);
-    closeWorkflow();
-  };
-
-  const unreadCount = broadcasts.filter(b => !b.isRead).length;
-
-  const completionPct = Math.round((EXECUTION_OVERVIEW.completed / EXECUTION_OVERVIEW.totalActions) * 100);
-  const overduePct = Math.round((EXECUTION_OVERVIEW.overdue / EXECUTION_OVERVIEW.totalActions) * 100);
+  const unreadBroadcastCount = broadcasts.filter(b => !b.isRead).length;
+  const greetingPart = new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening';
 
   if (isLoading) {
     return (
-      <div className="hq-home">
-        <div className="hq-loading">
-          <div className="hq-loading-spinner" />
+      <div className="store-ops-home">
+        <div className="store-ops-loading">
+          <div className="store-ops-loading-spinner" />
           <p>Loading command center...</p>
         </div>
       </div>
     );
   }
 
+  // Reusable AI Daily Brief content (shared between inline view and modal)
+  const aiBriefContent = (
+    <div className="ai-brief-summary">
+      <p className="ai-brief-paragraph">
+        Good {greetingPart}, {user?.name || 'Elena'}. Here's what changed across your regions overnight — performance is mixed, with two districts widening execution gaps and one delivering a record-setting compliance week.
+      </p>
+
+      <div className="ai-brief-section">
+        <h3 className="ai-brief-section-title"><TrendingUp size={14} /> Network Performance</h3>
+        <ul className="ai-brief-bullets">
+          <li>Network execution compliance moved to <strong>84.8%</strong> (+1.2pp WoW). 2 of 5 districts trending up; District 11 declined (–6%) and District 22 softened (–3%).</li>
+          <li>Average District Performance Index (DPI) is <strong>73</strong> (+1 pt MoM). District 14 leads at 82 — top 10% nationally — and is the highest single-district score in 6 months.</li>
+          <li>Average basket size across the network is <strong>$47.20</strong> (+3.1%), driven by the personal-care cross-sell POG rollout. <em>Recommend extending to remaining 3 districts.</em></li>
+        </ul>
+      </div>
+
+      <div className="ai-brief-section">
+        <h3 className="ai-brief-section-title"><BarChart3 size={14} /> District Performance Index</h3>
+        <ul className="ai-brief-bullets">
+          <li><strong>District 14 — Tennessee</strong> leads the network on planogram compliance for the 2nd consecutive week. Top 3 stores at 100% POG adherence; district-wide average 96%, camera audit scores averaging 96.2.</li>
+          <li><strong>District 11 — Florida</strong> dropped 6 points in execution compliance due to audit misses in 3 stores on Monday. Estimated revenue impact: <strong>$18K</strong>. DM Lisa Nguyen has been notified.</li>
+          <li><strong>District 22 — Carolina</strong> is trending down for the 3rd straight week (–3% WoW). Correlates with declining broadcast acknowledgement rates.</li>
+        </ul>
+      </div>
+
+      <div className="ai-brief-section">
+        <h3 className="ai-brief-section-title"><CheckCircle2 size={14} /> Compliance &amp; Operations</h3>
+        <ul className="ai-brief-bullets">
+          <li><strong>Compliance:</strong> Network-wide POG adherence at <strong>84.8%</strong> (–0.4pp WoW). Decline concentrated in Districts 11 (78%) and 22 (83%); remaining districts held steady.</li>
+          <li><strong>Critical issues:</strong> 14 open (+3 WoW). 2 are tied to the FDA Organic Baby Lotion recall (Batch #7742) — escalated to all impacted stores.</li>
+          <li><strong>Action backlog:</strong> 12% of total actions are overdue (vs. 8% target). Average completion time held at <strong>4.2h</strong>.</li>
+        </ul>
+      </div>
+
+      <div className="ai-brief-section">
+        <h3 className="ai-brief-section-title"><Bell size={14} /> Broadcasts &amp; Communication</h3>
+        <ul className="ai-brief-bullets">
+          <li>Broadcast reach is <strong>94.1%</strong> (+1.8pp WoW) — the highest in 8 weeks. Acknowledgement rate, however, declined in 3 districts (11, 19, 22) below the 85% threshold.</li>
+          <li>Average response time to HQ broadcasts increased from <strong>2.1h to 4.8h</strong> over the last 7 days. Recommend a follow-up nudge to underperforming districts.</li>
+          <li>"New Safety Protocol — Aisle Markings" broadcast issued 1 day ago: 18 of 32 stores acknowledged. 14-store gap remains.</li>
+        </ul>
+      </div>
+
+      <div className="ai-brief-section ai-brief-suggestions">
+        <h3 className="ai-brief-section-title"><Sparkles size={14} /> Suggestions</h3>
+        <ul className="ai-brief-bullets">
+          <li>District 14's execution playbook is a strong template for underperforming districts — <em>consider scheduling a best-practices share session</em> with Districts 11 and 22.</li>
+          <li>The cross-sell POG in personal care is showing strong lift — <em>recommend extending the rollout to Districts 11, 22, and 19 next week</em>.</li>
+          <li>Broadcast acknowledgement decline correlates with field communication frequency drop — consider reinstating the weekly DM huddle.</li>
+        </ul>
+      </div>
+
+      <p className="ai-brief-closing">
+        Overall, the network is steady with strong upside in District 14. Primary attention areas: address the District 11 audit misses and the rising broadcast acknowledgement gap before they widen further.
+      </p>
+    </div>
+  );
+
   return (
-    <div className="hq-home">
-      {/* ═══ 1. HEADER ═══ */}
-      <div className="hq-welcome">
-        <div className="hq-welcome-left">
-          <div className="hq-greeting">
-            <span className="hq-greeting-icon">{greeting.icon}</span>
-            <h1>{greeting.text}, <span className="hq-user-name">{user?.name || 'User'}</span></h1>
+    <div className="store-ops-home">
+      {/* ZONE 1: Welcome Header */}
+      <div className="store-ops-welcome-bar">
+        <div className="welcome-bar-left">
+          <div className="welcome-greeting">
+            <span className="greeting-icon">{greeting.icon}</span>
+            <h1>
+              {greeting.text}, <span className="user-name">{user?.name || 'Elena Fischer'}</span>
+            </h1>
           </div>
-          <div className="hq-welcome-meta">
-            <span className="hq-role-badge">HQ — Merchandising</span>
-            <span className="hq-scope-info">
-              <Eye size={13} />
+          <div className="welcome-meta">
+            <span className="role-badge">{user?.role || 'HQ'}</span>
+            <span className="scope-info">
+              <Globe size={14} />
               {user?.region || 'North America'} · Global View
             </span>
-            <span className="hq-refresh-time">
-              <Calendar size={13} />
-              {lastRefresh.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at {lastRefresh.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+            <span className="last-refresh-date">
+              <Calendar size={14} />
+              Last refreshed: {lastRefresh.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at {lastRefresh.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
             </span>
-            <button className={`hq-refresh-btn ${isRefreshing ? 'spinning' : ''}`} onClick={handleRefresh} disabled={isRefreshing}>
-              <RefreshCw size={13} />
+            <button
+              className={`refresh-btn-inline ${isRefreshing ? 'refreshing' : ''}`}
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+            >
+              <RefreshCw size={14} />
             </button>
           </div>
         </div>
       </div>
 
-      {/* ═══ 2. TOP ROW: AI Brief + Broadcasts (same as DM home) ═══ */}
-      <div className="hq-top-row">
-        <div className="hq-ai-brief">
-          <div className="hq-ai-header" onClick={() => setAiBriefExpanded(!aiBriefExpanded)}>
-            <div className="hq-ai-header-left">
-              <div className={`hq-ai-toggle ${aiBriefExpanded ? '' : 'collapsed'}`}>
-                <ChevronDown size={14} />
-              </div>
-              <div className="hq-ai-badge">
-                <Sparkles size={14} />
-                <span>AI Strategic Brief</span>
-              </div>
+      {/* AI DAILY BRIEF — Full Width Top */}
+      <div className="ai-daily-brief">
+        <div className="ai-brief-header-bar" onClick={() => setIsBriefCollapsed(!isBriefCollapsed)}>
+          <div className="ai-brief-header-left">
+            <div className={`ai-brief-toggle ${isBriefCollapsed ? 'collapsed' : ''}`}>
+              <ChevronDown size={14} />
             </div>
-            <div className="hq-ai-meta">
-              <span>Today, {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
-              <span className="hq-ai-meta-sep">·</span>
-              <span>5 data streams analysed</span>
+            <div className="ai-brief-header">
+              <div className="ai-brief-badge-clean">
+                <Sparkles size={18} />
+                <span>AI Daily Brief</span>
+              </div>
             </div>
           </div>
-          {aiBriefExpanded && (
-            <div className="hq-ai-body">
-              <div className="hq-ai-greeting-text">
-                <h2>Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening'}, {user?.name || 'Elena'}. Here's what changed across your regions overnight.</h2>
-              </div>
-
-              {/* Trending District Spotlight — matching DM VoC pattern */}
-              <div className="hq-trending-spotlight">
-                <div className="hq-trending-accent" />
-                <div className="hq-trending-body">
-                  <div className="hq-trending-header">
-                    <div className="hq-trending-badge">
-                      <TrendingUp size={12} />
-                      <span>District Performance Trending</span>
-                    </div>
-                    <div className="hq-trending-severity">
-                      <AlertTriangle size={12} />
-                      <span>Action Needed</span>
-                    </div>
-                  </div>
-                  <h3 className="hq-trending-title">Execution Gaps Widening in 2 Districts</h3>
-                  <p className="hq-trending-desc">Compliance scores declining in <strong>District 11</strong> and <strong>District 22</strong>. Correlated with audit misses and late broadcast acknowledgements.</p>
-                  <div className="hq-trending-stores">
-                    {HQ_TRENDING_DISTRICTS.map((d, i) => (
-                      <div key={i} className="hq-store-chip">
-                        <Store size={11} />
-                        <span>{d.name}</span>
-                        <span className={`hq-chip-delta ${d.delta.startsWith('-') ? 'negative' : ''}`}>{d.delta}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="hq-trending-action">
-                    <span className="hq-copilot-hint"><Sparkles size={12} /> AI Copilot has prepared an action plan</span>
-                    <button className="hq-trending-cta" onClick={(e) => { e.stopPropagation(); navigate('/command-center/ai-copilot?mode=actions&context=district-gaps'); }}>
-                      <span>Open in AI Copilot</span>
-                      <ChevronRight size={14} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Signal Cards — matching DM home pattern */}
-              <div className="hq-signal-grid">
-                {AI_BRIEF_INSIGHTS.map(insight => (
-                  <div key={insight.id} className={`hq-signal-card hq-signal--${insight.type}`} onClick={() => navigate(insight.navigateTo)}>
-                    <div className={`hq-signal-icon hq-signal-icon--${insight.type}`}>
-                      {getInsightIcon(insight.icon)}
-                    </div>
-                    <div className="hq-signal-content">
-                      <span className={`hq-signal-label hq-signal-label--${insight.type}`}>{insight.category}</span>
-                      <p className="hq-signal-text">{insight.text}</p>
-                      <p className="hq-signal-detail">{insight.detail}</p>
-                      <div className="hq-signal-actions">
-                        {insight.actionType === 'kudos' && (
-                          <button className="hq-signal-action-btn hq-signal-action--kudos" onClick={(e) => { e.stopPropagation(); handleGiveKudos(insight.dm || 'District Manager'); }}>
-                            <ThumbsUp size={12} />
-                            {insight.actionLabel}
-                          </button>
-                        )}
-                        {insight.actionType === 'escalate' && (
-                          <button className="hq-signal-action-btn hq-signal-action--escalate" onClick={(e) => { e.stopPropagation(); handleRaiseConcern(insight.category); }}>
-                            <AlertTriangle size={12} />
-                            {insight.actionLabel}
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                    <ChevronRight size={14} className="hq-signal-arrow" />
-                  </div>
-                ))}
-              </div>
-            </div>
+        </div>
+        <div className="ai-brief-body-wrapper">
+          <div className={`ai-brief-body ${isBriefCollapsed ? 'collapsed' : ''}`}>
+            {aiBriefContent}
+          </div>
+          {!isBriefCollapsed && <div className="ai-brief-scroll-fade" />}
+          {!isBriefCollapsed && (
+            <button className="ai-brief-read-more" onClick={() => setShowBriefModal(true)}>
+              <span>Read Full Brief</span>
+              <ChevronRight size={14} />
+            </button>
           )}
-        </div>
-
-        <div className="hq-right-col">
-        <div className="hq-broadcast-panel">
-          <div className="hq-broadcast-header" onClick={() => setBroadcastsExpanded(!broadcastsExpanded)}>
-            <div className="hq-broadcast-header-left">
-              <Bell size={15} />
-              <span>HQ Broadcasts</span>
-              {unreadCount > 0 && <span className="hq-broadcast-count">{unreadCount}</span>}
-            </div>
-            <ChevronDown size={14} className={`hq-expand-icon ${broadcastsExpanded ? 'expanded' : ''}`} />
-          </div>
-          {broadcastsExpanded && (
-            <div className="hq-broadcast-body">
-              <div className="hq-broadcast-list">
-                {broadcasts.map(b => (
-                  <div
-                    key={b.id}
-                    className={`hq-bcast-item ${!b.isRead ? 'unread' : ''} ${b.type === 'critical' ? 'critical' : ''}`}
-                    onClick={() => handleBroadcastClick(b)}
-                  >
-                    <div className="hq-bcast-content">
-                      <div className="hq-bcast-title-row">
-                        {b.type === 'critical' && (
-                          <span className="hq-bcast-priority-badge critical">
-                            <AlertTriangle size={10} />
-                            CRITICAL
-                          </span>
-                        )}
-                        {b.type === 'info' && (
-                          <span className="hq-bcast-priority-badge info">
-                            <Radio size={10} />
-                            INFO
-                          </span>
-                        )}
-                        <span className="hq-bcast-title">{b.title}</span>
-                        {!b.isRead && <span className="hq-bcast-unread-dot" />}
-                      </div>
-                      <p className="hq-bcast-desc">{b.description}</p>
-                      <div className="hq-bcast-meta">
-                        <span className="hq-bcast-sender">{b.sender}</span>
-                        <span className="hq-bcast-time">{b.timeSent}</span>
-                      </div>
-                      {b.type === 'critical' && (
-                        <button
-                          className="hq-bcast-view-stores"
-                          onClick={(e) => { e.stopPropagation(); navigate('/command-center/communications'); }}
-                        >
-                          <Send size={13} />
-                          Create Broadcast
-                          <ChevronRight size={13} />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Execution Overview — stacked below broadcast */}
-        <div className="hq-execution-card">
-          <div className="hq-execution-header">
-            <div className="hq-section-title">
-              <Target size={16} className="hq-section-icon hq-section-icon--exec" />
-              <h2>Execution Overview</h2>
-            </div>
-            <div className="hq-exec-filter-wrap">
-              <button className="hq-exec-filter-btn" onClick={() => setShowExecFilter(!showExecFilter)}>
-                <Filter size={12} />
-                {execDistrictFilter === 'all' ? 'All Districts' : MOCK_DISTRICTS.find(d => d.id === execDistrictFilter)?.name || 'All Districts'}
-                <ChevronDown size={11} />
-              </button>
-              {showExecFilter && (
-                <div className="hq-exec-filter-dropdown">
-                  <div className={`hq-exec-filter-option ${execDistrictFilter === 'all' ? 'active' : ''}`} onClick={() => { setExecDistrictFilter('all'); setShowExecFilter(false); }}>All Districts</div>
-                  {MOCK_DISTRICTS.map(d => (
-                    <div key={d.id} className={`hq-exec-filter-option ${execDistrictFilter === d.id ? 'active' : ''}`} onClick={() => { setExecDistrictFilter(d.id); setShowExecFilter(false); }}>{d.name}</div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="hq-exec-metrics">
-            <div className="hq-exec-metric">
-              <span className="hq-exec-metric-value">{EXECUTION_OVERVIEW.totalActions}</span>
-              <span className="hq-exec-metric-label">Total Actions</span>
-            </div>
-            <div className="hq-exec-metric">
-              <span className="hq-exec-metric-value hq-exec-metric--green">{completionPct}%</span>
-              <span className="hq-exec-metric-label">Completed</span>
-            </div>
-            <div className="hq-exec-metric">
-              <span className="hq-exec-metric-value hq-exec-metric--red">{overduePct}%</span>
-              <span className="hq-exec-metric-label">Overdue</span>
-            </div>
-            <div className="hq-exec-metric">
-              <span className="hq-exec-metric-value">{EXECUTION_OVERVIEW.avgCompletionTime}</span>
-              <span className="hq-exec-metric-label">Avg Completion</span>
-            </div>
-          </div>
-          <div className="hq-exec-bar-wrap">
-            <div className="hq-exec-bar">
-              <div className="hq-exec-bar-fill hq-exec-bar--completed" style={{ width: `${completionPct}%` }} />
-              <div className="hq-exec-bar-fill hq-exec-bar--overdue" style={{ width: `${overduePct}%` }} />
-            </div>
-            <div className="hq-exec-bar-legend">
-              <span className="hq-exec-legend-item"><span className="hq-legend-dot hq-legend-dot--completed" /> Completed</span>
-              <span className="hq-exec-legend-item"><span className="hq-legend-dot hq-legend-dot--overdue" /> Overdue</span>
-              <span className="hq-exec-legend-item"><span className="hq-legend-dot hq-legend-dot--remaining" /> Remaining</span>
-            </div>
-          </div>
-        </div>
         </div>
       </div>
 
-      {/* ═══ 3. KPI PULSE STRIP (Snapshot 4 style — non-clickable) ═══ */}
-      <div className="hq-pulse-strip">
-        <div className="hq-pulse-card">
-          <div className="hq-pulse-icon stores"><Store size={18} /></div>
-          <div className="hq-pulse-data">
-            <span className="hq-pulse-value">{MOCK_KPIS[0].value}</span>
-            <span className="hq-pulse-label">Execution Compliance</span>
-          </div>
-          <span className="hq-pulse-badge positive">{MOCK_KPIS[0].delta}</span>
-        </div>
-        <div className="hq-pulse-card">
-          <div className="hq-pulse-icon tasks"><Zap size={18} /></div>
-          <div className="hq-pulse-data">
-            <span className="hq-pulse-value">{MOCK_KPIS[1].value}</span>
-            <span className="hq-pulse-label">Critical Issues</span>
-          </div>
-          <span className="hq-pulse-badge warning">{MOCK_KPIS[1].delta}</span>
-        </div>
-        <div className="hq-pulse-card">
-          <div className="hq-pulse-icon compliance"><CheckCircle2 size={18} /></div>
-          <div className="hq-pulse-data">
-            <span className="hq-pulse-value">{MOCK_KPIS[2].value}</span>
-            <span className="hq-pulse-label">Broadcast Reach</span>
-          </div>
-          <span className="hq-pulse-badge positive">{MOCK_KPIS[2].delta}</span>
-        </div>
-        <div className="hq-pulse-card">
-          <div className="hq-pulse-icon nps"><Star size={18} /></div>
-          <div className="hq-pulse-data">
-            <span className="hq-pulse-value">{MOCK_KPIS[4].value}</span>
-            <span className="hq-pulse-label">District Perf. Index</span>
-          </div>
-          <span className="hq-pulse-badge positive">{MOCK_KPIS[4].delta}</span>
-        </div>
-      </div>
-
-      {/* ═══ 4. ACTION QUEUE (AI Brief theme) ═══ */}
-      <div className="hq-combined-section">
-        <div className="hq-combined-header">
-          <div className="hq-section-title">
-            <Zap size={16} className="hq-combined-icon" />
-            <h2>Action Queue</h2>
-            <span className="hq-combined-count">{MOCK_PRIORITY_ACTIONS.length}</span>
-          </div>
-          <span className="hq-action-queue-meta">{MOCK_PRIORITY_ACTIONS.length} tasks requiring attention</span>
-        </div>
-
-        <div className="hq-action-queue">
-          <div className="hq-action-queue-list">
-            {MOCK_PRIORITY_ACTIONS.slice(0, 3).map((action, idx) => (
-              <div key={action.id} className="hq-aq-item">
-                <div className="hq-aq-number">
-                  <span>{idx + 1}</span>
-                </div>
-                <div className="hq-aq-content">
-                  <div className="hq-aq-title">{action.title}</div>
-                  <div className="hq-aq-desc">{action.riskContext}</div>
-                  <div className="hq-aq-meta">
-                    <span className="hq-aq-impact">{action.impact}</span>
-                    <span className="hq-aq-sep">·</span>
-                    <span className={`hq-aq-sla ${action.slaOverdue ? 'overdue' : ''}`}>
-                      {action.slaOverdue && <AlertTriangle size={11} />}
-                      {action.sla}
-                    </span>
-                  </div>
-                </div>
-                <button className={`hq-aq-cta ${action.slaOverdue ? 'hq-aq-cta--urgent' : ''}`} onClick={() => openWorkflow(action)}>
-                  {action.slaOverdue ? 'Approve Now' : 'Take Action'}
-                  <ChevronRight size={13} />
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ═══ 5. DISTRICT LEADERBOARD (full width) ═══ */}
-      <div className="hq-full-section">
-        <div className="hq-district-card">
-          <div className="hq-district-header">
-            <div className="hq-section-title">
-              <BarChart3 size={16} className="hq-section-icon hq-section-icon--district" />
-              <h2>District Leaderboard</h2>
-              <span className="hq-district-badge">{MOCK_DISTRICTS.length} Districts</span>
+      {/* ═══ BROADCAST ANALYTICS — placed directly below AI Daily Brief ═══ */}
+      <div className="bca-section">
+        <div className="bca-header">
+          <div className="bca-header-left">
+            <div className="bca-title-row">
+              <Megaphone size={20} />
+              <h2>Broadcast Analytics</h2>
             </div>
+            <p className="bca-subtitle">Track HQ broadcast effectiveness, district acknowledgement, and engagement</p>
           </div>
+          <button className="bca-create-btn" onClick={openBroadcastWizard}>
+            <Megaphone size={13} /> Create Broadcast
+          </button>
+        </div>
 
-          {selectedDistricts.length > 0 && (
-            <div className="hq-dt-toolbar">
-              <div className="hq-dt-toolbar-left">
-                <span className="hq-dt-toolbar-count">{selectedDistricts.length} selected</span>
-                <button className="hq-dt-toolbar-clear" onClick={() => setSelectedDistricts([])}>
-                  <X size={12} /> Clear
-                </button>
-              </div>
-              <button className="hq-dt-broadcast-btn" onClick={handleBroadcast}>
-                <Send size={13} />
-                Broadcast to Selected
-              </button>
-            </div>
-          )}
+        {/* Performance Overview */}
+        <div className="bca-overview-grid">
+          <div className="bca-kpi-card">
+            <span className="bca-kpi-label">Active Broadcasts</span>
+            <span className="bca-kpi-value">{HQ_BROADCAST_OVERVIEW.active}</span>
+            <span className="bca-kpi-context">currently live</span>
+          </div>
+          <div className="bca-kpi-card">
+            <span className="bca-kpi-label">Sent This Week</span>
+            <span className="bca-kpi-value">{HQ_BROADCAST_OVERVIEW.sentThisWeek}</span>
+            <span className="bca-kpi-context">broadcasts</span>
+          </div>
+          <div className="bca-kpi-card">
+            <span className="bca-kpi-label">Acknowledged</span>
+            <span className="bca-kpi-value">{HQ_BROADCAST_OVERVIEW.ackPct}%</span>
+            <span className="bca-kpi-context">of all districts</span>
+          </div>
+          <div className="bca-kpi-card">
+            <span className="bca-kpi-label">Avg Ack Time</span>
+            <span className="bca-kpi-value">{HQ_BROADCAST_OVERVIEW.avgAckTime}</span>
+            <span className="bca-kpi-context">time to acknowledge</span>
+          </div>
+          <div className="bca-kpi-card">
+            <span className="bca-kpi-label">Trend vs Last</span>
+            <span className={`bca-kpi-value ${HQ_BROADCAST_OVERVIEW.trendVsLast >= 0 ? 'positive' : 'negative'}`}>
+              {HQ_BROADCAST_OVERVIEW.trendVsLast >= 0 ? '+' : ''}{HQ_BROADCAST_OVERVIEW.trendVsLast}%
+            </span>
+            <span className="bca-kpi-context">vs last period</span>
+          </div>
+        </div>
 
-          {broadcastToast && (
-            <div className="hq-dt-toast">
-              <CheckCircle2 size={14} />
-              <span>{broadcastToast}</span>
-            </div>
-          )}
-
-          <div className="hq-district-table-wrap">
-            <table className="hq-district-table wow-table">
+        {/* Broadcast List */}
+        <div className="bca-sub-section">
+          <div className="bca-table-wrapper">
+            <table className="bca-table wow-table">
               <thead>
                 <tr>
-                  <th className="hq-th-check">
-                    <label className="hq-checkbox-wrap">
-                      <input
-                        type="checkbox"
-                        checked={selectedDistricts.length === sortedDistricts.length && sortedDistricts.length > 0}
-                        onChange={toggleAllDistricts}
-                      />
-                      <span className="hq-checkbox" />
-                    </label>
-                  </th>
-                  <th>District</th>
-                  <th className="hq-th-sortable" onClick={() => handleSort('dpi')}>
-                    DPI {sortField === 'dpi' && <ChevronDown size={11} className={sortDir === 'asc' ? 'flipped' : ''} />}
-                  </th>
-                  <th>Compliance</th>
-                  <th className="hq-th-sortable" onClick={() => handleSort('riskLevel')}>
-                    Risk {sortField === 'riskLevel' && <ChevronDown size={11} className={sortDir === 'asc' ? 'flipped' : ''} />}
-                  </th>
-                  <th>District Manager</th>
-                  <th className="hq-th-actions">Actions</th>
+                  <th>Broadcast</th>
+                  <th>Priority</th>
+                  <th>Ack Rate</th>
+                  <th>Avg Ack Time</th>
+                  <th>Pending</th>
+                  <th>Status</th>
                 </tr>
               </thead>
               <tbody>
-                {sortedDistricts.map(d => (
-                  <tr key={d.id} className={selectedDistricts.includes(d.id) ? 'hq-row-selected' : ''}>
-                    <td className="hq-td-check">
-                      <label className="hq-checkbox-wrap" onClick={e => e.stopPropagation()}>
-                        <input
-                          type="checkbox"
-                          checked={selectedDistricts.includes(d.id)}
-                          onChange={() => toggleDistrict(d.id)}
-                        />
-                        <span className="hq-checkbox" />
-                      </label>
-                    </td>
-                    <td className="hq-district-name">
-                      <span className="hq-district-name-link" onClick={() => navigate(`/store-operations/district-intelligence?district=${d.id}`)}>{d.name}</span>
-                      <span className="hq-district-trend">
-                        {d.trend === 'up' && <TrendingUp size={11} />}
-                        {d.trend === 'down' && <TrendingDown size={11} />}
-                        {d.trend === 'flat' && <Minus size={11} />}
-                      </span>
-                    </td>
-                    <td>
-                      <span className={`hq-dpi-value ${d.dpi >= 75 ? 'good' : d.dpi >= 65 ? 'warning' : 'poor'}`}>{d.dpi}</span>
-                    </td>
-                    <td>
-                      <div className="hq-compliance-bar-wrap">
-                        <div className="hq-compliance-bar">
-                          <div className="hq-compliance-fill" style={{ width: `${d.compliance}%` }} />
-                        </div>
-                        <span className="hq-compliance-val">{d.compliance}%</span>
-                      </div>
-                    </td>
-                    <td>
-                      <span className={`hq-risk-level hq-risk-level--${d.riskLevel}`}>{d.riskLevel}</span>
-                    </td>
-                    <td>
-                      <div className="hq-dm-cell">
-                        <div className="hq-dm-avatar">{d.dm.split(' ').map(n => n[0]).join('')}</div>
-                        <div className="hq-dm-info">
-                          <span className="hq-dm-name">{d.dm}</span>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="hq-td-actions">
-                      <button
-                        className="hq-action-btn hq-action-btn--msg"
-                        title={`Message ${d.dm}`}
-                        onClick={() => { setMsgPanelOpen(true); }}
-                      >
-                        <MessageSquare size={13} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {HQ_BROADCAST_EFFECTIVENESS.map(bc => {
+                  const pending = bc.districts - bc.ackedDistricts;
+                  return (
+                    <tr key={bc.id} className="bca-table-row" onClick={() => setBcaSelectedBroadcast(bc)}>
+                      <td>
+                        <div className="bca-bc-name">{bc.name}</div>
+                        <span className="bca-bc-sent">{bc.type} · Sent {bc.sentAt}</span>
+                      </td>
+                      <td>
+                        <span className={`bca-priority-badge ${bc.priority}`}>{bc.priority}</span>
+                      </td>
+                      <td>
+                        <span className={`bca-bc-metric-val ${bc.ackRate >= 90 ? 'high' : bc.ackRate >= 75 ? 'medium' : 'low'}`}>{bc.ackRate}%</span>
+                      </td>
+                      <td className="bca-td-time">{bc.avgAckTime}</td>
+                      <td>
+                        <span className={`bca-pending-count ${pending > 1 ? 'high' : pending > 0 ? 'medium' : 'zero'}`}>{pending}</span>
+                      </td>
+                      <td>
+                        <span className={`bca-status-badge ${bc.status === 'good' ? 'good' : 'at-risk'}`}>
+                          {bc.status === 'good' ? 'Good' : 'Needs Attention'}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
         </div>
       </div>
 
-      {/* ═══ BROADCAST DETAIL MODAL (Snapshot 5 style) ═══ */}
+      {/* MAIN 2-COLUMN LAYOUT */}
+      <div className="home-main-grid">
+        {/* LEFT COLUMN: Alerts */}
+        <div className="home-col-left">
+          <div className="store-ops-section insights-section-v3">
+            <div className="section-header-v3">
+              <div className="section-title-v3">
+                <AlertTriangle size={16} className="header-icon-risk" />
+                <h2>Alerts</h2>
+              </div>
+              <div className="insights-meta">
+                <span className="meta-positive">1 Positive</span>
+                <span className="meta-divider">•</span>
+                <span className="meta-neutral">2 At Risk</span>
+              </div>
+            </div>
+            <div className="insights-content-v3">
+              {/* Compliance Risk — Critical */}
+              <div className="insight-hero-card">
+                <div className="hero-card-content">
+                  <div className="hero-card-header">
+                    <div className="hero-signal critical">
+                      <AlertTriangle size={14} />
+                      <span>COMPLIANCE RISK</span>
+                    </div>
+                  </div>
+                  <h2 className="hero-headline">Execution Compliance Dropped 6% — District 11</h2>
+                  <p className="hero-context">3 stores missed Monday audit window. Estimated revenue impact $18K. DM Lisa Nguyen has been notified.</p>
+                  <div className="hero-impact">
+                    <AlertCircle size={14} />
+                    <span>Compliance gap widening — escalation recommended within 24h</span>
+                  </div>
+                  <div className="hero-top-store">
+                    <Store size={12} />
+                    <span>District 11 — Florida (3 stores impacted)</span>
+                  </div>
+                  <div className="hero-actions">
+                    <button className="hero-action-primary" onClick={() => openHqAlertPanel('compliance-risk')}>
+                      <span>View district detail</span>
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* District Performance Trending — Warning */}
+              <div className="insight-hero-card">
+                <div className="hero-card-content">
+                  <div className="hero-card-header">
+                    <div className="hero-signal warning">
+                      <TrendingUp size={14} />
+                      <span>DISTRICT TRENDING</span>
+                    </div>
+                    <div className="hero-overdue">
+                      <AlertTriangle size={12} />
+                      <span>Action Needed</span>
+                    </div>
+                  </div>
+                  <h2 className="hero-headline">Execution Gaps Widening in 2 Districts</h2>
+                  <p className="hero-context">Compliance scores declining in District 11 and District 22. Correlated with audit misses and late broadcast acknowledgements.</p>
+                  <div className="hero-impact">
+                    <Store size={14} />
+                    <span>District 14 +4% · District 08 +2% · District 22 –3%</span>
+                  </div>
+                  <div className="hero-top-store">
+                    <Sparkles size={12} />
+                    <span>AI Copilot has prepared an action plan for these districts</span>
+                  </div>
+                  <div className="hero-actions">
+                    <button className="hero-action-primary" onClick={() => openHqAlertPanel('district-trending')}>
+                      <span>Open in AI Copilot</span>
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Communication Gap */}
+              <div className="insight-hero-card">
+                <div className="hero-card-content">
+                  <div className="hero-card-header">
+                    <div className="hero-signal">
+                      <TrendingDown size={14} />
+                      <span>COMMUNICATION GAP</span>
+                    </div>
+                    <div className="hero-overdue">
+                      <Clock size={12} />
+                      <span>3 districts below 85%</span>
+                    </div>
+                  </div>
+                  <h2 className="hero-headline">Broadcast Acknowledgement Rate Declining</h2>
+                  <p className="hero-context">Districts 11, 22, and 19 below the 85% threshold. Average response time has increased from 2.1h to 4.8h over the last 7 days.</p>
+                  <div className="hero-impact">
+                    <AlertCircle size={14} />
+                    <span>14-store acknowledgement gap on the latest Safety Protocol broadcast</span>
+                  </div>
+                  <div className="hero-top-store">
+                    <Store size={12} />
+                    <span>Districts 11, 19, and 22 most impacted</span>
+                  </div>
+                  <div className="hero-actions">
+                    <button className="hero-action-primary" onClick={() => openHqAlertPanel('communication-gap')}>
+                      <span>View broadcast analytics</span>
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Performance Win — Positive */}
+              <div className="insight-hero-card">
+                <div className="hero-card-content">
+                  <div className="hero-card-header">
+                    <div className="hero-signal" style={{ background: '#dcfce7', color: '#15803d' }}>
+                      <CheckCircle2 size={14} />
+                      <span>PERFORMANCE WIN</span>
+                    </div>
+                  </div>
+                  <h2 className="hero-headline">District 14 — Network-Leading Planogram Compliance, 2nd Week Running</h2>
+                  <p className="hero-context">Top 3 stores at 100% POG adherence; district-wide average 96%. Camera audit scores averaging 96.2. Top performer: Store #2034.</p>
+                  <div className="hero-impact">
+                    <Sparkles size={14} />
+                    <span>This is a replicable template for underperforming districts</span>
+                  </div>
+                  <div className="hero-top-store">
+                    <Users size={12} />
+                    <span>DM John Doe — share-out recommended</span>
+                  </div>
+                  <div className="hero-actions">
+                    <button className="hero-action-primary" onClick={() => openHqAlertPanel('performance-win')}>
+                      <span>View district detail</span>
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT COLUMN: Operational Pulse */}
+        <div className="home-col-right">
+          {/* Operational Pulse */}
+          <div className="store-ops-section kpi-snapshot-card">
+            <div className="kpi-snapshot-header">
+              <div className="kpi-snapshot-title-row">
+                <BarChart3 size={16} className="kpi-snapshot-icon" />
+                <h2>Operational Pulse</h2>
+              </div>
+            </div>
+            <div className="kpi-snapshot-grid">
+              <div className="kpi-snapshot-item">
+                <div className="kpi-snapshot-item-icon stores"><Store size={16} /></div>
+                <div className="kpi-snapshot-item-data">
+                  <span className="kpi-snapshot-value">5</span>
+                  <span className="kpi-snapshot-label">Districts Managed</span>
+                </div>
+              </div>
+              <div className="kpi-snapshot-item">
+                <div className="kpi-snapshot-item-icon tasks"><Zap size={16} /></div>
+                <div className="kpi-snapshot-item-data">
+                  <span className="kpi-snapshot-value">14</span>
+                  <span className="kpi-snapshot-label">Critical Issues</span>
+                </div>
+                <span className="kpi-snapshot-badge warning">+3</span>
+              </div>
+              <div className="kpi-snapshot-item">
+                <div className="kpi-snapshot-item-icon compliance"><CheckCircle2 size={16} /></div>
+                <div className="kpi-snapshot-item-data">
+                  <span className="kpi-snapshot-value">94.1%</span>
+                  <span className="kpi-snapshot-label">Broadcast Reach</span>
+                </div>
+                <span className="kpi-snapshot-badge positive">+1.8%</span>
+              </div>
+              <div className="kpi-snapshot-item">
+                <div className="kpi-snapshot-item-icon nps"><Star size={16} /></div>
+                <div className="kpi-snapshot-item-data">
+                  <span className="kpi-snapshot-value">73</span>
+                  <span className="kpi-snapshot-label">District Perf. Index</span>
+                </div>
+                <span className="kpi-snapshot-badge positive">+1 pt</span>
+              </div>
+            </div>
+          </div>
+
+          {/* DISTRICT LEADERBOARD — Operational-Pulse-style list, click for full detail panel */}
+          <div className="store-ops-section kpi-snapshot-card" style={{ marginTop: 16 }}>
+            <div className="kpi-snapshot-header">
+              <div className="kpi-snapshot-title-row">
+                <BarChart3 size={16} className="kpi-snapshot-icon" />
+                <h2>District Leaderboard</h2>
+              </div>
+              <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 500 }}>{MOCK_DISTRICTS.length} Districts · click for details</span>
+            </div>
+            {broadcastToast && (
+              <div className="hq-dt-toast">
+                <CheckCircle2 size={14} />
+                <span>{broadcastToast}</span>
+              </div>
+            )}
+            <div className="kpi-snapshot-grid">
+              {sortedDistricts.map((d, i) => {
+                const trendBadge = d.trend === 'up'
+                  ? { cls: 'positive', label: <><TrendingUp size={11} /> Up</> }
+                  : d.trend === 'down'
+                  ? { cls: 'negative', label: <><TrendingDown size={11} /> Down</> }
+                  : { cls: 'neutral', label: <><Minus size={11} /> Flat</> };
+                return (
+                  <div
+                    key={d.id}
+                    className="kpi-snapshot-item hq-leaderboard-item"
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => setLbSelectedDistrict(d)}
+                  >
+                    <div
+                      className="kpi-snapshot-item-icon"
+                      style={{
+                        background: i === 0 ? '#fef3c7' : i < 3 ? '#e0e7ff' : '#f1f5f9',
+                        color: i === 0 ? '#92400e' : i < 3 ? '#3730a3' : '#475569',
+                        fontWeight: 700,
+                        fontSize: 13,
+                      }}
+                    >#{i + 1}</div>
+                    <div className="kpi-snapshot-item-data">
+                      <span className="kpi-snapshot-value" style={{ fontSize: 18 }}>{d.dpi}</span>
+                      <span className="kpi-snapshot-label" style={{ textTransform: 'none', letterSpacing: 0, fontWeight: 600, color: '#0f172a' }}>{d.name}</span>
+                    </div>
+                    <span className={`kpi-snapshot-badge ${trendBadge.cls}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                      {trendBadge.label}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* District Leaderboard Right-side Detail Drawer */}
+      {lbSelectedDistrict && (
+        <div
+          className="hq-modal-overlay"
+          onClick={() => setLbSelectedDistrict(null)}
+          style={{ justifyContent: 'flex-end', alignItems: 'stretch', padding: 0 }}
+        >
+          <div
+            className="hq-modal-card"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: 440, maxWidth: '95vw', height: '100vh', maxHeight: '100vh',
+              borderRadius: 0, overflow: 'auto', padding: 24,
+              animation: 'slideInRight 0.25s ease-out',
+            }}
+          >
+            <button className="hq-modal-close" onClick={() => setLbSelectedDistrict(null)}>
+              <X size={18} />
+            </button>
+            <div className="hq-modal-badges">
+              <span className={`hq-modal-badge hq-modal-badge--${lbSelectedDistrict.riskLevel === 'low' ? 'info' : lbSelectedDistrict.riskLevel === 'high' || lbSelectedDistrict.riskLevel === 'critical' ? 'high' : 'info'}`}>
+                {lbSelectedDistrict.riskLevel.toUpperCase()} RISK
+              </span>
+              <span className="hq-modal-badge hq-modal-badge--category">
+                #{sortedDistricts.findIndex(x => x.id === lbSelectedDistrict.id) + 1} RANK
+              </span>
+            </div>
+            <h2 className="hq-modal-title">{lbSelectedDistrict.name}</h2>
+            <p className="hq-modal-desc">
+              Led by {lbSelectedDistrict.dm}. DPI of {lbSelectedDistrict.dpi} with {lbSelectedDistrict.compliance}% compliance. Trend is {lbSelectedDistrict.trend === 'up' ? 'improving' : lbSelectedDistrict.trend === 'down' ? 'declining' : 'stable'}.
+            </p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 16 }}>
+              <div style={{ padding: 14, background: '#f8fafc', borderRadius: 8, border: '1px solid #e2e8f0' }}>
+                <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>DPI Score</div>
+                <div style={{ fontSize: 28, fontWeight: 700, color: lbSelectedDistrict.dpi >= 75 ? '#059669' : lbSelectedDistrict.dpi >= 65 ? '#d97706' : '#dc2626' }}>
+                  {lbSelectedDistrict.dpi}
+                </div>
+                <div style={{ fontSize: 11, color: '#64748b' }}>out of 100</div>
+              </div>
+              <div style={{ padding: 14, background: '#f8fafc', borderRadius: 8, border: '1px solid #e2e8f0' }}>
+                <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Compliance</div>
+                <div style={{ fontSize: 28, fontWeight: 700, color: '#0f172a' }}>{lbSelectedDistrict.compliance}%</div>
+                <div className="hq-compliance-bar" style={{ marginTop: 6 }}>
+                  <div className="hq-compliance-fill" style={{ width: `${lbSelectedDistrict.compliance}%` }} />
+                </div>
+              </div>
+              <div style={{ padding: 14, background: '#f8fafc', borderRadius: 8, border: '1px solid #e2e8f0' }}>
+                <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Risk Level</div>
+                <span className={`hq-risk-level hq-risk-level--${lbSelectedDistrict.riskLevel}`}>{lbSelectedDistrict.riskLevel}</span>
+              </div>
+              <div style={{ padding: 14, background: '#f8fafc', borderRadius: 8, border: '1px solid #e2e8f0' }}>
+                <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Trend</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, fontWeight: 600, color: lbSelectedDistrict.trend === 'up' ? '#059669' : lbSelectedDistrict.trend === 'down' ? '#dc2626' : '#64748b' }}>
+                  {lbSelectedDistrict.trend === 'up' && <><TrendingUp size={16} /> Improving</>}
+                  {lbSelectedDistrict.trend === 'down' && <><TrendingDown size={16} /> Declining</>}
+                  {lbSelectedDistrict.trend === 'flat' && <><Minus size={16} /> Stable</>}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ marginTop: 20, padding: 14, background: '#f8fafc', borderRadius: 8, border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 10 }}>District Manager</div>
+              <div className="hq-dm-cell">
+                <div className="hq-dm-avatar">{lbSelectedDistrict.dm.split(' ').map(n => n[0]).join('')}</div>
+                <div className="hq-dm-info">
+                  <span className="hq-dm-name" style={{ fontWeight: 600 }}>{lbSelectedDistrict.dm}</span>
+                  <span style={{ fontSize: 12, color: '#64748b' }}>{lbSelectedDistrict.dmEmail}</span>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ marginTop: 20 }}>
+              <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 10 }}>Key Highlights</div>
+              <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13, color: '#334155', lineHeight: 1.7 }}>
+                <li>DPI {lbSelectedDistrict.dpi >= 75 ? 'exceeds' : lbSelectedDistrict.dpi >= 65 ? 'meets' : 'below'} the network average (72)</li>
+                <li>Compliance {lbSelectedDistrict.compliance >= 85 ? 'on track' : 'requires attention'} ({lbSelectedDistrict.compliance}% vs 85% target)</li>
+                <li>{lbSelectedDistrict.riskLevel === 'low' ? 'No critical risk flags' : lbSelectedDistrict.riskLevel === 'medium' ? '1–2 risk flags to review' : 'Multiple risk flags — escalate'}</li>
+              </ul>
+            </div>
+
+            <div className="hq-modal-actions" style={{ marginTop: 24 }}>
+              <button
+                className="hq-modal-btn hq-modal-btn--secondary"
+                onClick={() => {
+                  const d = lbSelectedDistrict;
+                  setLbSelectedDistrict(null);
+                  navigate(`/store-operations/district-intelligence?district=${d.id}`);
+                }}
+              >
+                <BarChart3 size={16} /> Open District Intelligence
+              </button>
+              <button
+                className="hq-modal-btn hq-modal-btn--primary"
+                onClick={() => { setLbSelectedDistrict(null); navigate('/command-center/communications'); }}
+              >
+                <MessageSquare size={16} /> Message DM
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══ HQ Alerts — Right-Side Detail Panel (mirrors DM Home pattern) ═══ */}
+      {hqAlertPanel && (
+        <>
+          <div className="detail-panel-overlay" onClick={closeHqAlertPanel} />
+          <div className="detail-panel">
+            <div className="detail-panel-header">
+              <button className="detail-panel-close" onClick={closeHqAlertPanel}>
+                <X size={18} />
+              </button>
+            </div>
+            <div className="detail-panel-body">
+              {/* Severity Badge */}
+              <div className="dp-severity-row">
+                <span
+                  className={`dp-severity-badge ${hqAlertPanel.severity === 'success' ? 'risk' : hqAlertPanel.severity}`}
+                  style={hqAlertPanel.severity === 'success' ? { background: '#dcfce7', color: '#15803d' } : undefined}
+                >
+                  {hqAlertPanel.severity !== 'success' && <AlertTriangle size={12} />}
+                  {hqAlertPanel.severity === 'success' && <CheckCircle2 size={12} />}
+                  {hqAlertPanel.signalLabel}
+                </span>
+                {hqAlertPanel.source && (
+                  <span className="dp-source">
+                    <Users size={11} />
+                    {hqAlertPanel.source}
+                  </span>
+                )}
+              </div>
+
+              {/* Title + Description */}
+              <h2 className="dp-title">{hqAlertPanel.title}</h2>
+              <p className="dp-description">{hqAlertPanel.description}</p>
+
+              {/* Impact Summary */}
+              <div className="dp-impact-summary">
+                {hqAlertPanel.severity === 'success' ? <Sparkles size={14} /> : <AlertCircle size={14} />}
+                <span>{hqAlertPanel.impactSummary}</span>
+              </div>
+
+              {/* Impacted Districts/Stores */}
+              <div className="dp-section">
+                <h3 className="dp-section-title">
+                  {hqAlertPanel.entityLabel === 'Districts' ? <BarChart3 size={14} /> : <Store size={14} />}
+                  Impacted {hqAlertPanel.entityLabel} ({hqAlertPanel.entities.length})
+                </h3>
+                <div className="dp-stores-list">
+                  {hqAlertPanel.entities.map((e) => (
+                    <div key={e.id} className={`dp-store-card ${e.status}`}>
+                      <div className="dp-store-header">
+                        <span className="dp-store-name">{e.name}</span>
+                        <span className={`dp-store-status ${e.status}`}>
+                          {e.status === 'critical' ? 'Critical' : e.status === 'warning' ? 'At Risk' : hqAlertPanel.severity === 'success' ? 'Top Performer' : 'Monitor'}
+                        </span>
+                      </div>
+                      <p className="dp-store-detail">
+                        {e.detail}
+                        {e.manager && <> · {hqAlertPanel.entityLabel === 'Districts' ? 'DM' : 'Manager'}: {e.manager}</>}
+                      </p>
+                      <div className="dp-store-actions">
+                        <button
+                          className="dp-store-link"
+                          onClick={() => {
+                            closeHqAlertPanel();
+                            if (hqAlertPanel.entityLabel === 'Districts') {
+                              navigate(`/store-operations/district-intelligence?district=${e.id}`);
+                            } else {
+                              navigate(`/store-operations/store-deep-dive?store=${e.id}`);
+                            }
+                          }}
+                        >
+                          {hqAlertPanel.entityLabel === 'Districts' ? 'Open District' : 'View Store'} <ChevronRight size={11} />
+                        </button>
+                        {e.manager && (
+                          <button
+                            className="dp-store-assign-btn"
+                            onClick={() => showToast(`✓ Message sent to ${e.manager} (${e.name})`)}
+                          >
+                            <MessageSquare size={11} />
+                            Message {hqAlertPanel.entityLabel === 'Districts' ? 'DM' : 'Manager'}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Action CTAs */}
+              <div className="dp-actions">
+                {hqAlertPanel.ctas.map((cta, idx) => (
+                  <button
+                    key={idx}
+                    className="dp-action-btn outlined"
+                    onClick={() => handleHqAlertCTA(cta)}
+                  >
+                    <span>{cta.label}</span>
+                    <ChevronRight size={15} />
+                  </button>
+                ))}
+              </div>
+
+              {/* Timestamp */}
+              {hqAlertPanel.timestamp && (
+                <div className="dp-timestamp">
+                  <Clock size={11} />
+                  <span>Just now</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ═══ Broadcast Analytics — Rich Right-Side Detail Panel (mirrors District Intelligence) ═══ */}
+      {bcaSelectedBroadcast && (
+        <>
+          <div className="detail-panel-overlay" onClick={closeBcaPanel} />
+          <div className="detail-panel">
+            <div className="detail-panel-header">
+              <button className="detail-panel-close" onClick={closeBcaPanel}>
+                <X size={18} />
+              </button>
+            </div>
+            <div className="detail-panel-body">
+              {/* Severity / Status Row */}
+              <div className="dp-severity-row">
+                <span className={`dp-severity-badge ${bcaSelectedBroadcast.priority === 'high' ? 'critical' : bcaSelectedBroadcast.priority === 'medium' ? 'warning' : 'risk'}`}>
+                  {bcaSelectedBroadcast.priority.toUpperCase()} PRIORITY
+                </span>
+                <span className="dp-source">
+                  <Megaphone size={11} />
+                  {bcaSelectedBroadcast.type}
+                </span>
+              </div>
+
+              {/* Title */}
+              <h2 className="dp-title">{bcaSelectedBroadcast.name}</h2>
+              <p className="dp-description">
+                Sent {bcaSelectedBroadcast.sentAt} · {bcaSelectedBroadcast.ackedDistricts}/{bcaSelectedBroadcast.districts} districts acknowledged · Avg ack time: {bcaSelectedBroadcast.avgAckTime}
+              </p>
+
+              {/* Impact Summary — only when at-risk */}
+              {bcaSelectedBroadcast.status === 'at-risk' && (
+                <div className="dp-impact-summary">
+                  <AlertCircle size={14} />
+                  <span>
+                    {bcaSelectedBroadcast.districts - bcaSelectedBroadcast.ackedDistricts} districts still pending · {bcaSelectedBroadcast.ackRate}% ack rate — needs follow-up to meet compliance target
+                  </span>
+                </div>
+              )}
+
+              {/* District-Level Compliance Table */}
+              <div className="dp-section">
+                <h3 className="dp-section-title">
+                  <Store size={14} />
+                  District-Level Compliance
+                </h3>
+                <div className="bca-panel-table-wrapper">
+                  <table className="bca-panel-table wow-table">
+                    <thead>
+                      <tr>
+                        <th>District</th>
+                        <th>Status</th>
+                        <th>Ack Time</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {getBroadcastDistrictCompliance(bcaSelectedBroadcast).map(d => (
+                        <tr
+                          key={d.districtId}
+                          className="bca-panel-table-row"
+                          onClick={() => { closeBcaPanel(); navigate(`/store-operations/district-intelligence?district=${d.districtId}`); }}
+                        >
+                          <td>
+                            <div className="bca-panel-store-name">{d.district}</div>
+                            <span className="bca-panel-store-id">#{d.districtId}</span>
+                          </td>
+                          <td>
+                            <span className={`bca-panel-ack-badge ${d.acknowledged ? 'acked' : 'pending'}`}>
+                              {d.acknowledged ? 'Acknowledged' : 'Pending'}
+                            </span>
+                          </td>
+                          <td className="bca-panel-td-time">{d.acknowledged ? d.avgTime : '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Smart Insights */}
+              <div className="dp-section">
+                <h3 className="dp-section-title">
+                  <Sparkles size={14} />
+                  Smart Insights
+                </h3>
+                <div className="dp-stores-list">
+                  {HQ_BROADCAST_INSIGHTS.map((insight, idx) => (
+                    <div key={idx} className="dp-store-card info">
+                      <div className="dp-store-header">
+                        <span className="dp-store-name" style={{ fontSize: 12 }}>
+                          <Activity size={12} style={{ marginRight: 6, verticalAlign: 'middle' }} />
+                          Pattern
+                        </span>
+                      </div>
+                      <p className="dp-store-detail">{insight.pattern}</p>
+                      <div className="dp-store-header" style={{ marginTop: 8 }}>
+                        <span className="dp-store-name" style={{ fontSize: 12, color: '#7c3aed' }}>
+                          <Sparkles size={12} style={{ marginRight: 6, verticalAlign: 'middle' }} />
+                          Recommendation
+                        </span>
+                      </div>
+                      <p className="dp-store-detail" style={{ color: '#6d28d9', fontStyle: 'italic' }}>{insight.recommendation}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Action CTAs */}
+              <div className="dp-actions">
+                <button className="dp-action-btn outlined" onClick={() => { const bc = bcaSelectedBroadcast; closeBcaPanel(); showToast(`Nudge sent to ${bc.districts - bc.ackedDistricts} pending districts`); }}>
+                  <Send size={14} />
+                  <span>Send Nudge</span>
+                </button>
+                <button className="dp-action-btn outlined" onClick={() => { const bc = bcaSelectedBroadcast; closeBcaPanel(); showToast(`Follow-up assigned for "${bc.name}"`); }}>
+                  <ClipboardCheck size={14} />
+                  <span>Assign Follow-up</span>
+                </button>
+                <button className="dp-action-btn outlined" onClick={() => { const bc = bcaSelectedBroadcast; closeBcaPanel(); showToast(`Escalated "${bc.name}" to Regional`); }}>
+                  <AlertTriangle size={14} />
+                  <span>Escalate</span>
+                </button>
+              </div>
+
+              {/* Timestamp */}
+              <div className="dp-timestamp">
+                <Clock size={11} />
+                <span>Sent {bcaSelectedBroadcast.sentAt}</span>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ═══ Create Broadcast Wizard (mirrors District Intelligence) ═══ */}
+      {showBroadcastWizard && (() => {
+        const totalDistricts = MOCK_DISTRICTS.length;
+        const recipientCount =
+          bwAudience === 'all-districts' ? totalDistricts :
+          bwAudience === 'specific-districts' ? bwSelectedDistrictIds.length :
+          bwSelectedManagerIds.length;
+        const canAdvanceStep1 =
+          bwAudience === 'all-districts' ||
+          (bwAudience === 'specific-districts' && bwSelectedDistrictIds.length > 0) ||
+          (bwAudience === 'managers' && bwSelectedManagerIds.length > 0);
+        const canSend = bwSubject.trim().length > 0 && bwMessage.trim().length > 0 && recipientCount > 0;
+        const audienceLabel =
+          bwAudience === 'all-districts' ? `All Districts (${totalDistricts})` :
+          bwAudience === 'specific-districts' ? `${bwSelectedDistrictIds.length} Specific District${bwSelectedDistrictIds.length === 1 ? '' : 's'}` :
+          `${bwSelectedManagerIds.length} District Manager${bwSelectedManagerIds.length === 1 ? '' : 's'}`;
+
+        return (
+          <div className="bw-overlay" onClick={() => !bwSending && setShowBroadcastWizard(false)}>
+            <div className="bw-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="bw-header">
+                <div className="bw-header-icon">
+                  <Megaphone size={18} />
+                </div>
+                <div className="bw-header-text">
+                  <h2>Create Broadcast</h2>
+                  <p>Send a broadcast to selected districts or managers across the network</p>
+                </div>
+                <button className="bw-close" onClick={() => !bwSending && setShowBroadcastWizard(false)} aria-label="Close">
+                  <X size={16} />
+                </button>
+              </div>
+
+              <div className="bw-stepper">
+                {[
+                  { n: 1, label: 'Audience' },
+                  { n: 2, label: 'Message' },
+                  { n: 3, label: 'Review & Send' },
+                ].map((s, i, arr) => (
+                  <React.Fragment key={s.n}>
+                    <div className={`bw-step ${bwStep === s.n ? 'active' : ''} ${bwStep > s.n ? 'done' : ''}`}>
+                      <div className="bw-step-dot">{bwStep > s.n ? <Check size={12} /> : s.n}</div>
+                      <span className="bw-step-label">{s.label}</span>
+                    </div>
+                    {i < arr.length - 1 && <div className={`bw-step-connector ${bwStep > s.n ? 'done' : ''}`} />}
+                  </React.Fragment>
+                ))}
+              </div>
+
+              <div className="bw-body">
+                {/* Step 1: Audience */}
+                {bwStep === 1 && (
+                  <div className="bw-step-content">
+                    <div className="bw-field-label">Who should receive this broadcast?</div>
+                    <div className="bw-audience-options">
+                      <div className={`bw-audience-card ${bwAudience === 'all-districts' ? 'selected' : ''}`} onClick={() => setBwAudience('all-districts')}>
+                        <div className="bw-audience-radio">{bwAudience === 'all-districts' && <div className="bw-audience-dot" />}</div>
+                        <div className="bw-audience-body">
+                          <div className="bw-audience-title"><Globe size={14} /> All Districts</div>
+                          <div className="bw-audience-desc">Send to every district ({totalDistricts}) and all stores within</div>
+                        </div>
+                      </div>
+                      <div className={`bw-audience-card ${bwAudience === 'specific-districts' ? 'selected' : ''}`} onClick={() => setBwAudience('specific-districts')}>
+                        <div className="bw-audience-radio">{bwAudience === 'specific-districts' && <div className="bw-audience-dot" />}</div>
+                        <div className="bw-audience-body">
+                          <div className="bw-audience-title"><Filter size={14} /> Specific Districts</div>
+                          <div className="bw-audience-desc">Pick one or more districts from the network</div>
+                        </div>
+                      </div>
+                      <div className={`bw-audience-card ${bwAudience === 'managers' ? 'selected' : ''}`} onClick={() => setBwAudience('managers')}>
+                        <div className="bw-audience-radio">{bwAudience === 'managers' && <div className="bw-audience-dot" />}</div>
+                        <div className="bw-audience-body">
+                          <div className="bw-audience-title"><Users size={14} /> District Managers Only</div>
+                          <div className="bw-audience-desc">Send directly to selected District Managers</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {bwAudience === 'specific-districts' && (
+                      <div className="bw-selector">
+                        <div className="bw-selector-header">
+                          <span className="bw-selector-title">Select districts ({bwSelectedDistrictIds.length}/{totalDistricts})</span>
+                          <button className="bw-selector-toggle" onClick={() =>
+                            setBwSelectedDistrictIds(bwSelectedDistrictIds.length === totalDistricts ? [] : MOCK_DISTRICTS.map(d => d.id))
+                          }>{bwSelectedDistrictIds.length === totalDistricts ? 'Clear All' : 'Select All'}</button>
+                        </div>
+                        <div className="bw-selector-list">
+                          {MOCK_DISTRICTS.map(d => {
+                            const selected = bwSelectedDistrictIds.includes(d.id);
+                            return (
+                              <div key={d.id} className={`bw-selector-item ${selected ? 'selected' : ''}`} onClick={() =>
+                                setBwSelectedDistrictIds(prev => selected ? prev.filter(id => id !== d.id) : [...prev, d.id])
+                              }>
+                                <div className={`bw-checkbox ${selected ? 'checked' : ''}`}>{selected && <Check size={11} />}</div>
+                                <div className="bw-selector-item-body">
+                                  <span className="bw-selector-item-title">{d.name}</span>
+                                  <span className="bw-selector-item-sub">DM {d.dm} · DPI {d.dpi} · {d.riskLevel} risk</span>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {bwAudience === 'managers' && (
+                      <div className="bw-selector">
+                        <div className="bw-selector-header">
+                          <span className="bw-selector-title">Select managers ({bwSelectedManagerIds.length}/{totalDistricts})</span>
+                          <button className="bw-selector-toggle" onClick={() =>
+                            setBwSelectedManagerIds(bwSelectedManagerIds.length === totalDistricts ? [] : MOCK_DISTRICTS.map(d => d.id))
+                          }>{bwSelectedManagerIds.length === totalDistricts ? 'Clear All' : 'Select All'}</button>
+                        </div>
+                        <div className="bw-selector-list">
+                          {MOCK_DISTRICTS.map(d => {
+                            const selected = bwSelectedManagerIds.includes(d.id);
+                            return (
+                              <div key={d.id} className={`bw-selector-item ${selected ? 'selected' : ''}`} onClick={() =>
+                                setBwSelectedManagerIds(prev => selected ? prev.filter(id => id !== d.id) : [...prev, d.id])
+                              }>
+                                <div className={`bw-checkbox ${selected ? 'checked' : ''}`}>{selected && <Check size={11} />}</div>
+                                <div className="bw-selector-item-body">
+                                  <span className="bw-selector-item-title">{d.dm}</span>
+                                  <span className="bw-selector-item-sub">{d.name}</span>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Step 2: Message */}
+                {bwStep === 2 && (
+                  <div className="bw-step-content">
+                    <div className="bw-grid-2">
+                      <div className="bw-field">
+                        <label className="bw-field-label">Category</label>
+                        <div className="bw-chip-group">
+                          {(['Operations', 'Safety', 'Compliance', 'Announcement'] as const).map(c => (
+                            <button key={c} className={`bw-chip ${bwCategory === c ? 'active' : ''}`} onClick={() => setBwCategory(c)}>{c}</button>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="bw-field">
+                        <label className="bw-field-label">Priority</label>
+                        <div className="bw-chip-group">
+                          {(['Normal', 'Important', 'Urgent'] as const).map(p => (
+                            <button key={p} className={`bw-chip bw-chip--${p.toLowerCase()} ${bwPriority === p ? 'active' : ''}`} onClick={() => setBwPriority(p)}>{p}</button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bw-field">
+                      <label className="bw-field-label">Subject <span className="bw-required">*</span></label>
+                      <input className="bw-input" type="text" placeholder="e.g., Holiday execution standards — action required" value={bwSubject} onChange={(e) => setBwSubject(e.target.value)} maxLength={120} />
+                      <div className="bw-field-hint">{bwSubject.length}/120</div>
+                    </div>
+                    <div className="bw-field">
+                      <label className="bw-field-label">Message <span className="bw-required">*</span></label>
+                      <textarea className="bw-textarea" rows={6} placeholder="Type your broadcast message..." value={bwMessage} onChange={(e) => setBwMessage(e.target.value)} maxLength={1000} />
+                      <div className="bw-field-hint">{bwMessage.length}/1000</div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 3: Review */}
+                {bwStep === 3 && (
+                  <div className="bw-step-content">
+                    <div className="bw-review">
+                      <div className="bw-review-row">
+                        <span className="bw-review-label">Audience</span>
+                        <span className="bw-review-value">{audienceLabel}</span>
+                      </div>
+                      <div className="bw-review-row">
+                        <span className="bw-review-label">Recipients</span>
+                        <span className="bw-review-value"><strong>{recipientCount}</strong> {bwAudience === 'managers' ? 'manager(s)' : 'district(s)'}</span>
+                      </div>
+                      <div className="bw-review-row">
+                        <span className="bw-review-label">Category</span>
+                        <span className="bw-review-value">{bwCategory}</span>
+                      </div>
+                      <div className="bw-review-row">
+                        <span className="bw-review-label">Priority</span>
+                        <span className={`bw-review-priority bw-chip--${bwPriority.toLowerCase()}`}>{bwPriority}</span>
+                      </div>
+                      <div className="bw-review-row bw-review-row--stacked">
+                        <span className="bw-review-label">Subject</span>
+                        <span className="bw-review-value">{bwSubject || <em className="bw-review-empty">(not set)</em>}</span>
+                      </div>
+                      <div className="bw-review-row bw-review-row--stacked">
+                        <span className="bw-review-label">Message</span>
+                        <div className="bw-review-body">{bwMessage || <em className="bw-review-empty">(not set)</em>}</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="bw-footer">
+                <div className="bw-footer-meta">
+                  {recipientCount > 0 && <><Users size={13} /> Will reach <strong>{recipientCount}</strong> recipient{recipientCount === 1 ? '' : 's'}</>}
+                </div>
+                <div className="bw-footer-actions">
+                  {bwStep > 1 && (
+                    <button className="bw-btn bw-btn--ghost" onClick={() => setBwStep((bwStep - 1) as 1 | 2 | 3)} disabled={bwSending}>Back</button>
+                  )}
+                  {bwStep < 3 && (
+                    <button
+                      className="bw-btn bw-btn--primary"
+                      onClick={() => setBwStep((bwStep + 1) as 1 | 2 | 3)}
+                      disabled={bwStep === 1 ? !canAdvanceStep1 : !(bwSubject.trim() && bwMessage.trim())}
+                    >Continue <ChevronRight size={14} /></button>
+                  )}
+                  {bwStep === 3 && (
+                    <button
+                      className="bw-btn bw-btn--primary"
+                      disabled={!canSend || bwSending}
+                      onClick={() => {
+                        setBwSending(true);
+                        setTimeout(() => {
+                          setShowBroadcastWizard(false);
+                          setBwSending(false);
+                          showToast(`✓ Broadcast sent to ${recipientCount} ${bwAudience === 'managers' ? 'manager(s)' : 'district(s)'}`);
+                        }, 1000);
+                      }}
+                    >
+                      {bwSending ? 'Sending…' : <><Send size={14} /> Send Broadcast</>}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Toast */}
+      {toastMessage && (
+        <div className="hq-toast hq-toast--broadcast">
+          <Send size={14} />
+          {toastMessage}
+        </div>
+      )}
+
+      {/* AI Brief Full Modal */}
+      {showBriefModal && (
+        <div className="brief-modal-overlay" onClick={() => setShowBriefModal(false)}>
+          <div className="brief-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="brief-modal-header">
+              <div className="brief-modal-title">
+                <Sparkles size={18} />
+                <h2>AI Daily Brief</h2>
+              </div>
+              <button className="brief-modal-close" onClick={() => setShowBriefModal(false)}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="brief-modal-content">
+              {aiBriefContent}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Broadcast Detail Modal */}
       {selectedBroadcast && (
         <div className="hq-modal-overlay" onClick={closeBroadcastModal}>
           <div className="hq-modal-card" onClick={(e) => e.stopPropagation()}>
@@ -846,129 +1498,6 @@ export const HQHome: React.FC = () => {
           </div>
         </div>
       )}
-
-      {/* ═══ TOASTS ═══ */}
-      {broadcastToast && (
-        <div className="hq-toast hq-toast--broadcast">
-          <Send size={14} />
-          {broadcastToast}
-        </div>
-      )}
-      {kudosToast && (
-        <div className="hq-toast hq-toast--kudos">
-          <ThumbsUp size={14} />
-          {kudosToast}
-        </div>
-      )}
-
-      {/* ═══ ACTION MODAL (Snapshot 1/3 style) ═══ */}
-      {workflowAction && ACTION_MODAL_ITEMS[workflowAction.id] && (() => {
-        const modal = ACTION_MODAL_ITEMS[workflowAction.id];
-        return (
-          <div className="hq-modal-overlay" onClick={closeWorkflow}>
-            <div className="hq-am-modal" onClick={e => e.stopPropagation()}>
-              <div className="hq-am-header">
-                <Zap size={20} className="hq-am-header-icon" />
-                <h2 className="hq-am-title">{workflowAction.title}</h2>
-                <button className="hq-modal-close" onClick={closeWorkflow}><X size={18} /></button>
-              </div>
-              <p className="hq-am-subtitle">{modal.subtitle} · {modal.items.length} items {workflowAction.severity === 'critical' ? 'critical' : ''}</p>
-
-              <div className="hq-am-toolbar">
-                <span className="hq-am-select-label">{modal.selectLabel}</span>
-                <button className="hq-am-select-all" onClick={selectAllActionItems}>
-                  {actionSelectedItems.length === modal.items.length ? 'Deselect All' : 'Select All'}
-                </button>
-              </div>
-
-              <div className="hq-am-list">
-                {modal.items.map(item => (
-                  <div
-                    key={item.id}
-                    className={`hq-am-item ${actionSelectedItems.includes(item.id) ? 'selected' : ''}`}
-                    onClick={() => toggleActionItem(item.id)}
-                  >
-                    <label className="hq-checkbox-wrap" onClick={e => e.stopPropagation()}>
-                      <input type="checkbox" checked={actionSelectedItems.includes(item.id)} onChange={() => toggleActionItem(item.id)} />
-                      <span className="hq-checkbox" />
-                    </label>
-                    <div className="hq-am-item-info">
-                      <div className="hq-am-item-row1">
-                        <span className="hq-am-item-code">{item.code}</span>
-                        <span className={`hq-am-sev hq-am-sev--${item.severity}`}>{item.severity.toUpperCase()}</span>
-                      </div>
-                      <div className="hq-am-item-name">{item.name}</div>
-                      <div className="hq-am-item-supplier">Supplier: {item.supplier}</div>
-                    </div>
-                    <div className="hq-am-item-right">
-                      <div className="hq-am-progress-wrap">
-                        <div className="hq-am-progress-bar">
-                          <div className="hq-am-progress-fill" style={{ width: `${(item.progress / item.progressMax) * 100}%` }} />
-                        </div>
-                        <span className="hq-am-progress-text">{item.progress} / {item.progressMax} min</span>
-                      </div>
-                      <span className="hq-am-units">{item.units}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="hq-am-footer">
-                <button className="hq-am-cancel" onClick={closeWorkflow}>Cancel</button>
-                <button
-                  className="hq-am-submit"
-                  disabled={actionSelectedItems.length === 0}
-                  onClick={submitAction}
-                >
-                  <ShoppingCart size={15} />
-                  {modal.ctaLabel} {actionSelectedItems.length} {actionSelectedItems.length === 1 ? 'item' : 'items'}
-                </button>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* ═══ MESSAGES & BROADCASTS FLYOUT (Snapshot 4 style) ═══ */}
-      {msgPanelOpen && (
-        <div className="hq-msgpanel">
-          <div className="hq-msgpanel-header">
-            <MessageSquare size={18} />
-            <span>Messages & Broadcasts</span>
-            <div className="hq-msgpanel-header-actions">
-              <button className="hq-msgpanel-compose" onClick={() => { setMsgPanelOpen(false); navigate('/command-center/communications'); }}>
-                <Send size={14} />
-              </button>
-              <button className="hq-msgpanel-close" onClick={() => setMsgPanelOpen(false)}>
-                <X size={16} />
-              </button>
-            </div>
-          </div>
-          <button className="hq-msgpanel-new" onClick={() => { setMsgPanelOpen(false); navigate('/command-center/communications'); }}>
-            <Bell size={16} />
-            <span>New Broadcast</span>
-            <ChevronRight size={16} />
-          </button>
-          <div className="hq-msgpanel-list">
-            {MSG_CONTACTS.map(c => (
-              <div key={c.id} className="hq-msgpanel-contact" onClick={() => { setMsgPanelOpen(false); navigate('/command-center/communications'); }}>
-                <div className="hq-msgpanel-avatar">{c.initials}</div>
-                <div className="hq-msgpanel-contact-info">
-                  <span className="hq-msgpanel-name">{c.name}</span>
-                  <span className="hq-msgpanel-role">{c.role}</span>
-                  {c.lastMsg && <span className="hq-msgpanel-lastmsg">{c.lastMsg}</span>}
-                </div>
-                {c.time && <span className="hq-msgpanel-time">{c.time}</span>}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ═══ FLOATING MESSAGE BUTTON ═══ */}
-      <button className="hq-floating-chatbot" onClick={() => setMsgPanelOpen(prev => !prev)} title="Messages & Broadcasts">
-        <MessageSquare size={24} />
-      </button>
     </div>
   );
 };

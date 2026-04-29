@@ -84,6 +84,13 @@ export const SCREEN_TO_PATH: Record<ScreenAccess, string> = {
   user_access_management: '/app-config/user-access',
 };
 
+// Get the default landing route for a user based on their access
+export const getDefaultRouteForAccess = (accessRoutes?: ScreenAccess[]): string => {
+  if (!accessRoutes || accessRoutes.length === 0) return '/store-operations/home';
+  if (accessRoutes.includes('home')) return '/store-operations/home';
+  return SCREEN_TO_PATH[accessRoutes[0]];
+};
+
 // Default access routes per role
 export const ROLE_ACCESS: Record<UserRole, ScreenAccess[]> = {
   ADMIN: [
@@ -96,7 +103,7 @@ export const ROLE_ACCESS: Record<UserRole, ScreenAccess[]> = {
     'ai_copilot', 'operations_queue', 'communications',
   ],
   SM: [
-    'home', 'store_deep_dive',
+    'store_deep_dive',
     'ai_copilot', 'operations_queue', 'communications',
   ],
   HQ: [

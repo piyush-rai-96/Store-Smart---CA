@@ -2713,3 +2713,147 @@
   .ocv-broadcast-tabs { padding: 0 12px; }
   .ocv-zone { padding: 14px; }
 }
+
+/* ==============================
+   SM — Dual Broadcast Feeds (HQ | DM)
+   Replicates DM Home "HQ Broadcasts" card visuals so SM
+   sees identical UI on Store Deep Dive (view-only).
+   ============================== */
+.sc-sm-broadcasts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 20px 0 8px 0;
+}
+
+.sc-sm-broadcast-card.hq-broadcasts-card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+}
+
+.sc-sm-broadcast-header.hq-broadcasts-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: #ffffff;
+  border-bottom: 1px solid #f1f5f9;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.sc-sm-broadcast-header.hq-broadcasts-header:hover { background: #f8fafc; }
+.sc-sm-broadcasts .expand-icon {
+  color: #64748b;
+  transition: transform 0.2s ease;
+}
+.sc-sm-broadcasts .expand-icon.expanded { transform: rotate(0deg); }
+.sc-sm-broadcasts .expand-icon:not(.expanded) { transform: rotate(-90deg); }
+
+.sc-sm-broadcasts .hq-broadcasts-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.2px;
+}
+.sc-sm-broadcasts .hq-broadcasts-title svg { color: #6366f1; }
+
+.sc-sm-broadcasts .hq-broadcast-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: #eef2ff;
+  color: #4f46e5;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.sc-sm-broadcasts .hq-broadcasts-body { overflow: visible; }
+.sc-sm-broadcasts .hq-broadcasts-list { display: flex; flex-direction: column; }
+
+.sc-sm-broadcast-item.hq-broadcast-item {
+  padding: 14px 20px;
+  border-bottom: 1px solid #f1f5f9;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.sc-sm-broadcast-item.hq-broadcast-item:last-child { border-bottom: none; }
+.sc-sm-broadcast-item.hq-broadcast-item:hover { background: #f8fafc; }
+.sc-sm-broadcast-item.hq-broadcast-item.unread { background: #fafafe; }
+.sc-sm-broadcast-item.hq-broadcast-item.critical {
+  background: #fffbfb;
+  border-left: 3px solid #e54d4d;
+  padding-left: 17px;
+}
+.sc-sm-broadcast-item.hq-broadcast-item.critical:hover { background: #fef5f5; }
+
+.sc-sm-broadcasts .hq-broadcast-priority-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
+}
+.sc-sm-broadcasts .hq-broadcast-priority-badge.critical {
+  background: #fecaca;
+  color: #dc2626;
+}
+
+.sc-sm-broadcasts .hq-broadcast-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+.sc-sm-broadcasts .hq-broadcast-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+  letter-spacing: -0.1px;
+  line-height: 1.35;
+}
+.sc-sm-broadcasts .hq-unread-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #6366f1;
+  flex-shrink: 0;
+}
+.sc-sm-broadcasts .hq-broadcast-desc {
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.45;
+  margin: 0 0 6px 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.sc-sm-broadcasts .hq-broadcast-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+}
+.sc-sm-broadcasts .hq-broadcast-sender { color: #6366f1; font-weight: 500; }
+.sc-sm-broadcasts .hq-broadcast-time { color: #94a3b8; }
+
+@media (max-width: 900px) {
+  .sc-sm-broadcasts { grid-template-columns: 1fr; }
+}

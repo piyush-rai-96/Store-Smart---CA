@@ -1596,3 +1596,77 @@
   .tc-search-bar { max-width: 100%; }
   .tc-toolbar-right { flex-wrap: wrap; }
 }
+
+/* ── Prefill from Alert (Open in Operations Queue) ── */
+.tc-prefill-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(2px);
+}
+.tc-prefill-card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 28px 32px;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  max-width: 420px;
+  text-align: center;
+}
+.tc-prefill-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #4f46e5;
+  border-radius: 50%;
+  animation: tc-prefill-spin 0.9s linear infinite;
+}
+@keyframes tc-prefill-spin { to { transform: rotate(360deg); } }
+.tc-prefill-title { font-size: 14px; font-weight: 600; color: #0f172a; }
+.tc-prefill-sub { font-size: 12px; color: #64748b; line-height: 1.5; }
+
+.tc-prefill-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  margin: 0 0 12px 0;
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  border-radius: 10px;
+}
+.tc-prefill-banner-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #dcfce7;
+  color: #15803d;
+  flex-shrink: 0;
+}
+.tc-prefill-banner-body { flex: 1; min-width: 0; }
+.tc-prefill-banner-title { font-size: 13px; font-weight: 600; color: #14532d; }
+.tc-prefill-banner-sub { font-size: 12px; color: #15803d; margin-top: 2px; }
+.tc-prefill-banner-close {
+  background: transparent; border: none; color: #15803d;
+  cursor: pointer; padding: 4px; border-radius: 6px;
+}
+.tc-prefill-banner-close:hover { background: #dcfce7; }
+
+.tc-table-row--prefilled {
+  background: #fefce8;
+  animation: tc-prefill-flash 1.6s ease-out;
+}
+@keyframes tc-prefill-flash {
+  0% { background: #fef08a; }
+  100% { background: #fefce8; }
+}

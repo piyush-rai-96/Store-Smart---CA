@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { ROUTES, SCREEN_TO_PATH } from '../types';
+import { ROUTES, SCREEN_TO_PATH, getDefaultRouteForAccess } from '../types';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -30,7 +30,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     if (isProtectedPath) {
       const hasAccess = allowedPaths.some(p => currentPath.startsWith(p));
       if (!hasAccess) {
-        return <Navigate to={ROUTES.STORE_OPS_HOME} replace />;
+        return <Navigate to={getDefaultRouteForAccess(user.accessRoutes)} replace />;
       }
     }
   }

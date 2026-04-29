@@ -16,7 +16,6 @@ import {
   Calendar,
   RefreshCw,
   Search,
-  Bell,
   Download,
   MapPin,
   Megaphone,
@@ -66,14 +65,14 @@ type MomentumType = 'Improving' | 'Slipping' | 'Flat';
 
 // Mock Data
 const mockStores: StoreData[] = [
-  { id: '1', rank: 1, storeNumber: '2034', storeName: 'Downtown Plaza', dpi: 94, dpiTier: 'Excellence', netSales: 245000, netSalesVar: 8.2, seaScore: 96, vocSatisfied: 92, topVocIssue: 'Wait times', topSeaIssue: '-', trend: 'up', status: 'excellent' },
-  { id: '2', rank: 2, storeNumber: '1876', storeName: 'Riverside Mall', dpi: 91, dpiTier: 'Excellence', netSales: 198000, netSalesVar: 5.4, seaScore: 94, vocSatisfied: 89, topVocIssue: 'Product availability', topSeaIssue: '-', trend: 'up', status: 'excellent' },
-  { id: '3', rank: 3, storeNumber: '3421', storeName: 'Central Station', dpi: 85, dpiTier: 'Stable', netSales: 176000, netSalesVar: 2.1, seaScore: 88, vocSatisfied: 85, topVocIssue: 'Staff friendliness', topSeaIssue: 'Signage', trend: 'flat', status: 'stable' },
-  { id: '4', rank: 4, storeNumber: '2198', storeName: 'Westfield Center', dpi: 82, dpiTier: 'Stable', netSales: 165000, netSalesVar: -1.2, seaScore: 85, vocSatisfied: 82, topVocIssue: 'Checkout speed', topSeaIssue: 'Planogram', trend: 'down', status: 'stable' },
-  { id: '5', rank: 5, storeNumber: '4532', storeName: 'Harbor View', dpi: 78, dpiTier: 'Stable', netSales: 142000, netSalesVar: -3.5, seaScore: 82, vocSatisfied: 78, topVocIssue: 'Product quality', topSeaIssue: 'Cleanliness', trend: 'down', status: 'warning' },
-  { id: '6', rank: 6, storeNumber: '1234', storeName: 'Oak Street', dpi: 72, dpiTier: 'AtRisk', netSales: 128000, netSalesVar: -6.8, seaScore: 75, vocSatisfied: 71, topVocIssue: 'Staff availability', topSeaIssue: 'Planogram', trend: 'down', status: 'warning' },
-  { id: '7', rank: 7, storeNumber: '5678', storeName: 'Pine Grove', dpi: 65, dpiTier: 'AtRisk', netSales: 112000, netSalesVar: -9.2, seaScore: 68, vocSatisfied: 65, topVocIssue: 'Long queues', topSeaIssue: 'Safety', trend: 'down', status: 'critical' },
-  { id: '8', rank: 8, storeNumber: '9012', storeName: 'Maple Heights', dpi: 58, dpiTier: 'Crisis', netSales: 95000, netSalesVar: -12.4, seaScore: 62, vocSatisfied: 58, topVocIssue: 'Overall experience', topSeaIssue: 'Multiple', trend: 'down', status: 'critical' },
+  { id: '1', rank: 1, storeNumber: '2034', storeName: 'Nashville Flagship', dpi: 94, dpiTier: 'Excellence', netSales: 245000, netSalesVar: 8.2, seaScore: 96, vocSatisfied: 92, topVocIssue: 'Wait times', topSeaIssue: '-', trend: 'up', status: 'excellent' },
+  { id: '2', rank: 2, storeNumber: '1876', storeName: 'Memphis Central', dpi: 91, dpiTier: 'Excellence', netSales: 198000, netSalesVar: 5.4, seaScore: 94, vocSatisfied: 89, topVocIssue: 'Product availability', topSeaIssue: '-', trend: 'up', status: 'excellent' },
+  { id: '3', rank: 3, storeNumber: '3421', storeName: 'Knoxville East', dpi: 85, dpiTier: 'Stable', netSales: 176000, netSalesVar: 2.1, seaScore: 88, vocSatisfied: 85, topVocIssue: 'Staff friendliness', topSeaIssue: 'Signage', trend: 'flat', status: 'stable' },
+  { id: '4', rank: 4, storeNumber: '2198', storeName: 'Chattanooga Riverside', dpi: 82, dpiTier: 'Stable', netSales: 165000, netSalesVar: -1.2, seaScore: 85, vocSatisfied: 82, topVocIssue: 'Checkout speed', topSeaIssue: 'Planogram', trend: 'down', status: 'stable' },
+  { id: '5', rank: 5, storeNumber: '4532', storeName: 'Murfreesboro Plaza', dpi: 78, dpiTier: 'Stable', netSales: 142000, netSalesVar: -3.5, seaScore: 82, vocSatisfied: 78, topVocIssue: 'Product quality', topSeaIssue: 'Cleanliness', trend: 'down', status: 'warning' },
+  { id: '6', rank: 6, storeNumber: '1234', storeName: 'Franklin Town Center', dpi: 72, dpiTier: 'AtRisk', netSales: 128000, netSalesVar: -6.8, seaScore: 75, vocSatisfied: 71, topVocIssue: 'Staff availability', topSeaIssue: 'Planogram', trend: 'down', status: 'warning' },
+  { id: '7', rank: 7, storeNumber: '5678', storeName: 'Clarksville Crossing', dpi: 65, dpiTier: 'AtRisk', netSales: 112000, netSalesVar: -9.2, seaScore: 68, vocSatisfied: 65, topVocIssue: 'Long queues', topSeaIssue: 'Safety', trend: 'down', status: 'critical' },
+  { id: '8', rank: 8, storeNumber: '9012', storeName: 'Johnson City Mall', dpi: 58, dpiTier: 'Crisis', netSales: 95000, netSalesVar: -12.4, seaScore: 62, vocSatisfied: 58, topVocIssue: 'Overall experience', topSeaIssue: 'Multiple', trend: 'down', status: 'critical' },
 ];
 
 // Audit Compliance Heatmap Data
@@ -110,7 +109,7 @@ const HQ_DISTRICT_OPTIONS = [
 
 // Generate district-varied store data
 const DISTRICT_STORE_NAMES: string[][] = [
-  ['Downtown Plaza', 'Riverside Mall', 'Central Station', 'Westfield Center', 'Harbor View', 'Oak Street', 'Pine Grove', 'Maple Heights'],
+  ['Nashville Flagship', 'Memphis Central', 'Knoxville East', 'Chattanooga Riverside', 'Murfreesboro Plaza', 'Franklin Town Center', 'Clarksville Crossing', 'Johnson City Mall'],
   ['Peachtree Plaza', 'Savannah Square', 'Augusta Mall', 'Athens Center', 'Macon Point', 'Columbus Walk'],
   ['Charlotte Hub', 'Raleigh Court', 'Durham Heights', 'Wilmington Bay', 'Greensboro Lane', 'Asheville Park', 'Chapel Hill'],
   ['Miami Central', 'Orlando Gateway', 'Tampa Bay Mall', 'Jacksonville Hub', 'Fort Lauderdale', 'St. Petersburg', 'Tallahassee', 'Gainesville', 'Naples Point'],
@@ -831,14 +830,29 @@ export const DistrictIntelligence: React.FC = () => {
   // Heatmap cell detail modal
   const [heatmapDetail, setHeatmapDetail] = useState<{ storeNumber: string; storeName: string; category: string; score: number; detail: AuditCellDetail; skill: string; skillLogic: string } | null>(null);
 
-  // Chat Window States (same as Home Screen)
-  const [showChatWindow, setShowChatWindow] = useState(false);
-  const [chatExpanded, setChatExpanded] = useState(false);
-  const [selectedChatContact, setSelectedChatContact] = useState<string | null>(null);
-  const [chatMessage, setChatMessage] = useState('');
-  const [showBroadcastComposer, setShowBroadcastComposer] = useState(false);
-  const [broadcastRecipients, setBroadcastRecipients] = useState<string[]>([]);
-  const [broadcastMessage, setBroadcastMessage] = useState('');
+  // Create Broadcast Wizard state
+  const [showBroadcastWizard, setShowBroadcastWizard] = useState(false);
+  const [bwStep, setBwStep] = useState<1 | 2 | 3>(1);
+  const [bwAudience, setBwAudience] = useState<'all-stores' | 'specific-stores' | 'managers'>('all-stores');
+  const [bwSelectedStores, setBwSelectedStores] = useState<string[]>([]);
+  const [bwSelectedManagers, setBwSelectedManagers] = useState<string[]>([]);
+  const [bwPriority, setBwPriority] = useState<'Normal' | 'Important' | 'Urgent'>('Normal');
+  const [bwCategory, setBwCategory] = useState<'Operations' | 'Safety' | 'Compliance' | 'Announcement'>('Operations');
+  const [bwSubject, setBwSubject] = useState('');
+  const [bwMessage, setBwMessage] = useState('');
+  const [bwSending, setBwSending] = useState(false);
+  const openBroadcastWizard = () => {
+    setBwStep(1);
+    setBwAudience('all-stores');
+    setBwSelectedStores([]);
+    setBwSelectedManagers([]);
+    setBwPriority('Normal');
+    setBwCategory('Operations');
+    setBwSubject('');
+    setBwMessage('');
+    setBwSending(false);
+    setShowBroadcastWizard(true);
+  };
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showVocPanel, setShowVocPanel] = useState(false);
   const [showSeaPanel, setShowSeaPanel] = useState(false);
@@ -1686,7 +1700,6 @@ export const DistrictIntelligence: React.FC = () => {
           <AIDailyBrief
             brief={activeBrief}
             userName={user?.name}
-            metaSuffix={`${activeTriageItems.length} triage items`}
             heightStyle={briefHeightStyle}
           />
         </div>
@@ -1702,7 +1715,7 @@ export const DistrictIntelligence: React.FC = () => {
             </div>
             <p className="bca-subtitle">Communication effectiveness, compliance gaps, and engagement insights</p>
           </div>
-          <button className="bca-create-btn" onClick={() => { setShowChatWindow(true); setChatExpanded(true); setShowBroadcastComposer(true); }}>
+          <button className="bca-create-btn" onClick={openBroadcastWizard}>
             <Megaphone size={13} /> Create Broadcast
           </button>
         </div>
@@ -2135,7 +2148,6 @@ export const DistrictIntelligence: React.FC = () => {
                 <th className="th-voc th-sortable" onClick={() => handleLeaderboardSort('voc')}><span>VoC %</span><SortIcon col="voc" /></th>
                 <th className="th-issue th-sortable" onClick={() => handleLeaderboardSort('vocIssue')}><span>Top VoC Issue</span><SortIcon col="vocIssue" /></th>
                 <th className="th-issue th-sortable" onClick={() => handleLeaderboardSort('seaIssue')}><span>Top SEA Issue</span><SortIcon col="seaIssue" /></th>
-                <th className="th-trend th-sortable" onClick={() => handleLeaderboardSort('trend')}><span>Trend</span><SortIcon col="trend" /></th>
                 <th className="th-status th-sortable" onClick={() => handleLeaderboardSort('status')}><span>Status</span><SortIcon col="status" /></th>
                 {!isHQ && <th className="th-action"></th>}
               </tr>
@@ -2143,7 +2155,7 @@ export const DistrictIntelligence: React.FC = () => {
             <tbody>
               {filteredStores.length === 0 && (
                 <tr>
-                  <td colSpan={11} className="leaderboard-empty">
+                  <td colSpan={10} className="leaderboard-empty">
                     No stores match your search or filters.
                   </td>
                 </tr>
@@ -2191,13 +2203,6 @@ export const DistrictIntelligence: React.FC = () => {
                   </td>
                   <td className="td-issue">{store.topVocIssue || '-'}</td>
                   <td className="td-issue">{store.topSeaIssue || '-'}</td>
-                  <td className="td-trend">
-                    <span className={`trend-icon ${store.trend}`}>
-                      {store.trend === 'up' && <TrendingUp size={14} />}
-                      {store.trend === 'down' && <TrendingDown size={14} />}
-                      {store.trend === 'flat' && <Minus size={14} />}
-                    </span>
-                  </td>
                   <td className="td-status">
                     <span className={`status-pill ${store.status.toLowerCase()}`}>{store.status}</span>
                   </td>
@@ -2647,226 +2652,253 @@ export const DistrictIntelligence: React.FC = () => {
         </>
       )}
 
-      {/* Floating Chat Button */}
-      <button 
-        className="floating-chat-btn"
-        onClick={() => setShowChatWindow(!showChatWindow)}
-        aria-label="Messages & Broadcasts"
-        title="Messages & Broadcasts"
-      >
-        <MessageSquare size={24} />
-      </button>
-
-      {/* Floating Chat Window - Same as Home Screen */}
-      {showChatWindow && (
-        <div className={`chat-window ${chatExpanded ? 'expanded' : ''}`}>
-          <div className="chat-window-header">
-            <div className="chat-header-title">
-              <MessageSquare size={18} />
-              <h3>Messages & Broadcasts</h3>
-            </div>
-            <div className="chat-header-actions">
-              <button 
-                className="chat-expand-btn" 
-                onClick={() => setChatExpanded(!chatExpanded)}
-                title={chatExpanded ? 'Collapse' : 'Expand'}
-              >
-                {chatExpanded ? <Minus size={16} /> : <ExternalLink size={16} />}
-              </button>
-              <button className="chat-close-btn" onClick={() => {
-                setShowChatWindow(false);
-                setChatExpanded(false);
-                setShowBroadcastComposer(false);
-              }}>
-                <X size={18} />
-              </button>
-            </div>
-          </div>
-          
-          <div className={`chat-window-body ${chatExpanded ? 'split-view' : ''}`}>
-            {/* Left Panel - Messages & Create Broadcast */}
-            <div className="chat-left-panel">
-              {showBroadcastComposer ? (
-                /* Broadcast Composer */
-                <div className="broadcast-composer">
-                  <div className="broadcast-composer-header">
-                    <button 
-                      className="chat-back-btn"
-                      onClick={() => {
-                        setShowBroadcastComposer(false);
-                        setBroadcastRecipients([]);
-                        setBroadcastMessage('');
-                      }}
-                    >
-                      <ChevronRight size={18} style={{ transform: 'rotate(180deg)' }} />
-                    </button>
-                    <div className="broadcast-composer-title">
-                      <Bell size={18} />
-                      <span>New Broadcast</span>
-                    </div>
-                  </div>
-                  
-                  <div className="broadcast-recipients-section">
-                    <div className="broadcast-section-label">
-                      <Users size={14} />
-                      <span>Select Recipients ({broadcastRecipients.length} selected)</span>
-                    </div>
-                    <div className="broadcast-recipients-list">
-                      {teamMembers.map((member) => (
-                        <div 
-                          key={member.id}
-                          className={`broadcast-recipient-item ${broadcastRecipients.includes(member.id) ? 'selected' : ''}`}
-                          onClick={() => {
-                            if (broadcastRecipients.includes(member.id)) {
-                              setBroadcastRecipients(prev => prev.filter(id => id !== member.id));
-                            } else {
-                              setBroadcastRecipients(prev => [...prev, member.id]);
-                            }
-                          }}
-                        >
-                          <div className={`recipient-checkbox ${broadcastRecipients.includes(member.id) ? 'checked' : ''}`}>
-                            {broadcastRecipients.includes(member.id) && <Check size={12} />}
-                          </div>
-                          <div className="chat-contact-avatar small">{member.avatar}</div>
-                          <div className="recipient-info">
-                            <span className="recipient-name">{member.name}</span>
-                            <span className="recipient-role">{member.role}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    <button 
-                      className="select-all-recipients-btn"
-                      onClick={() => {
-                        if (broadcastRecipients.length === teamMembers.length) {
-                          setBroadcastRecipients([]);
-                        } else {
-                          setBroadcastRecipients(teamMembers.map(m => m.id));
-                        }
-                      }}
-                    >
-                      {broadcastRecipients.length === teamMembers.length ? 'Deselect All' : 'Select All'}
-                    </button>
-                  </div>
-                  
-                  <div className="broadcast-message-section">
-                    <div className="broadcast-section-label">
-                      <MessageSquare size={14} />
-                      <span>Broadcast Message</span>
-                    </div>
-                    <textarea 
-                      placeholder="Type your broadcast message..."
-                      value={broadcastMessage}
-                      onChange={(e) => setBroadcastMessage(e.target.value)}
-                      rows={4}
-                    />
-                  </div>
-                  
-                  <div className="broadcast-actions">
-                    <button 
-                      className="broadcast-send-btn"
-                      disabled={!broadcastMessage.trim() || broadcastRecipients.length === 0}
-                      onClick={() => {
-                        const recipientCount = broadcastRecipients.length;
-                        showToast(`✓ Broadcast sent to ${recipientCount} recipient${recipientCount > 1 ? 's' : ''}`);
-                        setBroadcastMessage('');
-                        setBroadcastRecipients([]);
-                        setShowBroadcastComposer(false);
-                      }}
-                    >
-                      <Send size={16} />
-                      Send Broadcast ({broadcastRecipients.length})
-                    </button>
-                  </div>
-                </div>
-              ) : !selectedChatContact ? (
-                /* Contacts List */
-                <div className="chat-contacts-list">
-                  <button 
-                    className={`new-broadcast-btn ${chatExpanded ? 'compact' : ''}`}
-                    onClick={() => setShowBroadcastComposer(true)}
-                  >
-                    {chatExpanded ? (
-                      <>
-                        <span className="plus-icon">+</span>
-                        <span>Create Broadcast</span>
-                      </>
-                    ) : (
-                      <>
-                        <Bell size={16} />
-                        <span>New Broadcast</span>
-                        <ChevronRight size={16} />
-                      </>
-                    )}
-                  </button>
-                  {teamMembers.map((member) => (
-                    <div 
-                      key={member.id} 
-                      className="chat-contact-item"
-                      onClick={() => setSelectedChatContact(member.id)}
-                    >
-                      <div className="chat-contact-avatar">{member.avatar}</div>
-                      <div className="chat-contact-info">
-                        <span className="chat-contact-name">{member.name}</span>
-                        <span className="chat-contact-role">{member.role}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                /* Conversation View */
-                <div className="chat-conversation">
-                  <div className="chat-conversation-header">
-                    <button 
-                      className="chat-back-btn"
-                      onClick={() => setSelectedChatContact(null)}
-                    >
-                      <ChevronRight size={18} style={{ transform: 'rotate(180deg)' }} />
-                    </button>
-                    <div className="chat-contact-avatar small">
-                      {teamMembers.find(m => m.id === selectedChatContact)?.avatar}
-                    </div>
-                    <div className="chat-conversation-info">
-                      <span className="chat-conversation-name">
-                        {teamMembers.find(m => m.id === selectedChatContact)?.name}
-                      </span>
-                      <span className="chat-conversation-status">Online</span>
-                    </div>
-                  </div>
-                  
-                  <div className="chat-messages">
-                    <div className="chat-message incoming">
-                      <div className="message-content">
-                        <p>Hi! How can I help you today?</p>
-                        <span className="message-time">2:30 PM</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="chat-input-area">
-                    <input 
-                      type="text" 
-                      placeholder="Type a message..."
-                      value={chatMessage}
-                      onChange={(e) => setChatMessage(e.target.value)}
-                    />
-                    <button className="chat-send-btn">
-                      <Send size={16} />
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Toast Notification */}
       {toastMessage && (
         <div className="toast-notification">
           {toastMessage}
         </div>
       )}
+
+      {/* ═══ Create Broadcast Wizard (UAM-style multi-step) ═══ */}
+      {showBroadcastWizard && (() => {
+        const totalStores = activeStores.length;
+        const recipientCount =
+          bwAudience === 'all-stores' ? totalStores :
+          bwAudience === 'specific-stores' ? bwSelectedStores.length :
+          bwSelectedManagers.length;
+        const canAdvanceStep1 =
+          bwAudience === 'all-stores' ||
+          (bwAudience === 'specific-stores' && bwSelectedStores.length > 0) ||
+          (bwAudience === 'managers' && bwSelectedManagers.length > 0);
+        const canSend = bwSubject.trim().length > 0 && bwMessage.trim().length > 0 && recipientCount > 0;
+        const audienceLabel =
+          bwAudience === 'all-stores' ? `All Stores in District (${totalStores})` :
+          bwAudience === 'specific-stores' ? `${bwSelectedStores.length} Specific Store${bwSelectedStores.length === 1 ? '' : 's'}` :
+          `${bwSelectedManagers.length} District Manager${bwSelectedManagers.length === 1 ? '' : 's'}`;
+
+        return (
+          <div className="bw-overlay" onClick={() => !bwSending && setShowBroadcastWizard(false)}>
+            <div className="bw-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="bw-header">
+                <div className="bw-header-icon">
+                  <Megaphone size={18} />
+                </div>
+                <div className="bw-header-text">
+                  <h2>Create Broadcast</h2>
+                  <p>Send a broadcast to selected stores or managers in your district</p>
+                </div>
+                <button className="bw-close" onClick={() => !bwSending && setShowBroadcastWizard(false)} aria-label="Close">
+                  <X size={16} />
+                </button>
+              </div>
+
+              {/* Stepper */}
+              <div className="bw-stepper">
+                {[
+                  { n: 1, label: 'Audience' },
+                  { n: 2, label: 'Message' },
+                  { n: 3, label: 'Review & Send' },
+                ].map((s, i, arr) => (
+                  <React.Fragment key={s.n}>
+                    <div className={`bw-step ${bwStep === s.n ? 'active' : ''} ${bwStep > s.n ? 'done' : ''}`}>
+                      <div className="bw-step-dot">{bwStep > s.n ? <Check size={12} /> : s.n}</div>
+                      <span className="bw-step-label">{s.label}</span>
+                    </div>
+                    {i < arr.length - 1 && <div className={`bw-step-connector ${bwStep > s.n ? 'done' : ''}`} />}
+                  </React.Fragment>
+                ))}
+              </div>
+
+              <div className="bw-body">
+                {/* ── Step 1: Audience ── */}
+                {bwStep === 1 && (
+                  <div className="bw-step-content">
+                    <div className="bw-field-label">Who should receive this broadcast?</div>
+                    <div className="bw-audience-options">
+                      <div className={`bw-audience-card ${bwAudience === 'all-stores' ? 'selected' : ''}`} onClick={() => setBwAudience('all-stores')}>
+                        <div className="bw-audience-radio">{bwAudience === 'all-stores' && <div className="bw-audience-dot" />}</div>
+                        <div className="bw-audience-body">
+                          <div className="bw-audience-title"><Store size={14} /> All Stores in District</div>
+                          <div className="bw-audience-desc">Send to every store ({totalStores}) and their managers</div>
+                        </div>
+                      </div>
+                      <div className={`bw-audience-card ${bwAudience === 'specific-stores' ? 'selected' : ''}`} onClick={() => setBwAudience('specific-stores')}>
+                        <div className="bw-audience-radio">{bwAudience === 'specific-stores' && <div className="bw-audience-dot" />}</div>
+                        <div className="bw-audience-body">
+                          <div className="bw-audience-title"><Filter size={14} /> Specific Stores</div>
+                          <div className="bw-audience-desc">Pick one or more stores from your district</div>
+                        </div>
+                      </div>
+                      <div className={`bw-audience-card ${bwAudience === 'managers' ? 'selected' : ''}`} onClick={() => setBwAudience('managers')}>
+                        <div className="bw-audience-radio">{bwAudience === 'managers' && <div className="bw-audience-dot" />}</div>
+                        <div className="bw-audience-body">
+                          <div className="bw-audience-title"><Users size={14} /> District Managers Only</div>
+                          <div className="bw-audience-desc">Send to selected store/area managers</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {bwAudience === 'specific-stores' && (
+                      <div className="bw-selector">
+                        <div className="bw-selector-header">
+                          <span className="bw-selector-title">Select stores ({bwSelectedStores.length}/{totalStores})</span>
+                          <button className="bw-selector-toggle" onClick={() =>
+                            setBwSelectedStores(bwSelectedStores.length === totalStores ? [] : activeStores.map(s => s.storeNumber))
+                          }>{bwSelectedStores.length === totalStores ? 'Clear All' : 'Select All'}</button>
+                        </div>
+                        <div className="bw-selector-list">
+                          {activeStores.map(s => {
+                            const selected = bwSelectedStores.includes(s.storeNumber);
+                            return (
+                              <div key={s.storeNumber} className={`bw-selector-item ${selected ? 'selected' : ''}`} onClick={() =>
+                                setBwSelectedStores(prev => selected ? prev.filter(id => id !== s.storeNumber) : [...prev, s.storeNumber])
+                              }>
+                                <div className={`bw-checkbox ${selected ? 'checked' : ''}`}>{selected && <Check size={11} />}</div>
+                                <div className="bw-selector-item-body">
+                                  <span className="bw-selector-item-title">{s.storeName} #{s.storeNumber}</span>
+                                  <span className="bw-selector-item-sub">{s.dpiTier} · DPI {s.dpi} · {s.status}</span>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {bwAudience === 'managers' && (
+                      <div className="bw-selector">
+                        <div className="bw-selector-header">
+                          <span className="bw-selector-title">Select managers ({bwSelectedManagers.length}/{teamMembers.length})</span>
+                          <button className="bw-selector-toggle" onClick={() =>
+                            setBwSelectedManagers(bwSelectedManagers.length === teamMembers.length ? [] : teamMembers.map(m => m.id))
+                          }>{bwSelectedManagers.length === teamMembers.length ? 'Clear All' : 'Select All'}</button>
+                        </div>
+                        <div className="bw-selector-list">
+                          {teamMembers.map(m => {
+                            const selected = bwSelectedManagers.includes(m.id);
+                            return (
+                              <div key={m.id} className={`bw-selector-item ${selected ? 'selected' : ''}`} onClick={() =>
+                                setBwSelectedManagers(prev => selected ? prev.filter(id => id !== m.id) : [...prev, m.id])
+                              }>
+                                <div className={`bw-checkbox ${selected ? 'checked' : ''}`}>{selected && <Check size={11} />}</div>
+                                <div className="bw-selector-item-body">
+                                  <span className="bw-selector-item-title">{m.name}</span>
+                                  <span className="bw-selector-item-sub">{m.role}</span>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* ── Step 2: Message ── */}
+                {bwStep === 2 && (
+                  <div className="bw-step-content">
+                    <div className="bw-grid-2">
+                      <div className="bw-field">
+                        <label className="bw-field-label">Category</label>
+                        <div className="bw-chip-group">
+                          {(['Operations', 'Safety', 'Compliance', 'Announcement'] as const).map(c => (
+                            <button key={c} className={`bw-chip ${bwCategory === c ? 'active' : ''}`} onClick={() => setBwCategory(c)}>{c}</button>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="bw-field">
+                        <label className="bw-field-label">Priority</label>
+                        <div className="bw-chip-group">
+                          {(['Normal', 'Important', 'Urgent'] as const).map(p => (
+                            <button key={p} className={`bw-chip bw-chip--${p.toLowerCase()} ${bwPriority === p ? 'active' : ''}`} onClick={() => setBwPriority(p)}>{p}</button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bw-field">
+                      <label className="bw-field-label">Subject <span className="bw-required">*</span></label>
+                      <input className="bw-input" type="text" placeholder="e.g., Inventory safety-stock reorder — action required" value={bwSubject} onChange={(e) => setBwSubject(e.target.value)} maxLength={120} />
+                      <div className="bw-field-hint">{bwSubject.length}/120</div>
+                    </div>
+                    <div className="bw-field">
+                      <label className="bw-field-label">Message <span className="bw-required">*</span></label>
+                      <textarea className="bw-textarea" rows={6} placeholder="Type your broadcast message..." value={bwMessage} onChange={(e) => setBwMessage(e.target.value)} maxLength={1000} />
+                      <div className="bw-field-hint">{bwMessage.length}/1000</div>
+                    </div>
+                  </div>
+                )}
+
+                {/* ── Step 3: Review ── */}
+                {bwStep === 3 && (
+                  <div className="bw-step-content">
+                    <div className="bw-review">
+                      <div className="bw-review-row">
+                        <span className="bw-review-label">Audience</span>
+                        <span className="bw-review-value">{audienceLabel}</span>
+                      </div>
+                      <div className="bw-review-row">
+                        <span className="bw-review-label">Recipients</span>
+                        <span className="bw-review-value"><strong>{recipientCount}</strong> {bwAudience === 'managers' ? 'manager(s)' : 'store(s)'}</span>
+                      </div>
+                      <div className="bw-review-row">
+                        <span className="bw-review-label">Category</span>
+                        <span className="bw-review-value">{bwCategory}</span>
+                      </div>
+                      <div className="bw-review-row">
+                        <span className="bw-review-label">Priority</span>
+                        <span className={`bw-review-priority bw-chip--${bwPriority.toLowerCase()}`}>{bwPriority}</span>
+                      </div>
+                      <div className="bw-review-row bw-review-row--stacked">
+                        <span className="bw-review-label">Subject</span>
+                        <span className="bw-review-value">{bwSubject || <em className="bw-review-empty">(not set)</em>}</span>
+                      </div>
+                      <div className="bw-review-row bw-review-row--stacked">
+                        <span className="bw-review-label">Message</span>
+                        <div className="bw-review-body">{bwMessage || <em className="bw-review-empty">(not set)</em>}</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer */}
+              <div className="bw-footer">
+                <div className="bw-footer-meta">
+                  {recipientCount > 0 && <><Users size={13} /> Will reach <strong>{recipientCount}</strong> recipient{recipientCount === 1 ? '' : 's'}</>}
+                </div>
+                <div className="bw-footer-actions">
+                  {bwStep > 1 && (
+                    <button className="bw-btn bw-btn--ghost" onClick={() => setBwStep((bwStep - 1) as 1 | 2 | 3)} disabled={bwSending}>Back</button>
+                  )}
+                  {bwStep < 3 && (
+                    <button
+                      className="bw-btn bw-btn--primary"
+                      onClick={() => setBwStep((bwStep + 1) as 1 | 2 | 3)}
+                      disabled={bwStep === 1 ? !canAdvanceStep1 : !(bwSubject.trim() && bwMessage.trim())}
+                    >Continue <ChevronRight size={14} /></button>
+                  )}
+                  {bwStep === 3 && (
+                    <button
+                      className="bw-btn bw-btn--primary"
+                      disabled={!canSend || bwSending}
+                      onClick={() => {
+                        setBwSending(true);
+                        setTimeout(() => {
+                          setShowBroadcastWizard(false);
+                          setBwSending(false);
+                          showToast(`✓ Broadcast sent to ${recipientCount} ${bwAudience === 'managers' ? 'manager(s)' : 'store(s)'}`);
+                        }, 1000);
+                      }}
+                    >
+                      {bwSending ? <><div className="bw-spinner" /> Sending…</> : <><Send size={14} /> Send Broadcast</>}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* VoC Investigation Panel */}
       {showVocPanel && (
@@ -2921,9 +2953,7 @@ export const DistrictIntelligence: React.FC = () => {
                 </button>
                 <button className="action-btn secondary" onClick={() => {
                   setShowVocPanel(false);
-                  setShowChatWindow(true);
-                  setChatExpanded(true);
-                  setShowBroadcastComposer(true);
+                  openBroadcastWizard();
                 }}>
                   Send Broadcast
                   <ChevronRight size={14} />
@@ -3052,9 +3082,7 @@ export const DistrictIntelligence: React.FC = () => {
                     </button>
                     <button className="action-btn tertiary" onClick={() => {
                       setShowTriageDetail(null);
-                      setShowChatWindow(true);
-                      setChatExpanded(true);
-                      setShowBroadcastComposer(true);
+                      openBroadcastWizard();
                     }}>
                       <Megaphone size={14} />
                       Send Broadcast
@@ -3215,9 +3243,7 @@ export const DistrictIntelligence: React.FC = () => {
                       </button>
                       <button className="action-btn tertiary" onClick={() => {
                         setShowTriageDetail(null);
-                        setShowChatWindow(true);
-                        setChatExpanded(true);
-                        setShowBroadcastComposer(true);
+                        openBroadcastWizard();
                       }}>
                         <Megaphone size={14} />
                         Send Broadcast

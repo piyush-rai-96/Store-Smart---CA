@@ -3,14 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { Button, Card } from 'impact-ui/dist/components';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { ROUTES } from '../types';
+import { getDefaultRouteForAccess } from '../types';
 import { AUTH_ERRORS } from '../constants/auth';
 import { ASSETS, APP_CONFIG } from '../constants/app';
 import './Login.css';
 
 export const Login: React.FC = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, allUsers } = useAuth();
 
   // Form state
   const [email, setEmail] = useState('');
@@ -33,8 +33,9 @@ export const Login: React.FC = () => {
     const success = login(email, password);
 
     if (success) {
-      // Redirect to home on success
-      navigate(ROUTES.STORE_OPS_HOME);
+      // Redirect to the user's default landing route based on their access
+      const loggedInUser = allUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
+      navigate(getDefaultRouteForAccess(loggedInUser?.accessRoutes));
     } else {
       // Show error on failure
       setError(AUTH_ERRORS.INVALID_CREDENTIALS);

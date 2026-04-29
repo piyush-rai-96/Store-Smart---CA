@@ -28,6 +28,7 @@ import {
   Eye,
   Wrench,
   CheckCircle,
+  Store,
 } from 'lucide-react';
 import './AICopilot.css';
 
@@ -85,7 +86,7 @@ interface ChatMessage {
   kpiCards?: { label: string; value: string; delta: string; direction: 'up' | 'down' }[];
   chartData?: { type: 'bar' | 'line' | 'horizontal-bar'; title: string; labels: string[]; values: number[]; color?: string; secondaryValues?: number[]; secondaryLabel?: string }[];
   pogResults?: { status: 'pass' | 'fail'; item: string; detail: string }[];
-  taskCreated?: { title: string; assignee: string; priority: string; due: string };
+  taskCreated?: { title: string; assignee: string; priority: string; due: string; stores?: { name: string; manager: string }[] };
   pogRuleCreated?: { name: string; type: string; description: string; status: 'Active' | 'Warning'; category: string };
   isTyping?: boolean;
   imageUrl?: string;
@@ -400,6 +401,11 @@ const vocActionPlanResponse = {
     title: 'Deploy Targeted Aisle Cleanliness Protocol — 3 Stores',
     assignee: '',
     priority: 'High',
+    stores: [
+      { name: 'Hamburg South #2041', manager: 'Anna Becker' },
+      { name: 'Cologne East #2034', manager: 'Thomas Richter' },
+      { name: 'Brussels Nord #2038', manager: 'Marie Laurent' },
+    ],
     due: 'This Week',
   },
   suggestedQueries: ['Create follow-up audit task', 'View affected store details', 'Schedule team briefing'],
@@ -1882,16 +1888,60 @@ export const AICopilot: React.FC = () => {
             <div className="cop-task-body">
               <div className="cop-task-row"><span className="cop-task-label">Title</span><span className="cop-task-value">{msg.taskCreated.title}</span></div>
               <div className="cop-task-row"><span className="cop-task-label">Due</span><span className="cop-task-value">{msg.taskCreated.due}</span></div>
-              {taskPushed.has(msg.id) && (
+              {msg.taskCreated.stores && msg.taskCreated.stores.length > 0 && (
+                <div className="cop-task-stores">
+                  <div className="cop-task-stores-label">
+                    <Store size={11} />
+                    <span>{msg.taskCreated.stores.length} stores · auto-tagged to store manager</span>
+                  </div>
+                  <div className="cop-task-stores-list">
+                    {msg.taskCreated.stores.map(s => (
+                      <div key={s.name} className="cop-task-store-row">
+                        <div className="cop-task-store-info">
+                          <span className="cop-task-store-name">{s.name}</span>
+                          <span className="cop-task-store-manager">{s.manager} · Store Manager</span>
+                        </div>
+                        {taskPushed.has(msg.id) && <CheckCircle2 size={13} className="cop-task-check" />}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {taskPushed.has(msg.id) && !msg.taskCreated.stores && (
                 <>
                   <div className="cop-task-row"><span className="cop-task-label">Assigned To</span><span className="cop-task-value">{taskAssignee}</span></div>
                   <div className="cop-task-row"><span className="cop-task-label">Priority</span><span className={`cop-task-priority cop-pri--${taskPriority.toLowerCase()}`}>{taskPriority}</span></div>
                 </>
               )}
+              {taskPushed.has(msg.id) && msg.taskCreated.stores && (
+                <div className="cop-task-row"><span className="cop-task-label">Priority</span><span className={`cop-task-priority cop-pri--${taskPriority.toLowerCase()}`}>{taskPriority}</span></div>
+              )}
             </div>
 
-            {/* Add to Operations Queue — inline panel */}
-            {!taskPushed.has(msg.id) && (
+            {/* Multi-store: one-click push, no dropdown */}
+            {!taskPushed.has(msg.id) && msg.taskCreated.stores && msg.taskCreated.stores.length > 0 && (
+              <button
+                className="cop-task-push-btn"
+                disabled={taskPushing === msg.id}
+                onClick={() => {
+                  setTaskPushing(msg.id);
+                  setTaskPriority(msg.taskCreated?.priority || 'High');
+                  setTimeout(() => {
+                    setTaskPushed(prev => new Set(prev).add(msg.id));
+                    setTaskPushing(null);
+                  }, 1200);
+                }}
+              >
+                {taskPushing === msg.id ? (
+                  <><div className="cop-btn-spinner" /> Adding {msg.taskCreated.stores.length} tasks…</>
+                ) : (
+                  <><Zap size={14} /> Add {msg.taskCreated.stores.length} tasks to Operations Queue</>
+                )}
+              </button>
+            )}
+
+            {/* Add to Operations Queue — inline panel (single-task) */}
+            {!taskPushed.has(msg.id) && !msg.taskCreated.stores && (
               <>
                 {taskPushOpen === msg.id ? (
                   <div className="cop-task-push-panel">
@@ -2003,7 +2053,11 @@ export const AICopilot: React.FC = () => {
             {taskPushed.has(msg.id) && (
               <div className="cop-task-pushed-banner">
                 <CheckCircle2 size={14} />
-                <span>Added to Operations Queue — assigned to {taskAssignee}</span>
+                <span>
+                  {msg.taskCreated.stores && msg.taskCreated.stores.length > 0
+                    ? `${msg.taskCreated.stores.length} tasks added to Operations Queue — assigned to ${msg.taskCreated.stores.map(s => s.manager).join(', ')}`
+                    : `Added to Operations Queue — assigned to ${taskAssignee}`}
+                </span>
               </div>
             )}
           </div>

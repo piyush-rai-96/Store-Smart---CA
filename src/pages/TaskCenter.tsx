@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useLocation } from 'react-router-dom';
 import {
   Plus,
   Search,
@@ -302,6 +302,7 @@ type FilterStatus = 'all' | 'Pending' | 'In Progress' | 'Completed';
 
 export const TaskCenter: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { tasks: contextTasks, addTasks, updateTaskStatus, assignTask, teamMembers } = useExecutionTasks();
   const [tcSearchParams, setTcSearchParams] = useSearchParams();
   const [view, setView] = useState<ViewMode>('board');
@@ -311,6 +312,10 @@ export const TaskCenter: React.FC = () => {
   const [selectedTask, setSelectedTask] = useState<ExecutionTask | null>(null);
   const [seeded, setSeeded] = useState(false);
   const [broadcastHighlight, setBroadcastHighlight] = useState<string | null>(null);
+  const [prefillLoading, setPrefillLoading] = useState(false);
+  const [prefillBanner, setPrefillBanner] = useState<{ title: string; count: number; managers: string[] } | null>(null);
+  const [prefillIds, setPrefillIds] = useState<string[]>([]);
+  const prefillHandledRef = useRef(false);
 
   // Custom dropdown state for Create Task modal
   const [openDropdown, setOpenDropdown] = useState<null | 'priority' | 'type' | 'assignee'>(null);
@@ -345,6 +350,65 @@ export const TaskCenter: React.FC = () => {
       setSeeded(true);
     }
   }, [seeded, contextTasks, addTasks]);
+
+  // Prefill tasks from an Alert (e.g., "Open in Operations Queue") — one task per store, tagged to the store manager
+  useEffect(() => {
+    if (prefillHandledRef.current) return;
+    const state = location.state as { prefillFromAlert?: { alertId?: string; title: string; description?: string; severity?: string; source?: string; stores: { name: string; manager?: string; detail?: string }[] } } | null;
+    const payload = state?.prefillFromAlert;
+    if (!payload || !payload.stores || payload.stores.length === 0) return;
+    prefillHandledRef.current = true;
+
+    setPrefillLoading(true);
+    setView('list');
+    setFilter('all');
+    // Clear router state so a refresh doesn't re-trigger
+    window.history.replaceState({}, document.title);
+
+    setTimeout(() => {
+      const sevToPriority: Record<string, Priority> = { critical: 'High', risk: 'High', warning: 'Medium', info: 'Low' };
+      const priority: Priority = sevToPriority[(payload.severity || '').toLowerCase()] || 'High';
+      const due = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+      const createdAt = new Date().toISOString();
+      const taskType: ExecutionTask['type'] = payload.alertId === 'alert-inventory' ? 'Add' : 'Reset Shelf';
+
+      const newTasks: ExecutionTask[] = payload.stores.map((s, idx) => {
+        const memberMatch = teamMembers.find(m => m.name === s.manager);
+        const id = `tc-prefill-${payload.alertId || 'alert'}-${Date.now()}-${idx}`;
+        return {
+          id,
+          type: taskType,
+          title: `${payload.title} — ${s.name}`,
+          description: payload.description || '',
+          priority,
+          reason: s.detail || payload.title,
+          impact: payload.description || '',
+          status: 'Pending',
+          assignedTo: memberMatch?.id || `mgr-${s.name.replace(/\s+/g, '-').toLowerCase()}`,
+          assignedToName: s.manager || 'Store Manager',
+          dueDate: due,
+          storeName: s.name,
+          storeGroup: 'Alert-driven Tasks',
+          pogName: '—',
+          category: payload.alertId === 'alert-inventory' ? 'Inventory' : 'Operations',
+          createdAt,
+          localizationId: `alert-${payload.alertId || 'gen'}-${idx}`,
+          source: 'Manual',
+          slaHours: priority === 'High' ? 24 : 48,
+          severityRationale: s.detail,
+        };
+      });
+
+      addTasks(newTasks);
+      setPrefillIds(newTasks.map(t => t.id));
+      setPrefillBanner({
+        title: payload.title,
+        count: newTasks.length,
+        managers: payload.stores.map(s => s.manager || 'Store Manager'),
+      });
+      setPrefillLoading(false);
+    }, 1400);
+  }, [location.state, addTasks, teamMembers]);
 
   // All tasks
   const allTasks = contextTasks;
@@ -531,7 +595,7 @@ export const TaskCenter: React.FC = () => {
             filteredTasks.map(task => (
               <tr
                 key={task.id}
-                className={`tc-table-row${broadcastHighlight && task.localizationId === broadcastHighlight ? ' tc-table-row--highlighted' : ''}`}
+                className={`tc-table-row${broadcastHighlight && task.localizationId === broadcastHighlight ? ' tc-table-row--highlighted' : ''}${prefillIds.includes(task.id) ? ' tc-table-row--prefilled' : ''}`}
                 onClick={() => setSelectedTask(task)}
               >
                 <td className="tc-td-task">
@@ -577,6 +641,29 @@ export const TaskCenter: React.FC = () => {
 
   return (
     <div className="tc-container">
+      {prefillLoading && (
+        <div className="tc-prefill-overlay">
+          <div className="tc-prefill-card">
+            <div className="tc-prefill-spinner" />
+            <div className="tc-prefill-title">Creating tasks in Operations Queue…</div>
+            <div className="tc-prefill-sub">Generating one task per impacted store and assigning to the respective Store Manager.</div>
+          </div>
+        </div>
+      )}
+
+      {prefillBanner && !prefillLoading && (
+        <div className="tc-prefill-banner">
+          <div className="tc-prefill-banner-icon"><CheckCircle2 size={16} /></div>
+          <div className="tc-prefill-banner-body">
+            <div className="tc-prefill-banner-title">{prefillBanner.count} tasks created from "{prefillBanner.title}"</div>
+            <div className="tc-prefill-banner-sub">Auto-assigned to {prefillBanner.managers.join(', ')}</div>
+          </div>
+          <button className="tc-prefill-banner-close" onClick={() => setPrefillBanner(null)} aria-label="Dismiss">
+            <X size={14} />
+          </button>
+        </div>
+      )}
+
       {/* ── Header (mirrors User Access Management — touches breadcrumbs) ── */}
       <div className="district-intel-header tc-di-header">
         <div className="header-left">

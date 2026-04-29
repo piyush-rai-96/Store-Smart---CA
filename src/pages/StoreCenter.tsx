@@ -42,6 +42,8 @@ import {
 import { AIDailyBrief, AIDailyBriefData } from '../components/common/AIDailyBrief';
 import { useAuth } from '../context/AuthContext';
 import './StoreCenter.css';
+// Reuses detail-panel/dp-* styles for the SM broadcast detail panel
+import './StoreOpsHome.css';
 import './DistrictIntelligence.css';
 
 // ── Types ──────────────────────────────────────────────
@@ -673,6 +675,270 @@ const broadcastActions: BroadcastAction[] = [
   },
 ];
 
+// ── SM Broadcast Feeds (view-only) ─────────────────────
+interface SMBroadcast {
+  id: string;
+  priority: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+  category: 'Safety' | 'Operations' | 'Compliance' | 'Announcement' | 'Merchandising' | 'HR';
+  title: string;
+  description: string;
+  sender: string;
+  timestamp: string;
+  isRead: boolean;
+}
+
+// HQ Broadcasts — IDENTICAL data and content to DM Home (StoreOpsHome generateMockBroadcasts)
+const SM_HQ_BROADCASTS: SMBroadcast[] = [
+  {
+    id: '2',
+    priority: 'HIGH',
+    category: 'Operations',
+    title: 'Holiday Schedule Update',
+    description: 'Updated store hours for upcoming holiday weekend. Please review and confirm your availability by Friday.',
+    sender: 'District Manager',
+    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    isRead: false,
+  },
+  {
+    id: '3',
+    priority: 'MEDIUM',
+    category: 'Merchandising',
+    title: 'New Planogram Guidelines',
+    description: 'New planogram guidelines released. Review updated shelf layouts for seasonal products.',
+    sender: 'Merchandising Team',
+    timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+    isRead: true,
+  },
+  {
+    id: '4',
+    priority: 'LOW',
+    category: 'HR',
+    title: 'Training Module Available',
+    description: 'New training module available for team members. Confirm staffing assignments.',
+    sender: 'HR Department',
+    timestamp: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
+    isRead: true,
+  },
+];
+
+// DM Broadcasts — mirrors the District Intelligence "Broadcast Analytics" effectiveness list (D14)
+const SM_DM_BROADCASTS: SMBroadcast[] = [
+  {
+    id: 'dm-b1',
+    priority: 'HIGH',
+    category: 'Safety',
+    title: 'Safety Protocol Update',
+    description: 'Action Required · Updated emergency response and incident-reporting protocol effective immediately.',
+    sender: 'John Doe · District Manager',
+    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    isRead: false,
+  },
+  {
+    id: 'dm-b2',
+    priority: 'MEDIUM',
+    category: 'Operations',
+    title: 'Weekend Staffing Reminder',
+    description: 'Action Required · Confirm weekend coverage and submit the staffing roster by EOD Friday.',
+    sender: 'John Doe · District Manager',
+    timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+    isRead: false,
+  },
+  {
+    id: 'dm-b3',
+    priority: 'LOW',
+    category: 'Merchandising',
+    title: 'Planogram Refresh Checklist',
+    description: 'Informational · Walk through the seasonal planogram refresh checklist and align your team for the upcoming reset.',
+    sender: 'John Doe · District Manager',
+    timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    isRead: true,
+  },
+  {
+    id: 'dm-b4',
+    priority: 'LOW',
+    category: 'Announcement',
+    title: 'Monthly Performance Summary',
+    description: 'Informational · District-level performance recap with rankings, wins, and focus areas for next month.',
+    sender: 'John Doe · District Manager',
+    timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    isRead: true,
+  },
+  {
+    id: 'dm-b5',
+    priority: 'HIGH',
+    category: 'Compliance',
+    title: 'Fire Exit Compliance Alert',
+    description: 'Action Required · Confirm fire exits are unobstructed and signage is visible. Submit photo evidence.',
+    sender: 'John Doe · District Manager',
+    timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    isRead: false,
+  },
+];
+
+// Enrichment for the SM broadcast detail panel — keyed by broadcast id
+const SM_BROADCAST_ENRICHMENT: Record<string, {
+  fullMessage: string;
+  scope: string;
+  keyDates: { label: string; date: string }[];
+  actionItems: { text: string; done: boolean }[];
+  attachments: { name: string; type: string }[];
+}> = {
+  // ── HQ broadcasts (mirrors DM Home enrichment) ──
+  '2': {
+    fullMessage: 'All stores will operate on modified hours during the upcoming holiday weekend (Dec 23–26). Saturday and Sunday hours shift to 9 AM – 6 PM. Monday (Dec 25) all stores closed. Thursday (Dec 26) resume normal hours.\n\nPlease review the attached schedule, confirm your team\'s availability by Friday EOD, and ensure signage is updated at store entrances by Saturday morning.',
+    scope: 'All stores in District 14 (8 locations)',
+    keyDates: [
+      { label: 'Modified hours begin', date: 'Dec 23, 2025' },
+      { label: 'Availability confirmation due', date: 'Dec 20, 2025 (Friday)' },
+      { label: 'Signage update deadline', date: 'Dec 22, 2025' },
+    ],
+    actionItems: [
+      { text: 'Review and confirm team availability', done: false },
+      { text: 'Update store entrance signage', done: false },
+      { text: 'Notify part-time staff of schedule changes', done: false },
+      { text: 'Adjust POS system operating hours', done: false },
+    ],
+    attachments: [
+      { name: 'Holiday_Schedule_District14.pdf', type: 'pdf' },
+      { name: 'Signage_Template_Holiday.png', type: 'image' },
+    ],
+  },
+  '3': {
+    fullMessage: 'New planogram guidelines have been released for the SS26 season. Key changes include updated shelf layouts for seasonal products in Women\'s, Men\'s, and Accessories departments.\n\nAll stores must complete the transition by end of next week. Compliance audits will begin the following Monday. Camera Shelf Audit scores will be tracked against the new layouts.',
+    scope: 'All stores — Merchandising compliance',
+    keyDates: [
+      { label: 'Guidelines effective', date: 'Jan 6, 2026' },
+      { label: 'Transition deadline', date: 'Jan 12, 2026' },
+      { label: 'Compliance audit starts', date: 'Jan 13, 2026' },
+    ],
+    actionItems: [
+      { text: 'Download updated planogram layouts', done: false },
+      { text: 'Brief store team on changes', done: false },
+      { text: 'Execute shelf reset per new POG', done: false },
+      { text: 'Submit completion photo via audit tool', done: false },
+    ],
+    attachments: [
+      { name: 'SS26_Planogram_Guidelines.pdf', type: 'pdf' },
+      { name: 'Shelf_Layout_Womens.pdf', type: 'pdf' },
+      { name: 'Shelf_Layout_Mens.pdf', type: 'pdf' },
+    ],
+  },
+  '4': {
+    fullMessage: 'A new mandatory training module on updated safety protocols and customer service excellence is now available in the Learning Hub.\n\nAll store managers must complete the training by end of month and ensure at least 80% of their team has completed it within 2 weeks of the deadline. Certificates will be issued upon completion and tracked in the compliance dashboard.',
+    scope: 'All store managers + team leads',
+    keyDates: [
+      { label: 'Module available from', date: 'Jan 2, 2026' },
+      { label: 'Manager completion deadline', date: 'Jan 31, 2026' },
+      { label: 'Team completion deadline', date: 'Feb 14, 2026' },
+    ],
+    actionItems: [
+      { text: 'Complete training module personally', done: false },
+      { text: 'Assign training to all team members', done: false },
+      { text: 'Track team completion progress', done: false },
+      { text: 'Submit completion report to HR', done: false },
+    ],
+    attachments: [
+      { name: 'Training_Module_Overview.pdf', type: 'pdf' },
+    ],
+  },
+  // ── DM broadcasts (mirrors DI Broadcast Analytics list) ──
+  'dm-b1': {
+    fullMessage: 'A revised emergency response and incident-reporting protocol takes effect immediately across all District 14 stores.\n\nReview the updated playbook with your team in this week\'s huddle, run a tabletop walk-through of the evacuation flow, and confirm completion via the compliance form.',
+    scope: 'All stores in District 14',
+    keyDates: [
+      { label: 'Protocol effective', date: 'Immediately' },
+      { label: 'Team huddle review', date: 'This week' },
+      { label: 'Compliance confirmation due', date: 'Friday EOD' },
+    ],
+    actionItems: [
+      { text: 'Review updated protocol with your team', done: false },
+      { text: 'Run tabletop evacuation walk-through', done: false },
+      { text: 'Submit compliance confirmation form', done: false },
+    ],
+    attachments: [
+      { name: 'Safety_Protocol_v2.pdf', type: 'pdf' },
+    ],
+  },
+  'dm-b2': {
+    fullMessage: 'Confirm weekend coverage for both Saturday and Sunday peaks, and submit your store\'s staffing roster by EOD Friday.\n\nMake sure shift leads are assigned to peak windows (11 AM–2 PM and 4–7 PM). Flag any gaps to the district roster channel before submission.',
+    scope: 'All stores in District 14 — Store Managers',
+    keyDates: [
+      { label: 'Roster submission due', date: 'Friday EOD' },
+      { label: 'Weekend coverage starts', date: 'Saturday' },
+    ],
+    actionItems: [
+      { text: 'Assign shift leads to weekend peak windows', done: false },
+      { text: 'Confirm part-time availability', done: false },
+      { text: 'Submit roster via staffing tool', done: false },
+    ],
+    attachments: [
+      { name: 'Weekend_Roster_Template.xlsx', type: 'pdf' },
+    ],
+  },
+  'dm-b3': {
+    fullMessage: 'A seasonal planogram refresh is scheduled for the upcoming reset window. Use this checklist to align your team and prepare the floor.\n\nReview the attached layouts, schedule the reset within the published window, and complete the post-reset photo capture for compliance scoring.',
+    scope: 'All stores — Merchandising',
+    keyDates: [
+      { label: 'Pre-reset prep window', date: 'Next week' },
+      { label: 'Reset execution window', date: 'Following weekend' },
+      { label: 'Post-reset audit', date: 'Following Monday' },
+    ],
+    actionItems: [
+      { text: 'Review updated planogram layouts', done: false },
+      { text: 'Brief team on the reset plan', done: false },
+      { text: 'Execute shelf reset within window', done: false },
+      { text: 'Submit post-reset photo evidence', done: false },
+    ],
+    attachments: [
+      { name: 'Planogram_Refresh_Checklist.pdf', type: 'pdf' },
+    ],
+  },
+  'dm-b4': {
+    fullMessage: 'Monthly performance recap for District 14 — rankings, wins, and focus areas for the next 30 days.\n\nReview your store\'s standing relative to the district, share two highlights with your team, and pick one focus area for next month.',
+    scope: 'All District 14 stores',
+    keyDates: [
+      { label: 'Recap published', date: 'This week' },
+      { label: 'Team share-out', date: 'Next huddle' },
+      { label: 'Focus-area selection', date: 'By next Monday' },
+    ],
+    actionItems: [
+      { text: 'Review district performance recap', done: false },
+      { text: 'Share two team highlights at huddle', done: false },
+      { text: 'Pick one focus area for next month', done: false },
+    ],
+    attachments: [
+      { name: 'District14_Monthly_Performance.pdf', type: 'pdf' },
+    ],
+  },
+  'dm-b5': {
+    fullMessage: 'Confirm that all fire exits are unobstructed, lighting is functional, and signage is visible. Submit photo evidence by EOD today.\n\nThis is a recurring compliance check — any failures will trigger a same-day district follow-up call.',
+    scope: 'All stores — Compliance',
+    keyDates: [
+      { label: 'Compliance check active', date: 'Today' },
+      { label: 'Photo evidence due', date: 'EOD today' },
+    ],
+    actionItems: [
+      { text: 'Walk all fire exits and verify clearance', done: false },
+      { text: 'Test emergency lighting and signage', done: false },
+      { text: 'Submit photo evidence via audit tool', done: false },
+    ],
+    attachments: [
+      { name: 'Fire_Exit_Compliance_Form.pdf', type: 'pdf' },
+    ],
+  },
+};
+
+const formatSMBroadcastTime = (timestamp: string) => {
+  const diff = Date.now() - new Date(timestamp).getTime();
+  const minutes = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+  if (days > 0) return `${days}d ago`;
+  if (hours > 0) return `${hours}h ago`;
+  if (minutes > 0) return `${minutes}m ago`;
+  return 'Just now';
+};
+
 // ── Helpers ────────────────────────────────────────────
 const getComplianceColor = (val: number) => {
   if (val >= 90) return '#dcfce7';
@@ -694,9 +960,28 @@ export const StoreCenter: React.FC = () => {
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [selectedStoreId, setSelectedStoreId] = useState(storesData[0].id);
+  const isSM = user?.role === 'SM';
+  const lockedStoreId = isSM
+    ? (storesData.find(s => s.number === user?.storeId)?.id || storesData[0].id)
+    : null;
+  const [selectedStoreId, setSelectedStoreId] = useState(lockedStoreId || storesData[0].id);
   const [showStoreSelector, setShowStoreSelector] = useState(false);
   const [storeSearch, setStoreSearch] = useState('');
+  // SM-only: dual broadcast feeds (matches DM Home interactive behavior)
+  const [hqBroadcasts, setHqBroadcasts] = useState<SMBroadcast[]>(SM_HQ_BROADCASTS);
+  const [dmBroadcasts, setDmBroadcasts] = useState<SMBroadcast[]>(SM_DM_BROADCASTS);
+  const [hqBroadcastsExpanded, setHqBroadcastsExpanded] = useState(true);
+  const [dmBroadcastsExpanded, setDmBroadcastsExpanded] = useState(true);
+  // SM broadcast detail panel
+  const [smBroadcastPanel, setSmBroadcastPanel] = useState<{
+    source: 'HQ' | 'DM';
+    broadcast: SMBroadcast;
+    fullMessage: string;
+    scope: string;
+    keyDates: { label: string; date: string }[];
+    actionItems: { text: string; done: boolean }[];
+    attachments: { name: string; type: string }[];
+  } | null>(null);
   const [trendModal, setTrendModal] = useState<KPITile | null>(null);
   const [auditWeekDetail, setAuditWeekDetail] = useState<AuditWeek | null>(null);
   const [activeKPIPanel, setActiveKPIPanel] = useState<StoreKPI | null>(null);
@@ -855,8 +1140,9 @@ export const StoreCenter: React.FC = () => {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  // Handle incoming store selection via URL query param
+  // Handle incoming store selection via URL query param (ignored for SM — store is locked)
   useEffect(() => {
+    if (isSM) return;
     const storeParam = searchParams.get('store');
     if (storeParam) {
       const match = storesData.find(s => s.number === storeParam);
@@ -947,14 +1233,19 @@ export const StoreCenter: React.FC = () => {
           </div>
           <div className="header-meta">
             <div className="sc-store-selector-wrap">
-              <button className="di-district-picker sc-store-picker" onClick={() => setShowStoreSelector(!showStoreSelector)}>
+              <button
+                className={`di-district-picker sc-store-picker${isSM ? ' sc-store-picker--locked' : ''}`}
+                onClick={() => { if (!isSM) setShowStoreSelector(!showStoreSelector); }}
+                disabled={isSM}
+                title={isSM ? 'Your assigned store' : undefined}
+              >
                 <Store size={14} />
                 <span>{store.name}</span>
                 <span className="di-district-dm">#{store.number} · {store.format}</span>
-                <ChevronDown size={14} className={showStoreSelector ? 'rotated' : ''} />
+                {!isSM && <ChevronDown size={14} className={showStoreSelector ? 'rotated' : ''} />}
               </button>
 
-              {showStoreSelector && (
+              {!isSM && showStoreSelector && (
                 <div className="sc-store-dropdown">
                   <div className="sc-dropdown-search">
                     <Search size={14} />
@@ -1242,6 +1533,86 @@ export const StoreCenter: React.FC = () => {
             })()}
           </div>
         </div>
+
+        {/* ── SM-only: Dual Broadcast Feeds (HQ | DM) — same UI/behavior as DM Home ── */}
+        {isSM && (
+          <div className="sc-sm-broadcasts">
+            {([
+              { title: 'HQ Broadcasts', source: 'HQ' as const, data: hqBroadcasts, setData: setHqBroadcasts, expanded: hqBroadcastsExpanded, setExpanded: setHqBroadcastsExpanded },
+              { title: 'DM Broadcasts', source: 'DM' as const, data: dmBroadcasts, setData: setDmBroadcasts, expanded: dmBroadcastsExpanded, setExpanded: setDmBroadcastsExpanded },
+            ] as const).map((feed) => {
+              const unread = feed.data.filter(b => !b.isRead).length;
+              return (
+                <div key={feed.title} className="hq-broadcasts-card sc-sm-broadcast-card">
+                  <div
+                    className="hq-broadcasts-header sc-sm-broadcast-header"
+                    onClick={() => feed.setExpanded(!feed.expanded)}
+                  >
+                    <div className="hq-broadcasts-title">
+                      <Bell size={15} />
+                      <span>{feed.title}</span>
+                      {unread > 0 && (
+                        <span className="hq-broadcast-count">{unread}</span>
+                      )}
+                    </div>
+                    <ChevronDown size={14} className={`expand-icon ${feed.expanded ? 'expanded' : ''}`} />
+                  </div>
+                  {feed.expanded && (
+                    <div className="hq-broadcasts-body">
+                      <div className="hq-broadcasts-list">
+                        {feed.data.map((b) => (
+                          <div
+                            key={b.id}
+                            className={`hq-broadcast-item sc-sm-broadcast-item ${!b.isRead ? 'unread' : ''} ${b.priority === 'CRITICAL' ? 'critical' : ''}`}
+                            onClick={() => {
+                              feed.setData((prev) =>
+                                prev.map((x) => (x.id === b.id ? { ...x, isRead: true } : x))
+                              );
+                              const extra = SM_BROADCAST_ENRICHMENT[b.id] || {
+                                fullMessage: b.description,
+                                scope: feed.source === 'HQ' ? 'District-wide' : 'Store-level',
+                                keyDates: [],
+                                actionItems: [],
+                                attachments: [],
+                              };
+                              setSmBroadcastPanel({
+                                source: feed.source,
+                                broadcast: b,
+                                fullMessage: extra.fullMessage,
+                                scope: extra.scope,
+                                keyDates: extra.keyDates,
+                                actionItems: extra.actionItems,
+                                attachments: extra.attachments,
+                              });
+                            }}
+                          >
+                            <div className="hq-broadcast-content">
+                              <div className="hq-broadcast-title-row">
+                                {b.priority === 'CRITICAL' && (
+                                  <span className="hq-broadcast-priority-badge critical">
+                                    <AlertTriangle size={10} />
+                                    CRITICAL
+                                  </span>
+                                )}
+                                <span className="hq-broadcast-title">{b.title}</span>
+                                {!b.isRead && <span className="hq-unread-dot"></span>}
+                              </div>
+                              <p className="hq-broadcast-desc">{b.description}</p>
+                              <div className="hq-broadcast-meta">
+                                <span className="hq-broadcast-sender">{b.sender}</span>
+                                <span className="hq-broadcast-time">{formatSMBroadcastTime(b.timestamp)}</span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* ── Store KPIs (mirrors District Intelligence "District KPIs") ── */}
         <div className="kpi-cards-section sc-kpi-section">
@@ -2072,6 +2443,110 @@ export const StoreCenter: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* ── SM Broadcast Detail Panel (right slide-in, mirrors DM Home) ── */}
+      {smBroadcastPanel && (() => {
+        const { source, broadcast: b, fullMessage, scope, keyDates, actionItems, attachments } = smBroadcastPanel;
+        const priorityClass = b.priority.toLowerCase();
+        const senderInitials = b.sender.split(/[ ·]+/).filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+        const senderRole = source === 'HQ' ? 'HQ' : 'District Manager';
+        return (
+          <>
+            <div className="detail-panel-overlay" onClick={() => setSmBroadcastPanel(null)} />
+            <div className="detail-panel">
+              <div className="detail-panel-header">
+                <button className="detail-panel-close" onClick={() => setSmBroadcastPanel(null)}>
+                  <X size={18} />
+                </button>
+              </div>
+              <div className="detail-panel-body">
+                <div className="dp-severity-row">
+                  <span className={`dp-priority-badge ${priorityClass}`}>{b.priority}</span>
+                  <span className="dp-category-badge">{b.category}</span>
+                </div>
+                <h2 className="dp-title">{b.title}</h2>
+                <div className="dp-broadcast-message">
+                  {fullMessage.split('\n\n').map((para, i) => (
+                    <p key={i}>{para}</p>
+                  ))}
+                </div>
+                {scope && (
+                  <div className="dp-scope-row">
+                    <Users size={13} />
+                    <span>{scope}</span>
+                  </div>
+                )}
+                {keyDates.length > 0 && (
+                  <div className="dp-section">
+                    <h3 className="dp-section-title">
+                      <Calendar size={14} />
+                      Key Dates
+                    </h3>
+                    <div className="dp-key-dates">
+                      {keyDates.map((kd, i) => (
+                        <div key={i} className="dp-key-date-item">
+                          <span className="dp-kd-label">{kd.label}</span>
+                          <span className="dp-kd-date">{kd.date}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {actionItems.length > 0 && (
+                  <div className="dp-section">
+                    <h3 className="dp-section-title">
+                      <CheckCircle2 size={14} />
+                      Required Actions ({actionItems.length})
+                    </h3>
+                    <div className="dp-action-checklist">
+                      {actionItems.map((ai, i) => (
+                        <div key={i} className={`dp-checklist-item ${ai.done ? 'done' : ''}`}>
+                          <div className="dp-checklist-check">
+                            {ai.done ? <CheckCircle2 size={14} /> : <div className="dp-checklist-empty" />}
+                          </div>
+                          <span>{ai.text}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {attachments.length > 0 && (
+                  <div className="dp-section">
+                    <h3 className="dp-section-title">
+                      <FileText size={14} />
+                      Attachments ({attachments.length})
+                    </h3>
+                    <div className="dp-attachments">
+                      {attachments.map((att, i) => (
+                        <div key={i} className="dp-attachment-item">
+                          <div className={`dp-attachment-icon ${att.type}`}>
+                            <FileText size={14} />
+                          </div>
+                          <span className="dp-attachment-name">{att.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="dp-section">
+                  <h3 className="dp-section-title">Source</h3>
+                  <div className="dp-broadcast-source">
+                    <div className="dp-source-avatar">{senderInitials}</div>
+                    <div className="dp-source-info">
+                      <span className="dp-source-name">{b.sender}</span>
+                      <span className="dp-source-role">{senderRole}</span>
+                    </div>
+                    <span className="dp-source-time">
+                      <Clock size={11} />
+                      {formatSMBroadcastTime(b.timestamp)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        );
+      })()}
 
       {/* ── Trend Modal ──────────────────────────────────── */}
       {trendModal && (

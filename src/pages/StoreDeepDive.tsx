@@ -1007,7 +1007,6 @@ export const StoreDeepDive: React.FC = () => {
         <AIDailyBrief
           brief={getStoreBrief(selectedStore)}
           userName={user?.name}
-          metaSuffix={`${mockActions.length} priority actions · SPI ${adjustedSPI.spi}`}
         />
       </div>
 
