@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   Plus,
@@ -7,8 +7,6 @@ import {
   List,
   ClipboardList,
   CheckCircle2,
-  Circle,
-  Loader2,
   X,
   Calendar,
   User,
@@ -19,6 +17,10 @@ import {
   AlertTriangle,
   Image,
   Shield,
+  FileText,
+  ChevronDown,
+  Check,
+  Wrench,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useExecutionTasks, ExecutionTask, TaskStatus, Priority } from '../context/ExecutionTasksContext';
@@ -310,6 +312,18 @@ export const TaskCenter: React.FC = () => {
   const [seeded, setSeeded] = useState(false);
   const [broadcastHighlight, setBroadcastHighlight] = useState<string | null>(null);
 
+  // Custom dropdown state for Create Task modal
+  const [openDropdown, setOpenDropdown] = useState<null | 'priority' | 'type' | 'assignee'>(null);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!openDropdown) return;
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) setOpenDropdown(null);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [openDropdown]);
+
   // Handle broadcast deep-link from OCV
   useEffect(() => {
     const bcId = tcSearchParams.get('broadcast');
@@ -491,123 +505,151 @@ export const TaskCenter: React.FC = () => {
     </div>
   );
 
-  // ── List View ──
+  // ── List View (UAM-style table) ──
   const renderList = () => (
-    <div className="tc-list">
-      <div className="tc-list-header">
-        <span>Task</span>
-        <span>Status</span>
-        <span>Priority</span>
-        <span>Type</span>
-        <span>Assignee</span>
-        <span>Due</span>
-      </div>
-      {filteredTasks.length === 0 ? (
-        <div className="tc-empty">
-          <div className="tc-empty-icon"><ClipboardList size={28} /></div>
-          <h3>No tasks found</h3>
-          <p>Try adjusting your filters or create a new task.</p>
-        </div>
-      ) : (
-        filteredTasks.map(task => (
-          <div key={task.id} className={`tc-list-row${broadcastHighlight && task.localizationId === broadcastHighlight ? ' tc-list-row--highlighted' : ''}`} onClick={() => setSelectedTask(task)}>
-            <div className="tc-list-title">
-              <span className="tc-list-title-text">{task.title}</span>
-              <span className="tc-list-title-desc">{task.description}</span>
-            </div>
-            <div className="tc-list-status">
-              <span className={`tc-status-dot tc-status--${task.status === 'Pending' ? 'pending' : task.status === 'In Progress' ? 'inprogress' : 'completed'}`} />
-              <span>{task.status}</span>
-            </div>
-            <span className={`tc-list-priority tc-pri--${task.priority.toLowerCase()}`} style={{ background: 'transparent' }}>{task.priority}</span>
-            <span className="tc-card-type">{task.type}</span>
-            <div className="tc-list-assignee">
-              {task.assignedToName ? (
-                <>
-                  <span className="tc-list-assignee-avatar">{task.assignedToName.split(' ').map(n => n[0]).join('')}</span>
-                  <span>{task.assignedToName}</span>
-                </>
-              ) : (
-                <span style={{ color: '#94a3b8' }}>Unassigned</span>
-              )}
-            </div>
-            <span className={`tc-list-due ${isOverdue(task.dueDate, task.status) ? 'tc-due--overdue' : ''}`}>{formatDate(task.dueDate)}</span>
-          </div>
-        ))
-      )}
+    <div className="tc-table-card">
+      <table className="tc-table wow-table">
+        <thead>
+          <tr>
+            <th className="tc-th-task">Task</th>
+            <th className="tc-th-status">Status</th>
+            <th className="tc-th-priority">Priority</th>
+            <th className="tc-th-type">Type</th>
+            <th className="tc-th-assignee">Assignee</th>
+            <th className="tc-th-due">Due</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredTasks.length === 0 ? (
+            <tr>
+              <td colSpan={6} className="tc-table-empty">
+                <Search size={20} />
+                <span>No tasks match your search or filters</span>
+              </td>
+            </tr>
+          ) : (
+            filteredTasks.map(task => (
+              <tr
+                key={task.id}
+                className={`tc-table-row${broadcastHighlight && task.localizationId === broadcastHighlight ? ' tc-table-row--highlighted' : ''}`}
+                onClick={() => setSelectedTask(task)}
+              >
+                <td className="tc-td-task">
+                  <div className="tc-td-task-inner">
+                    <span className="tc-td-task-title">{task.title}</span>
+                    {task.description && (
+                      <span className="tc-td-task-desc">{task.description}</span>
+                    )}
+                  </div>
+                </td>
+                <td>
+                  <div className={`tc-status-pill tc-status-pill--${task.status === 'Pending' ? 'pending' : task.status === 'In Progress' ? 'inprogress' : 'completed'}`}>
+                    <span className="tc-status-pill-dot" />
+                    <span>{task.status}</span>
+                  </div>
+                </td>
+                <td>
+                  <span className={`tc-priority-tag tc-pri--${task.priority.toLowerCase()}`}>{task.priority}</span>
+                </td>
+                <td>
+                  <span className="tc-type-tag">{task.type}</span>
+                </td>
+                <td>
+                  {task.assignedToName ? (
+                    <div className="tc-td-assignee">
+                      <span className="tc-td-avatar">{task.assignedToName.split(' ').map(n => n[0]).join('').substring(0, 2)}</span>
+                      <span className="tc-td-assignee-name">{task.assignedToName}</span>
+                    </div>
+                  ) : (
+                    <span className="tc-td-unassigned">Unassigned</span>
+                  )}
+                </td>
+                <td>
+                  <span className={`tc-td-due ${isOverdue(task.dueDate, task.status) ? 'tc-due--overdue' : ''}`}>{formatDate(task.dueDate)}</span>
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
     </div>
   );
 
   return (
     <div className="tc-container">
-      {/* Header */}
-      <div className="tc-header">
-        <div className="tc-header-left">
-          <div>
-            <h2>Operations Queue</h2>
-            <p>Manage, assign, and track all tasks across your stores</p>
+      {/* ── Header (mirrors User Access Management — touches breadcrumbs) ── */}
+      <div className="district-intel-header tc-di-header">
+        <div className="header-left">
+          <div className="header-title">
+            <ClipboardList size={22} />
+            <h1>Operations Queue</h1>
+          </div>
+          <div className="header-meta">
+            <span className="district-badge">
+              <ClipboardList size={13} />
+              Task Center
+            </span>
+            <span className="district-badge tc-meta-pill">
+              <CheckCircle2 size={13} />
+              {counts.all} tasks
+            </span>
+            <span className="tc-meta-updated">Manage, assign &amp; track tasks across your stores</span>
           </div>
         </div>
         <div className="tc-header-right">
           <button className="tc-create-btn" onClick={() => setShowCreateModal(true)}>
             <Plus size={15} />
-            Create Task
+            <span>Create Task</span>
           </button>
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="tc-stats">
-        <div className="tc-stat-card">
-          <div className="tc-stat-icon tc-stat-total"><ClipboardList size={16} /></div>
-          <div className="tc-stat-info">
-            <span className="tc-stat-num">{counts.all}</span>
-            <span className="tc-stat-label">Total</span>
-          </div>
+      {/* ── Summary Strip (Store Leaderboard mini-card style) ── */}
+      <div className="tc-summary-strip">
+        <div className="tc-stat-pill">
+          <span className="tc-stat-pill-value">{counts.all}</span>
+          <span className="tc-stat-pill-label">Total</span>
         </div>
-        <div className="tc-stat-card">
-          <div className="tc-stat-icon tc-stat-todo"><Circle size={16} /></div>
-          <div className="tc-stat-info">
-            <span className="tc-stat-num">{counts.pending}</span>
-            <span className="tc-stat-label">To Do</span>
-          </div>
+        <div className="tc-stat-pill tc-stat-pill--neutral">
+          <span className="tc-stat-pill-value">{counts.pending}</span>
+          <span className="tc-stat-pill-label">To Do</span>
         </div>
-        <div className="tc-stat-card">
-          <div className="tc-stat-icon tc-stat-progress"><Loader2 size={16} /></div>
-          <div className="tc-stat-info">
-            <span className="tc-stat-num">{counts.inProgress}</span>
-            <span className="tc-stat-label">In Progress</span>
-          </div>
+        <div className="tc-stat-pill tc-stat-pill--warning">
+          <span className="tc-stat-pill-value">{counts.inProgress}</span>
+          <span className="tc-stat-pill-label">In Progress</span>
         </div>
-        <div className="tc-stat-card">
-          <div className="tc-stat-icon tc-stat-done"><CheckCircle2 size={16} /></div>
-          <div className="tc-stat-info">
-            <span className="tc-stat-num">{counts.completed}</span>
-            <span className="tc-stat-label">Done</span>
-          </div>
+        <div className="tc-stat-pill tc-stat-pill--success">
+          <span className="tc-stat-pill-value">{counts.completed}</span>
+          <span className="tc-stat-pill-label">Done</span>
         </div>
       </div>
 
-      {/* Toolbar */}
-      <div className="tc-toolbar">
-        <div className="tc-toolbar-left">
-          {([['all', 'All'], ['Pending', 'To Do'], ['In Progress', 'In Progress'], ['Completed', 'Done']] as [FilterStatus, string][]).map(([key, label]) => (
-            <button
-              key={key}
-              className={`tc-filter-btn ${filter === key ? 'tc-filter-btn--active' : ''}`}
-              onClick={() => setFilter(key)}
-            >
-              {label}
-              <span className="tc-filter-count">
-                {key === 'all' ? counts.all : key === 'Pending' ? counts.pending : key === 'In Progress' ? counts.inProgress : counts.completed}
-              </span>
+      {/* ── Toolbar (Store Leaderboard style — search left, filter pills right) ── */}
+      <div className="tc-toolbar tc-toolbar--leaderboard">
+        <div className="tc-search-bar">
+          <Search size={15} />
+          <input
+            placeholder="Search tasks, assignees, stores..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+          {search && (
+            <button className="tc-search-clear" onClick={() => setSearch('')} aria-label="Clear search">
+              <X size={13} />
             </button>
-          ))}
+          )}
         </div>
         <div className="tc-toolbar-right">
-          <div className="tc-search">
-            <Search size={14} />
-            <input placeholder="Search tasks..." value={search} onChange={e => setSearch(e.target.value)} />
+          <div className="tc-filter-tabs">
+            {([['all', 'All Tasks'], ['Pending', 'To Do'], ['In Progress', 'In Progress'], ['Completed', 'Done']] as [FilterStatus, string][]).map(([key, label]) => (
+              <button
+                key={key}
+                className={`tc-filter-tab ${filter === key ? 'tc-filter-tab--active' : ''}`}
+                onClick={() => setFilter(key)}
+              >
+                {label}
+              </button>
+            ))}
           </div>
           <div className="tc-view-toggle">
             <button className={`tc-view-btn ${view === 'board' ? 'tc-view-btn--active' : ''}`} onClick={() => setView('board')} title="Board"><LayoutGrid size={15} /></button>
@@ -630,64 +672,215 @@ export const TaskCenter: React.FC = () => {
         ) : view === 'board' ? renderBoard() : renderList()}
       </div>
 
-      {/* Create Modal */}
+      {/* ── Create Task Modal (mirrors Create User look) ── */}
       {showCreateModal && (
         <div className="tc-modal-overlay" onClick={() => setShowCreateModal(false)}>
-          <div className="tc-modal" onClick={e => e.stopPropagation()}>
-            <div className="tc-modal-header">
-              <h3>Create Task</h3>
-              <button className="tc-modal-close" onClick={() => setShowCreateModal(false)}><X size={16} /></button>
+          <div className="tc-modal tc-modal--wow" onClick={e => e.stopPropagation()}>
+            {/* Header with icon block + title + subtitle + close */}
+            <div className="tc-m-header">
+              <div className="tc-m-header-icon">
+                <ClipboardList size={18} />
+              </div>
+              <div className="tc-m-header-text">
+                <h3>Create New Task</h3>
+                <p>Add a task and assign it to your team</p>
+              </div>
+              <button className="tc-m-close" onClick={() => setShowCreateModal(false)}>
+                <X size={16} />
+              </button>
             </div>
-            <div className="tc-modal-body">
-              <div className="tc-field">
-                <label>Title *</label>
-                <input placeholder="Task title" value={newTask.title} onChange={e => setNewTask(p => ({ ...p, title: e.target.value }))} />
-              </div>
-              <div className="tc-field">
-                <label>Description</label>
-                <textarea placeholder="Task description..." value={newTask.description} onChange={e => setNewTask(p => ({ ...p, description: e.target.value }))} />
-              </div>
-              <div className="tc-field-row">
-                <div className="tc-field">
-                  <label>Priority</label>
-                  <select value={newTask.priority} onChange={e => setNewTask(p => ({ ...p, priority: e.target.value as Priority }))}>
-                    <option value="High">High</option>
-                    <option value="Medium">Medium</option>
-                    <option value="Low">Low</option>
-                  </select>
+
+            {/* Body */}
+            <div className="tc-m-body">
+              {/* Section: Task Details */}
+              <div className="tc-m-section">
+                <div className="tc-m-section-label">
+                  <FileText size={13} />
+                  <span>Task Details</span>
                 </div>
-                <div className="tc-field">
-                  <label>Type</label>
-                  <select value={newTask.type} onChange={e => setNewTask(p => ({ ...p, type: e.target.value as ExecutionTask['type'] }))}>
-                    <option value="Reset Shelf">Reset Shelf</option>
-                    <option value="Add">Add / Replenish</option>
-                    <option value="Remove">Remove</option>
-                    <option value="Move">Move / Reposition</option>
-                    <option value="Adjust Facing">Adjust Facing</option>
-                    <option value="Update Label">Update Label</option>
-                    <option value="Install Fixture">Install Fixture</option>
-                  </select>
+                <div className="tc-m-field" style={{ marginBottom: 14 }}>
+                  <label>Title <span className="tc-m-req">*</span></label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Reset shelf for Energy Drinks"
+                    value={newTask.title}
+                    onChange={e => setNewTask(p => ({ ...p, title: e.target.value }))}
+                  />
+                </div>
+                <div className="tc-m-field">
+                  <label>Description</label>
+                  <textarea
+                    placeholder="Add context, instructions, or notes for the assignee..."
+                    value={newTask.description}
+                    onChange={e => setNewTask(p => ({ ...p, description: e.target.value }))}
+                  />
                 </div>
               </div>
-              <div className="tc-field-row">
-                <div className="tc-field">
-                  <label>Assignee</label>
-                  <select value={newTask.assignedTo} onChange={e => setNewTask(p => ({ ...p, assignedTo: e.target.value }))}>
-                    <option value="">Unassigned</option>
-                    {teamMembers.map(m => (
-                      <option key={m.id} value={m.id}>{m.name} — {m.role}</option>
-                    ))}
-                  </select>
+
+              {/* Section: Classification */}
+              <div className="tc-m-section">
+                <div className="tc-m-section-label">
+                  <Shield size={13} />
+                  <span>Classification</span>
                 </div>
-                <div className="tc-field">
-                  <label>Due Date</label>
-                  <input type="date" value={newTask.dueDate} onChange={e => setNewTask(p => ({ ...p, dueDate: e.target.value }))} />
+                <div className="tc-m-fields-row">
+                  {/* Priority */}
+                  <div className="tc-m-field">
+                    <label>Priority</label>
+                    <div className="tc-dd-wrap" ref={openDropdown === 'priority' ? dropdownRef : undefined}>
+                      <button
+                        type="button"
+                        className="tc-dd-trigger"
+                        onClick={() => setOpenDropdown(openDropdown === 'priority' ? null : 'priority')}
+                      >
+                        <span className={`tc-dd-pri-dot tc-dd-pri-dot--${newTask.priority.toLowerCase()}`} />
+                        <span className="tc-dd-trigger-text">{newTask.priority}</span>
+                        <ChevronDown size={14} className={`tc-dd-chevron ${openDropdown === 'priority' ? 'tc-dd-chevron--open' : ''}`} />
+                      </button>
+                      {openDropdown === 'priority' && (
+                        <div className="tc-dd-menu">
+                          {(['High', 'Medium', 'Low'] as Priority[]).map(p => (
+                            <button
+                              key={p}
+                              type="button"
+                              className={`tc-dd-item ${p === newTask.priority ? 'tc-dd-item--active' : ''}`}
+                              onClick={() => { setNewTask(prev => ({ ...prev, priority: p })); setOpenDropdown(null); }}
+                            >
+                              <span className="tc-dd-item-left">
+                                <span className={`tc-dd-pri-dot tc-dd-pri-dot--${p.toLowerCase()}`} />
+                                <span className="tc-dd-item-name">{p}</span>
+                              </span>
+                              {p === newTask.priority && <Check size={14} />}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Type */}
+                  <div className="tc-m-field">
+                    <label>Type</label>
+                    <div className="tc-dd-wrap" ref={openDropdown === 'type' ? dropdownRef : undefined}>
+                      <button
+                        type="button"
+                        className="tc-dd-trigger"
+                        onClick={() => setOpenDropdown(openDropdown === 'type' ? null : 'type')}
+                      >
+                        <Wrench size={14} className="tc-dd-icon-muted" />
+                        <span className="tc-dd-trigger-text">{newTask.type}</span>
+                        <ChevronDown size={14} className={`tc-dd-chevron ${openDropdown === 'type' ? 'tc-dd-chevron--open' : ''}`} />
+                      </button>
+                      {openDropdown === 'type' && (
+                        <div className="tc-dd-menu">
+                          {(['Reset Shelf', 'Add', 'Remove', 'Move', 'Adjust Facing', 'Update Label', 'Install Fixture'] as ExecutionTask['type'][]).map(t => (
+                            <button
+                              key={t}
+                              type="button"
+                              className={`tc-dd-item ${t === newTask.type ? 'tc-dd-item--active' : ''}`}
+                              onClick={() => { setNewTask(prev => ({ ...prev, type: t })); setOpenDropdown(null); }}
+                            >
+                              <span className="tc-dd-item-left">
+                                <span className="tc-dd-item-name">
+                                  {t === 'Add' ? 'Add / Replenish' : t === 'Move' ? 'Move / Reposition' : t}
+                                </span>
+                              </span>
+                              {t === newTask.type && <Check size={14} />}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section: Assignment & Schedule */}
+              <div className="tc-m-section tc-m-section--last">
+                <div className="tc-m-section-label">
+                  <User size={13} />
+                  <span>Assignment & Schedule</span>
+                </div>
+                <div className="tc-m-fields-row">
+                  {/* Assignee */}
+                  <div className="tc-m-field">
+                    <label>Assignee</label>
+                    <div className="tc-dd-wrap" ref={openDropdown === 'assignee' ? dropdownRef : undefined}>
+                      <button
+                        type="button"
+                        className="tc-dd-trigger"
+                        onClick={() => setOpenDropdown(openDropdown === 'assignee' ? null : 'assignee')}
+                      >
+                        {newTask.assignedTo ? (
+                          <>
+                            <span className="tc-dd-avatar">
+                              {(teamMembers.find(m => m.id === newTask.assignedTo)?.name || '')
+                                .split(' ').map(n => n[0]).join('').substring(0, 2)}
+                            </span>
+                            <span className="tc-dd-trigger-text">
+                              {teamMembers.find(m => m.id === newTask.assignedTo)?.name}
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <User size={14} className="tc-dd-icon-muted" />
+                            <span className="tc-dd-trigger-text tc-dd-trigger-text--placeholder">Select assignee...</span>
+                          </>
+                        )}
+                        <ChevronDown size={14} className={`tc-dd-chevron ${openDropdown === 'assignee' ? 'tc-dd-chevron--open' : ''}`} />
+                      </button>
+                      {openDropdown === 'assignee' && (
+                        <div className="tc-dd-menu tc-dd-menu--scroll">
+                          <button
+                            type="button"
+                            className={`tc-dd-item ${!newTask.assignedTo ? 'tc-dd-item--active' : ''}`}
+                            onClick={() => { setNewTask(prev => ({ ...prev, assignedTo: '' })); setOpenDropdown(null); }}
+                          >
+                            <span className="tc-dd-item-left">
+                              <span className="tc-dd-avatar tc-dd-avatar--unassigned"><User size={11} /></span>
+                              <span className="tc-dd-item-name">Unassigned</span>
+                            </span>
+                            {!newTask.assignedTo && <Check size={14} />}
+                          </button>
+                          {teamMembers.map(m => (
+                            <button
+                              key={m.id}
+                              type="button"
+                              className={`tc-dd-item ${m.id === newTask.assignedTo ? 'tc-dd-item--active' : ''}`}
+                              onClick={() => { setNewTask(prev => ({ ...prev, assignedTo: m.id })); setOpenDropdown(null); }}
+                            >
+                              <span className="tc-dd-item-left">
+                                <span className="tc-dd-avatar">{m.name.split(' ').map(n => n[0]).join('').substring(0, 2)}</span>
+                                <span className="tc-dd-item-text">
+                                  <span className="tc-dd-item-name">{m.name}</span>
+                                  <span className="tc-dd-item-desc">{m.role}</span>
+                                </span>
+                              </span>
+                              {m.id === newTask.assignedTo && <Check size={14} />}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Due Date */}
+                  <div className="tc-m-field">
+                    <label>Due Date</label>
+                    <input
+                      type="date"
+                      value={newTask.dueDate}
+                      onChange={e => setNewTask(p => ({ ...p, dueDate: e.target.value }))}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
-            <div className="tc-modal-footer">
-              <button className="tc-modal-cancel" onClick={() => setShowCreateModal(false)}>Cancel</button>
-              <button className="tc-modal-submit" onClick={handleCreate} disabled={!newTask.title.trim()}>
+
+            {/* Footer */}
+            <div className="tc-m-footer">
+              <button className="tc-m-cancel" onClick={() => setShowCreateModal(false)}>Cancel</button>
+              <button className="tc-m-submit" onClick={handleCreate} disabled={!newTask.title.trim()}>
                 <Plus size={14} /> Create Task
               </button>
             </div>
@@ -695,26 +888,51 @@ export const TaskCenter: React.FC = () => {
         </div>
       )}
 
-      {/* Detail Drawer */}
-      {selectedTask && (
-        <div className="tc-detail-overlay" onClick={() => setSelectedTask(null)}>
-          <div className="tc-detail" onClick={e => e.stopPropagation()}>
-            <div className="tc-detail-header">
-              <h3>Task Details</h3>
-              <button className="tc-modal-close" onClick={() => setSelectedTask(null)}><X size={16} /></button>
-            </div>
-            <div className="tc-detail-body">
-              {/* Title + Description */}
-              <div className="tc-detail-section">
-                <h4 style={{ fontSize: '16px', fontWeight: 700, color: '#0f172a', margin: 0 }}>{selectedTask.title}</h4>
-                {selectedTask.description && (
-                  <div className="tc-detail-desc">{selectedTask.description}</div>
-                )}
+      {/* ── Detail Drawer (structured & wow) ── */}
+      {selectedTask && (() => {
+        const sla = getSlaStatus(selectedTask);
+        const statusKey = selectedTask.status === 'Pending' ? 'pending' : selectedTask.status === 'In Progress' ? 'inprogress' : 'completed';
+        return (
+          <div className="tc-detail-overlay" onClick={() => setSelectedTask(null)}>
+            <div className="tc-detail" onClick={e => e.stopPropagation()}>
+              {/* Hero header */}
+              <div className="tc-detail-hero">
+                <div className="tc-detail-hero-top">
+                  <div className="tc-detail-hero-id">
+                    <ClipboardList size={13} />
+                    <span>{selectedTask.id.toUpperCase()}</span>
+                  </div>
+                  <button className="tc-detail-close" onClick={() => setSelectedTask(null)}><X size={16} /></button>
+                </div>
+                <h2 className="tc-detail-hero-title">{selectedTask.title}</h2>
+                <div className="tc-detail-hero-pills">
+                  <div className={`tc-status-pill tc-status-pill--${statusKey} tc-status-pill--lg`}>
+                    <span className="tc-status-pill-dot" />
+                    <span>{selectedTask.status}</span>
+                  </div>
+                  <span className={`tc-priority-tag tc-pri--${selectedTask.priority.toLowerCase()} tc-priority-tag--lg`}>
+                    {selectedTask.priority} priority
+                  </span>
+                  <span className="tc-type-tag tc-type-tag--lg">{selectedTask.type}</span>
+                  {sla && (
+                    <span className={`tc-detail-sla-pill ${sla.className}`}>
+                      <Clock size={11} /> {sla.label}
+                    </span>
+                  )}
+                </div>
               </div>
 
-              {/* Source Badge */}
-              {selectedTask.source && selectedTask.source !== 'Manual' && (
-                <div className="tc-detail-section">
+              <div className="tc-detail-body">
+                {/* Description */}
+                {selectedTask.description && (
+                  <div className="tc-detail-block">
+                    <div className="tc-detail-block-label"><FileText size={12} /> Description</div>
+                    <p className="tc-detail-desc">{selectedTask.description}</p>
+                  </div>
+                )}
+
+                {/* Source */}
+                {selectedTask.source && selectedTask.source !== 'Manual' && (
                   <div
                     className={`tc-detail-source-badge ${getSourceClass(selectedTask.source)}`}
                     onClick={() => selectedTask.sourceLink && navigate(selectedTask.sourceLink)}
@@ -733,159 +951,160 @@ export const TaskCenter: React.FC = () => {
                       {selectedTask.sourceLink && <ExternalLink size={12} />}
                     </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Details */}
-              <div className="tc-detail-section">
-                <span className="tc-detail-section-title">Details</span>
-                <div className="tc-detail-row">
-                  <span className="tc-detail-row-label">Status</span>
-                  <select
-                    className="tc-detail-status-select"
-                    value={selectedTask.status}
-                    onChange={e => {
-                      updateTaskStatus(selectedTask.id, e.target.value as TaskStatus);
-                      setSelectedTask({ ...selectedTask, status: e.target.value as TaskStatus });
-                    }}
-                  >
-                    <option value="Pending">Pending</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Completed">Completed</option>
-                  </select>
+                {/* Assignment & Schedule (editable controls) */}
+                <div className="tc-detail-block">
+                  <div className="tc-detail-block-label"><User size={12} /> Assignment & Schedule</div>
+                  <div className="tc-detail-grid">
+                    <div className="tc-detail-cell">
+                      <span className="tc-detail-cell-label">Status</span>
+                      <select
+                        className="tc-detail-input-select"
+                        value={selectedTask.status}
+                        onChange={e => {
+                          updateTaskStatus(selectedTask.id, e.target.value as TaskStatus);
+                          setSelectedTask({ ...selectedTask, status: e.target.value as TaskStatus });
+                        }}
+                      >
+                        <option value="Pending">Pending</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Completed">Completed</option>
+                      </select>
+                    </div>
+                    <div className="tc-detail-cell">
+                      <span className="tc-detail-cell-label">Owner</span>
+                      <select
+                        className="tc-detail-input-select"
+                        value={selectedTask.assignedTo || ''}
+                        onChange={e => {
+                          const member = teamMembers.find(m => m.id === e.target.value);
+                          if (member) {
+                            assignTask(selectedTask.id, member.id, member.name);
+                            setSelectedTask({ ...selectedTask, assignedTo: member.id, assignedToName: member.name });
+                          }
+                        }}
+                      >
+                        <option value="">Unassigned</option>
+                        {teamMembers.map(m => (
+                          <option key={m.id} value={m.id}>{m.name} — {m.role}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="tc-detail-cell">
+                      <span className="tc-detail-cell-label">Due Date</span>
+                      <span className={`tc-detail-cell-value ${isOverdue(selectedTask.dueDate, selectedTask.status) ? 'tc-due--overdue' : ''}`}>
+                        <Calendar size={12} /> {formatDate(selectedTask.dueDate)}
+                      </span>
+                    </div>
+                    <div className="tc-detail-cell">
+                      <span className="tc-detail-cell-label">Created</span>
+                      <span className="tc-detail-cell-value">
+                        <Clock size={12} /> {formatDate(selectedTask.createdAt)}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div className="tc-detail-row">
-                  <span className="tc-detail-row-label">Priority</span>
-                  <span className={`tc-card-priority tc-pri--${selectedTask.priority.toLowerCase()}`}>{selectedTask.priority}</span>
-                </div>
-                <div className="tc-detail-row">
-                  <span className="tc-detail-row-label">Type</span>
-                  <span className="tc-detail-row-value">{selectedTask.type}</span>
-                </div>
-                <div className="tc-detail-row">
-                  <span className="tc-detail-row-label"><User size={12} /> Owner</span>
-                  <select
-                    className="tc-detail-assignee-select"
-                    value={selectedTask.assignedTo || ''}
-                    onChange={e => {
-                      const member = teamMembers.find(m => m.id === e.target.value);
-                      if (member) {
-                        assignTask(selectedTask.id, member.id, member.name);
-                        setSelectedTask({ ...selectedTask, assignedTo: member.id, assignedToName: member.name });
-                      }
-                    }}
-                  >
-                    <option value="">Unassigned</option>
-                    {teamMembers.map(m => (
-                      <option key={m.id} value={m.id}>{m.name} — {m.role}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="tc-detail-row">
-                  <span className="tc-detail-row-label">Due Date</span>
-                  <span className={`tc-detail-row-value ${isOverdue(selectedTask.dueDate, selectedTask.status) ? 'tc-due--overdue' : ''}`}>{formatDate(selectedTask.dueDate)}</span>
-                </div>
-                <div className="tc-detail-row">
-                  <span className="tc-detail-row-label">Created</span>
-                  <span className="tc-detail-row-value">{formatDate(selectedTask.createdAt)}</span>
-                </div>
+
+                {/* Store & Context */}
+                {(selectedTask.storeName || selectedTask.pogName) && (
+                  <div className="tc-detail-block">
+                    <div className="tc-detail-block-label"><Store size={12} /> Store & Context</div>
+                    <div className="tc-detail-grid">
+                      {selectedTask.storeName && (
+                        <div className="tc-detail-cell">
+                          <span className="tc-detail-cell-label">Store</span>
+                          <span className="tc-detail-cell-value">{selectedTask.storeName}</span>
+                        </div>
+                      )}
+                      {selectedTask.storeGroup && (
+                        <div className="tc-detail-cell">
+                          <span className="tc-detail-cell-label">Store Group</span>
+                          <span className="tc-detail-cell-value">{selectedTask.storeGroup}</span>
+                        </div>
+                      )}
+                      {selectedTask.pogName && (
+                        <div className="tc-detail-cell">
+                          <span className="tc-detail-cell-label">Planogram</span>
+                          <span className="tc-detail-cell-value">{selectedTask.pogName}</span>
+                        </div>
+                      )}
+                      {selectedTask.category && (
+                        <div className="tc-detail-cell">
+                          <span className="tc-detail-cell-label">Category</span>
+                          <span className="tc-detail-cell-value">{selectedTask.category}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* SLA breakdown (only if SLA exists) */}
+                {selectedTask.slaHours && sla && (
+                  <div className="tc-detail-block">
+                    <div className="tc-detail-block-label"><Clock size={12} /> SLA Tracking</div>
+                    <div className="tc-detail-sla-card">
+                      <div className="tc-detail-sla-card-row">
+                        <span className="tc-detail-sla-card-label">Target window</span>
+                        <span className="tc-detail-sla-card-value">{selectedTask.slaHours} hours from creation</span>
+                      </div>
+                      <div className="tc-detail-sla-card-row">
+                        <span className="tc-detail-sla-card-label">Status</span>
+                        <span className={`tc-detail-sla-pill ${sla.className}`}>{sla.label}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Severity Rationale */}
+                {selectedTask.severityRationale && (
+                  <div className="tc-detail-block">
+                    <div className="tc-detail-block-label"><Shield size={12} /> Severity Rationale</div>
+                    <div className="tc-detail-rationale">
+                      {selectedTask.severityRationale}
+                    </div>
+                    {selectedTask.impact && (
+                      <div className="tc-detail-impact">
+                        <span className="tc-detail-impact-label">Estimated impact</span>
+                        <span className="tc-detail-impact-value">{selectedTask.impact}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Before / After Proof */}
+                {(selectedTask.beforeImage || selectedTask.afterImage) && (
+                  <div className="tc-detail-block">
+                    <div className="tc-detail-block-label"><Image size={12} /> Audit Evidence</div>
+                    <div className="tc-detail-proof-grid">
+                      {selectedTask.beforeImage && (
+                        <div className="tc-detail-proof-card">
+                          <div className="tc-detail-proof-label">Before</div>
+                          <div className="tc-detail-proof-placeholder">
+                            <Image size={22} />
+                            <span>Shelf photo captured</span>
+                            <span className="tc-detail-proof-file">{selectedTask.beforeImage.split('/').pop()}</span>
+                          </div>
+                        </div>
+                      )}
+                      {selectedTask.afterImage && (
+                        <div className="tc-detail-proof-card">
+                          <div className="tc-detail-proof-label after">After</div>
+                          <div className="tc-detail-proof-placeholder">
+                            <Image size={22} />
+                            <span>Expected layout</span>
+                            <span className="tc-detail-proof-file">{selectedTask.afterImage.split('/').pop()}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
-
-              {/* SLA */}
-              {selectedTask.slaHours && (
-                <div className="tc-detail-section">
-                  <span className="tc-detail-section-title"><Clock size={12} /> SLA</span>
-                  <div className="tc-detail-sla-row">
-                    <div className="tc-detail-sla-info">
-                      <span className="tc-detail-sla-target">Target: {selectedTask.slaHours}h from creation</span>
-                      {(() => {
-                        const sla = getSlaStatus(selectedTask);
-                        return sla ? <span className={`tc-detail-sla-status ${sla.className}`}>{sla.label}</span> : null;
-                      })()}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Store & Context */}
-              {(selectedTask.storeName || selectedTask.pogName) && (
-                <div className="tc-detail-section">
-                  <span className="tc-detail-section-title"><Store size={12} /> Store & Context</span>
-                  {selectedTask.storeName && (
-                    <div className="tc-detail-row">
-                      <span className="tc-detail-row-label">Store</span>
-                      <span className="tc-detail-row-value">{selectedTask.storeName}</span>
-                    </div>
-                  )}
-                  {selectedTask.storeGroup && (
-                    <div className="tc-detail-row">
-                      <span className="tc-detail-row-label">Store Group</span>
-                      <span className="tc-detail-row-value">{selectedTask.storeGroup}</span>
-                    </div>
-                  )}
-                  {selectedTask.pogName && (
-                    <div className="tc-detail-row">
-                      <span className="tc-detail-row-label">Planogram</span>
-                      <span className="tc-detail-row-value">{selectedTask.pogName}</span>
-                    </div>
-                  )}
-                  {selectedTask.category && (
-                    <div className="tc-detail-row">
-                      <span className="tc-detail-row-label">Category</span>
-                      <span className="tc-detail-row-value">{selectedTask.category}</span>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Severity Rationale */}
-              {selectedTask.severityRationale && (
-                <div className="tc-detail-section">
-                  <span className="tc-detail-section-title"><Shield size={12} /> Severity Rationale</span>
-                  <div className="tc-detail-rationale">
-                    {selectedTask.severityRationale}
-                  </div>
-                  {selectedTask.reason && (
-                    <div className="tc-detail-row" style={{ marginTop: 8 }}>
-                      <span className="tc-detail-row-label">Impact</span>
-                      <span className="tc-detail-row-value" style={{ fontSize: '12px', maxWidth: '250px', textAlign: 'right' }}>{selectedTask.impact}</span>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Before / After Proof */}
-              {(selectedTask.beforeImage || selectedTask.afterImage) && (
-                <div className="tc-detail-section">
-                  <span className="tc-detail-section-title"><Image size={12} /> Audit Evidence</span>
-                  <div className="tc-detail-proof-grid">
-                    {selectedTask.beforeImage && (
-                      <div className="tc-detail-proof-card">
-                        <div className="tc-detail-proof-label">Before</div>
-                        <div className="tc-detail-proof-placeholder">
-                          <Image size={24} />
-                          <span>Shelf photo captured</span>
-                          <span className="tc-detail-proof-file">{selectedTask.beforeImage.split('/').pop()}</span>
-                        </div>
-                      </div>
-                    )}
-                    {selectedTask.afterImage && (
-                      <div className="tc-detail-proof-card">
-                        <div className="tc-detail-proof-label after">After</div>
-                        <div className="tc-detail-proof-placeholder">
-                          <Image size={24} />
-                          <span>Expected layout</span>
-                          <span className="tc-detail-proof-file">{selectedTask.afterImage.split('/').pop()}</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 };

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Search,
   Send,
@@ -17,6 +18,12 @@ import {
   Pin,
   X,
   ArrowLeft,
+  ExternalLink,
+  ClipboardList,
+  MapPin,
+  Sparkles,
+  Layers,
+  ShieldAlert,
 } from 'lucide-react';
 import './MessageCenter.css';
 
@@ -24,15 +31,24 @@ import './MessageCenter.css';
 type ChatType = 'direct' | 'group' | 'broadcast';
 type MessageStatus = 'sent' | 'delivered' | 'read';
 type Tab = 'all' | 'direct' | 'groups' | 'broadcast';
+type UserRole = 'ADMIN' | 'DM' | 'SM' | 'HQ' | 'OPS' | 'LP' | 'INV' | 'POG';
 
 interface Contact {
   id: string;
   name: string;
   avatar: string;
   role: string;
+  roleCode: UserRole;
   store?: string;
   online: boolean;
   lastSeen?: string;
+}
+
+/** Optional context chip rendered inside a message bubble that deep-links into a tool screen */
+interface MessageContext {
+  label: string;
+  route: string;
+  kind: 'pog' | 'task' | 'localization' | 'audit' | 'broadcast' | 'store';
 }
 
 interface Message {
@@ -43,6 +59,7 @@ interface Message {
   status: MessageStatus;
   replyTo?: string;
   imageUrl?: string;
+  context?: MessageContext;
 }
 
 interface Chat {
@@ -58,19 +75,43 @@ interface Chat {
   description?: string;
 }
 
-// ── Mock Data ──
+// ── Mock Data (StoreHub users on tool) ──
 const contacts: Contact[] = [
-  { id: 'u1', name: 'Sarah Chen', avatar: 'SC', role: 'District Manager', online: true },
-  { id: 'u2', name: 'Mike Rodriguez', avatar: 'MR', role: 'Regional VP', online: false, lastSeen: '2h ago' },
-  { id: 'u3', name: 'Emily Parker', avatar: 'EP', role: 'Store Associate', store: 'Store #142', online: true },
-  { id: 'u4', name: 'David Kim', avatar: 'DK', role: 'Loss Prevention', online: false, lastSeen: '30m ago' },
-  { id: 'u5', name: 'Lisa Thompson', avatar: 'LT', role: 'Inventory Lead', store: 'Store #142', online: true },
-  { id: 'u6', name: 'James Wilson', avatar: 'JW', role: 'Store Manager', store: 'Store #087', online: false, lastSeen: '1h ago' },
-  { id: 'u7', name: 'Anna Martinez', avatar: 'AM', role: 'Planogram Specialist', online: true },
-  { id: 'u8', name: 'Robert Chang', avatar: 'RC', role: 'Operations Director', online: true },
+  { id: 'u1', name: 'Sarah Chen',     avatar: 'SC', role: 'District Manager',       roleCode: 'DM',    online: true },
+  { id: 'u2', name: 'Mike Rodriguez', avatar: 'MR', role: 'Regional VP',            roleCode: 'HQ',    online: false, lastSeen: '2h ago' },
+  { id: 'u3', name: 'Emily Parker',   avatar: 'EP', role: 'Store Associate',        roleCode: 'SM',    store: 'Store #2341 - Nashville', online: true },
+  { id: 'u4', name: 'David Kim',      avatar: 'DK', role: 'Loss Prevention',        roleCode: 'LP',    online: false, lastSeen: '30m ago' },
+  { id: 'u5', name: 'Lisa Thompson',  avatar: 'LT', role: 'Inventory Lead',         roleCode: 'INV',   store: 'Store #2341 - Nashville', online: true },
+  { id: 'u6', name: 'James Wilson',   avatar: 'JW', role: 'Store Manager',          roleCode: 'SM',    store: 'Store #1142 - Memphis',   online: false, lastSeen: '1h ago' },
+  { id: 'u7', name: 'Anna Martinez',  avatar: 'AM', role: 'POG Specialist',         roleCode: 'POG',   online: true },
+  { id: 'u8', name: 'Robert Chang',   avatar: 'RC', role: 'Operations Director',    roleCode: 'OPS',   online: true },
+  { id: 'u9', name: 'Clarke T',       avatar: 'CT', role: 'Platform Administrator', roleCode: 'ADMIN', online: true },
 ];
 
+const ROLE_BADGE: Record<UserRole, { label: string; cls: string }> = {
+  ADMIN: { label: 'Admin',  cls: 'mc-role--admin' },
+  DM:    { label: 'DM',     cls: 'mc-role--dm' },
+  SM:    { label: 'SM',     cls: 'mc-role--sm' },
+  HQ:    { label: 'HQ',     cls: 'mc-role--hq' },
+  OPS:   { label: 'Ops',    cls: 'mc-role--ops' },
+  LP:    { label: 'LP',     cls: 'mc-role--lp' },
+  INV:   { label: 'Inv',    cls: 'mc-role--inv' },
+  POG:   { label: 'POG',    cls: 'mc-role--pog' },
+};
+
+// Routes used for context chips (deep-link into the tool)
+const R = {
+  district: '/store-operations/district-intelligence',
+  storeDD: '/store-operations/store-deep-dive',
+  pog: '/planogram/master-pog',
+  pogRule: '/planogram/rule-management',
+  loc: '/planogram/localization-engine',
+  copilot: '/command-center/ai-copilot',
+  ops: '/command-center/operations-queue',
+};
+
 const mockChats: Chat[] = [
+  /* ─── Pinned: live ops thread with your DM ─── */
   {
     id: 'c1',
     type: 'direct',
@@ -81,32 +122,35 @@ const mockChats: Chat[] = [
     pinned: true,
     lastActivity: new Date(Date.now() - 5 * 60000),
     messages: [
-      { id: 'm1', senderId: 'u1', content: 'Hey! Did you see the new planogram for Aisle 7?', timestamp: new Date(Date.now() - 45 * 60000), status: 'read' },
-      { id: 'm2', senderId: 'me', content: 'Yes! Implementing it this afternoon. The endcap layout looks great.', timestamp: new Date(Date.now() - 40 * 60000), status: 'read' },
-      { id: 'm3', senderId: 'u1', content: 'Perfect. Let me know if you need help with the reset. I can send a team over.', timestamp: new Date(Date.now() - 30 * 60000), status: 'read' },
-      { id: 'm4', senderId: 'me', content: 'That would be awesome, thanks! We\'re a bit short-staffed today.', timestamp: new Date(Date.now() - 25 * 60000), status: 'read' },
-      { id: 'm5', senderId: 'u1', content: 'No problem. I\'ll have 2 people there by 2 PM. Also, the compliance audit results are in — your store scored 94%! 🎉', timestamp: new Date(Date.now() - 10 * 60000), status: 'delivered' },
-      { id: 'm6', senderId: 'u1', content: 'Can you check the POG compliance report I shared?', timestamp: new Date(Date.now() - 5 * 60000), status: 'delivered' },
+      { id: 'm1', senderId: 'u1', content: 'Heads up — AI Copilot flagged 3 POG drift issues for Energy Drinks at Store #2341 this morning.', timestamp: new Date(Date.now() - 45 * 60000), status: 'read' },
+      { id: 'm2', senderId: 'me', content: 'Saw it. I\'ve already pushed a Reset Shelf task to the Operations Queue.', timestamp: new Date(Date.now() - 40 * 60000), status: 'read', context: { label: 'Open Operations Queue', route: R.ops, kind: 'task' } },
+      { id: 'm3', senderId: 'u1', content: 'Perfect. Loop in Anna if anything escalates — she owns the POG approvals this week.', timestamp: new Date(Date.now() - 30 * 60000), status: 'read' },
+      { id: 'm5', senderId: 'u1', content: 'Also: District 14 compliance is back to 94%. Nashville drove most of the lift 📈', timestamp: new Date(Date.now() - 10 * 60000), status: 'delivered', context: { label: 'View District Intelligence', route: R.district, kind: 'audit' } },
+      { id: 'm6', senderId: 'u1', content: 'Can you review the Energy Drinks POG audit before EOD?', timestamp: new Date(Date.now() - 5 * 60000), status: 'delivered', context: { label: 'Open AI Copilot audit', route: R.copilot, kind: 'audit' } },
     ],
   },
+
+  /* ─── Pinned: store team chat for Store #2341 ─── */
   {
     id: 'c2',
     type: 'group',
-    name: 'Store #142 Team',
-    avatar: 'ST',
-    description: 'All hands for Store #142 operations',
+    name: 'Store #2341 — Nashville',
+    avatar: 'S2',
+    description: 'Day-to-day ops for Store #2341 (Nashville)',
     participants: [contacts[0], contacts[2], contacts[4]],
     unread: 5,
     pinned: true,
     lastActivity: new Date(Date.now() - 12 * 60000),
     messages: [
       { id: 'm10', senderId: 'u3', content: 'Morning shift check-in: all sections covered ✅', timestamp: new Date(Date.now() - 120 * 60000), status: 'read' },
-      { id: 'm11', senderId: 'u5', content: 'Inventory count for dairy is done. We need to reorder milk — down to 15 units.', timestamp: new Date(Date.now() - 90 * 60000), status: 'read' },
-      { id: 'm12', senderId: 'me', content: 'Thanks Lisa! I\'ll submit the PO right away.', timestamp: new Date(Date.now() - 85 * 60000), status: 'read' },
-      { id: 'm13', senderId: 'u3', content: 'Customer reported a spill in Aisle 3. Cleanup in progress.', timestamp: new Date(Date.now() - 30 * 60000), status: 'read' },
-      { id: 'm14', senderId: 'u5', content: '@everyone Quick reminder: stockroom audit at 4 PM today', timestamp: new Date(Date.now() - 12 * 60000), status: 'delivered' },
+      { id: 'm11', senderId: 'u5', content: 'Inventory count for Dairy done. Need to reorder milk — down to 15 units.', timestamp: new Date(Date.now() - 90 * 60000), status: 'read' },
+      { id: 'm12', senderId: 'me', content: 'Submitting the PO now. Logged it as a task too.', timestamp: new Date(Date.now() - 85 * 60000), status: 'read', context: { label: 'View task in Operations Queue', route: R.ops, kind: 'task' } },
+      { id: 'm13', senderId: 'u3', content: 'POG drift on Aisle 7 endcap — facing count is off by 2. Re-shooting now.', timestamp: new Date(Date.now() - 30 * 60000), status: 'read', context: { label: 'Open POG Audit', route: R.copilot, kind: 'audit' } },
+      { id: 'm14', senderId: 'u5', content: '@everyone Stockroom audit at 4 PM. Everyone needs to confirm by 3:30.', timestamp: new Date(Date.now() - 12 * 60000), status: 'delivered' },
     ],
   },
+
+  /* ─── Broadcast: Regional Updates from HQ ─── */
   {
     id: 'c3',
     type: 'broadcast',
@@ -118,10 +162,12 @@ const mockChats: Chat[] = [
     pinned: false,
     lastActivity: new Date(Date.now() - 60 * 60000),
     messages: [
-      { id: 'm20', senderId: 'u2', content: '📋 Q4 Planogram Refresh — All stores must complete the Holiday reset by Nov 15. New POGs are available in the system. Contact your district manager for questions.', timestamp: new Date(Date.now() - 180 * 60000), status: 'read' },
-      { id: 'm21', senderId: 'u2', content: '🏆 Congrats to Store #142, #087, and #215 for achieving 95%+ compliance this quarter! Keep up the great work.', timestamp: new Date(Date.now() - 60 * 60000), status: 'delivered' },
+      { id: 'm20', senderId: 'u2', content: 'Q4 Planogram Refresh — all stores must complete the Holiday reset by Nov 15. New POGs are live in Master POG Management.', timestamp: new Date(Date.now() - 180 * 60000), status: 'read', context: { label: 'Open Master POG Management', route: R.pog, kind: 'pog' } },
+      { id: 'm21', senderId: 'u2', content: '🏆 Congrats to Store #2341, #1142, and #3021 for hitting 95%+ compliance this quarter.', timestamp: new Date(Date.now() - 60 * 60000), status: 'delivered', context: { label: 'View leaderboard', route: R.district, kind: 'audit' } },
     ],
   },
+
+  /* ─── 1:1 with LP ─── */
   {
     id: 'c4',
     type: 'direct',
@@ -132,26 +178,31 @@ const mockChats: Chat[] = [
     pinned: false,
     lastActivity: new Date(Date.now() - 180 * 60000),
     messages: [
-      { id: 'm30', senderId: 'u4', content: 'Completed the LP walkthrough for this week. Report is uploaded.', timestamp: new Date(Date.now() - 240 * 60000), status: 'read' },
-      { id: 'm31', senderId: 'me', content: 'Thanks David. Any concerns I should know about?', timestamp: new Date(Date.now() - 200 * 60000), status: 'read' },
-      { id: 'm32', senderId: 'u4', content: 'Camera 3 near the back exit needs adjustment. I\'ve raised a ticket.', timestamp: new Date(Date.now() - 180 * 60000), status: 'read' },
+      { id: 'm30', senderId: 'u4', content: 'Weekly LP walkthrough done for Store #2341. Report uploaded.', timestamp: new Date(Date.now() - 240 * 60000), status: 'read' },
+      { id: 'm31', senderId: 'me', content: 'Thanks David. Anything I should escalate?', timestamp: new Date(Date.now() - 200 * 60000), status: 'read' },
+      { id: 'm32', senderId: 'u4', content: 'Camera 3 near the back exit needs adjustment. I logged a Fixture task.', timestamp: new Date(Date.now() - 180 * 60000), status: 'read', context: { label: 'View task in Operations Queue', route: R.ops, kind: 'task' } },
     ],
   },
+
+  /* ─── Group: District Managers ─── */
   {
     id: 'c5',
     type: 'group',
-    name: 'District Managers',
-    avatar: 'DM',
-    description: 'DM sync and coordination',
+    name: 'District 14 — Managers',
+    avatar: 'D1',
+    description: 'DM sync for District 14 (Tennessee)',
     participants: [contacts[0], contacts[5], contacts[7]],
     unread: 0,
     pinned: false,
     lastActivity: new Date(Date.now() - 300 * 60000),
     messages: [
-      { id: 'm40', senderId: 'u1', content: 'Team — let\'s align on the holiday staffing plan. I\'ve shared a draft in the shared drive.', timestamp: new Date(Date.now() - 360 * 60000), status: 'read' },
-      { id: 'm41', senderId: 'u8', content: 'Reviewed it. I think we need +20% coverage for Black Friday week. Let me know your thoughts.', timestamp: new Date(Date.now() - 300 * 60000), status: 'read' },
+      { id: 'm40', senderId: 'u1', content: 'Team — holiday staffing draft is up. Pls review by tomorrow.', timestamp: new Date(Date.now() - 360 * 60000), status: 'read' },
+      { id: 'm41', senderId: 'u8', content: 'Reviewed. We need +20% coverage for Black Friday — mostly at #2341 and #1142.', timestamp: new Date(Date.now() - 320 * 60000), status: 'read', context: { label: 'View District Intelligence', route: R.district, kind: 'audit' } },
+      { id: 'm42', senderId: 'u6', content: 'Memphis is good. We can absorb +15% without new hires — OT only.', timestamp: new Date(Date.now() - 300 * 60000), status: 'read' },
     ],
   },
+
+  /* ─── Broadcast: Safety ─── */
   {
     id: 'c6',
     type: 'broadcast',
@@ -163,24 +214,64 @@ const mockChats: Chat[] = [
     pinned: false,
     lastActivity: new Date(Date.now() - 30 * 60000),
     messages: [
-      { id: 'm50', senderId: 'u8', content: '🔴 IMPORTANT: New fire safety protocol effective immediately. All fire exits must be inspected by end of week. Checklist attached to the operations queue.', timestamp: new Date(Date.now() - 480 * 60000), status: 'read' },
-      { id: 'm51', senderId: 'u8', content: '📋 Mandatory safety training modules have been updated. All store managers must complete the new training by end of month. Access the training portal through the Learning Hub. Certificates will be issued upon completion.', timestamp: new Date(Date.now() - 30 * 60000), status: 'delivered' },
+      { id: 'm50', senderId: 'u8', content: '🔴 New fire safety protocol effective immediately. All fire exits must be inspected by EOW — checklist is in the Operations Queue.', timestamp: new Date(Date.now() - 480 * 60000), status: 'read', context: { label: 'Open Operations Queue', route: R.ops, kind: 'task' } },
+      { id: 'm51', senderId: 'u8', content: 'Mandatory safety training modules have been updated. All SMs must complete by EOM.', timestamp: new Date(Date.now() - 30 * 60000), status: 'delivered' },
     ],
   },
+
+  /* ─── Group: POG Compliance ─── */
+  {
+    id: 'c-pog',
+    type: 'group',
+    name: 'POG Compliance — District 14',
+    avatar: 'PC',
+    description: 'AI Copilot audits, drift triage and POG approvals',
+    participants: [contacts[0], contacts[6], contacts[1], contacts[7]],
+    unread: 3,
+    pinned: false,
+    lastActivity: new Date(Date.now() - 22 * 60000),
+    messages: [
+      { id: 'mp1', senderId: 'u7', content: 'Pushed the Q4 Energy Drinks template to Localization Engine for Tennessee stores.', timestamp: new Date(Date.now() - 240 * 60000), status: 'read', context: { label: 'Open Localization Engine', route: R.loc, kind: 'localization' } },
+      { id: 'mp2', senderId: 'u1', content: 'Nashville is approved. Memphis still has 2 SKUs failing the SLA rule — reviewing.', timestamp: new Date(Date.now() - 180 * 60000), status: 'read', context: { label: 'Open POG Rules', route: R.pogRule, kind: 'pog' } },
+      { id: 'mp3', senderId: 'u7', content: 'Copilot just opened 4 new audits across Beverages — confidence 88–94%.', timestamp: new Date(Date.now() - 60 * 60000), status: 'delivered', context: { label: 'Triage in AI Copilot', route: R.copilot, kind: 'audit' } },
+      { id: 'mp4', senderId: 'u1', content: 'Pinning this thread. Anna will own approvals through Friday.', timestamp: new Date(Date.now() - 22 * 60000), status: 'delivered' },
+    ],
+  },
+
+  /* ─── Group: Localization Reviewers ─── */
+  {
+    id: 'c-loc',
+    type: 'group',
+    name: 'Localization Reviewers',
+    avatar: 'LR',
+    description: 'Final sign-off on localized POGs before publish',
+    participants: [contacts[6], contacts[1], contacts[8]],
+    unread: 1,
+    pinned: false,
+    lastActivity: new Date(Date.now() - 45 * 60000),
+    messages: [
+      { id: 'ml1', senderId: 'u7', content: 'Beverages — Tennessee variant is ready for review. 12 stores included.', timestamp: new Date(Date.now() - 90 * 60000), status: 'read', context: { label: 'Open in Localization Engine', route: R.loc, kind: 'localization' } },
+      { id: 'ml2', senderId: 'u2', content: 'LGTM on assortment. One question on facing rules for #3021.', timestamp: new Date(Date.now() - 45 * 60000), status: 'delivered', context: { label: 'View POG Rules', route: R.pogRule, kind: 'pog' } },
+    ],
+  },
+
+  /* ─── Broadcast: Holiday ops ─── */
   {
     id: 'c8',
     type: 'broadcast',
     name: 'Operations — Holiday Schedule',
     avatar: 'HS',
-    description: 'Holiday operations and scheduling updates',
+    description: 'Holiday operations & scheduling updates',
     participants: contacts,
     unread: 1,
     pinned: true,
     lastActivity: new Date(Date.now() - 30 * 60000),
     messages: [
-      { id: 'm70', senderId: 'u2', content: '📢 All stores will operate on modified hours during the upcoming holiday weekend (Dec 23-26). Please review the attached schedule and confirm your team\'s availability by Friday. Contact HR if you need to request time off.', timestamp: new Date(Date.now() - 30 * 60000), status: 'delivered' },
+      { id: 'm70', senderId: 'u2', content: 'All stores will operate on modified hours during Dec 23–26. Confirm your team\'s availability by Friday.', timestamp: new Date(Date.now() - 30 * 60000), status: 'delivered', context: { label: 'View tasks in Operations Queue', route: R.ops, kind: 'task' } },
     ],
   },
+
+  /* ─── Broadcast: Performance ─── */
   {
     id: 'c9',
     type: 'broadcast',
@@ -192,9 +283,11 @@ const mockChats: Chat[] = [
     pinned: false,
     lastActivity: new Date(Date.now() - 120 * 60000),
     messages: [
-      { id: 'm80', senderId: 'u2', content: '🏆 Great job on exceeding Q4 targets! Our district achieved 108% of sales goals. Top performers will be recognized at the regional meeting next week. Keep up the excellent work!', timestamp: new Date(Date.now() - 120 * 60000), status: 'delivered' },
+      { id: 'm80', senderId: 'u2', content: '🏆 Great work on Q4! District 14 hit 108% of plan. Top performers will be recognized at the regional sync.', timestamp: new Date(Date.now() - 120 * 60000), status: 'delivered', context: { label: 'View leaderboard', route: R.district, kind: 'audit' } },
     ],
   },
+
+  /* ─── 1:1 with POG specialist ─── */
   {
     id: 'c7',
     type: 'direct',
@@ -205,8 +298,8 @@ const mockChats: Chat[] = [
     pinned: false,
     lastActivity: new Date(Date.now() - 600 * 60000),
     messages: [
-      { id: 'm60', senderId: 'u7', content: 'The Aisle 5 planogram audit is ready for review. Score: 91%.', timestamp: new Date(Date.now() - 720 * 60000), status: 'read' },
-      { id: 'm61', senderId: 'me', content: 'Great work Anna! I\'ll approve it today.', timestamp: new Date(Date.now() - 600 * 60000), status: 'read' },
+      { id: 'm60', senderId: 'u7', content: 'Aisle 5 planogram audit ready for sign-off — 91% match.', timestamp: new Date(Date.now() - 720 * 60000), status: 'read', context: { label: 'Open AI Copilot audit', route: R.copilot, kind: 'audit' } },
+      { id: 'm61', senderId: 'me', content: 'Looks great Anna — approving now.', timestamp: new Date(Date.now() - 600 * 60000), status: 'read' },
     ],
   },
 ];
@@ -228,23 +321,43 @@ const formatFullTime = (date: Date) => {
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 };
 
+/** Toned-down avatar palette — calm slate base + 5 subtle accents (consistent with UAM modern table). */
 const getInitialColor = (initials: string) => {
   const colors = [
-    'linear-gradient(135deg, #6366f1, #7c3aed)',
-    'linear-gradient(135deg, #f59e0b, #ef4444)',
-    'linear-gradient(135deg, #10b981, #059669)',
-    'linear-gradient(135deg, #ec4899, #f43f5e)',
-    'linear-gradient(135deg, #3b82f6, #1d4ed8)',
-    'linear-gradient(135deg, #8b5cf6, #a855f7)',
-    'linear-gradient(135deg, #14b8a6, #0d9488)',
-    'linear-gradient(135deg, #f97316, #ea580c)',
+    'linear-gradient(135deg, #eef2ff, #e0e7ff)', // indigo (primary brand)
+    'linear-gradient(135deg, #f1f5f9, #e2e8f0)', // slate
+    'linear-gradient(135deg, #ecfdf5, #d1fae5)', // emerald
+    'linear-gradient(135deg, #fef3c7, #fde68a)', // amber
+    'linear-gradient(135deg, #fef2f2, #fee2e2)', // rose
+    'linear-gradient(135deg, #f5f3ff, #ede9fe)', // violet
   ];
-  const index = initials.charCodeAt(0) % colors.length;
-  return colors[index];
+  const code = initials.split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+  return colors[code % colors.length];
+};
+
+/** Matching ink color for the slate avatar (kept dark for AA contrast against tinted bg). */
+const getInitialInk = (initials: string) => {
+  const inks = ['#4338ca', '#475569', '#047857', '#b45309', '#b91c1c', '#6d28d9'];
+  const code = initials.split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+  return inks[code % inks.length];
+};
+
+/** Icon for the context chip kind */
+const getContextIcon = (kind: MessageContext['kind']) => {
+  switch (kind) {
+    case 'pog': return <Layers size={11} />;
+    case 'task': return <ClipboardList size={11} />;
+    case 'localization': return <MapPin size={11} />;
+    case 'audit': return <Sparkles size={11} />;
+    case 'broadcast': return <Megaphone size={11} />;
+    case 'store': return <Hash size={11} />;
+    default: return <ExternalLink size={11} />;
+  }
 };
 
 // ── Component ──
 export const MessageCenter: React.FC = () => {
+  const navigate = useNavigate();
   const [chats, setChats] = useState<Chat[]>(mockChats);
   const [activeChat, setActiveChat] = useState<string | null>('c1');
   const [inputValue, setInputValue] = useState('');
@@ -403,27 +516,6 @@ export const MessageCenter: React.FC = () => {
     c.role.toLowerCase().includes(contactSearch.toLowerCase())
   );
 
-  const getLastMessage = (chat: Chat) => {
-    const last = chat.messages[chat.messages.length - 1];
-    if (!last) return '';
-    const prefix = last.senderId === 'me' ? 'You: ' : '';
-    const text = last.content.length > 50 ? last.content.slice(0, 50) + '…' : last.content;
-    return prefix + text;
-  };
-
-  const getOnlineParticipant = (chat: Chat) => {
-    if (chat.type === 'direct') return chat.participants[0]?.online || false;
-    return false;
-  };
-
-  const getChatTypeIcon = (type: ChatType) => {
-    switch (type) {
-      case 'group': return <Users size={10} />;
-      case 'broadcast': return <Megaphone size={10} />;
-      default: return null;
-    }
-  };
-
   const getStatusIcon = (status: MessageStatus) => {
     switch (status) {
       case 'sent': return <Check size={14} />;
@@ -517,36 +609,27 @@ export const MessageCenter: React.FC = () => {
 
         {/* Chat List */}
         <div className="mc-chat-list">
-          {filteredChats.map(chat => (
-            <button
-              key={chat.id}
-              className={`mc-chat-item ${activeChat === chat.id ? 'mc-chat-item--active' : ''}`}
-              onClick={() => { setActiveChat(chat.id); setChats(prev => prev.map(c => c.id === chat.id ? { ...c, unread: 0 } : c)); }}
-            >
-              <div className="mc-chat-avatar-wrap">
-                <div className="mc-chat-avatar" style={{ background: getInitialColor(chat.avatar) }}>
-                  <span className="mc-chat-avatar-text">{chat.avatar}</span>
-                </div>
-                {getOnlineParticipant(chat) && <span className="mc-online-dot" />}
-                {chat.type !== 'direct' && (
-                  <span className="mc-chat-type-badge">{getChatTypeIcon(chat.type)}</span>
-                )}
-              </div>
-              <div className="mc-chat-info">
-                <div className="mc-chat-info-top">
-                  <span className="mc-chat-name">{chat.name}</span>
+          {filteredChats.map(chat => {
+            const Icon = chat.type === 'broadcast' ? Megaphone : chat.type === 'group' ? Hash : MessageSquare;
+            const hasUnread = chat.unread > 0;
+            return (
+              <button
+                key={chat.id}
+                className={`mc-chat-item ${activeChat === chat.id ? 'mc-chat-item--active' : ''} ${hasUnread ? 'mc-chat-item--unread' : ''}`}
+                onClick={() => { setActiveChat(chat.id); setChats(prev => prev.map(c => c.id === chat.id ? { ...c, unread: 0 } : c)); }}
+              >
+                <span className={`mc-chat-icon mc-chat-icon--${chat.type}`} aria-hidden>
+                  <Icon size={14} strokeWidth={2} />
+                </span>
+                <span className="mc-chat-name">{chat.name}</span>
+                <span className="mc-chat-meta">
+                  {chat.pinned && <Pin size={10} className="mc-pin-icon" aria-label="Pinned" />}
+                  {hasUnread && <span className="mc-unread-badge">{chat.unread}</span>}
                   <span className="mc-chat-time">{formatTime(chat.lastActivity)}</span>
-                </div>
-                <div className="mc-chat-info-bottom">
-                  <span className="mc-chat-preview">{getLastMessage(chat)}</span>
-                  <div className="mc-chat-badges">
-                    {chat.pinned && <Pin size={11} className="mc-pin-icon" />}
-                    {chat.unread > 0 && <span className="mc-unread-badge">{chat.unread}</span>}
-                  </div>
-                </div>
-              </div>
-            </button>
-          ))}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -604,7 +687,10 @@ export const MessageCenter: React.FC = () => {
                         {!isMe && selectedChat.type !== 'direct' && (
                           <div className="mc-msg-avatar-space">
                             {showAvatar && (
-                              <div className="mc-msg-avatar" style={{ background: getInitialColor(sender?.avatar || '??') }}>
+                              <div
+                                className="mc-msg-avatar"
+                                style={{ background: getInitialColor(sender?.avatar || '??'), color: getInitialInk(sender?.avatar || '??') }}
+                              >
                                 {sender?.avatar || '??'}
                               </div>
                             )}
@@ -612,9 +698,27 @@ export const MessageCenter: React.FC = () => {
                         )}
                         <div className={`mc-msg-bubble ${isMe ? 'mc-msg-bubble--me' : 'mc-msg-bubble--them'}`}>
                           {!isMe && selectedChat.type !== 'direct' && showAvatar && (
-                            <span className="mc-msg-sender-name">{sender?.name}</span>
+                            <span className="mc-msg-sender-name">
+                              <span>{sender?.name}</span>
+                              {sender && (
+                                <span className={`mc-role-pill ${ROLE_BADGE[sender.roleCode].cls}`}>
+                                  {ROLE_BADGE[sender.roleCode].label}
+                                </span>
+                              )}
+                            </span>
                           )}
                           <p className="mc-msg-text">{msg.content}</p>
+                          {msg.context && (
+                            <button
+                              type="button"
+                              className={`mc-msg-context mc-msg-context--${msg.context.kind} ${isMe ? 'mc-msg-context--me' : ''}`}
+                              onClick={() => navigate(msg.context!.route)}
+                            >
+                              <span className="mc-msg-context-icon">{getContextIcon(msg.context.kind)}</span>
+                              <span className="mc-msg-context-label">{msg.context.label}</span>
+                              <ExternalLink size={10} className="mc-msg-context-arrow" />
+                            </button>
+                          )}
                           <div className="mc-msg-footer">
                             <span className="mc-msg-time">{formatFullTime(msg.timestamp)}</span>
                             {isMe && <span className="mc-msg-status">{getStatusIcon(msg.status)}</span>}
@@ -654,8 +758,8 @@ export const MessageCenter: React.FC = () => {
               </div>
             ) : (
               <div className="mc-broadcast-footer">
-                <Megaphone size={14} />
-                <span>This is a broadcast channel. Only admins can send messages.</span>
+                <ShieldAlert size={14} />
+                <span>Broadcast channel · only admins can post here. Replies are disabled.</span>
               </div>
             )}
           </>

@@ -42,6 +42,7 @@ export interface AuthContextType {
   logout: () => void;
   addUser: (user: User) => void;
   updateUser: (userId: string, updates: Partial<User>) => void;
+  removeUser: (userId: string) => void;
 }
 
 // Login form data

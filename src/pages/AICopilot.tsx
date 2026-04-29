@@ -9,7 +9,6 @@ import {
   Bot,
   User,
   FileText,
-  ExternalLink,
   Upload,
   CheckCircle2,
   AlertTriangle,
@@ -29,7 +28,6 @@ import {
   Eye,
   Wrench,
   CheckCircle,
-  MessageSquare,
 } from 'lucide-react';
 import './AICopilot.css';
 
@@ -81,7 +79,9 @@ interface ChatMessage {
   timestamp: Date;
   skill: SkillMode;
   // Rich content
-  sources?: { doc: string; section: string; page: string }[];
+  sources?: { doc: string; section: string; page: string; tag?: 'primary' | 'supporting' | 'regulatory'; updated?: string; excerpt?: string }[];
+  confidenceBreakdown?: { sourceContribution: number; coverage: number; lastUpdated: string };
+  nextActions?: { learnMore?: string[]; takeAction?: string[] };
   kpiCards?: { label: string; value: string; delta: string; direction: 'up' | 'down' }[];
   chartData?: { type: 'bar' | 'line' | 'horizontal-bar'; title: string; labels: string[]; values: number[]; color?: string; secondaryValues?: number[]; secondaryLabel?: string }[];
   pogResults?: { status: 'pass' | 'fail'; item: string; detail: string }[];
@@ -446,6 +446,8 @@ export const AICopilot: React.FC = () => {
   const [taskPushed, setTaskPushed] = useState<Set<string>>(new Set());
   const [taskPushing, setTaskPushing] = useState<string | null>(null); // loading state
   const [assigneeDropdownOpen, setAssigneeDropdownOpen] = useState(false);
+  const [openSource, setOpenSource] = useState<{ doc: string; section: string; page: string; tag?: string; updated?: string; excerpt?: string } | null>(null);
+  const [sourcesPanelMsgId, setSourcesPanelMsgId] = useState<string | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -801,24 +803,68 @@ export const AICopilot: React.FC = () => {
     await new Promise(resolve => setTimeout(resolve, 1200));
     const randConfidence = () => Math.round(86 + Math.random() * 11); // 86-97
 
+    // ── Helpers: enrich sources with tag + last-updated; build confidence breakdown; split follow-ups into Learn/Take ──
+    const tagForSource = (
+      src: { doc: string; section: string; page: string },
+      idx: number,
+    ): 'primary' | 'supporting' | 'regulatory' => {
+      const blob = `${src.doc} ${src.section} ${src.page}`.toLowerCase();
+      if (/osha|fda|cfr|federal|regulatory|compliance reference|industry guidance/.test(blob)) return 'regulatory';
+      if (idx === 0) return 'primary';
+      return 'supporting';
+    };
+    const updatedForSource = (idx: number) => {
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const now = new Date();
+      const offset = idx * 4 + Math.floor(Math.random() * 6);
+      const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - offset);
+      return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+    };
+    const enrichSources = (
+      sources?: { doc: string; section: string; page: string }[],
+    ) => sources?.map((s, i) => ({ ...s, tag: tagForSource(s, i), updated: updatedForSource(i) }));
+    const buildBreakdown = (conf: number, sources?: unknown[]) => ({
+      sourceContribution: Math.min(100, Math.round((sources?.length || 1) * 22 + conf / 5)),
+      coverage: Math.max(60, Math.min(99, conf - 4 + Math.floor(Math.random() * 6))),
+      lastUpdated: updatedForSource(0),
+    });
+    const ACTION_VERBS = /^(create|schedule|notify|generate|audit|push|assign|send|escalate|file|open|trigger|run|launch|draft|publish|export|email)\b/i;
+    const splitNextActions = (followUps?: string[]) => {
+      if (!followUps || followUps.length === 0) return undefined;
+      const learnMore: string[] = [];
+      const takeAction: string[] = [];
+      followUps.forEach(q => (ACTION_VERBS.test(q.trim()) ? takeAction : learnMore).push(q));
+      // Synthesize at least one Take action item from a knowledge query
+      if (takeAction.length === 0 && learnMore.length > 0) {
+        const first = learnMore[0];
+        takeAction.push(`Create a task to address: ${first.replace(/\?$/, '').replace(/^(what|how|why|when|where)\s+/i, '')}`);
+      }
+      return { learnMore, takeAction };
+    };
+
     setMessages(prev => {
       const filtered = prev[activeSkill].filter(m => m.id !== processingId);
       let response: ChatMessage;
 
       if (activeSkill === 'knowledge') {
         const result = findKnowledgeResponse(userQuery);
+        const conf = randConfidence();
+        const enrichedSources = enrichSources(result.sources);
         response = {
           id: generateId(),
           role: 'assistant',
           content: result.answer,
           timestamp: new Date(),
           skill: 'knowledge',
-          sources: result.sources,
+          sources: enrichedSources,
           followUpQuestions: result.followUpQuestions,
-          confidence: randConfidence(),
+          nextActions: splitNextActions(result.followUpQuestions),
+          confidence: conf,
+          confidenceBreakdown: buildBreakdown(conf, enrichedSources),
         };
       } else if (activeSkill === 'analytics') {
         const result = findAnalyticsResponse(userQuery);
+        const conf = randConfidence();
         response = {
           id: generateId(),
           role: 'assistant',
@@ -828,7 +874,9 @@ export const AICopilot: React.FC = () => {
           kpiCards: result.kpiCards,
           chartData: result.chartData,
           followUpQuestions: result.followUpQuestions,
-          confidence: randConfidence(),
+          nextActions: splitNextActions(result.followUpQuestions),
+          confidence: conf,
+          confidenceBreakdown: buildBreakdown(conf, result.kpiCards),
         };
       } else if (activeSkill === 'pog') {
         response = { id: generateId(), role: 'assistant', content: '', timestamp: new Date(), skill: 'pog' };
@@ -961,9 +1009,9 @@ export const AICopilot: React.FC = () => {
     };
     setMessages(prev => ({ ...prev, pog: [...prev.pog, processingMsg] }));
 
-    // Animate steps one by one
+    // Animate steps one by one — slow enough for the agent to feel deliberate
     for (let i = 0; i < steps.length; i++) {
-      await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 400));
+      await new Promise(resolve => setTimeout(resolve, 1100 + Math.random() * 700));
       setMessages(prev => ({
         ...prev,
         pog: prev.pog.map(m =>
@@ -978,72 +1026,147 @@ export const AICopilot: React.FC = () => {
       }));
     }
 
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // Remove processing message and add result
+    // ── Helpers (mirror Knowledge/Analytics enrichment) ──
+    const updatedForSource = (idx: number) => {
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const now = new Date();
+      const offset = idx * 4 + Math.floor(Math.random() * 6);
+      const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - offset);
+      return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+    };
+    const tagFor = (
+      src: { doc: string; section: string; page: string },
+      idx: number,
+    ): 'primary' | 'supporting' | 'regulatory' => {
+      const blob = `${src.doc} ${src.section} ${src.page}`.toLowerCase();
+      if (/osha|fda|cfr|federal|regulatory|compliance reference/.test(blob)) return 'regulatory';
+      if (idx === 0) return 'primary';
+      return 'supporting';
+    };
+    const enrichSources = (
+      sources: { doc: string; section: string; page: string }[],
+    ) => sources.map((s, i) => ({ ...s, tag: tagFor(s, i), updated: updatedForSource(i) }));
+    const buildBreakdown = (conf: number, count: number) => ({
+      sourceContribution: Math.min(100, Math.round(count * 22 + conf / 5)),
+      coverage: Math.max(60, Math.min(99, conf - 4 + Math.floor(Math.random() * 6))),
+      lastUpdated: updatedForSource(0),
+    });
+    const ACTION_VERBS = /^(create|schedule|notify|generate|audit|push|assign|send|escalate|file|open|trigger|run|launch|draft|publish|export|email|reposition|reinstall|realign|replace|submit|request|restock|reorder|reset)\b/i;
+    const splitNextActions = (followUps: string[]) => {
+      const learnMore: string[] = [];
+      const takeAction: string[] = [];
+      followUps.forEach(q => (ACTION_VERBS.test(q.trim()) ? takeAction : learnMore).push(q));
+      return { learnMore, takeAction };
+    };
+    const conf = Math.round(86 + Math.random() * 11);
+
+    // Remove processing message and add Knowledge/Analytics-style result
     if (isOos) {
+      const oosSources = enrichSources([
+        { doc: 'Replenishment SOP v3.4', section: 'Section 2.1 — OOS Detection & Recovery', page: 'Pages 9–12' },
+        { doc: 'Backroom Inventory Procedures', section: 'Section 1.2 — On-Hand Reconciliation', page: 'Pages 4–6' },
+        { doc: 'AI Vision OOS Reference', section: 'Detection Confidence Thresholds', page: 'Technical Reference' },
+      ]);
+      const oosFollowUps = [
+        'Create replenishment task for these 4 positions',
+        'Check backroom on-hand inventory for these SKUs',
+        'Schedule end-of-day shelf restocking',
+        'What is the OOS escalation protocol when backroom is empty?',
+      ];
+      const oosContent = [
+        '## Out-of-Stock Detection Complete',
+        '',
+        'I analyzed the shelf capture and detected **4 out-of-stock positions** that need immediate replenishment.',
+        '',
+        '| # | Product | Section | Position |',
+        '|---|---------|---------|----------|',
+        '| 1 | **V-Neck Basic Tee — White (M)** | Section A | Rail 2, Position 3–4 |',
+        '| 2 | **Floral Print Dress — Navy (S)** | Section B | Rail 1, Position 5–6 |',
+        '| 3 | **Slim Fit Denim — Dark Wash (L)** | Section C | Rail 3, Position 1–2 |',
+        '| 4 | **Classic Fit Blouse — Cream (M)** | Section A | Rail 1, Position 7–8 |',
+        '',
+        '### Recommended next steps',
+        '- Pull on-hand units from the backroom for the 4 SKUs above',
+        '- File a replenishment task and assign to the floor associate',
+        '- Re-audit the endcap after restocking to confirm zero OOS',
+      ].join('\n');
+
       const oosResult: ChatMessage = {
         id: generateId(),
         role: 'assistant',
-        content: '🚨 **Critical Out-of-Stock Alert!**\n\nI detected **4 out-of-stock positions** requiring immediate replenishment:',
+        content: oosContent,
         timestamp: new Date(),
         skill: 'pog',
-        oosImage: userImage || '/oos-case-1-detected.png',
-        oosItems: [
-          { name: 'V-Neck Basic Tee — White (M)', shelf: 'Section A', position: 'Rail 2, Position 3-4' },
-          { name: 'Floral Print Dress — Navy (S)', shelf: 'Section B', position: 'Rail 1, Position 5-6' },
-          { name: 'Slim Fit Denim — Dark Wash (L)', shelf: 'Section C', position: 'Rail 3, Position 1-2' },
-          { name: 'Classic Fit Blouse — Cream (M)', shelf: 'Section A', position: 'Rail 1, Position 7-8' },
-        ],
-        suggestedQueries: ['Create replenishment task', 'Check backroom inventory', 'Schedule shelf restocking'],
+        imageUrl: userImage || '/oos-case-1-detected.png',
+        sources: oosSources,
+        followUpQuestions: oosFollowUps,
+        nextActions: splitNextActions(oosFollowUps),
+        confidence: conf,
+        confidenceBreakdown: buildBreakdown(conf, oosSources.length),
       };
       setMessages(prev => ({ ...prev, pog: [...prev.pog.filter(m => m.id !== processingId), oosResult] }));
     } else {
-      // Compliance report
-      const report: ComplianceAuditReport = {
-        overallScore: 76.4,
-        grade: 'C',
-        planogramName: 'C&A Accessories Endcap — Localized v2.1',
-        storeInfo: 'Downtown Plaza #2034 — Urban Flagship Cluster',
-        auditDate: new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
-        categories: [
-          { name: 'Product Placement Accuracy', score: 18, maxScore: 25, status: 'warning', findings: ['Scarves section shifted 2 positions left from planogram', 'Sunglasses display rotated incorrectly', 'Belt rack missing from designated hook position'] },
-          { name: 'Facing Count Compliance', score: 15, maxScore: 20, status: 'warning', findings: ['Hair accessories: 4 facings vs. required 6 (-33%)', 'Jewelry display: 8 facings vs. required 10 (-20%)', 'Watch section: Compliant at 4 facings'] },
-          { name: 'Category Adjacency', score: 20, maxScore: 20, status: 'pass', findings: ['All category groupings follow planogram sequence', 'Premium items correctly positioned at eye level', 'Impulse items properly placed near checkout zone'] },
-          { name: 'Price Label Alignment', score: 12, maxScore: 15, status: 'warning', findings: ['3 missing price labels in jewelry section', '2 labels misaligned with product position', 'Promotional tags correctly displayed'] },
-          { name: 'Fixture & Signage', score: 11.4, maxScore: 20, status: 'fail', findings: ['Header signage partially obscured', 'One shelf bracket needs replacement', 'Endcap topper missing promotional insert', 'LED strip lighting non-functional on shelf 2'] },
-        ],
-        deviations: [
-          { item: 'Silk Scarves Collection', expected: 'Shelf 1, Position 1-4 (4 facings)', actual: 'Shelf 1, Position 3-6 (shifted right)', severity: 'warning', impact: 'Reduces visual flow, -5% category sales risk' },
-          { item: 'Designer Sunglasses', expected: 'Shelf 2, Eye-level center', actual: 'Shelf 2, Left side (rotated 15°)', severity: 'critical', impact: 'Premium visibility reduced, -12% conversion risk' },
-          { item: 'Leather Belt Display', expected: 'Hook Panel A, Position 1-8', actual: 'Missing from fixture', severity: 'critical', impact: 'Complete category gap, estimated $340/week lost sales' },
-          { item: 'Hair Accessories Rack', expected: '6 facings minimum', actual: '4 facings displayed', severity: 'warning', impact: 'Reduced selection visibility, -8% category performance' },
-          { item: 'Statement Jewelry', expected: 'Shelf 3, Positions 1-10', actual: 'Shelf 3, Positions 1-8 (2 short)', severity: 'warning', impact: 'Incomplete assortment display' },
-          { item: 'Watch Display Case', expected: 'Locked case, 4 facings', actual: 'Compliant', severity: 'info', impact: 'No action required' },
-        ],
-        recommendations: [
-          'IMMEDIATE: Reinstall leather belt display on Hook Panel A — Critical revenue impact',
-          'HIGH: Reposition sunglasses to center eye-level per planogram — Premium category at risk',
-          'HIGH: Add 2 facings to hair accessories rack — Stock from backroom',
-          'MEDIUM: Realign scarves section 2 positions left to match planogram',
-          'MEDIUM: Replace missing price labels in jewelry section (3 labels)',
-          'LOW: Submit maintenance ticket for LED strip repair on shelf 2',
-          'LOW: Request replacement shelf bracket from facilities',
-        ],
-        comparisonImages: {
-          expected: '/localized-accessories-endcap.png',
-          actual: userImage || '/compliance-usecase.png',
-        },
-      };
+      const complianceSources = enrichSources([
+        { doc: 'Planogram Compliance SOP v3.1', section: 'Section 3.1 — Audit Scoring & Tolerances', page: 'Pages 12–16' },
+        { doc: 'C&A Accessories Endcap — Localized v2.1', section: 'Reference Planogram', page: 'Page 1' },
+        { doc: 'Visual Merchandising Standards', section: 'Section 1.4 — Implementation Timelines', page: 'Pages 5–8' },
+        { doc: 'Category Management Guidelines', section: 'Section 2.3 — Adjacency & Eye-Level Rules', page: 'Page 22' },
+      ]);
+      const complianceFollowUps = [
+        'How is the compliance score weighted across categories?',
+        'What is the SLA for fixing critical deviations?',
+        'Reposition sunglasses to eye-level per planogram',
+        'Reinstall leather belt display on Hook Panel A',
+        'Replace missing price labels in jewelry section',
+        'Schedule a re-audit after corrections are complete',
+      ];
+      const auditDate = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      const complianceContent = [
+        '## Compliance Audit — Grade C (76.4%)',
+        '',
+        `**Planogram:** C&A Accessories Endcap — Localized v2.1  `,
+        `**Store:** Downtown Plaza #2034 — Urban Flagship Cluster  `,
+        `**Audit date:** ${auditDate}`,
+        '',
+        '### Category breakdown',
+        '| Category | Score | Status |',
+        '|----------|-------|--------|',
+        '| Product Placement Accuracy | 18 / 25 | Warning |',
+        '| Facing Count Compliance | 15 / 20 | Warning |',
+        '| Category Adjacency | 20 / 20 | Pass |',
+        '| Price Label Alignment | 12 / 15 | Warning |',
+        '| Fixture & Signage | 11.4 / 20 | Fail |',
+        '',
+        '### Top deviations',
+        '- **Leather Belt Display** — Missing from fixture (Hook Panel A). Estimated **$340/week** lost sales.',
+        '- **Designer Sunglasses** — Off eye-level center, rotated 15°. Premium visibility down ~12%.',
+        '- **Hair Accessories Rack** — 4 facings vs. required 6 (-33%). Pull from backroom.',
+        '- **Silk Scarves Collection** — Shifted 2 positions right of planogram.',
+        '- **Statement Jewelry** — 2 facings short of planogram.',
+        '',
+        '### Recommendations',
+        '1. **IMMEDIATE** — Reinstall leather belt display on Hook Panel A.',
+        '2. **HIGH** — Reposition sunglasses to center eye-level.',
+        '3. **HIGH** — Add 2 facings to hair accessories rack.',
+        '4. **MEDIUM** — Realign scarves section 2 positions left.',
+        '5. **MEDIUM** — Replace 3 missing price labels in jewelry section.',
+        '6. **LOW** — Submit maintenance ticket for LED strip on shelf 2.',
+      ].join('\n');
 
       const complianceResult: ChatMessage = {
         id: generateId(),
         role: 'assistant',
-        content: '📋 **Compliance Audit Report Generated**',
+        content: complianceContent,
         timestamp: new Date(),
         skill: 'pog',
-        complianceReport: report,
-        suggestedQueries: ['Create compliance reset task', 'View reference planogram', 'Re-audit after corrections'],
+        imageUrl: userImage || '/compliance-usecase.png',
+        sources: complianceSources,
+        followUpQuestions: complianceFollowUps,
+        nextActions: splitNextActions(complianceFollowUps),
+        confidence: conf,
+        confidenceBreakdown: buildBreakdown(conf, complianceSources.length),
       };
       setMessages(prev => ({ ...prev, pog: [...prev.pog.filter(m => m.id !== processingId), complianceResult] }));
     }
@@ -1330,19 +1453,17 @@ export const AICopilot: React.FC = () => {
           </div>
         )}
 
-        {/* Knowledge Sources — ChatGPT/Gemini style pills */}
+        {/* Knowledge Sources — single-line inline link, opens right-side panel */}
         {msg.sources && msg.sources.length > 0 && (
-          <div className="cop-sources-pills">
-            <div className="cop-sources-pills-label"><BookOpen size={13} /> Sources</div>
-            <div className="cop-sources-pills-row">
-              {msg.sources.map((src, i) => (
-                <button key={i} className="cop-source-pill" title={`${src.section} · ${src.page}`}>
-                  <span className="cop-source-pill-num">{i + 1}</span>
-                  <span className="cop-source-pill-name">{src.doc}</span>
-                  <ExternalLink size={11} />
-                </button>
-              ))}
-            </div>
+          <div className="cop-sources-inline">
+            <BookOpen size={12} className="cop-sources-inline-icon" />
+            <span className="cop-sources-inline-summary">
+              Based on {msg.sources.length} source{msg.sources.length === 1 ? '' : 's'}: {msg.sources.slice(0, 2).map(s => s.doc).join(' · ')}
+              {msg.sources.length > 2 && ` · +${msg.sources.length - 2} more`}
+            </span>
+            <button className="cop-sources-inline-link" onClick={() => setSourcesPanelMsgId(msg.id)}>
+              View sources
+            </button>
           </div>
         )}
 
@@ -1459,34 +1580,46 @@ export const AICopilot: React.FC = () => {
           </div>
         )}
 
-        {/* Confidence Score Badge — after content, before follow-ups */}
-        {msg.role === 'assistant' && typeof msg.confidence === 'number' && !msg.isProcessing && !msg.isTyping && (
-          <div className={`cop-confidence cop-confidence--${msg.confidence >= 90 ? 'high' : msg.confidence >= 75 ? 'medium' : 'low'}`}>
-            <div className="cop-confidence-body">
-              <span className="cop-confidence-label">Confidence Score</span>
-              <div className="cop-confidence-bar">
-                <div className="cop-confidence-bar-fill" style={{ width: `${msg.confidence}%` }} />
-              </div>
+        {/* Answer Confidence — inline label with tooltip */}
+        {msg.role === 'assistant' && typeof msg.confidence === 'number' && !msg.isProcessing && !msg.isTyping && (() => {
+          const conf = msg.confidence;
+          const level = conf >= 90 ? 'high' : conf >= 75 ? 'medium' : 'low';
+          const levelLabel = level === 'high' ? 'High' : level === 'medium' ? 'Medium' : 'Low';
+          const bd = msg.confidenceBreakdown;
+          const tooltip = bd
+            ? `Confidence reflects how well this answer is grounded in available sources.\nSource contribution: ${bd.sourceContribution}%\nCoverage: ${bd.coverage}%\nLast updated: ${bd.lastUpdated}`
+            : `Confidence reflects how well this answer is grounded in available sources.`;
+          return (
+            <div className="cop-confidence-inline" title={tooltip}>
+              <span className="cop-confidence-inline-label">Confidence:</span>
+              <strong className={`cop-confidence-inline-value cop-confidence-inline-value--${level}`}>
+                {levelLabel} ({conf}%)
+              </strong>
             </div>
-            <span className="cop-confidence-value">{msg.confidence}%</span>
-          </div>
-        )}
+          );
+        })()}
 
-        {/* Follow-up Questions */}
-        {msg.followUpQuestions && msg.followUpQuestions.length > 0 && (
-          <div className="cop-followup">
-            <div className="cop-followup-label">Follow-up questions</div>
-            <div className="cop-followup-list">
-              {msg.followUpQuestions.map((q, i) => (
-                <button key={i} className="cop-followup-btn" onClick={() => { setInputValue(''); handleSend(q); }}>
-                  <MessageSquare size={13} className="cop-followup-icon" />
-                  <span>{q}</span>
-                  <ChevronRight size={13} className="cop-followup-arrow" />
-                </button>
-              ))}
+        {/* Follow-up Questions — bullet-style conversational prompts */}
+        {msg.nextActions && ((msg.nextActions.learnMore?.length || 0) + (msg.nextActions.takeAction?.length || 0)) > 0 && (() => {
+          const all = [...(msg.nextActions.learnMore || []), ...(msg.nextActions.takeAction || [])];
+          return (
+            <div className="cop-followups-inline">
+              <div className="cop-followups-inline-label">Follow-up questions</div>
+              <ul className="cop-followups-inline-list">
+                {all.map((q, i) => (
+                  <li key={i}>
+                    <button
+                      className="cop-followup-prompt"
+                      onClick={() => { setInputValue(''); handleSend(q); }}
+                    >
+                      {q}
+                    </button>
+                  </li>
+                ))}
+              </ul>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* OOS Alert — ShelfIQ Style */}
         {msg.oosItems && msg.oosItems.length > 0 && (
@@ -2159,6 +2292,124 @@ export const AICopilot: React.FC = () => {
           )}
         </div>
       )}
+
+      {/* Right-side Sources Panel — opens from inline "View sources" link */}
+      {sourcesPanelMsgId && (() => {
+        const msg = currentMessages.find(m => m.id === sourcesPanelMsgId);
+        if (!msg || !msg.sources) { return null; }
+        return (
+          <div className="cop-sources-panel-overlay" onClick={() => setSourcesPanelMsgId(null)}>
+            <aside className="cop-sources-panel" onClick={(e) => e.stopPropagation()}>
+              <div className="cop-sources-panel-header">
+                <div className="cop-sources-panel-title">
+                  <BookOpen size={15} />
+                  <h3>Sources</h3>
+                  <span className="cop-sources-panel-count">{msg.sources.length}</span>
+                </div>
+                <button className="cop-sources-panel-close" onClick={() => setSourcesPanelMsgId(null)}>
+                  <X size={18} />
+                </button>
+              </div>
+              <div className="cop-sources-panel-body">
+                <p className="cop-sources-panel-intro">
+                  This answer is grounded in {msg.sources.length} source{msg.sources.length === 1 ? '' : 's'}. Click any item to view details.
+                </p>
+                <ul className="cop-sources-panel-list">
+                  {msg.sources.map((src, i) => {
+                    const tag = src.tag || (i === 0 ? 'primary' : 'supporting');
+                    const tagLabel = tag === 'primary' ? 'Primary' : tag === 'regulatory' ? 'Regulatory' : 'Supporting';
+                    return (
+                      <li key={i}>
+                        <button
+                          className="cop-sources-panel-row"
+                          onClick={() => setOpenSource(src)}
+                        >
+                          <span className="cop-sources-panel-num">{i + 1}</span>
+                          <div className="cop-sources-panel-main">
+                            <div className="cop-sources-panel-title-row">
+                              <span className="cop-sources-panel-doc">{src.doc}</span>
+                              <span className={`cop-source-tag cop-source-tag--${tag}`}>{tagLabel}</span>
+                            </div>
+                            <div className="cop-sources-panel-meta">
+                              <span>{src.section}</span>
+                              <span className="cop-source-meta-sep">·</span>
+                              <span>{src.page}</span>
+                              {src.updated && (
+                                <>
+                                  <span className="cop-source-meta-sep">·</span>
+                                  <span>Updated {src.updated}</span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                          <ChevronRight size={14} className="cop-sources-panel-arrow" />
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            </aside>
+          </div>
+        );
+      })()}
+
+      {/* Source Detail Modal — opens when a source row is clicked */}
+      {openSource && (() => {
+        const tag = (openSource.tag as 'primary' | 'supporting' | 'regulatory') || 'supporting';
+        const tagLabel = tag === 'primary' ? 'Primary' : tag === 'regulatory' ? 'Regulatory' : 'Supporting';
+        return (
+          <div className="cop-source-modal-overlay" onClick={() => setOpenSource(null)}>
+            <div className="cop-source-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="cop-source-modal-header">
+                <div className="cop-source-modal-title">
+                  <BookOpen size={16} />
+                  <h3>Source Detail</h3>
+                </div>
+                <button className="cop-source-modal-close" onClick={() => setOpenSource(null)}>
+                  <X size={18} />
+                </button>
+              </div>
+              <div className="cop-source-modal-body">
+                <div className="cop-source-modal-tagrow">
+                  <span className={`cop-source-tag cop-source-tag--${tag}`}>{tagLabel}</span>
+                  {openSource.updated && (
+                    <span className="cop-source-modal-updated">
+                      <Clock size={11} />
+                      Updated {openSource.updated}
+                    </span>
+                  )}
+                </div>
+                <h2 className="cop-source-modal-doc">{openSource.doc}</h2>
+                <div className="cop-source-modal-meta">
+                  <div className="cop-source-modal-meta-row">
+                    <span className="cop-source-modal-meta-label">Section</span>
+                    <span className="cop-source-modal-meta-value">{openSource.section}</span>
+                  </div>
+                  <div className="cop-source-modal-meta-row">
+                    <span className="cop-source-modal-meta-label">Reference</span>
+                    <span className="cop-source-modal-meta-value">{openSource.page}</span>
+                  </div>
+                </div>
+                <div className="cop-source-modal-excerpt">
+                  <div className="cop-source-modal-excerpt-label">Relevant excerpt</div>
+                  <p>
+                    {openSource.excerpt
+                      || `This source contributed key context to the answer above. Open the full document to review ${openSource.section} on ${openSource.page} for the complete policy text, definitions, and procedural steps.`}
+                  </p>
+                </div>
+              </div>
+              <div className="cop-source-modal-footer">
+                <button className="cop-source-modal-secondary" onClick={() => setOpenSource(null)}>Close</button>
+                <button className="cop-source-modal-primary">
+                  <FileText size={13} />
+                  Open Full Document
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 };

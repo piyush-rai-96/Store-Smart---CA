@@ -99,6 +99,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     storage.set(USERS_STORAGE_KEY, updated);
   };
 
+  // Remove a user
+  const removeUser = (userId: string): void => {
+    const updated = allUsers.filter(u => u.id !== userId);
+    setAllUsers(updated);
+    storage.set(USERS_STORAGE_KEY, updated);
+  };
+
   const value: AuthContextType = {
     isAuthenticated,
     user,
@@ -107,6 +114,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     logout,
     addUser,
     updateUser,
+    removeUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

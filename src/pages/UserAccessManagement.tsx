@@ -19,6 +19,8 @@ import {
   CheckCircle2,
   Settings2,
   RotateCcw,
+  Trash2,
+  AlertTriangle,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { User, UserRole, ROLE_LABELS, ROLE_ACCESS, ScreenAccess } from '../types';
@@ -52,11 +54,23 @@ const ROLE_DESCRIPTIONS: Record<UserRole, string> = {
 };
 
 export const UserAccessManagement: React.FC = () => {
-  const { allUsers, addUser } = useAuth();
+  const { allUsers, addUser, removeUser, user: currentUser } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [inviteSuccess, setInviteSuccess] = useState<string | null>(null);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<User | null>(null);
+  const [deleteSuccess, setDeleteSuccess] = useState<string | null>(null);
+
+  const handleConfirmDelete = () => {
+    if (!confirmDelete) return;
+    const removedName = confirmDelete.name;
+    removeUser(confirmDelete.id);
+    setConfirmDelete(null);
+    setExpandedRow(prev => prev === confirmDelete.id ? null : prev);
+    setDeleteSuccess(removedName);
+    setTimeout(() => setDeleteSuccess(null), 2800);
+  };
 
   const [newName, setNewName] = useState('');
   const [newEmail, setNewEmail] = useState('');
@@ -223,6 +237,14 @@ export const UserAccessManagement: React.FC = () => {
         </div>
       )}
 
+      {/* Delete success toast */}
+      {deleteSuccess && (
+        <div className="uam-toast uam-toast--danger">
+          <div className="uam-toast-icon uam-toast-icon--danger"><Trash2 size={14} /></div>
+          <span><strong>{deleteSuccess}</strong> was removed</span>
+        </div>
+      )}
+
       {/* ── Stats Strip (DI bca-overview-grid pattern) ── */}
       <div className="uam-stats-card">
         <div className="bca-overview-grid uam-stats-grid">
@@ -283,6 +305,7 @@ export const UserAccessManagement: React.FC = () => {
               <th>Scope</th>
               <th>Status</th>
               <th className="uam-th-screens">Access</th>
+              <th className="uam-th-actions">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -323,11 +346,25 @@ export const UserAccessManagement: React.FC = () => {
                       <span>{u.accessRoutes.length}</span>
                     </div>
                   </td>
+                  <td className="uam-td-actions" onClick={e => e.stopPropagation()}>
+                    {currentUser?.id === u.id ? (
+                      <span className="uam-action-self" title="You can't remove your own account">You</span>
+                    ) : (
+                      <button
+                        type="button"
+                        className="uam-action-delete"
+                        title={`Remove ${u.name}`}
+                        onClick={() => setConfirmDelete(u)}
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    )}
+                  </td>
                 </tr>
                 {/* Expanded detail row */}
                 {expandedRow === u.id && (
                   <tr className="uam-expand-row">
-                    <td colSpan={5}>
+                    <td colSpan={6}>
                       <div className="uam-expand-content">
                         <div className="uam-expand-label">Screen Access</div>
                         <div className="uam-expand-chips">
@@ -343,7 +380,7 @@ export const UserAccessManagement: React.FC = () => {
             ))}
             {filteredUsers.length === 0 && (
               <tr>
-                <td colSpan={5} className="uam-empty">
+                <td colSpan={6} className="uam-empty">
                   <Search size={20} />
                   <span>No users match your search</span>
                 </td>
@@ -637,6 +674,32 @@ export const UserAccessManagement: React.FC = () => {
                   </button>
                 )}
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========== Confirm Delete Modal ========== */}
+      {confirmDelete && (
+        <div className="uam-overlay" onClick={() => setConfirmDelete(null)}>
+          <div className="uam-confirm" onClick={e => e.stopPropagation()}>
+            <div className="uam-confirm-icon">
+              <AlertTriangle size={22} />
+            </div>
+            <h3 className="uam-confirm-title">Remove user?</h3>
+            <p className="uam-confirm-text">
+              You're about to permanently remove <strong>{confirmDelete.name}</strong>
+              {' '}({confirmDelete.email}). They will lose access to StoreHub immediately.
+              This action cannot be undone.
+            </p>
+            <div className="uam-confirm-actions">
+              <button className="uam-m-cancel" onClick={() => setConfirmDelete(null)}>
+                Cancel
+              </button>
+              <button className="uam-confirm-delete-btn" onClick={handleConfirmDelete}>
+                <Trash2 size={13} />
+                <span>Remove user</span>
+              </button>
             </div>
           </div>
         </div>
