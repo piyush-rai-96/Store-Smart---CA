@@ -22,7 +22,6 @@ import {
   BarChart3,
   ArrowRight,
   Minus,
-  MessageSquare,
   Calendar,
   X,
   MapPin,
@@ -576,7 +575,7 @@ export const StoreOpsHome: React.FC = () => {
   const [insights, setInsights] = useState<EnhancedInsightItem[]>([]);
   const [actionItems, setActionItems] = useState<ActionItemV2[]>([]);
   const [broadcasts, setBroadcasts] = useState<BroadcastMessage[]>([]);
-  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+  const [, setLastRefresh] = useState<Date>(new Date());
   const [broadcastsExpanded, setBroadcastsExpanded] = useState(true);
   const [isBriefCollapsed, setIsBriefCollapsed] = useState(false);
   const [showBriefModal, setShowBriefModal] = useState(false);
@@ -641,55 +640,6 @@ export const StoreOpsHome: React.FC = () => {
   const [selectedEscalation, setSelectedEscalation] = useState<VoCEscalation | null>(null);
   const [escalationResponse, setEscalationResponse] = useState('');
   
-  // Chat Window States
-  const [showChatWindow, setShowChatWindow] = useState(false);
-  const [chatExpanded, setChatExpanded] = useState(false);
-  const [selectedChatContact, setSelectedChatContact] = useState<string | null>(null);
-  const [chatMessage, setChatMessage] = useState('');
-  const [showBroadcastComposer, setShowBroadcastComposer] = useState(false);
-  const [broadcastRecipients, setBroadcastRecipients] = useState<string[]>([]);
-  const [broadcastMessage, setBroadcastMessage] = useState('');
-  const [chatMessages, setChatMessages] = useState<{id: string; contactId: string; text: string; timestamp: Date; isOutgoing: boolean; type?: string; recipients?: string[]}[]>([
-    { id: '1', contactId: '1', text: 'Hi Sarah, please review the holiday schedule update.', timestamp: new Date(Date.now() - 3600000), isOutgoing: true, type: 'broadcast' },
-    { id: '2', contactId: '1', text: 'Got it! I\'ll review and confirm by end of day.', timestamp: new Date(Date.now() - 3000000), isOutgoing: false },
-    { id: '3', contactId: '2', text: 'Mike, can you check the inventory levels at Store #2341?', timestamp: new Date(Date.now() - 7200000), isOutgoing: true },
-    { id: '4', contactId: '2', text: 'Already on it. Will send report shortly.', timestamp: new Date(Date.now() - 6800000), isOutgoing: false },
-  ]);
-  
-  // Incoming broadcasts from others
-  const incomingBroadcasts = [
-    { 
-      id: 'ib1', 
-      sender: 'Regional Manager', 
-      senderAvatar: 'RM',
-      title: 'Holiday Schedule Update',
-      message: 'All stores will operate on modified hours during the upcoming holiday weekend (Dec 23-26). Please review the attached schedule and confirm your team\'s availability by Friday. Contact HR if you need to request time off.',
-      timestamp: new Date(Date.now() - 1800000),
-      priority: 'high',
-      category: 'Operations'
-    },
-    { 
-      id: 'ib2', 
-      sender: 'District Manager', 
-      senderAvatar: 'DM',
-      title: 'Q4 Performance Review',
-      message: 'Great job on exceeding Q4 targets! Our district achieved 108% of sales goals. Top performers will be recognized at the regional meeting next week. Keep up the excellent work!',
-      timestamp: new Date(Date.now() - 7200000),
-      priority: 'medium',
-      category: 'Announcement'
-    },
-    { 
-      id: 'ib3', 
-      sender: 'Compliance Team', 
-      senderAvatar: 'CT',
-      title: 'New Safety Protocol Training',
-      message: 'Mandatory safety training modules have been updated. All store managers must complete the new training by end of month. Access the training portal through the Learning Hub. Certificates will be issued upon completion.',
-      timestamp: new Date(Date.now() - 86400000),
-      priority: 'high',
-      category: 'Training'
-    },
-  ];
-  const [selectedIncomingBroadcast, setSelectedIncomingBroadcast] = useState<typeof incomingBroadcasts[0] | null>(null);
 
   // Mock data for modals — aligned with StoreCenter broadcastActions bc-001 store breakdown
   const impactedStores = [
@@ -1083,34 +1033,8 @@ export const StoreOpsHome: React.FC = () => {
     setPanelSubView(null);
   };
 
-  const handleOpenChat = (contactId?: string) => {
-    if (contactId) {
-      setSelectedChatContact(contactId);
-    }
-    setShowChatWindow(true);
-  };
-
-  const handleSendChatMessage = () => {
-    if (chatMessage.trim() && selectedChatContact) {
-      const newMessage = {
-        id: `msg-${Date.now()}`,
-        contactId: selectedChatContact,
-        text: chatMessage,
-        timestamp: new Date(),
-        isOutgoing: true
-      };
-      setChatMessages(prev => [...prev, newMessage]);
-      setChatMessage('');
-    }
-  };
-
-  const getContactMessages = (contactId: string) => {
-    return chatMessages.filter(m => m.contactId === contactId);
-  };
-
-  const getLastMessage = (contactId: string) => {
-    const messages = getContactMessages(contactId);
-    return messages.length > 0 ? messages[messages.length - 1] : null;
+  const handleOpenChat = (_contactId?: string) => {
+    navigate('/communications');
   };
 
 
@@ -1139,29 +1063,6 @@ export const StoreOpsHome: React.FC = () => {
     setShowPlanogramModal(false);
     setSelectedPlanogramItem(null);
     setPlanogramActionAssignments({});
-  };
-
-  const handleSendBroadcast = () => {
-    if (broadcastMessage.trim() && broadcastRecipients.length > 0) {
-      // Add broadcast message to each recipient's chat
-      broadcastRecipients.forEach(recipientId => {
-        const newMessage = {
-          id: `broadcast-${Date.now()}-${recipientId}`,
-          contactId: recipientId,
-          text: broadcastMessage,
-          timestamp: new Date(),
-          isOutgoing: true,
-          type: 'broadcast',
-          recipients: broadcastRecipients
-        };
-        setChatMessages(prev => [...prev, newMessage]);
-      });
-      
-      showToast(`✓ Broadcast sent to ${broadcastRecipients.length} recipient${broadcastRecipients.length > 1 ? 's' : ''}`);
-      setBroadcastMessage('');
-      setBroadcastRecipients([]);
-      setShowBroadcastComposer(false);
-    }
   };
 
   const overdueCount = actionItems.filter(a => a.status === 'overdue').length;
@@ -1210,7 +1111,7 @@ export const StoreOpsHome: React.FC = () => {
             </span>
             <span className="last-refresh-date">
               <Calendar size={14} />
-              Last refreshed: {lastRefresh.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at {lastRefresh.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+              Last refreshed: Apr 27, 2026 at 11:31 AM
             </span>
             <button
               className={`refresh-btn-inline ${isRefreshing ? 'refreshing' : ''}`}
@@ -2748,321 +2649,6 @@ export const StoreOpsHome: React.FC = () => {
         </div>
       )}
 
-      {/* Floating Chat Button */}
-      <button 
-        className="floating-chat-btn"
-        onClick={() => setShowChatWindow(!showChatWindow)}
-        aria-label="Messages & Broadcasts"
-        title="Messages & Broadcasts"
-      >
-        <MessageSquare size={24} />
-      </button>
-
-      {/* Floating Chat Window */}
-      {showChatWindow && (
-        <div className={`chat-window ${chatExpanded ? 'expanded' : ''}`}>
-          <div className="chat-window-header">
-            <div className="chat-header-title">
-              <MessageSquare size={18} />
-              <h3>Messages & Broadcasts</h3>
-            </div>
-            <div className="chat-header-actions">
-              <button 
-                className="chat-expand-btn" 
-                onClick={() => setChatExpanded(!chatExpanded)}
-                title={chatExpanded ? 'Collapse' : 'Expand'}
-              >
-                {chatExpanded ? <Minus size={16} /> : <ExternalLink size={16} />}
-              </button>
-              <button className="chat-close-btn" onClick={() => {
-                setShowChatWindow(false);
-                setChatExpanded(false);
-                setShowBroadcastComposer(false);
-                setSelectedIncomingBroadcast(null);
-              }}>
-                <X size={18} />
-              </button>
-            </div>
-          </div>
-          
-          <div className={`chat-window-body ${chatExpanded ? 'split-view' : ''}`}>
-            {/* Left Panel - Messages & Create Broadcast */}
-            <div className="chat-left-panel">
-              {showBroadcastComposer ? (
-                /* Broadcast Composer */
-                <div className="broadcast-composer">
-                  <div className="broadcast-composer-header">
-                    <button 
-                      className="chat-back-btn"
-                      onClick={() => {
-                        setShowBroadcastComposer(false);
-                        setBroadcastRecipients([]);
-                        setBroadcastMessage('');
-                      }}
-                    >
-                      <ChevronRight size={18} style={{ transform: 'rotate(180deg)' }} />
-                    </button>
-                    <div className="broadcast-composer-title">
-                      <Bell size={18} />
-                      <span>New Broadcast</span>
-                    </div>
-                  </div>
-                  
-                  <div className="broadcast-recipients-section">
-                    <div className="broadcast-section-label">
-                      <Users size={14} />
-                      <span>Select Recipients ({broadcastRecipients.length} selected)</span>
-                    </div>
-                    <div className="broadcast-recipients-list">
-                      {teamMembers.map((member) => (
-                        <div 
-                          key={member.id}
-                          className={`broadcast-recipient-item ${broadcastRecipients.includes(member.id) ? 'selected' : ''}`}
-                          onClick={() => {
-                            if (broadcastRecipients.includes(member.id)) {
-                              setBroadcastRecipients(prev => prev.filter(id => id !== member.id));
-                            } else {
-                              setBroadcastRecipients(prev => [...prev, member.id]);
-                            }
-                          }}
-                        >
-                          <div className={`recipient-checkbox ${broadcastRecipients.includes(member.id) ? 'checked' : ''}`}>
-                            {broadcastRecipients.includes(member.id) && <Check size={12} />}
-                          </div>
-                          <div className="chat-contact-avatar small">{member.avatar}</div>
-                          <div className="recipient-info">
-                            <span className="recipient-name">{member.name}</span>
-                            <span className="recipient-role">{member.role}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    <button 
-                      className="select-all-recipients-btn"
-                      onClick={() => {
-                        if (broadcastRecipients.length === teamMembers.length) {
-                          setBroadcastRecipients([]);
-                        } else {
-                          setBroadcastRecipients(teamMembers.map(m => m.id));
-                        }
-                      }}
-                    >
-                      {broadcastRecipients.length === teamMembers.length ? 'Deselect All' : 'Select All'}
-                    </button>
-                  </div>
-                  
-                  <div className="broadcast-message-section">
-                    <div className="broadcast-section-label">
-                      <MessageSquare size={14} />
-                      <span>Broadcast Message</span>
-                    </div>
-                    <textarea 
-                      placeholder="Type your broadcast message..."
-                      value={broadcastMessage}
-                      onChange={(e) => setBroadcastMessage(e.target.value)}
-                      rows={4}
-                    />
-                  </div>
-                  
-                  <div className="broadcast-actions">
-                    <button 
-                      className="broadcast-send-btn"
-                      disabled={!broadcastMessage.trim() || broadcastRecipients.length === 0}
-                      onClick={handleSendBroadcast}
-                    >
-                      <Send size={16} />
-                      Send Broadcast ({broadcastRecipients.length})
-                    </button>
-                  </div>
-                </div>
-              ) : !selectedChatContact ? (
-                /* Contacts List */
-                <div className="chat-contacts-list">
-                  <button 
-                    className={`new-broadcast-btn ${chatExpanded ? 'compact' : ''}`}
-                    onClick={() => setShowBroadcastComposer(true)}
-                  >
-                    {chatExpanded ? (
-                      <>
-                        <span className="plus-icon">+</span>
-                        <span>Create Broadcast</span>
-                      </>
-                    ) : (
-                      <>
-                        <Bell size={16} />
-                        <span>New Broadcast</span>
-                        <ChevronRight size={16} />
-                      </>
-                    )}
-                  </button>
-                  {teamMembers.map((member) => {
-                    const lastMsg = getLastMessage(member.id);
-                    return (
-                      <div 
-                        key={member.id} 
-                        className="chat-contact-item"
-                        onClick={() => setSelectedChatContact(member.id)}
-                      >
-                        <div className="chat-contact-avatar">{member.avatar}</div>
-                        <div className="chat-contact-info">
-                          <span className="chat-contact-name">{member.name}</span>
-                          <span className="chat-contact-role">{member.role}</span>
-                          {lastMsg && (
-                            <span className="chat-contact-preview">
-                              {lastMsg.type === 'broadcast' && <Bell size={10} />}
-                              {lastMsg.isOutgoing ? 'You: ' : ''}{lastMsg.text.substring(0, 25)}...
-                            </span>
-                          )}
-                        </div>
-                      {lastMsg && (
-                        <span className="chat-contact-time">
-                          {lastMsg.timestamp.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
-                        </span>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              /* Conversation View */
-              <div className="chat-conversation">
-                <div className="chat-conversation-header">
-                  <button 
-                    className="chat-back-btn"
-                    onClick={() => setSelectedChatContact(null)}
-                  >
-                    <ChevronRight size={18} style={{ transform: 'rotate(180deg)' }} />
-                  </button>
-                  <div className="chat-contact-avatar small">
-                    {teamMembers.find(m => m.id === selectedChatContact)?.avatar}
-                  </div>
-                  <div className="chat-conversation-info">
-                    <span className="chat-conversation-name">
-                      {teamMembers.find(m => m.id === selectedChatContact)?.name}
-                    </span>
-                    <span className="chat-conversation-status">Online</span>
-                  </div>
-                </div>
-                
-                <div className="chat-messages">
-                  {getContactMessages(selectedChatContact).map((msg) => (
-                    <div 
-                      key={msg.id} 
-                      className={`chat-message ${msg.isOutgoing ? 'outgoing' : 'incoming'} ${msg.type === 'broadcast' ? 'broadcast' : ''}`}
-                    >
-                      {msg.type === 'broadcast' && (
-                        <div className="message-broadcast-tag">
-                          <Bell size={10} />
-                          Broadcast
-                          {msg.recipients && msg.recipients.length > 1 && (
-                            <span className="broadcast-recipient-count">to {msg.recipients.length} people</span>
-                          )}
-                        </div>
-                      )}
-                      <p>{msg.text}</p>
-                      <span className="message-time">
-                        {msg.timestamp.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-                
-                <div className="chat-input-area">
-                  <input 
-                    type="text"
-                    placeholder="Type a message..."
-                    value={chatMessage}
-                    onChange={(e) => setChatMessage(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSendChatMessage()}
-                  />
-                  <button 
-                    className="chat-send-btn"
-                    onClick={handleSendChatMessage}
-                    disabled={!chatMessage.trim()}
-                  >
-                    <Send size={18} />
-                  </button>
-                </div>
-              </div>
-            )}
-            </div>
-
-            {/* Right Panel - Incoming Broadcasts (only in expanded view) */}
-            {chatExpanded && (
-              <div className="chat-right-panel">
-                <div className="incoming-broadcasts-header">
-                  <Bell size={16} />
-                  <h4>Incoming Broadcasts</h4>
-                </div>
-                <div className="incoming-broadcasts-list">
-                  {!selectedIncomingBroadcast ? (
-                    incomingBroadcasts.map((broadcast) => (
-                      <div 
-                        key={broadcast.id} 
-                        className={`incoming-broadcast-card priority-${broadcast.priority}`}
-                        onClick={() => setSelectedIncomingBroadcast(broadcast)}
-                      >
-                        <div className="broadcast-card-header">
-                          <div className="broadcast-sender-avatar">{broadcast.senderAvatar}</div>
-                          <div className="broadcast-sender-info">
-                            <span className="broadcast-sender-name">{broadcast.sender}</span>
-                            <span className="broadcast-category">{broadcast.category}</span>
-                          </div>
-                          <span className={`broadcast-priority-badge ${broadcast.priority}`}>
-                            {broadcast.priority.toUpperCase()}
-                          </span>
-                        </div>
-                        <h5 className="broadcast-card-title">{broadcast.title}</h5>
-                        <p className="broadcast-card-preview">{broadcast.message.substring(0, 80)}...</p>
-                        <span className="broadcast-card-time">
-                          {formatTimeAgo(broadcast.timestamp.toISOString())}
-                        </span>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="incoming-broadcast-detail">
-                      <button 
-                        className="chat-back-btn"
-                        onClick={() => setSelectedIncomingBroadcast(null)}
-                      >
-                        <ChevronRight size={18} style={{ transform: 'rotate(180deg)' }} />
-                        <span>Back to all</span>
-                      </button>
-                      <div className="broadcast-detail-header">
-                        <div className="broadcast-sender-avatar large">{selectedIncomingBroadcast.senderAvatar}</div>
-                        <div className="broadcast-detail-meta">
-                          <span className="broadcast-sender-name">{selectedIncomingBroadcast.sender}</span>
-                          <div className="broadcast-detail-badges">
-                            <span className={`broadcast-priority-badge ${selectedIncomingBroadcast.priority}`}>
-                              {selectedIncomingBroadcast.priority.toUpperCase()}
-                            </span>
-                            <span className="broadcast-category-badge">{selectedIncomingBroadcast.category}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <h4 className="broadcast-detail-title">{selectedIncomingBroadcast.title}</h4>
-                      <p className="broadcast-detail-message">{selectedIncomingBroadcast.message}</p>
-                      <div className="broadcast-detail-footer">
-                        <span className="broadcast-detail-time">
-                          <Clock size={14} />
-                          {formatTimeAgo(selectedIncomingBroadcast.timestamp.toISOString())}
-                        </span>
-                        <button className="broadcast-acknowledge-btn" onClick={() => {
-                          showToast('✓ Broadcast acknowledged');
-                          setSelectedIncomingBroadcast(null);
-                        }}>
-                          <Check size={14} />
-                          Acknowledge
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Approval Drawer */}
       {showApprovalDrawer && approvalDrawerItem && (

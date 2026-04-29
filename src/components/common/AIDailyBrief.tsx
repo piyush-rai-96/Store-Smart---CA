@@ -85,7 +85,6 @@ export const AIDailyBrief: React.FC<AIDailyBriefProps> = ({
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
   const [showModal, setShowModal] = useState(false);
-  const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
   return (
     <>
@@ -102,15 +101,11 @@ export const AIDailyBrief: React.FC<AIDailyBriefProps> = ({
               </div>
             </div>
           </div>
-          <div className="di-brief-meta">
-            <span>Today, {time}</span>
-            {metaSuffix && (
-              <>
-                <span className="meta-sep">•</span>
-                <span>{metaSuffix}</span>
-              </>
-            )}
-          </div>
+          {metaSuffix && (
+            <div className="di-brief-meta">
+              <span>{metaSuffix}</span>
+            </div>
+          )}
         </div>
         <div className="di-brief-body-wrapper">
           <div className={`di-brief-body ${isCollapsed ? 'collapsed' : ''}`}>
