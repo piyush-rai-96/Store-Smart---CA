@@ -12,15 +12,15 @@
 }
 
 .critical-alert-critical {
-  background: #fef2f2;
-  border-color: #fecaca;
-  color: #991b1b;
+  background: var(--ia-color-error-bg);
+  border-color: var(--ia-color-error-soft);
+  color: var(--ia-color-error-strong);
 }
 
 .critical-alert-high {
-  background: #fef3c7;
-  border-color: #fde68a;
-  color: #92400e;
+  background: var(--ia-color-warning-bg);
+  border-color: var(--ia-color-warning-bg);
+  color: var(--ia-color-warning-text);
 }
 
 .critical-alert-icon {
@@ -34,13 +34,13 @@
 }
 
 .critical-alert-critical .critical-alert-icon {
-  background: #fee2e2;
-  color: #dc2626;
+  background: var(--ia-color-error-bg);
+  color: var(--ia-color-error-strong);
 }
 
 .critical-alert-high .critical-alert-icon {
-  background: #fef3c7;
-  color: #d97706;
+  background: var(--ia-color-warning-bg);
+  color: var(--ia-color-warning-text);
 }
 
 .critical-alert-content {
@@ -49,15 +49,15 @@
 }
 
 .critical-alert-title {
-  font-size: 14px;
-  font-weight: 700;
+  font-size: var(--ia-text-sm);
+  font-weight: var(--ia-font-weight-bold);
   margin-bottom: 4px;
   line-height: 1.4;
 }
 
 .critical-alert-message {
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--ia-text-13);
+  font-weight: var(--ia-font-weight-medium);
   opacity: 0.9;
   line-height: 1.5;
 }
@@ -72,29 +72,29 @@
   padding: 8px 16px;
   border: none;
   border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--ia-text-13);
+  font-weight: var(--ia-font-weight-semibold);
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
 }
 
 .critical-alert-critical .critical-alert-action-button {
-  background: #dc2626;
+  background: var(--ia-color-error-strong);
   color: white;
 }
 
 .critical-alert-critical .critical-alert-action-button:hover {
-  background: #b91c1c;
+  background: var(--ia-color-error-strong);
 }
 
 .critical-alert-high .critical-alert-action-button {
-  background: #d97706;
+  background: var(--ia-color-warning-text);
   color: white;
 }
 
 .critical-alert-high .critical-alert-action-button:hover {
-  background: #b45309;
+  background: var(--ia-color-warning-text);
 }
 
 .critical-alert-dismiss {

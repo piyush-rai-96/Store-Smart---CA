@@ -1,0 +1,111 @@
+/*
+  Impact UI–aligned typography tokens (StoreHub).
+
+  Impact’s published bundle uses "Manrope", sans-serif. Raw pixel sizes in impact-ui
+  dist are dominated by 12px and 14px, with 16/18/20 for larger UI.
+
+  Mapping (use these instead of raw px in app CSS):
+  | Common px | Token              |
+  |----------|--------------------|
+  | 10px     | --ia-text-3xs      |
+  | 11px     | --ia-text-2xs      |
+  | 12px     | --ia-text-xs       |
+  | 13px     | --ia-text-13      |
+  | 14px     | --ia-text-sm       |
+  | 15px     | --ia-text-15      |
+  | 16px     | --ia-text-md       |
+  | 18px     | --ia-text-lg       |
+  | 20px     | --ia-text-xl       |
+  | 22px     | --ia-text-2xl     |
+  | 24px     | --ia-text-3xl     |
+  | 28px+    | --ia-text-4xl     / --ia-text-5xl |
+*/
+
+:root {
+  --ia-font-sans: 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+
+  --ia-font-weight-regular: 400;
+  --ia-font-weight-medium: 500;
+  --ia-font-weight-semibold: 600;
+  --ia-font-weight-bold: 700;
+  --ia-font-weight-extrabold: 800;
+
+  --ia-text-8: 0.5rem; /* 8px */
+  --ia-text-9-5: 0.59375rem; /* 9.5px */
+  --ia-text-9: 0.5625rem; /* 9px */
+  --ia-text-3xs: 0.625rem; /* 10px */
+  --ia-text-10-5: 0.65625rem; /* 10.5px */
+  --ia-text-2xs: 0.6875rem; /* 11px */
+  --ia-text-11-5: 0.71875rem; /* 11.5px */
+  --ia-text-13-5: 0.84375rem; /* 13.5px */
+  --ia-text-xs: 0.75rem; /* 12px */
+  --ia-text-12-5: 0.78125rem; /* 12.5px */
+  --ia-text-13: 0.8125rem; /* 13px */
+  --ia-text-sm: 0.875rem; /* 14px — most common in Impact */
+  --ia-text-15: 0.9375rem; /* 15px */
+  --ia-text-15-5: 0.96875rem; /* 15.5px */
+  --ia-text-md: 1rem; /* 16px */
+  --ia-text-17: 1.0625rem; /* 17px */
+  --ia-text-lg: 1.125rem; /* 18px */
+  --ia-text-19: 1.1875rem; /* 19px */
+  --ia-text-xl: 1.25rem; /* 20px */
+  --ia-text-21: 1.3125rem; /* 21px */
+  --ia-text-2xl: 1.375rem; /* 22px */
+  --ia-text-3xl: 1.5rem; /* 24px */
+  --ia-text-26: 1.625rem; /* 26px */
+  --ia-text-4xl: 1.75rem; /* 28px */
+  --ia-text-30: 1.875rem; /* 30px */
+  --ia-text-5xl: 2rem; /* 32px */
+  --ia-text-36: 2.25rem; /* 36px */
+  --ia-text-42: 2.625rem; /* 42px */
+  --ia-text-48: 3rem; /* 48px */
+  --ia-text-44: 2.75rem; /* 44px */
+}
+
+/* ============================================================
+   Impact UI Color Tokens
+   Source: compiled impact-ui@3.7.20 dist/index.js
+   These are the canonical design-system colors for StoreHub.
+   All page/component CSS should reference var(--ia-color-*)
+   rather than raw hex literals.
+   ============================================================ */
+
+:root {
+  /* --- Brand / Primary (#4259EE family) --- */
+  --ia-color-primary:           #4259EE;
+  --ia-color-primary-hover:     #3649C6;
+  --ia-color-primary-pressed:   #29399F;
+  --ia-color-primary-soft:      #ECEEFD;
+  --ia-color-primary-border:    #B3BDF8;
+  --ia-color-info:              #5267F4;
+
+  /* --- Neutral text --- */
+  --ia-color-text-primary:      #1F2B4D;
+  --ia-color-text-secondary:    #60697D;
+  --ia-color-text-tertiary:     #B4BAC7;
+
+  /* --- Neutral surface / border --- */
+  --ia-color-border:            #D9DDE7;
+  --ia-color-border-strong:     #C3C8D4;
+  --ia-color-bg-muted:          #F2F3F4;
+  --ia-color-bg-subtle:         #F8F9FB;
+  --ia-color-surface:           #FFFFFF;
+
+  /* --- Semantic: success --- */
+  --ia-color-success:           #108431;
+  --ia-color-success-soft:      #C4E8D5;
+  --ia-color-success-bg:        #ECFDF3;
+
+  /* --- Semantic: warning --- */
+  --ia-color-warning:           #FFE174;
+  --ia-color-warning-text:      #8C6F06;
+  --ia-color-warning-bg:        #FFF8E1;
+
+  /* --- Semantic: error / destructive --- */
+  --ia-color-error:             #EC4C5C;
+  --ia-color-error-strong:      #D62F2D;
+  --ia-color-error-soft:        #FCEEEE;
+  --ia-color-error-bg:          #FCEEEE;
+  --ia-color-destructive:       #E15554;
+}

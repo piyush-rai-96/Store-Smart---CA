@@ -1,30 +1,29 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Search,
-  Send,
-  Phone,
-  Video,
-  MoreVertical,
-  Smile,
-  Paperclip,
-  Check,
-  CheckCheck,
-  Users,
-  Megaphone,
-  MessageSquare,
-  Plus,
-  Hash,
-  Pin,
-  X,
-  ArrowLeft,
-  ExternalLink,
-  ClipboardList,
-  MapPin,
-  Sparkles,
-  Layers,
-  ShieldAlert,
-} from 'lucide-react';
+import SearchOutlined from '@mui/icons-material/SearchOutlined';
+import SendOutlined from '@mui/icons-material/SendOutlined';
+import PhoneOutlined from '@mui/icons-material/PhoneOutlined';
+import VideocamOutlined from '@mui/icons-material/VideocamOutlined';
+import MoreVert from '@mui/icons-material/MoreVert';
+import SentimentSatisfiedOutlined from '@mui/icons-material/SentimentSatisfiedOutlined';
+import AttachFileOutlined from '@mui/icons-material/AttachFileOutlined';
+import Check from '@mui/icons-material/Check';
+import DoneAll from '@mui/icons-material/DoneAll';
+import GroupOutlined from '@mui/icons-material/GroupOutlined';
+import CampaignOutlined from '@mui/icons-material/CampaignOutlined';
+import ChatOutlined from '@mui/icons-material/ChatOutlined';
+import Add from '@mui/icons-material/Add';
+import TagOutlined from '@mui/icons-material/TagOutlined';
+import PushPinOutlined from '@mui/icons-material/PushPinOutlined';
+import CloseOutlined from '@mui/icons-material/CloseOutlined';
+import ArrowBackOutlined from '@mui/icons-material/ArrowBackOutlined';
+import OpenInNewOutlined from '@mui/icons-material/OpenInNewOutlined';
+import AssignmentOutlined from '@mui/icons-material/AssignmentOutlined';
+import PlaceOutlined from '@mui/icons-material/PlaceOutlined';
+import AutoAwesomeOutlined from '@mui/icons-material/AutoAwesomeOutlined';
+import LayersOutlined from '@mui/icons-material/LayersOutlined';
+import GppBadOutlined from '@mui/icons-material/GppBadOutlined';
+import { Button, Chips, Badge, Tabs } from 'impact-ui';
 import './MessageCenter.css';
 
 // ── Types ──
@@ -97,6 +96,22 @@ const ROLE_BADGE: Record<UserRole, { label: string; cls: string }> = {
   LP:    { label: 'LP',     cls: 'mc-role--lp' },
   INV:   { label: 'Inv',    cls: 'mc-role--inv' },
   POG:   { label: 'POG',    cls: 'mc-role--pog' },
+};
+
+const roleBadgeColor = (role: UserRole): 'error' | 'warning' | 'info' | 'success' => {
+  switch (role) {
+    case 'ADMIN':
+    case 'HQ':
+      return 'error';
+    case 'DM':
+    case 'OPS':
+      return 'warning';
+    case 'SM':
+    case 'INV':
+      return 'success';
+    default:
+      return 'info';
+  }
 };
 
 // Routes used for context chips (deep-link into the tool)
@@ -337,7 +352,7 @@ const getInitialColor = (initials: string) => {
 
 /** Matching ink color for the slate avatar (kept dark for AA contrast against tinted bg). */
 const getInitialInk = (initials: string) => {
-  const inks = ['#4338ca', '#475569', '#047857', '#b45309', '#b91c1c', '#6d28d9'];
+  const inks = ['var(--ia-color-primary-pressed)', 'var(--ia-color-text-secondary)', '#047857', '#b45309', '#b91c1c', '#6d28d9'];
   const code = initials.split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
   return inks[code % inks.length];
 };
@@ -345,13 +360,13 @@ const getInitialInk = (initials: string) => {
 /** Icon for the context chip kind */
 const getContextIcon = (kind: MessageContext['kind']) => {
   switch (kind) {
-    case 'pog': return <Layers size={11} />;
-    case 'task': return <ClipboardList size={11} />;
-    case 'localization': return <MapPin size={11} />;
-    case 'audit': return <Sparkles size={11} />;
-    case 'broadcast': return <Megaphone size={11} />;
-    case 'store': return <Hash size={11} />;
-    default: return <ExternalLink size={11} />;
+    case 'pog': return <LayersOutlined sx={{ fontSize: 11 }} />;
+    case 'task': return <AssignmentOutlined sx={{ fontSize: 11 }} />;
+    case 'localization': return <PlaceOutlined sx={{ fontSize: 11 }} />;
+    case 'audit': return <AutoAwesomeOutlined sx={{ fontSize: 11 }} />;
+    case 'broadcast': return <CampaignOutlined sx={{ fontSize: 11 }} />;
+    case 'store': return <TagOutlined sx={{ fontSize: 11 }} />;
+    default: return <OpenInNewOutlined sx={{ fontSize: 11 }} />;
   }
 };
 
@@ -518,9 +533,9 @@ export const MessageCenter: React.FC = () => {
 
   const getStatusIcon = (status: MessageStatus) => {
     switch (status) {
-      case 'sent': return <Check size={14} />;
-      case 'delivered': return <CheckCheck size={14} />;
-      case 'read': return <CheckCheck size={14} className="mc-status-read" />;
+      case 'sent': return <Check sx={{ fontSize: 14 }} />;
+      case 'delivered': return <DoneAll sx={{ fontSize: 14 }} />;
+      case 'read': return <DoneAll sx={{ fontSize: 14 }} className="mc-status-read" />;
     }
   };
 
@@ -564,17 +579,24 @@ export const MessageCenter: React.FC = () => {
         {/* Sidebar Header */}
         <div className="mc-sidebar-header">
           <div className="mc-sidebar-title">
-            <MessageSquare size={20} />
+            <ChatOutlined sx={{ fontSize: 20 }} />
             <h2>Communications</h2>
           </div>
-          <button className="mc-new-chat-btn" onClick={() => setShowNewChat(!showNewChat)}>
-            <Plus size={18} />
-          </button>
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            className="mc-new-chat-btn"
+            onClick={() => setShowNewChat(!showNewChat)}
+            aria-label="New conversation"
+          >
+            <Add sx={{ fontSize: 18 }} />
+          </Button>
         </div>
 
         {/* Search */}
         <div className="mc-search">
-          <Search size={15} />
+          <SearchOutlined sx={{ fontSize: 15 }} />
           <input
             type="text"
             placeholder="Search conversations..."
@@ -582,35 +604,29 @@ export const MessageCenter: React.FC = () => {
             onChange={e => setSearchQuery(e.target.value)}
           />
           {searchQuery && (
-            <button className="mc-search-clear" onClick={() => setSearchQuery('')}>
-              <X size={13} />
-            </button>
+            <Button variant="text" size="small" className="mc-search-clear" onClick={() => setSearchQuery('')} aria-label="Clear search">
+              <CloseOutlined sx={{ fontSize: 13 }} />
+            </Button>
           )}
         </div>
 
         {/* Tabs */}
-        <div className="mc-tabs">
-          {([
-            { id: 'all' as Tab, label: 'All', icon: null },
-            { id: 'direct' as Tab, label: 'Direct', icon: <MessageSquare size={12} /> },
-            { id: 'groups' as Tab, label: 'Groups', icon: <Users size={12} /> },
-            { id: 'broadcast' as Tab, label: 'Broadcast', icon: <Megaphone size={12} /> },
-          ]).map(tab => (
-            <button
-              key={tab.id}
-              className={`mc-tab ${activeTab === tab.id ? 'mc-tab--active' : ''}`}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              {tab.icon}
-              <span>{tab.label}</span>
-            </button>
-          ))}
-        </div>
+        <Tabs
+          tabNames={[
+            { value: 'all', label: 'All' },
+            { value: 'direct', label: 'Direct', icon: <ChatOutlined sx={{ fontSize: 12 }} /> },
+            { value: 'groups', label: 'Groups', icon: <GroupOutlined sx={{ fontSize: 12 }} /> },
+            { value: 'broadcast', label: 'Broadcast', icon: <CampaignOutlined sx={{ fontSize: 12 }} /> },
+          ]}
+          tabPanels={[]}
+          value={activeTab}
+          onChange={(_, val) => setActiveTab(val as Tab)}
+        />
 
         {/* Chat List */}
         <div className="mc-chat-list">
           {filteredChats.map(chat => {
-            const Icon = chat.type === 'broadcast' ? Megaphone : chat.type === 'group' ? Hash : MessageSquare;
+            const Icon = chat.type === 'broadcast' ? CampaignOutlined : chat.type === 'group' ? TagOutlined : ChatOutlined;
             const hasUnread = chat.unread > 0;
             return (
               <button
@@ -619,12 +635,16 @@ export const MessageCenter: React.FC = () => {
                 onClick={() => { setActiveChat(chat.id); setChats(prev => prev.map(c => c.id === chat.id ? { ...c, unread: 0 } : c)); }}
               >
                 <span className={`mc-chat-icon mc-chat-icon--${chat.type}`} aria-hidden>
-                  <Icon size={14} strokeWidth={2} />
+                  <Icon sx={{ fontSize: 14 }} />
                 </span>
                 <span className="mc-chat-name">{chat.name}</span>
                 <span className="mc-chat-meta">
-                  {chat.pinned && <Pin size={10} className="mc-pin-icon" aria-label="Pinned" />}
-                  {hasUnread && <span className="mc-unread-badge">{chat.unread}</span>}
+                  {chat.pinned && <PushPinOutlined sx={{ fontSize: 10 }} className="mc-pin-icon" aria-label="Pinned" />}
+                  {hasUnread && (
+                    <span className="mc-unread-badge-wrap">
+                      <Badge label={String(chat.unread)} color="error" size="small" />
+                    </span>
+                  )}
                   <span className="mc-chat-time">{formatTime(chat.lastActivity)}</span>
                 </span>
               </button>
@@ -656,12 +676,12 @@ export const MessageCenter: React.FC = () => {
               <div className="mc-chat-header-actions">
                 {selectedChat.type === 'direct' && (
                   <>
-                    <button className="mc-header-action"><Phone size={18} /></button>
-                    <button className="mc-header-action"><Video size={18} /></button>
+                    <Button variant="outlined" size="small" className="mc-header-action" aria-label="Call"><PhoneOutlined sx={{ fontSize: 18 }} /></Button>
+                    <Button variant="outlined" size="small" className="mc-header-action" aria-label="Video"><VideocamOutlined sx={{ fontSize: 18 }} /></Button>
                   </>
                 )}
-                <button className="mc-header-action"><Search size={18} /></button>
-                <button className="mc-header-action"><MoreVertical size={18} /></button>
+                <Button variant="outlined" size="small" className="mc-header-action" aria-label="Search in chat"><SearchOutlined sx={{ fontSize: 18 }} /></Button>
+                <Button variant="outlined" size="small" className="mc-header-action" aria-label="More"><MoreVert sx={{ fontSize: 18 }} /></Button>
               </div>
             </div>
 
@@ -669,7 +689,7 @@ export const MessageCenter: React.FC = () => {
             <div className="mc-messages">
               {selectedChat.description && (
                 <div className="mc-chat-description">
-                  <Hash size={14} />
+                  <TagOutlined sx={{ fontSize: 14 }} />
                   <span>{selectedChat.description}</span>
                 </div>
               )}
@@ -701,9 +721,12 @@ export const MessageCenter: React.FC = () => {
                             <span className="mc-msg-sender-name">
                               <span>{sender?.name}</span>
                               {sender && (
-                                <span className={`mc-role-pill ${ROLE_BADGE[sender.roleCode].cls}`}>
-                                  {ROLE_BADGE[sender.roleCode].label}
-                                </span>
+                                <Badge
+                                  className="mc-role-pill"
+                                  label={ROLE_BADGE[sender.roleCode].label}
+                                  size="small"
+                                  color={roleBadgeColor(sender.roleCode)}
+                                />
                               )}
                             </span>
                           )}
@@ -716,7 +739,7 @@ export const MessageCenter: React.FC = () => {
                             >
                               <span className="mc-msg-context-icon">{getContextIcon(msg.context.kind)}</span>
                               <span className="mc-msg-context-label">{msg.context.label}</span>
-                              <ExternalLink size={10} className="mc-msg-context-arrow" />
+                              <OpenInNewOutlined sx={{ fontSize: 10 }} className="mc-msg-context-arrow" />
                             </button>
                           )}
                           <div className="mc-msg-footer">
@@ -736,8 +759,8 @@ export const MessageCenter: React.FC = () => {
             {selectedChat.type !== 'broadcast' ? (
               <div className="mc-input-area">
                 <div className="mc-input-row">
-                  <button className="mc-input-action"><Smile size={20} /></button>
-                  <button className="mc-input-action"><Paperclip size={20} /></button>
+                  <Button variant="text" size="small" className="mc-input-action" aria-label="Emoji"><SentimentSatisfiedOutlined sx={{ fontSize: 20 }} /></Button>
+                  <Button variant="text" size="small" className="mc-input-action" aria-label="Attach"><AttachFileOutlined sx={{ fontSize: 20 }} /></Button>
                   <textarea
                     ref={inputRef}
                     className="mc-input"
@@ -747,18 +770,22 @@ export const MessageCenter: React.FC = () => {
                     onKeyDown={handleKeyDown}
                     rows={1}
                   />
-                  <button
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    size="medium"
                     className={`mc-send-btn ${inputValue.trim() ? 'mc-send-btn--active' : ''}`}
                     onClick={handleSend}
                     disabled={!inputValue.trim()}
+                    aria-label="Send message"
                   >
-                    <Send size={18} />
-                  </button>
+                    <SendOutlined sx={{ fontSize: 18 }} />
+                  </Button>
                 </div>
               </div>
             ) : (
               <div className="mc-broadcast-footer">
-                <ShieldAlert size={14} />
+                <GppBadOutlined sx={{ fontSize: 14 }} />
                 <span>Broadcast channel · only admins can post here. Replies are disabled.</span>
               </div>
             )}
@@ -766,7 +793,7 @@ export const MessageCenter: React.FC = () => {
         ) : (
           <div className="mc-empty-state">
             <div className="mc-empty-icon">
-              <MessageSquare size={48} />
+              <ChatOutlined sx={{ fontSize: 48 }} />
             </div>
             <h2>Welcome to Communications</h2>
             <p>Select a conversation to start messaging, or create a new one.</p>
@@ -781,25 +808,25 @@ export const MessageCenter: React.FC = () => {
             {/* Modal Header */}
             <div className="mc-modal-header">
               {modalStep !== 'main' && (
-                <button className="mc-modal-back" onClick={() => { setModalStep('main'); setSelectedMembers([]); setNewChatName(''); setContactSearch(''); }}>
-                  <ArrowLeft size={18} />
-                </button>
+                <Button variant="text" size="small" className="mc-modal-back" onClick={() => { setModalStep('main'); setSelectedMembers([]); setNewChatName(''); setContactSearch(''); }} aria-label="Back">
+                  <ArrowBackOutlined sx={{ fontSize: 18 }} />
+                </Button>
               )}
               <h3>
                 {modalStep === 'main' && 'New Conversation'}
                 {modalStep === 'group' && 'New Group'}
                 {modalStep === 'broadcast' && 'New Broadcast'}
               </h3>
-              <button className="mc-modal-close" onClick={closeModal}>
-                <X size={18} />
-              </button>
+              <Button variant="text" size="small" className="mc-modal-close" onClick={closeModal} aria-label="Close">
+                <CloseOutlined sx={{ fontSize: 18 }} />
+              </Button>
             </div>
 
             {/* Main Step — Choose type or DM a contact */}
             {modalStep === 'main' && (
               <>
                 <div className="mc-modal-search">
-                  <Search size={15} />
+                  <SearchOutlined sx={{ fontSize: 15 }} />
                   <input
                     type="text"
                     placeholder="Search people..."
@@ -807,21 +834,21 @@ export const MessageCenter: React.FC = () => {
                     onChange={e => setContactSearch(e.target.value)}
                   />
                   {contactSearch && (
-                    <button className="mc-search-clear" onClick={() => setContactSearch('')}>
-                      <X size={13} />
-                    </button>
+                    <Button variant="text" size="small" className="mc-search-clear" onClick={() => setContactSearch('')} aria-label="Clear search">
+                      <CloseOutlined sx={{ fontSize: 13 }} />
+                    </Button>
                   )}
                 </div>
                 <div className="mc-modal-actions">
                   <button className="mc-modal-action-btn" onClick={() => setModalStep('group')}>
-                    <Users size={18} />
+                    <GroupOutlined sx={{ fontSize: 18 }} />
                     <div>
                       <span className="mc-modal-action-title">New Group</span>
                       <span className="mc-modal-action-desc">Create a group chat with multiple people</span>
                     </div>
                   </button>
                   <button className="mc-modal-action-btn" onClick={() => setModalStep('broadcast')}>
-                    <Megaphone size={18} />
+                    <CampaignOutlined sx={{ fontSize: 18 }} />
                     <div>
                       <span className="mc-modal-action-title">New Broadcast</span>
                       <span className="mc-modal-action-desc">Send announcements to multiple people</span>
@@ -866,17 +893,21 @@ export const MessageCenter: React.FC = () => {
                       const c = contacts.find(ct => ct.id === id);
                       if (!c) return null;
                       return (
-                        <span key={id} className="mc-chip">
-                          {c.name.split(' ')[0]}
-                          <button onClick={() => toggleMember(id)}><X size={11} /></button>
-                        </span>
+                        <Chips
+                          key={id}
+                          label={c.name.split(' ')[0]}
+                          size="small"
+                          variant="solid"
+                          isRemovable
+                          onDelete={() => toggleMember(id)}
+                        />
                       );
                     })}
                   </div>
                 )}
 
                 <div className="mc-modal-search">
-                  <Search size={15} />
+                  <SearchOutlined sx={{ fontSize: 15 }} />
                   <input
                     type="text"
                     placeholder={modalStep === 'group' ? 'Add members...' : 'Add recipients...'}
@@ -901,7 +932,7 @@ export const MessageCenter: React.FC = () => {
                           <span className="mc-modal-contact-role">{c.role}{c.store ? ` · ${c.store}` : ''}</span>
                         </div>
                         <span className={`mc-checkbox ${isSelected ? 'mc-checkbox--checked' : ''}`}>
-                          {isSelected && <Check size={12} />}
+                          {isSelected && <Check sx={{ fontSize: 12 }} />}
                         </span>
                       </button>
                     );
@@ -910,17 +941,17 @@ export const MessageCenter: React.FC = () => {
 
                 {/* Create Button */}
                 <div className="mc-modal-footer">
-                  <button
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    size="large"
                     className={`mc-create-btn ${selectedMembers.length > 0 ? 'mc-create-btn--active' : ''}`}
                     disabled={selectedMembers.length === 0}
                     onClick={modalStep === 'group' ? createGroupChat : createBroadcast}
+                    startIcon={modalStep === 'group' ? <GroupOutlined sx={{ fontSize: 16 }} /> : <CampaignOutlined sx={{ fontSize: 16 }} />}
                   >
-                    {modalStep === 'group' ? (
-                      <><Users size={16} /> Create Group</>
-                    ) : (
-                      <><Megaphone size={16} /> Create Broadcast</>
-                    )}
-                  </button>
+                    {modalStep === 'group' ? 'Create Group' : 'Create Broadcast'}
+                  </Button>
                 </div>
               </>
             )}

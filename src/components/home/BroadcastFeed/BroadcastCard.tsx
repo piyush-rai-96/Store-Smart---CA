@@ -1,5 +1,6 @@
 import React from 'react';
-import { Clock, User } from 'lucide-react';
+import AccessTimeOutlined from '@mui/icons-material/AccessTimeOutlined';
+import PersonOutlined from '@mui/icons-material/PersonOutlined';
 import { Button, Card } from 'impact-ui';
 import { Broadcast } from '../../../types/broadcast';
 import { PRIORITY_CONFIG, CATEGORY_CONFIG } from '../../../constants/broadcasts';
@@ -47,7 +48,8 @@ export const BroadcastCard: React.FC<BroadcastCardProps> = ({
   };
 
   return (
-    <Card size="medium" className={`broadcast-card ${!broadcast.isRead ? 'broadcast-card-unread' : ''}`}>
+    <Card size="medium" sx={{ maxWidth: '100%', minHeight: 0, padding: 0 }}>
+      <div className={`broadcast-card ${!broadcast.isRead ? 'broadcast-card-unread' : ''}`}>
       <div
         className="broadcast-card-content"
         onClick={handleCardClick}
@@ -62,7 +64,7 @@ export const BroadcastCard: React.FC<BroadcastCardProps> = ({
             <span>{priorityConfig.label.toUpperCase()}</span>
           </div>
           <div className="broadcast-timestamp">
-            <Clock size={14} />
+            <AccessTimeOutlined sx={{ fontSize: 14 }} />
             <span>{getTimeAgo(broadcast.createdAt)}</span>
           </div>
         </div>
@@ -76,7 +78,7 @@ export const BroadcastCard: React.FC<BroadcastCardProps> = ({
         {/* Meta Row */}
         <div className="broadcast-meta">
           <div className="broadcast-sender">
-            <User size={14} />
+            <PersonOutlined sx={{ fontSize: 14 }} />
             <span>From: {broadcast.sender.role}</span>
           </div>
           <span className="broadcast-meta-separator">•</span>
@@ -135,6 +137,7 @@ export const BroadcastCard: React.FC<BroadcastCardProps> = ({
             <span className="broadcast-acknowledged">✓ Acknowledged</span>
           )}
         </div>
+      </div>
       </div>
     </Card>
   );

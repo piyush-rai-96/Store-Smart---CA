@@ -1,36 +1,35 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  CheckCircle, 
-  Play,
-  ChevronRight,
-  ChevronDown,
-  Sparkles,
-  ShieldCheck,
-  Package,
-  Zap,
-  Target,
-  BarChart3,
-  ArrowUpRight,
-  FileText,
-  Info,
-  Layers,
-  Store,
-  Users,
-  Home,
-  Loader2,
-  Search,
-  Download,
-  Share2,
-  Eye,
-  Calendar,
-  AlertCircle,
-  TrendingUp,
-  RotateCcw,
-  Clock,
-  Printer,
-  X
-} from 'lucide-react';
+import CheckCircleOutlined from '@mui/icons-material/CheckCircleOutlined';
+import PlayArrowOutlined from '@mui/icons-material/PlayArrowOutlined';
+import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
+import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
+import AutoAwesomeOutlined from '@mui/icons-material/AutoAwesomeOutlined';
+import GppGoodOutlined from '@mui/icons-material/GppGoodOutlined';
+import InventoryOutlined from '@mui/icons-material/InventoryOutlined';
+import BoltOutlined from '@mui/icons-material/BoltOutlined';
+import TrackChangesOutlined from '@mui/icons-material/TrackChangesOutlined';
+import BarChartOutlined from '@mui/icons-material/BarChartOutlined';
+import NorthEast from '@mui/icons-material/NorthEast';
+import DescriptionOutlined from '@mui/icons-material/DescriptionOutlined';
+import InfoOutlined from '@mui/icons-material/InfoOutlined';
+import LayersOutlined from '@mui/icons-material/LayersOutlined';
+import StoreOutlined from '@mui/icons-material/StoreOutlined';
+import GroupOutlined from '@mui/icons-material/GroupOutlined';
+import HomeOutlined from '@mui/icons-material/HomeOutlined';
+import RotateRight from '@mui/icons-material/RotateRight';
+import SearchOutlined from '@mui/icons-material/SearchOutlined';
+import FileDownloadOutlined from '@mui/icons-material/FileDownloadOutlined';
+import IosShareOutlined from '@mui/icons-material/IosShareOutlined';
+import VisibilityOutlined from '@mui/icons-material/VisibilityOutlined';
+import CalendarTodayOutlined from '@mui/icons-material/CalendarTodayOutlined';
+import ErrorOutlined from '@mui/icons-material/ErrorOutlined';
+import TrendingUpOutlined from '@mui/icons-material/TrendingUpOutlined';
+import RotateLeftOutlined from '@mui/icons-material/RotateLeftOutlined';
+import AccessTimeOutlined from '@mui/icons-material/AccessTimeOutlined';
+import PrintOutlined from '@mui/icons-material/PrintOutlined';
+import CloseOutlined from '@mui/icons-material/CloseOutlined';
+import { Button, Card, Chips, Tabs } from 'impact-ui';
 import { useExecutionTasks, ExecutionTask } from '../context/ExecutionTasksContext';
 import './POGLocalizationEngine.css';
 
@@ -120,9 +119,9 @@ interface LocalizationResult {
 
 // Mock Data
 const categories: Category[] = [
-  { id: 'apparel', name: 'Apparel', icon: <Users size={24} />, pogCount: 3 },
-  { id: 'accessories', name: 'Accessories', icon: <Package size={24} />, pogCount: 1 },
-  { id: 'seasonal', name: 'Seasonal', icon: <Home size={24} />, pogCount: 1 },
+  { id: 'apparel', name: 'Apparel', icon: <GroupOutlined sx={{ fontSize: 24 }} />, pogCount: 3 },
+  { id: 'accessories', name: 'Accessories', icon: <InventoryOutlined sx={{ fontSize: 24 }} />, pogCount: 1 },
+  { id: 'seasonal', name: 'Seasonal', icon: <HomeOutlined sx={{ fontSize: 24 }} />, pogCount: 1 },
 ];
 
 // Mapping of corporate POG images to their localized versions
@@ -403,10 +402,10 @@ export const POGLocalizationEngine: React.FC = () => {
   const [isEngineRunning, setIsEngineRunning] = useState(false);
   const [isStepLoading, setIsStepLoading] = useState(false);
   const [engineStages, setEngineStages] = useState<EngineStageData[]>([
-    { id: 'geometry', name: 'Geometry & Localization', icon: <Layers size={20} />, status: 'pending', reasoning: '' },
-    { id: 'demand', name: 'Demand Rebalancing', icon: <BarChart3 size={20} />, status: 'pending', reasoning: '' },
-    { id: 'policy', name: 'Policy Validation', icon: <ShieldCheck size={20} />, status: 'pending', reasoning: '' },
-    { id: 'execution', name: 'Execution Packaging', icon: <Package size={20} />, status: 'pending', reasoning: '' },
+    { id: 'geometry', name: 'Geometry & Localization', icon: <LayersOutlined sx={{ fontSize: 20 }} />, status: 'pending', reasoning: '' },
+    { id: 'demand', name: 'Demand Rebalancing', icon: <BarChartOutlined sx={{ fontSize: 20 }} />, status: 'pending', reasoning: '' },
+    { id: 'policy', name: 'Policy Validation', icon: <GppGoodOutlined sx={{ fontSize: 20 }} />, status: 'pending', reasoning: '' },
+    { id: 'execution', name: 'Execution Packaging', icon: <InventoryOutlined sx={{ fontSize: 20 }} />, status: 'pending', reasoning: '' },
   ]);
   const [localizationResult, setLocalizationResult] = useState<LocalizationResult | null>(null);
   const [publishedResults, setPublishedResults] = useState<LocalizationResult[]>([]);
@@ -890,7 +889,7 @@ export const POGLocalizationEngine: React.FC = () => {
               style={{ cursor: isDone ? 'pointer' : 'default' }}
             >
               <span className="pi-step-num">
-                {isDone ? <CheckCircle size={14} /> : step.number}
+                {isDone ? <CheckCircleOutlined sx={{ fontSize: 14 }} /> : step.number}
               </span>
               <span className="pi-step-label">
                 {step.label}
@@ -922,7 +921,7 @@ export const POGLocalizationEngine: React.FC = () => {
               <h4>{cat.name}</h4>
               <span>{cat.pogCount} POGs available</span>
             </div>
-            {selectedCategory === cat.id && <CheckCircle size={20} className="loc-category-check" />}
+            {selectedCategory === cat.id && <CheckCircleOutlined sx={{ fontSize: 20 }} className="loc-category-check" />}
           </div>
         ))}
       </div>
@@ -955,7 +954,7 @@ export const POGLocalizationEngine: React.FC = () => {
                   <span>{pog.shelfCount} shelves</span>
                 </div>
               </div>
-              {selectedPOG?.id === pog.id && <CheckCircle size={18} className="loc-pog-select-check" />}
+              {selectedPOG?.id === pog.id && <CheckCircleOutlined sx={{ fontSize: 18 }} className="loc-pog-select-check" />}
             </div>
           ))}
         </div>
@@ -985,7 +984,7 @@ export const POGLocalizationEngine: React.FC = () => {
               
               <div className="loc-agentic-insights">
                 <div className="loc-agentic-header">
-                  <Sparkles size={16} />
+                  <AutoAwesomeOutlined sx={{ fontSize: 16 }} />
                   <span>AI-Interpreted Structure</span>
                 </div>
                 <div className="loc-insight-tags">
@@ -998,25 +997,25 @@ export const POGLocalizationEngine: React.FC = () => {
               {/* Rules Section */}
               <div className="loc-rules-section premium">
                 <div className="loc-rules-header">
-                  <ShieldCheck size={16} />
+                  <GppGoodOutlined sx={{ fontSize: 16 }} />
                   <span>Applicable Rules</span>
                   <span className="loc-rules-count">{selectedPOG.rules.length}</span>
                 </div>
                 <div className="loc-rules-grid">
                   {selectedPOG.rules.map((rule, idx) => {
-                    const typeIcon = rule.type.toLowerCase().includes('facing') ? <Eye size={16} />
-                      : rule.type.toLowerCase().includes('priority') ? <Target size={16} />
-                      : rule.type.toLowerCase().includes('adjacency') ? <Layers size={16} />
-                      : rule.type.toLowerCase().includes('capacity') || rule.type.toLowerCase().includes('fit') ? <Package size={16} />
-                      : rule.type.toLowerCase().includes('brand') || rule.type.toLowerCase().includes('block') ? <BarChart3 size={16} />
-                      : rule.type.toLowerCase().includes('compliance') ? <ShieldCheck size={16} />
-                      : rule.type.toLowerCase().includes('visual') ? <Sparkles size={16} />
-                      : rule.type.toLowerCase().includes('space') ? <Layers size={16} />
-                      : rule.type.toLowerCase().includes('price') ? <TrendingUp size={16} />
-                      : <FileText size={16} />;
+                    const typeIcon = rule.type.toLowerCase().includes('facing') ? <VisibilityOutlined sx={{ fontSize: 16 }} />
+                      : rule.type.toLowerCase().includes('priority') ? <TrackChangesOutlined sx={{ fontSize: 16 }} />
+                      : rule.type.toLowerCase().includes('adjacency') ? <LayersOutlined sx={{ fontSize: 16 }} />
+                      : rule.type.toLowerCase().includes('capacity') || rule.type.toLowerCase().includes('fit') ? <InventoryOutlined sx={{ fontSize: 16 }} />
+                      : rule.type.toLowerCase().includes('brand') || rule.type.toLowerCase().includes('block') ? <BarChartOutlined sx={{ fontSize: 16 }} />
+                      : rule.type.toLowerCase().includes('compliance') ? <GppGoodOutlined sx={{ fontSize: 16 }} />
+                      : rule.type.toLowerCase().includes('visual') ? <AutoAwesomeOutlined sx={{ fontSize: 16 }} />
+                      : rule.type.toLowerCase().includes('space') ? <LayersOutlined sx={{ fontSize: 16 }} />
+                      : rule.type.toLowerCase().includes('price') ? <TrendingUpOutlined sx={{ fontSize: 16 }} />
+                      : <DescriptionOutlined sx={{ fontSize: 16 }} />;
                     return (
                       <div key={idx} className={`loc-rule-card-v2 ${rule.status.toLowerCase()}`}>
-                        <div className="loc-rule-icon" style={{ color: rule.status === 'Warning' ? '#d97706' : '#818cf8', background: rule.status === 'Warning' ? '#fef9c3' : '#eef2ff' }}>
+                        <div className="loc-rule-icon" style={{ color: rule.status === 'Warning' ? 'var(--ia-color-warning-text)' : 'var(--ia-color-primary-hover)', background: rule.status === 'Warning' ? '#fef9c3' : 'var(--ia-color-primary-soft)' }}>
                           {typeIcon}
                         </div>
                         <div className="loc-rule-content">
@@ -1030,7 +1029,7 @@ export const POGLocalizationEngine: React.FC = () => {
                           <div className="loc-rule-meta-row">
                             <span className="loc-rule-type-label">{rule.type}</span>
                             <span className={`loc-rule-status-label ${rule.status.toLowerCase()}`}>
-                              {rule.status === 'Warning' && <AlertCircle size={9} />}
+                              {rule.status === 'Warning' && <ErrorOutlined sx={{ fontSize: 9 }} />}
                               {rule.status}
                             </span>
                           </div>
@@ -1044,13 +1043,17 @@ export const POGLocalizationEngine: React.FC = () => {
           </div>
         )}
         
-        <button 
-          className="pi-btn-primary loc-continue-btn" 
+        <Button
+          variant="contained"
+          color="primary"
+          size="large"
+          className="pi-btn-primary loc-continue-btn"
           onClick={() => transitionToStep('storeGroup')}
           disabled={!selectedPOG}
+          endIcon={<KeyboardArrowRight sx={{ fontSize: 18 }} />}
         >
-          Continue to Store Group <ChevronRight size={18} />
-        </button>
+          Continue to Store Group
+        </Button>
       </div>
     );
   };
@@ -1075,13 +1078,13 @@ export const POGLocalizationEngine: React.FC = () => {
               onClick={() => setSelectedStoreGroup(group.id)}
             >
               <div className="loc-store-group-header">
-                <Store size={20} />
+                <StoreOutlined sx={{ fontSize: 20 }} />
                 <h4>{group.name}</h4>
-                {selectedStoreGroup === group.id && <CheckCircle size={18} className="loc-group-check" />}
+                {selectedStoreGroup === group.id && <CheckCircleOutlined sx={{ fontSize: 18 }} className="loc-group-check" />}
               </div>
               <p className="loc-store-group-desc">{group.description}</p>
               <div className="loc-store-group-meta">
-                <Users size={14} />
+                <GroupOutlined sx={{ fontSize: 14 }} />
                 <span>{group.storeCount} stores</span>
               </div>
               <div className="loc-store-group-tags">
@@ -1099,10 +1102,10 @@ export const POGLocalizationEngine: React.FC = () => {
             <div className="loc-demand-index-panel">
               <div className="loc-demand-index-header">
                 <div className="loc-demand-index-title">
-                  <BarChart3 size={18} />
+                  <BarChartOutlined sx={{ fontSize: 18 }} />
                   <h4>Category Demand Index</h4>
                   <div className="loc-demand-index-tooltip" title="Index shows how strongly a category performs in this store group compared to average stores. Values above 100 indicate higher demand.">
-                    <Info size={14} />
+                    <InfoOutlined sx={{ fontSize: 14 }} />
                   </div>
                 </div>
                 <span className="loc-demand-index-subtitle">Relative demand vs average store (100 = baseline)</span>
@@ -1133,7 +1136,7 @@ export const POGLocalizationEngine: React.FC = () => {
             </div>
 
             <div className="loc-agentic-insight-banner">
-              <Zap size={18} />
+              <BoltOutlined sx={{ fontSize: 18 }} />
               <span>
                 <strong>Implication:</strong> {generateDemandImplication(categoryDemandIndex[selectedCategory]?.[selectedStoreGroup!] || [])}
               </span>
@@ -1157,9 +1160,9 @@ export const POGLocalizationEngine: React.FC = () => {
               </div>
             </div>
 
-            <button className="pi-btn-primary loc-continue-btn" onClick={() => transitionToStep('engine')}>
-              Continue to Engine <ChevronRight size={18} />
-            </button>
+            <Button variant="contained" color="primary" size="large" className="pi-btn-primary loc-continue-btn" onClick={() => transitionToStep('engine')} endIcon={<KeyboardArrowRight sx={{ fontSize: 18 }} />}>
+              Continue to Engine
+            </Button>
           </>
         )}
       </div>
@@ -1178,9 +1181,9 @@ export const POGLocalizationEngine: React.FC = () => {
               <div className="loc-stage-header">
                 <div className="loc-stage-icon">
                   {stage.status === 'running' ? (
-                    <Loader2 size={20} className="spinning" />
+                    <RotateRight sx={{ fontSize: 20 }} className="spinning" />
                   ) : stage.status === 'completed' ? (
-                    <CheckCircle size={20} />
+                    <CheckCircleOutlined sx={{ fontSize: 20 }} />
                   ) : (
                     stage.icon
                   )}
@@ -1199,7 +1202,7 @@ export const POGLocalizationEngine: React.FC = () => {
                 <div className="loc-stage-details">
                   {stage.details.map((detail, idx) => (
                     <div key={idx} className="loc-stage-detail-item">
-                      <ChevronRight size={14} />
+                      <KeyboardArrowRight sx={{ fontSize: 14 }} />
                       <span>{detail}</span>
                     </div>
                   ))}
@@ -1220,7 +1223,7 @@ export const POGLocalizationEngine: React.FC = () => {
           <div className="loc-prompt-block">
             <div className="loc-prompt-header">
               <div className="loc-prompt-label">
-                <Sparkles size={14} />
+                <AutoAwesomeOutlined sx={{ fontSize: 14 }} />
                 <span>Customize this run <em>(optional)</em></span>
               </div>
               <span className="loc-prompt-hint">Add natural-language guidance — the engine will factor it into Geometry, Demand &amp; Policy stages.</span>
@@ -1239,33 +1242,32 @@ export const POGLocalizationEngine: React.FC = () => {
                 'Cap promo facings at 30%',
                 'Maximize family / value SKU visibility',
               ].map((s) => (
-                <button
+                <Chips
                   key={s}
-                  type="button"
+                  label={`+ ${s}`}
+                  variant="outlined"
+                  size="small"
                   className="loc-prompt-chip"
                   onClick={() => setCustomPrompt((p) => (p ? `${p}\n• ${s}` : `• ${s}`))}
-                >
-                  + {s}
-                </button>
+                />
               ))}
             </div>
-            <button className="loc-run-engine-btn" onClick={runLocalizationEngine}>
-              <Play size={18} />
+            <Button variant="contained" color="primary" size="large" className="loc-run-engine-btn" onClick={runLocalizationEngine} startIcon={<PlayArrowOutlined sx={{ fontSize: 18 }} />}>
               Run Localization Engine
-            </button>
+            </Button>
           </div>
         )}
 
         {localizationResult && (
           <div className="loc-engine-complete">
-            <CheckCircle size={24} />
+            <CheckCircleOutlined sx={{ fontSize: 24 }} />
             <div>
               <strong>Localization Complete</strong>
               <p>View results in the Published Results tab</p>
             </div>
-            <button className="loc-view-results-btn" onClick={() => { setSelectedResultId(localizationResult?.id || null); setActiveTab('results'); }}>
-              View Results <ChevronRight size={16} />
-            </button>
+            <Button variant="contained" color="primary" className="loc-view-results-btn" onClick={() => { setSelectedResultId(localizationResult?.id || null); setActiveTab('results'); }} endIcon={<KeyboardArrowRight sx={{ fontSize: 16 }} />}>
+              View Results
+            </Button>
           </div>
         )}
       </div>
@@ -1278,7 +1280,7 @@ export const POGLocalizationEngine: React.FC = () => {
       <div className="loc-main-panel">
         {isStepLoading ? (
           <div className="loc-step-loading">
-            <Loader2 size={32} className="spinning" />
+            <RotateRight sx={{ fontSize: 32 }} className="spinning" />
             <h4>Loading next step...</h4>
             <p>Preparing data and validating selections</p>
           </div>
@@ -1325,11 +1327,11 @@ export const POGLocalizationEngine: React.FC = () => {
 
     // Task package preview
     const taskPackage = [
-      { type: 'Reset Shelf', count: Math.round((storeGroup?.storeCount || 50) * 0.08), priority: 'High', icon: <Layers size={16} /> },
-      { type: 'Relocate Products', count: Math.round(result.changes.facingsAdjusted * 0.6), priority: 'High', icon: <ArrowUpRight size={16} /> },
-      { type: 'Adjust Facings', count: result.changes.facingsAdjusted, priority: 'Medium', icon: <Target size={16} /> },
-      { type: 'Update Labels', count: Math.round(result.changes.facingsAdjusted * 0.8), priority: 'Medium', icon: <FileText size={16} /> },
-      { type: 'Photo Compliance', count: Math.round((storeGroup?.storeCount || 50) * 0.08), priority: 'Low', icon: <Eye size={16} /> },
+      { type: 'Reset Shelf', count: Math.round((storeGroup?.storeCount || 50) * 0.08), priority: 'High', icon: <LayersOutlined sx={{ fontSize: 16 }} /> },
+      { type: 'Relocate Products', count: Math.round(result.changes.facingsAdjusted * 0.6), priority: 'High', icon: <NorthEast sx={{ fontSize: 16 }} /> },
+      { type: 'Adjust Facings', count: result.changes.facingsAdjusted, priority: 'Medium', icon: <TrackChangesOutlined sx={{ fontSize: 16 }} /> },
+      { type: 'Update Labels', count: Math.round(result.changes.facingsAdjusted * 0.8), priority: 'Medium', icon: <DescriptionOutlined sx={{ fontSize: 16 }} /> },
+      { type: 'Photo Compliance', count: Math.round((storeGroup?.storeCount || 50) * 0.08), priority: 'Low', icon: <VisibilityOutlined sx={{ fontSize: 16 }} /> },
     ];
     
     return (
@@ -1337,12 +1339,12 @@ export const POGLocalizationEngine: React.FC = () => {
         {/* Top Bar */}
         <div className="loc-artifact-topbar">
           <button className="loc-back-btn" onClick={() => setSelectedResultId(null)}>
-            <ChevronRight size={16} className="rotated" /> Back to Results
+            <KeyboardArrowRight sx={{ fontSize: 16 }} className="rotated" /> Back to Results
           </button>
           <div className="loc-artifact-actions">
-            <button className="loc-artifact-action-btn"><Printer size={15} /> Print</button>
-            <button className="loc-artifact-action-btn"><Download size={15} /> Export PDF</button>
-            <button className="loc-artifact-action-btn primary"><Share2 size={15} /> Share Artifact</button>
+            <button className="loc-artifact-action-btn"><PrintOutlined sx={{ fontSize: 15 }} /> Print</button>
+            <button className="loc-artifact-action-btn"><FileDownloadOutlined sx={{ fontSize: 15 }} /> Export PDF</button>
+            <button className="loc-artifact-action-btn primary"><IosShareOutlined sx={{ fontSize: 15 }} /> Share Artifact</button>
           </div>
         </div>
 
@@ -1351,18 +1353,18 @@ export const POGLocalizationEngine: React.FC = () => {
           <div className="loc-artifact-header-left">
             <div className="loc-artifact-badge-row">
               <span className={`loc-artifact-status ${result.status.toLowerCase()}`}>
-                {result.status === 'Published' ? <CheckCircle size={13} /> : <Clock size={13} />}
+                {result.status === 'Published' ? <CheckCircleOutlined sx={{ fontSize: 13 }} /> : <AccessTimeOutlined sx={{ fontSize: 13 }} />}
                 {result.status}
               </span>
               <span className="loc-artifact-confidence">
-                <Sparkles size={13} />
+                <AutoAwesomeOutlined sx={{ fontSize: 13 }} />
                 {result.confidenceScore}% Confidence
               </span>
             </div>
             <h2 className="loc-artifact-title">{result.corporatePOG}</h2>
             <p className="loc-artifact-subtitle">Localized for <strong>{result.cluster}</strong> · {storeGroup?.storeCount || 0} stores · {result.category}</p>
             <div className="loc-artifact-meta-row">
-              <span><Calendar size={13} /> Created {result.createdAt}</span>
+              <span><CalendarTodayOutlined sx={{ fontSize: 13 }} /> Created {result.createdAt}</span>
               <span>{result.version}</span>
               <span>Derived from corporate standard</span>
             </div>
@@ -1393,7 +1395,7 @@ export const POGLocalizationEngine: React.FC = () => {
         <div className="loc-artifact-grid">
           {/* Left: Visual Layout Preview */}
           <div className="loc-artifact-left">
-            <div className="loc-artifact-card">
+            <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: 0, overflow: 'hidden' }}>
               <div className="loc-artifact-card-header">
                 <h3>Visual Layout Preview</h3>
                 <div className="loc-viewer-toggle">
@@ -1419,29 +1421,29 @@ export const POGLocalizationEngine: React.FC = () => {
                   }}
                 />
                 {!showCorporateView && (
-                  <div className="loc-artifact-overlay-badge"><Sparkles size={14} /> AI-Localized for {result.cluster}</div>
+                  <div className="loc-artifact-overlay-badge"><AutoAwesomeOutlined sx={{ fontSize: 14 }} /> AI-Localized for {result.cluster}</div>
                 )}
               </div>
               <div className="loc-artifact-diff-strip">
-                <span className="loc-artifact-diff-label"><TrendingUp size={14} /> Key Changes</span>
+                <span className="loc-artifact-diff-label"><TrendingUpOutlined sx={{ fontSize: 14 }} /> Key Changes</span>
                 <div className="loc-artifact-diff-tags">
                   {result.diffHighlights.map((diff, idx) => (
                     <span key={idx} className="loc-artifact-diff-tag">{diff}</span>
                   ))}
                 </div>
               </div>
-            </div>
+            </Card>
 
             {/* Why This Changed */}
-            <div className="loc-artifact-card">
+            <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: 0, overflow: 'hidden' }}>
               <div className="loc-artifact-card-header">
-                <h3><Info size={16} /> Why This Changed</h3>
+                <h3><InfoOutlined sx={{ fontSize: 16 }} /> Why This Changed</h3>
               </div>
               <div className="loc-artifact-why-list">
                 {result.whyChanged.map((item, idx) => (
                   <div key={idx} className="loc-artifact-why-item">
                     <div className="loc-artifact-why-header" onClick={() => toggleReasonExpand(item.title)}>
-                      <ChevronDown size={15} className={expandedReasons.includes(item.title) ? 'expanded' : ''} />
+                      <KeyboardArrowDown sx={{ fontSize: 15 }} className={expandedReasons.includes(item.title) ? 'expanded' : ''} />
                       <span className="loc-artifact-why-title">{item.title}</span>
                     </div>
                     {expandedReasons.includes(item.title) && (
@@ -1450,15 +1452,15 @@ export const POGLocalizationEngine: React.FC = () => {
                   </div>
                 ))}
               </div>
-            </div>
+            </Card>
           </div>
 
           {/* Right: Validation, Tasks, Actions */}
           <div className="loc-artifact-right">
             {/* Validation Checks */}
-            <div className="loc-artifact-card">
+            <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: 0, overflow: 'hidden' }}>
               <div className="loc-artifact-card-header">
-                <h3><ShieldCheck size={16} /> Validation Checks</h3>
+                <h3><GppGoodOutlined sx={{ fontSize: 16 }} /> Validation Checks</h3>
                 <span className="loc-artifact-check-summary">
                   {validationChecks.filter(c => c.passed).length}/{validationChecks.length} passed
                 </span>
@@ -1467,7 +1469,7 @@ export const POGLocalizationEngine: React.FC = () => {
                 {validationChecks.map(check => (
                   <div key={check.id} className={`loc-artifact-check ${check.passed ? 'passed' : 'warning'}`}>
                     <div className="loc-artifact-check-icon">
-                      {check.passed ? <CheckCircle size={16} /> : <AlertCircle size={16} />}
+                      {check.passed ? <CheckCircleOutlined sx={{ fontSize: 16 }} /> : <ErrorOutlined sx={{ fontSize: 16 }} />}
                     </div>
                     <div className="loc-artifact-check-info">
                       <span className="loc-artifact-check-label">{check.label}</span>
@@ -1476,12 +1478,12 @@ export const POGLocalizationEngine: React.FC = () => {
                   </div>
                 ))}
               </div>
-            </div>
+            </Card>
 
             {/* Task Package */}
-            <div className="loc-artifact-card">
+            <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: 0, overflow: 'hidden' }}>
               <div className="loc-artifact-card-header">
-                <h3><Package size={16} /> Task Package</h3>
+                <h3><InventoryOutlined sx={{ fontSize: 16 }} /> Task Package</h3>
                 <span className="loc-artifact-task-total">{result.changes.tasksGenerated} tasks</span>
               </div>
               <div className="loc-artifact-tasks">
@@ -1496,10 +1498,10 @@ export const POGLocalizationEngine: React.FC = () => {
                   </div>
                 ))}
               </div>
-            </div>
+            </Card>
 
             {/* Publish / Rollback Actions */}
-            <div className="loc-artifact-card loc-artifact-publish-card">
+            <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: 0, overflow: 'hidden' }}>
               {result.status === 'Ready' ? (
                 <>
                   <div className="loc-artifact-publish-header">
@@ -1509,26 +1511,26 @@ export const POGLocalizationEngine: React.FC = () => {
                     </div>
                   </div>
                   <button className="loc-artifact-publish-btn" onClick={() => setShowPublishModal(result.id)}>
-                    <Zap size={16} />
+                    <BoltOutlined sx={{ fontSize: 16 }} />
                     Publish to Stores
                   </button>
                 </>
               ) : (
                 <>
                   <div className="loc-artifact-publish-header published">
-                    <CheckCircle size={20} />
+                    <CheckCircleOutlined sx={{ fontSize: 20 }} />
                     <div>
                       <h3>Published</h3>
                       <p>Live across {storeGroup?.storeCount || 0} stores · {result.changes.tasksGenerated} tasks dispatched</p>
                     </div>
                   </div>
                   <button className="loc-artifact-rollback-btn" onClick={() => setShowRollbackConfirm(result.id)}>
-                    <RotateCcw size={15} />
+                    <RotateLeftOutlined sx={{ fontSize: 15 }} />
                     Rollback to Draft
                   </button>
                 </>
               )}
-            </div>
+            </Card>
           </div>
         </div>
 
@@ -1536,8 +1538,8 @@ export const POGLocalizationEngine: React.FC = () => {
         {showPublishModal === result.id && (
           <div className="loc-modal-overlay" onClick={() => !isPublishing && setShowPublishModal(null)}>
             <div className="loc-modal" onClick={e => e.stopPropagation()}>
-              <button className="loc-modal-close" onClick={() => !isPublishing && setShowPublishModal(null)}><X size={18} /></button>
-              <div className="loc-modal-icon publish"><Zap size={28} /></div>
+              <Button variant="text" size="small" className="loc-modal-close" onClick={() => !isPublishing && setShowPublishModal(null)} aria-label="Close"><CloseOutlined sx={{ fontSize: 18 }} /></Button>
+              <div className="loc-modal-icon publish"><BoltOutlined sx={{ fontSize: 28 }} /></div>
               <h3>Publish Localization</h3>
               <p>This will deploy the localized planogram to <strong>{storeGroup?.storeCount || 0} {result.cluster} stores</strong> and generate <strong>{result.changes.tasksGenerated} execution tasks</strong> in the Operations Queue.</p>
               <div className="loc-modal-summary">
@@ -1555,10 +1557,12 @@ export const POGLocalizationEngine: React.FC = () => {
                 </div>
               </div>
               <div className="loc-modal-actions">
-                <button className="loc-modal-cancel" onClick={() => setShowPublishModal(null)} disabled={isPublishing}>Cancel</button>
-                <button className="loc-modal-confirm" onClick={() => handlePublishWithConfirm(result.id)} disabled={isPublishing}>
-                  {isPublishing ? <><Loader2 size={16} className="spinning" /> Publishing…</> : <><Zap size={16} /> Confirm Publish</>}
-                </button>
+                <Button variant="outlined" color="primary" className="loc-modal-cancel" onClick={() => setShowPublishModal(null)} disabled={isPublishing}>
+                  Cancel
+                </Button>
+                <Button variant="contained" color="primary" className="loc-modal-confirm" onClick={() => handlePublishWithConfirm(result.id)} disabled={isPublishing} startIcon={isPublishing ? <RotateRight sx={{ fontSize: 16 }} className="spinning" /> : <BoltOutlined sx={{ fontSize: 16 }} />}>
+                  {isPublishing ? 'Publishing…' : 'Confirm Publish'}
+                </Button>
               </div>
             </div>
           </div>
@@ -1568,15 +1572,17 @@ export const POGLocalizationEngine: React.FC = () => {
         {showRollbackConfirm === result.id && (
           <div className="loc-modal-overlay" onClick={() => setShowRollbackConfirm(null)}>
             <div className="loc-modal" onClick={e => e.stopPropagation()}>
-              <button className="loc-modal-close" onClick={() => setShowRollbackConfirm(null)}><X size={18} /></button>
-              <div className="loc-modal-icon rollback"><RotateCcw size={28} /></div>
+              <Button variant="text" size="small" className="loc-modal-close" onClick={() => setShowRollbackConfirm(null)} aria-label="Close"><CloseOutlined sx={{ fontSize: 18 }} /></Button>
+              <div className="loc-modal-icon rollback"><RotateLeftOutlined sx={{ fontSize: 28 }} /></div>
               <h3>Rollback to Draft</h3>
               <p>This will revert the localization status to <strong>Ready</strong>. Published tasks in the Operations Queue will remain but no new tasks will be dispatched.</p>
               <div className="loc-modal-actions">
-                <button className="loc-modal-cancel" onClick={() => setShowRollbackConfirm(null)}>Cancel</button>
-                <button className="loc-modal-confirm rollback" onClick={() => handleRollback(result.id)}>
-                  <RotateCcw size={16} /> Confirm Rollback
-                </button>
+                <Button variant="outlined" color="primary" className="loc-modal-cancel" onClick={() => setShowRollbackConfirm(null)}>
+                  Cancel
+                </Button>
+                <Button variant="contained" color="warning" className="loc-modal-confirm rollback" onClick={() => handleRollback(result.id)} startIcon={<RotateLeftOutlined sx={{ fontSize: 16 }} />}>
+                  Confirm Rollback
+                </Button>
               </div>
             </div>
           </div>
@@ -1596,7 +1602,7 @@ export const POGLocalizationEngine: React.FC = () => {
         {/* Toolbar */}
         <div className="loc-results-toolbar">
           <div className="loc-results-search">
-            <Search size={18} />
+            <SearchOutlined sx={{ fontSize: 18 }} />
             <input 
               type="text" 
               placeholder="Search by cluster, POG, or category..." 
@@ -1604,36 +1610,39 @@ export const POGLocalizationEngine: React.FC = () => {
               onChange={(e) => setResultsSearch(e.target.value)}
             />
           </div>
-          <div className="loc-results-filters">
-            <button 
-              className={`loc-filter-btn ${resultsFilter === 'all' ? 'active' : ''}`}
+          <div className="loc-results-filters loc-results-filters--impact">
+            <Chips
+              label={`All (${publishedResults.length})`}
+              variant={resultsFilter === 'all' ? 'filled' : 'outlined'}
+              color={resultsFilter === 'all' ? 'primary' : undefined}
+              size="small"
               onClick={() => setResultsFilter('all')}
-            >
-              All ({publishedResults.length})
-            </button>
-            <button 
-              className={`loc-filter-btn ${resultsFilter === 'Ready' ? 'active' : ''}`}
+            />
+            <Chips
+              label={`Ready (${publishedResults.filter(r => r.status === 'Ready').length})`}
+              variant={resultsFilter === 'Ready' ? 'filled' : 'outlined'}
+              color={resultsFilter === 'Ready' ? 'primary' : undefined}
+              size="small"
               onClick={() => setResultsFilter('Ready')}
-            >
-              Ready ({publishedResults.filter(r => r.status === 'Ready').length})
-            </button>
-            <button 
-              className={`loc-filter-btn ${resultsFilter === 'Published' ? 'active' : ''}`}
+            />
+            <Chips
+              label={`Published (${publishedResults.filter(r => r.status === 'Published').length})`}
+              variant={resultsFilter === 'Published' ? 'filled' : 'outlined'}
+              color={resultsFilter === 'Published' ? 'primary' : undefined}
+              size="small"
               onClick={() => setResultsFilter('Published')}
-            >
-              Published ({publishedResults.filter(r => r.status === 'Published').length})
-            </button>
+            />
           </div>
           <button 
             className={`loc-filter-toggle-btn ${showFilters ? 'active' : ''} ${activeFilterCount > 0 ? 'has-filters' : ''}`}
             onClick={() => setShowFilters(!showFilters)}
           >
-            <Store size={16} />
+            <StoreOutlined sx={{ fontSize: 16 }} />
             Filters
             {activeFilterCount > 0 && <span className="loc-filter-count">{activeFilterCount}</span>}
           </button>
           <div className="loc-results-actions-toolbar">
-            <button className="loc-toolbar-btn"><Download size={16} /> Export All</button>
+            <button className="loc-toolbar-btn"><FileDownloadOutlined sx={{ fontSize: 16 }} /> Export All</button>
           </div>
         </div>
 
@@ -1668,9 +1677,9 @@ export const POGLocalizationEngine: React.FC = () => {
               </select>
             </div>
             {activeFilterCount > 0 && (
-              <button className="loc-clear-filters-btn" onClick={clearAllFilters}>
+              <Button variant="text" color="primary" size="small" className="loc-clear-filters-btn" onClick={clearAllFilters}>
                 Clear All
-              </button>
+              </Button>
             )}
           </div>
         )}
@@ -1678,11 +1687,13 @@ export const POGLocalizationEngine: React.FC = () => {
         {/* Results List */}
         {filteredResults.length === 0 ? (
           <div className="loc-no-results">
-            <FileText size={48} />
+            <DescriptionOutlined sx={{ fontSize: 48 }} />
             <h3>No Results Found</h3>
             <p>{publishedResults.length === 0 ? 'Run the localization engine to generate results.' : 'Try adjusting your search or filters.'}</p>
             {publishedResults.length === 0 && (
-              <button className="loc-go-run-btn" onClick={() => setActiveTab('run')}>Go to Run Localization</button>
+              <Button variant="contained" color="primary" className="loc-go-run-btn" onClick={() => setActiveTab('run')}>
+                Go to Run Localization
+              </Button>
             )}
           </div>
         ) : (
@@ -1690,14 +1701,14 @@ export const POGLocalizationEngine: React.FC = () => {
             {filteredResults.map(result => (
               <div key={result.id} className="loc-result-card" onClick={() => setSelectedResultId(result.id)}>
                 <div className="loc-result-card-left">
-                  <div className="loc-result-card-preview">
+                  <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '16px' }}>
                     <img src={allCorporatePOGs.find(p => p.id === result.corporatePOGId)?.image || '/planograms/beverage-cooler-standard.svg'} alt="" />
-                  </div>
+                  </Card>
                   <div className="loc-result-card-info">
                     <h4>{result.corporatePOG}</h4>
                     <p>Localized for <strong>{result.cluster}</strong></p>
                     <div className="loc-result-card-meta">
-                      <span><Calendar size={12} /> {result.createdAt}</span>
+                      <span><CalendarTodayOutlined sx={{ fontSize: 12 }} /> {result.createdAt}</span>
                       <span className="loc-result-card-category">{result.category}</span>
                     </div>
                   </div>
@@ -1715,9 +1726,9 @@ export const POGLocalizationEngine: React.FC = () => {
                   </div>
                   <span className={`loc-result-status ${result.status.toLowerCase()}`}>{result.status}</span>
                   <div className="loc-result-card-actions">
-                    <button className="loc-card-action" onClick={(e) => { e.stopPropagation(); }}><Eye size={14} /></button>
-                    <button className="loc-card-action" onClick={(e) => { e.stopPropagation(); }}><Download size={14} /></button>
-                    <button className="loc-card-action" onClick={(e) => { e.stopPropagation(); }}><Share2 size={14} /></button>
+                    <button className="loc-card-action" onClick={(e) => { e.stopPropagation(); }}><VisibilityOutlined sx={{ fontSize: 14 }} /></button>
+                    <button className="loc-card-action" onClick={(e) => { e.stopPropagation(); }}><FileDownloadOutlined sx={{ fontSize: 14 }} /></button>
+                    <button className="loc-card-action" onClick={(e) => { e.stopPropagation(); }}><IosShareOutlined sx={{ fontSize: 14 }} /></button>
                   </div>
                 </div>
               </div>
@@ -1734,7 +1745,7 @@ export const POGLocalizationEngine: React.FC = () => {
         <div className="pi-header-row">
           <div className="loc-engine-title-section">
             <div className="loc-engine-title-row">
-              <Target size={24} />
+              <TrackChangesOutlined sx={{ fontSize: 24 }} />
               <h1 className="loc-engine-title">Localization Engine</h1>
             </div>
             <p className="loc-engine-subtitle">
@@ -1742,7 +1753,7 @@ export const POGLocalizationEngine: React.FC = () => {
             </p>
             <div className="pi-header-meta">
               <span className="pi-meta-pill">
-                <Target size={12} />
+                <TrackChangesOutlined sx={{ fontSize: 12 }} />
                 {publishedResults.length} Localizations
               </span>
               <span className="pi-meta-pill pi-meta-pill--success">
@@ -1756,26 +1767,19 @@ export const POGLocalizationEngine: React.FC = () => {
         </div>
       </div>
 
-      <div className="loc-engine-tabs">
-        <div className="loc-tabs-container">
-          <button 
-            className={`loc-tab ${activeTab === 'run' ? 'active' : ''}`}
-            onClick={() => setActiveTab('run')}
-          >
-            Run Localization
-          </button>
-          <button 
-            className={`loc-tab ${activeTab === 'results' ? 'active' : ''}`}
-            onClick={() => setActiveTab('results')}
-          >
-            Published Results
-            {localizationResult && <span className="loc-tab-badge">1</span>}
-          </button>
-        </div>
-      </div>
-
-      <div className="loc-engine-content">
-        {activeTab === 'run' ? renderRunLocalization() : renderPublishedResults()}
+      <div style={{ marginTop: '24px' }}>
+        <Tabs
+          tabNames={[
+            { value: 'run', label: 'Run Localization' },
+            { value: 'results', label: 'Published Results' },
+          ]}
+          tabPanels={[
+            <div className="loc-engine-content">{renderRunLocalization()}</div>,
+            <div className="loc-engine-content">{renderPublishedResults()}</div>,
+          ]}
+          value={activeTab}
+          onChange={(_, val) => setActiveTab(val as 'run' | 'results')}
+        />
       </div>
     </div>
   );

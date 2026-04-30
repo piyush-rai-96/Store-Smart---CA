@@ -1,6 +1,7 @@
 import React from 'react';
 import { Badge } from 'impact-ui';
-import { Calendar, MapPin } from 'lucide-react';
+import CalendarTodayOutlined from '@mui/icons-material/CalendarTodayOutlined';
+import PlaceOutlined from '@mui/icons-material/PlaceOutlined';
 import './HomeHero.css';
 
 interface HomeHeroProps {
@@ -51,7 +52,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({
             <div className="home-hero-badges">
               <Badge label={roleName} color="info" size="medium" />
               <div className="home-hero-assignment">
-                <MapPin size={16} />
+                <PlaceOutlined sx={{ fontSize: 16 }} />
                 <span>{assignment}</span>
                 {region && <span className="home-hero-region">• {region}</span>}
               </div>
@@ -59,7 +60,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({
             
             <div className="home-hero-context">
               <div className="home-hero-date">
-                <Calendar size={14} />
+                <CalendarTodayOutlined sx={{ fontSize: 14 }} />
                 <span>{formatDate()}</span>
               </div>
               {lastSync && (

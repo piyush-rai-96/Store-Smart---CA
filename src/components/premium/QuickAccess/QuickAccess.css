@@ -1,17 +1,17 @@
 /* Premium Quick Access Styles */
 
 .quick-access {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: var(--ia-color-surface);
+  border: 1px solid var(--ia-color-border);
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 20px;
 }
 
 .quick-access-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: #0f172a;
+  font-size: var(--ia-text-md);
+  font-weight: var(--ia-font-weight-bold);
+  color: var(--ia-color-text-primary);
   margin: 0 0 16px 0;
 }
 
@@ -26,8 +26,8 @@
   align-items: center;
   gap: 12px;
   padding: 12px;
-  border: 1px solid #e5e7eb;
-  background: #ffffff;
+  border: 1px solid var(--ia-color-border);
+  background: var(--ia-color-surface);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
@@ -35,15 +35,15 @@
 }
 
 .quick-access-item:hover {
-  border-color: #3b82f6;
-  background: #f9fafb;
+  border-color: var(--ia-color-primary);
+  background: var(--ia-color-bg-subtle);
   transform: translateX(4px);
 }
 
 .quick-access-icon {
   width: 36px;
   height: 36px;
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  background: linear-gradient(135deg, var(--ia-color-primary) 0%, var(--ia-color-primary) 100%);
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -58,9 +58,9 @@
 }
 
 .quick-access-label {
-  font-size: 14px;
-  font-weight: 600;
-  color: #0f172a;
+  font-size: var(--ia-text-sm);
+  font-weight: var(--ia-font-weight-semibold);
+  color: var(--ia-color-text-primary);
   line-height: 1.4;
 }
 
@@ -68,20 +68,20 @@
   display: inline-block;
   margin-top: 4px;
   padding: 2px 8px;
-  background: #dbeafe;
+  background: var(--ia-color-primary-soft);
   color: #1e40af;
   border-radius: 6px;
-  font-size: 11px;
-  font-weight: 700;
+  font-size: var(--ia-text-2xs);
+  font-weight: var(--ia-font-weight-bold);
 }
 
 .quick-access-arrow {
-  color: #9ca3af;
+  color: var(--ia-color-text-tertiary);
   flex-shrink: 0;
   transition: transform 0.2s;
 }
 
 .quick-access-item:hover .quick-access-arrow {
-  color: #3b82f6;
+  color: var(--ia-color-primary);
   transform: translateX(4px);
 }

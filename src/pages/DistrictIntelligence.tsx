@@ -1,42 +1,41 @@
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Activity,
-  TrendingUp,
-  TrendingDown,
-  Minus,
-  AlertTriangle,
-  AlertCircle,
-  Store,
-  ChevronRight,
-  ChevronDown,
-  ChevronUp,
-  ArrowUpDown,
-  Clock,
-  Calendar,
-  RefreshCw,
-  Search,
-  Download,
-  MapPin,
-  Megaphone,
-  Sparkles,
-  X,
-  Send,
-  Package,
-  MessageSquare,
-  ExternalLink,
-  Users,
-  Check,
-  DollarSign,
-  Heart,
-  ClipboardCheck,
-  BarChart3,
-  Target,
-  ArrowUpRight,
-  ArrowDownRight,
-  Filter,
-  CheckCircle2
-} from 'lucide-react';
+import ShowChartOutlined from '@mui/icons-material/ShowChartOutlined';
+import TrendingUpOutlined from '@mui/icons-material/TrendingUpOutlined';
+import TrendingDownOutlined from '@mui/icons-material/TrendingDownOutlined';
+import Remove from '@mui/icons-material/Remove';
+import WarningAmberOutlined from '@mui/icons-material/WarningAmberOutlined';
+import ErrorOutlined from '@mui/icons-material/ErrorOutlined';
+import StoreOutlined from '@mui/icons-material/StoreOutlined';
+import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
+import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUp from '@mui/icons-material/KeyboardArrowUp';
+import SwapVert from '@mui/icons-material/SwapVert';
+import AccessTimeOutlined from '@mui/icons-material/AccessTimeOutlined';
+import CalendarTodayOutlined from '@mui/icons-material/CalendarTodayOutlined';
+import RefreshOutlined from '@mui/icons-material/RefreshOutlined';
+import SearchOutlined from '@mui/icons-material/SearchOutlined';
+import FileDownloadOutlined from '@mui/icons-material/FileDownloadOutlined';
+import PlaceOutlined from '@mui/icons-material/PlaceOutlined';
+import CampaignOutlined from '@mui/icons-material/CampaignOutlined';
+import AutoAwesomeOutlined from '@mui/icons-material/AutoAwesomeOutlined';
+import CloseOutlined from '@mui/icons-material/CloseOutlined';
+import SendOutlined from '@mui/icons-material/SendOutlined';
+import InventoryOutlined from '@mui/icons-material/InventoryOutlined';
+import ChatOutlined from '@mui/icons-material/ChatOutlined';
+import OpenInNewOutlined from '@mui/icons-material/OpenInNewOutlined';
+import GroupOutlined from '@mui/icons-material/GroupOutlined';
+import Check from '@mui/icons-material/Check';
+import AttachMoneyOutlined from '@mui/icons-material/AttachMoneyOutlined';
+import FavoriteOutlined from '@mui/icons-material/FavoriteOutlined';
+import AssignmentTurnedInOutlined from '@mui/icons-material/AssignmentTurnedInOutlined';
+import BarChartOutlined from '@mui/icons-material/BarChartOutlined';
+import TrackChangesOutlined from '@mui/icons-material/TrackChangesOutlined';
+import NorthEast from '@mui/icons-material/NorthEast';
+import SouthEast from '@mui/icons-material/SouthEast';
+import FilterListOutlined from '@mui/icons-material/FilterListOutlined';
+import TaskAltOutlined from '@mui/icons-material/TaskAltOutlined';
+import { Button, Card, Tabs } from 'impact-ui';
 import { useAuth } from '../context/AuthContext';
 import { AIDailyBrief } from '../components/common/AIDailyBrief';
 import './DistrictIntelligence.css';
@@ -397,13 +396,13 @@ const DISTRICT_BROADCAST_ANALYTICS: Record<string, DistrictBroadcastAnalytics> =
 const getComplianceColor = (value: number): string => {
   if (value >= 90) return '#c6f0d4';
   if (value >= 75) return '#d9f2e0';
-  if (value >= 50) return '#fef3c7';
+  if (value >= 50) return 'var(--ia-color-warning-bg)';
   if (value >= 25) return '#fde2e2';
   return '#fcc';
 };
 
 const getComplianceTextColor = (value: number): string => {
-  if (value >= 90) return '#15803d';
+  if (value >= 90) return 'var(--ia-color-success)';
   if (value >= 75) return '#166534';
   if (value >= 50) return '#92400e';
   if (value >= 25) return '#991b1b';
@@ -709,11 +708,11 @@ const teamMembers = [
 // Helper functions
 const getDPIColor = (tier: string) => {
   switch (tier) {
-    case 'Excellence': return '#10b981';
+    case 'Excellence': return 'var(--ia-color-success)';
     case 'Stable': return '#0ea5e9';
-    case 'AtRisk': return '#f59e0b';
-    case 'Crisis': return '#ef4444';
-    default: return '#64748b';
+    case 'AtRisk': return 'var(--ia-color-warning)';
+    case 'Crisis': return 'var(--ia-color-error)';
+    default: return 'var(--ia-color-text-secondary)';
   }
 };
 
@@ -1362,10 +1361,10 @@ export const DistrictIntelligence: React.FC = () => {
 
   const SortIcon: React.FC<{ col: SortKey }> = ({ col }) => (
     leaderboardSort.key !== col
-      ? <ArrowUpDown size={12} className="sort-icon sort-icon--idle" />
+      ? <SwapVert sx={{ fontSize: 12 }} className="sort-icon sort-icon--idle"/>
       : leaderboardSort.dir === 'asc'
-        ? <ChevronUp size={12} className="sort-icon sort-icon--active" />
-        : <ChevronDown size={12} className="sort-icon sort-icon--active" />
+        ? <KeyboardArrowUp sx={{ fontSize: 12 }} className="sort-icon sort-icon--active"/>
+        : <KeyboardArrowDown sx={{ fontSize: 12 }} className="sort-icon sort-icon--active"/>
   );
 
   if (isLoading) {
@@ -1385,17 +1384,17 @@ export const DistrictIntelligence: React.FC = () => {
       <div className="district-intel-header">
         <div className="header-left">
           <div className="header-title">
-            <Activity size={24} />
+            <ShowChartOutlined sx={{ fontSize: 24 }}/>
             <h1>District Intelligence Center</h1>
           </div>
           <div className="header-meta">
             {isHQ ? (
               <div className="di-district-picker-wrap">
                 <button className="di-district-picker" onClick={() => setShowDistrictDropdown(prev => !prev)}>
-                  <MapPin size={14} />
+                  <PlaceOutlined sx={{ fontSize: 14 }}/>
                   <span>{selectedDistrictOption.label}</span>
                   <span className="di-district-dm">DM: {selectedDistrictOption.dm}</span>
-                  <ChevronDown size={14} className={showDistrictDropdown ? 'rotated' : ''} />
+                  <KeyboardArrowDown sx={{ fontSize: 14 }} className={showDistrictDropdown ? 'rotated' : ''}/>
                 </button>
                 {showDistrictDropdown && (
                   <div className="di-district-dropdown">
@@ -1406,14 +1405,14 @@ export const DistrictIntelligence: React.FC = () => {
                         onClick={() => { setSelectedDistrictId(d.id); setShowDistrictDropdown(false); }}
                       >
                         <div className="di-district-option-main">
-                          <MapPin size={13} />
+                          <PlaceOutlined sx={{ fontSize: 13 }}/>
                           <span className="di-district-option-label">{d.label}</span>
                         </div>
                         <div className="di-district-option-meta">
                           <span>DM: {d.dm}</span>
                           <span>{d.storeCount} stores</span>
                         </div>
-                        {d.id === selectedDistrictId && <Check size={14} className="di-district-check" />}
+                        {d.id === selectedDistrictId && <Check sx={{ fontSize: 14 }} className="di-district-check"/>}
                       </button>
                     ))}
                   </div>
@@ -1421,7 +1420,7 @@ export const DistrictIntelligence: React.FC = () => {
               </div>
             ) : (
               <span className="district-badge">
-                <MapPin size={14} />
+                <PlaceOutlined sx={{ fontSize: 14 }}/>
                 District 14 — Tennessee
               </span>
             )}
@@ -1430,9 +1429,9 @@ export const DistrictIntelligence: React.FC = () => {
                 className="period-selector"
                 onClick={() => setShowCalendar(!showCalendar)}
               >
-                <Calendar size={14} />
+                <CalendarTodayOutlined sx={{ fontSize: 14 }}/>
                 <span>{getSelectedPeriodLabel()}</span>
-                <ChevronDown size={14} className={showCalendar ? 'rotated' : ''} />
+                <KeyboardArrowDown sx={{ fontSize: 14 }} className={showCalendar ? 'rotated' : ''}/>
               </button>
               
               {showCalendar && (
@@ -1490,14 +1489,14 @@ export const DistrictIntelligence: React.FC = () => {
                     <>
                       <div className="calendar-nav">
                         <button className="nav-btn" onClick={() => navigateMonth('prev')}>
-                          <ChevronDown size={16} style={{ transform: 'rotate(90deg)' }} />
+                          <KeyboardArrowDown sx={{ fontSize: 16 }} style={{ transform: 'rotate(90deg)' }}/>
                         </button>
                         <div className="calendar-month-year">
                           <span className="calendar-month">{monthNames[viewingMonth]}</span>
                           <span className="calendar-year">{viewingYear}</span>
                         </div>
                         <button className="nav-btn" onClick={() => navigateMonth('next')}>
-                          <ChevronDown size={16} style={{ transform: 'rotate(-90deg)' }} />
+                          <KeyboardArrowDown sx={{ fontSize: 16 }} style={{ transform: 'rotate(-90deg)' }}/>
                         </button>
                       </div>
                       
@@ -1558,22 +1557,22 @@ export const DistrictIntelligence: React.FC = () => {
               )}
             </div>
             <span className="last-refresh">
-              <Clock size={12} />
+              <AccessTimeOutlined sx={{ fontSize: 12 }}/>
               Updated {lastRefresh.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </span>
           </div>
         </div>
         <div className="header-right">
           <div className="header-search">
-            <Search size={16} />
+            <SearchOutlined sx={{ fontSize: 16 }}/>
             <input type="text" placeholder="Search stores, metrics..." />
           </div>
           <button className="header-action-btn secondary">
-            <Download size={16} />
+            <FileDownloadOutlined sx={{ fontSize: 16 }}/>
             Export
           </button>
           <button className="header-icon-btn" onClick={handleRefresh}>
-            <RefreshCw size={18} />
+            <RefreshOutlined sx={{ fontSize: 18 }}/>
           </button>
         </div>
       </div>
@@ -1584,7 +1583,7 @@ export const DistrictIntelligence: React.FC = () => {
         <div className="dpi-card-v2" ref={dpiCardRef}>
           {/* Hero Score Section */}
           <div className="dpi-hero-section">
-            {isAnyFilterActive && <Filter size={12} className="filter-active-icon dpi-card-filter" />}
+            {isAnyFilterActive && <FilterListOutlined sx={{ fontSize: 12 }} className="filter-active-icon dpi-card-filter"/>}
             <div className="dpi-gauge-wrapper-v2">
               <svg className="dpi-gauge-v2" viewBox="0 0 160 160">
                 {/* Background track */}
@@ -1642,7 +1641,7 @@ export const DistrictIntelligence: React.FC = () => {
               </div>
               <div className="dpi-change-card">
                 <div className={`dpi-change-value ${dpiChange < 0 ? 'negative' : ''}`}>
-                  <TrendingUp size={18} />
+                  <TrendingUpOutlined sx={{ fontSize: 18 }}/>
                   <span>{dpiChange >= 0 ? '+' : ''}{dpiChange}%</span>
                 </div>
                 <span className="dpi-change-label">{calendarMode === 'week' ? 'this week' : calendarMode === 'month' ? 'this month' : 'this quarter'}</span>
@@ -1654,27 +1653,27 @@ export const DistrictIntelligence: React.FC = () => {
               <span className="breakdown-title">Score Breakdown</span>
             </div>
             <div className="dpi-breakdown-grid">
-              <div className="breakdown-card">
+              <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '12px 8px 10px', overflow: 'hidden' }}>
                 <div className="breakdown-value">{currentData.scoreSales}</div>
                 <div className="breakdown-label">Sales</div>
                 <div className="breakdown-bar">
                   <div className="breakdown-fill" style={{ width: `${currentData.scoreSales}%` }}></div>
                 </div>
-              </div>
-              <div className="breakdown-card">
+              </Card>
+              <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '12px 8px 10px', overflow: 'hidden' }}>
                 <div className="breakdown-value">{currentData.scoreExecution}</div>
                 <div className="breakdown-label">Execution</div>
                 <div className="breakdown-bar">
                   <div className="breakdown-fill" style={{ width: `${currentData.scoreExecution}%` }}></div>
                 </div>
-              </div>
-              <div className="breakdown-card">
+              </Card>
+              <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '12px 8px 10px', overflow: 'hidden' }}>
                 <div className="breakdown-value">{currentData.scoreVoC}</div>
                 <div className="breakdown-label">VoC</div>
                 <div className="breakdown-bar">
                   <div className="breakdown-fill" style={{ width: `${currentData.scoreVoC}%` }}></div>
                 </div>
-              </div>
+              </Card>
             </div>
             {/* Chain Comparison - Integrated */}
             <div className="dpi-chain-comparison">
@@ -1710,17 +1709,17 @@ export const DistrictIntelligence: React.FC = () => {
         <div className="bca-header">
           <div className="bca-header-left">
             <div className="bca-title-row">
-              <Megaphone size={20} />
-              <h2>Broadcast Analytics {isAnyFilterActive && <Filter size={12} className="filter-active-icon" />}</h2>
+              <CampaignOutlined sx={{ fontSize: 20 }}/>
+              <h2>Broadcast Analytics {isAnyFilterActive && <FilterListOutlined sx={{ fontSize: 12 }} className="filter-active-icon"/>}</h2>
             </div>
             <p className="bca-subtitle">Communication effectiveness, compliance gaps, and engagement insights</p>
           </div>
           <button className="bca-create-btn" onClick={openBroadcastWizard}>
-            <Megaphone size={13} /> Create Broadcast
+            <CampaignOutlined sx={{ fontSize: 13 }}/> Create Broadcast
           </button>
         </div>
 
-        {/* A. Performance Overview — KPI Cards */}
+        {/* A. Performance Overview — KPI Strip */}
         <div className="bca-overview-grid">
           <div className="bca-kpi-card">
             <span className="bca-kpi-label">Active Broadcasts</span>
@@ -1803,7 +1802,7 @@ export const DistrictIntelligence: React.FC = () => {
         <div className="kpi-cards-header">
           <div className="kpi-header-title-row">
             <div className="kpi-title-group">
-              <h2><BarChart3 size={20} /> District KPIs {isAnyFilterActive && <Filter size={12} className="filter-active-icon" />}</h2>
+              <h2><BarChartOutlined sx={{ fontSize: 20 }}/> District KPIs {isAnyFilterActive && <FilterListOutlined sx={{ fontSize: 12 }} className="filter-active-icon"/>}</h2>
               <span className="kpi-header-subtitle">Click any metric to explore 52-week trend</span>
             </div>
             <div className="kpi-header-stats">
@@ -1825,242 +1824,310 @@ export const DistrictIntelligence: React.FC = () => {
         <div className="kpi-cards-grid">
           {/* 1. Commercial */}
           {adjustedKPIs.filter(k => k.category === 'commercial').map(kpi => (
-            <div
+            <Card
               key={kpi.id}
-              className={`kpi-tile kpi-tile--${kpi.status} ${kpi.clickable ? 'kpi-tile--clickable' : ''} ${activeKPIPanel?.id === kpi.id ? 'kpi-tile--active' : ''}`}
+              className={`kpi-tile--${kpi.status}`}
               onClick={() => kpi.clickable && setActiveKPIPanel(activeKPIPanel?.id === kpi.id ? null : kpi)}
+              sx={{
+                maxWidth: '100%',
+                minHeight: 'unset',
+                padding: 0,
+                width: '100%',
+                borderRadius: '8px',
+                border: activeKPIPanel?.id === kpi.id ? '1px solid var(--ia-color-text-primary)' : '1px solid var(--ia-color-border)',
+                boxShadow: activeKPIPanel?.id === kpi.id ? '0 0 0 1px var(--ia-color-text-primary), 0 1px 3px rgba(15,23,42,0.04)' : '0 1px 3px rgba(15,23,42,0.04)',
+                cursor: kpi.clickable ? 'pointer' : 'default',
+                transition: 'all 0.15s ease',
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+                position: 'relative',
+                '&:hover': kpi.clickable ? { borderColor: 'var(--ia-color-text-tertiary)', boxShadow: '0 1px 4px rgba(15,23,42,0.08)', transform: 'translateY(-1px)' } : {},
+              }}
             >
-              <div className="kpi-tile-category kpi-tile-category--commercial">
-                <DollarSign size={12} />
-                <span>Commercial</span>
-              </div>
-              <div className="kpi-tile-value-row">
-                <span className="kpi-tile-primary">{kpi.primaryValue}</span>
-                {kpi.primaryUnit && <span className="kpi-tile-unit">{kpi.primaryUnit}</span>}
-              </div>
-              <span className="kpi-tile-label">{kpi.label}</span>
-              {kpi.microInsight && (
-                <div className="kpi-tile-insight">
-                  <span className="kpi-tile-insight-dot" />
-                  <span>{kpi.microInsight}</span>
+              <div style={{ padding: '14px 16px 0', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                <div className="kpi-tile-category kpi-tile-category--commercial">
+                  <AttachMoneyOutlined sx={{ fontSize: 12 }}/>
+                  <span>Commercial</span>
                 </div>
-              )}
-              <div className={`kpi-tile-delta delta-${kpi.deltaDirection}`}>
-                {kpi.deltaDirection === 'up' && <ArrowUpRight size={12} />}
-                {kpi.deltaDirection === 'down' && <ArrowDownRight size={12} />}
-                <span>{kpi.delta}</span>
-                {kpi.deltaContext && <span className="kpi-delta-ctx">{kpi.deltaContext}</span>}
-              </div>
-              {kpi.trendData && (() => {
-                const data = kpi.trendData;
-                const min = Math.min(...data);
-                const max = Math.max(...data);
-                const range = max - min || 1;
-                const W = 120, H = 44, P = 3;
-                const points = data.map((v, i) => ({
-                  x: (i / (data.length - 1)) * W,
-                  y: H - P - ((v - min) / range) * (H - P * 2),
-                }));
-                // Linear (straight-line) path — sharp angles convey precision
-                const path = points.map((p, i) => i === 0 ? `M ${p.x},${p.y}` : `L ${p.x},${p.y}`).join(' ');
-                const areaPath = `${path} L ${W},${H} L 0,${H} Z`;
-                const last = points[points.length - 1];
-                const color = kpi.status === 'positive' ? '#047857' : kpi.status === 'negative' ? '#991b1b' : kpi.status === 'warning' ? '#b45309' : '#4338ca';
-                return (
-                  <div className="kpi-tile-sparkline">
-                    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
-                      <defs>
-                        <linearGradient id={`spark-${kpi.id}`} x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor={color} stopOpacity="0.06" />
-                          <stop offset="100%" stopColor={color} stopOpacity="0" />
-                        </linearGradient>
-                      </defs>
-                      <path d={areaPath} fill={`url(#spark-${kpi.id})`} />
-                      <path d={path} fill="none" stroke={color} strokeWidth="1.3" strokeLinecap="square" strokeLinejoin="miter" />
-                      <circle cx={last.x} cy={last.y} r="1.8" fill={color} stroke="#ffffff" strokeWidth="1" />
-                    </svg>
+                <div className="kpi-tile-value-row">
+                  <span className="kpi-tile-primary">{kpi.primaryValue}</span>
+                  {kpi.primaryUnit && <span className="kpi-tile-unit">{kpi.primaryUnit}</span>}
+                </div>
+                <span className="kpi-tile-label">{kpi.label}</span>
+                {kpi.microInsight && (
+                  <div className="kpi-tile-insight">
+                    <span className="kpi-tile-insight-dot" />
+                    <span>{kpi.microInsight}</span>
                   </div>
-                );
-              })()}
-              {kpi.clickable && <ChevronRight size={14} className="kpi-tile-arrow" />}
-            </div>
+                )}
+                <div className={`kpi-tile-delta delta-${kpi.deltaDirection}`}>
+                  {kpi.deltaDirection === 'up' && <NorthEast sx={{ fontSize: 12 }}/>}
+                  {kpi.deltaDirection === 'down' && <SouthEast sx={{ fontSize: 12 }}/>}
+                  <span>{kpi.delta}</span>
+                  {kpi.deltaContext && <span className="kpi-delta-ctx">{kpi.deltaContext}</span>}
+                </div>
+                {kpi.trendData && (() => {
+                  const data = kpi.trendData;
+                  const min = Math.min(...data);
+                  const max = Math.max(...data);
+                  const range = max - min || 1;
+                  const W = 120, H = 44, P = 3;
+                  const points = data.map((v, i) => ({
+                    x: (i / (data.length - 1)) * W,
+                    y: H - P - ((v - min) / range) * (H - P * 2),
+                  }));
+                  const path = points.map((p, i) => i === 0 ? `M ${p.x},${p.y}` : `L ${p.x},${p.y}`).join(' ');
+                  const areaPath = `${path} L ${W},${H} L 0,${H} Z`;
+                  const last = points[points.length - 1];
+                  const color = kpi.status === 'positive' ? '#047857' : kpi.status === 'negative' ? '#991b1b' : kpi.status === 'warning' ? '#b45309' : 'var(--ia-color-primary-pressed)';
+                  return (
+                    <div className="kpi-tile-sparkline">
+                      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+                        <defs>
+                          <linearGradient id={`spark-${kpi.id}`} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor={color} stopOpacity="0.06" />
+                            <stop offset="100%" stopColor={color} stopOpacity="0" />
+                          </linearGradient>
+                        </defs>
+                        <path d={areaPath} fill={`url(#spark-${kpi.id})`} />
+                        <path d={path} fill="none" stroke={color} strokeWidth="1.3" strokeLinecap="square" strokeLinejoin="miter" />
+                        <circle cx={last.x} cy={last.y} r="1.8" fill={color} stroke="#ffffff" strokeWidth="1" />
+                      </svg>
+                    </div>
+                  );
+                })()}
+                {kpi.clickable && <KeyboardArrowRight sx={{ fontSize: 14 }} className="kpi-tile-arrow"/>}
+              </div>
+            </Card>
           ))}
 
           {/* 2. Customer */}
           {adjustedKPIs.filter(k => k.category === 'customer').map(kpi => (
-            <div
+            <Card
               key={kpi.id}
-              className={`kpi-tile kpi-tile--${kpi.status} ${kpi.clickable ? 'kpi-tile--clickable' : ''} ${activeKPIPanel?.id === kpi.id ? 'kpi-tile--active' : ''}`}
+              className={`kpi-tile--${kpi.status}`}
               onClick={() => kpi.clickable && setActiveKPIPanel(activeKPIPanel?.id === kpi.id ? null : kpi)}
+              sx={{
+                maxWidth: '100%',
+                minHeight: 'unset',
+                padding: 0,
+                width: '100%',
+                borderRadius: '8px',
+                border: activeKPIPanel?.id === kpi.id ? '1px solid var(--ia-color-text-primary)' : '1px solid var(--ia-color-border)',
+                boxShadow: activeKPIPanel?.id === kpi.id ? '0 0 0 1px var(--ia-color-text-primary), 0 1px 3px rgba(15,23,42,0.04)' : '0 1px 3px rgba(15,23,42,0.04)',
+                cursor: kpi.clickable ? 'pointer' : 'default',
+                transition: 'all 0.15s ease',
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+                position: 'relative',
+                '&:hover': kpi.clickable ? { borderColor: 'var(--ia-color-text-tertiary)', boxShadow: '0 1px 4px rgba(15,23,42,0.08)', transform: 'translateY(-1px)' } : {},
+              }}
             >
-              <div className="kpi-tile-category kpi-tile-category--customer">
-                <Heart size={12} />
-                <span>Customer</span>
+              <div style={{ padding: '14px 16px 0', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                <div className="kpi-tile-category kpi-tile-category--customer">
+                  <FavoriteOutlined sx={{ fontSize: 12 }}/>
+                  <span>Customer</span>
+                </div>
+                <div className="kpi-tile-value-row">
+                  <span className="kpi-tile-primary">{kpi.primaryValue}</span>
+                  {kpi.primaryUnit && <span className="kpi-tile-unit">{kpi.primaryUnit}</span>}
+                </div>
+                <span className="kpi-tile-label">{kpi.label}</span>
+                <div className={`kpi-tile-delta delta-${kpi.deltaDirection}`}>
+                  {kpi.deltaDirection === 'up' && <NorthEast sx={{ fontSize: 12 }}/>}
+                  {kpi.deltaDirection === 'down' && <SouthEast sx={{ fontSize: 12 }}/>}
+                  <span>{kpi.delta}</span>
+                  {kpi.deltaContext && <span className="kpi-delta-ctx">{kpi.deltaContext}</span>}
+                </div>
+                {kpi.trendData && (() => {
+                  const data = kpi.trendData;
+                  const min = Math.min(...data);
+                  const max = Math.max(...data);
+                  const range = max - min || 1;
+                  const W = 120, H = 44, P = 3;
+                  const points = data.map((v, i) => ({
+                    x: (i / (data.length - 1)) * W,
+                    y: H - P - ((v - min) / range) * (H - P * 2),
+                  }));
+                  const path = points.map((p, i) => i === 0 ? `M ${p.x},${p.y}` : `L ${p.x},${p.y}`).join(' ');
+                  const areaPath = `${path} L ${W},${H} L 0,${H} Z`;
+                  const last = points[points.length - 1];
+                  const color = kpi.status === 'positive' ? '#047857' : kpi.status === 'negative' ? '#991b1b' : kpi.status === 'warning' ? '#b45309' : 'var(--ia-color-primary-pressed)';
+                  return (
+                    <div className="kpi-tile-sparkline">
+                      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+                        <defs>
+                          <linearGradient id={`spark-${kpi.id}`} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor={color} stopOpacity="0.06" />
+                            <stop offset="100%" stopColor={color} stopOpacity="0" />
+                          </linearGradient>
+                        </defs>
+                        <path d={areaPath} fill={`url(#spark-${kpi.id})`} />
+                        <path d={path} fill="none" stroke={color} strokeWidth="1.3" strokeLinecap="square" strokeLinejoin="miter" />
+                        <circle cx={last.x} cy={last.y} r="1.8" fill={color} stroke="#ffffff" strokeWidth="1" />
+                      </svg>
+                    </div>
+                  );
+                })()}
+                {kpi.clickable && <KeyboardArrowRight sx={{ fontSize: 14 }} className="kpi-tile-arrow"/>}
               </div>
-              <div className="kpi-tile-value-row">
-                <span className="kpi-tile-primary">{kpi.primaryValue}</span>
-                {kpi.primaryUnit && <span className="kpi-tile-unit">{kpi.primaryUnit}</span>}
-              </div>
-              <span className="kpi-tile-label">{kpi.label}</span>
-              <div className={`kpi-tile-delta delta-${kpi.deltaDirection}`}>
-                {kpi.deltaDirection === 'up' && <ArrowUpRight size={12} />}
-                {kpi.deltaDirection === 'down' && <ArrowDownRight size={12} />}
-                <span>{kpi.delta}</span>
-                {kpi.deltaContext && <span className="kpi-delta-ctx">{kpi.deltaContext}</span>}
-              </div>
-              {kpi.trendData && (() => {
-                const data = kpi.trendData;
-                const min = Math.min(...data);
-                const max = Math.max(...data);
-                const range = max - min || 1;
-                const W = 120, H = 44, P = 3;
-                const points = data.map((v, i) => ({
-                  x: (i / (data.length - 1)) * W,
-                  y: H - P - ((v - min) / range) * (H - P * 2),
-                }));
-                // Linear (straight-line) path — sharp angles convey precision
-                const path = points.map((p, i) => i === 0 ? `M ${p.x},${p.y}` : `L ${p.x},${p.y}`).join(' ');
-                const areaPath = `${path} L ${W},${H} L 0,${H} Z`;
-                const last = points[points.length - 1];
-                const color = kpi.status === 'positive' ? '#047857' : kpi.status === 'negative' ? '#991b1b' : kpi.status === 'warning' ? '#b45309' : '#4338ca';
-                return (
-                  <div className="kpi-tile-sparkline">
-                    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
-                      <defs>
-                        <linearGradient id={`spark-${kpi.id}`} x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor={color} stopOpacity="0.06" />
-                          <stop offset="100%" stopColor={color} stopOpacity="0" />
-                        </linearGradient>
-                      </defs>
-                      <path d={areaPath} fill={`url(#spark-${kpi.id})`} />
-                      <path d={path} fill="none" stroke={color} strokeWidth="1.3" strokeLinecap="square" strokeLinejoin="miter" />
-                      <circle cx={last.x} cy={last.y} r="1.8" fill={color} stroke="#ffffff" strokeWidth="1" />
-                    </svg>
-                  </div>
-                );
-              })()}
-              {kpi.clickable && <ChevronRight size={14} className="kpi-tile-arrow" />}
-            </div>
+            </Card>
           ))}
 
           {/* 3. Execution */}
           {adjustedKPIs.filter(k => k.category === 'execution').map(kpi => (
-            <div
+            <Card
               key={kpi.id}
-              className={`kpi-tile kpi-tile--${kpi.status} ${kpi.clickable ? 'kpi-tile--clickable' : ''} ${activeKPIPanel?.id === kpi.id ? 'kpi-tile--active' : ''}`}
+              className={`kpi-tile--${kpi.status}`}
               onClick={() => kpi.clickable && setActiveKPIPanel(activeKPIPanel?.id === kpi.id ? null : kpi)}
+              sx={{
+                maxWidth: '100%',
+                minHeight: 'unset',
+                padding: 0,
+                width: '100%',
+                borderRadius: '8px',
+                border: activeKPIPanel?.id === kpi.id ? '1px solid var(--ia-color-text-primary)' : '1px solid var(--ia-color-border)',
+                boxShadow: activeKPIPanel?.id === kpi.id ? '0 0 0 1px var(--ia-color-text-primary), 0 1px 3px rgba(15,23,42,0.04)' : '0 1px 3px rgba(15,23,42,0.04)',
+                cursor: kpi.clickable ? 'pointer' : 'default',
+                transition: 'all 0.15s ease',
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+                position: 'relative',
+                '&:hover': kpi.clickable ? { borderColor: 'var(--ia-color-text-tertiary)', boxShadow: '0 1px 4px rgba(15,23,42,0.08)', transform: 'translateY(-1px)' } : {},
+              }}
             >
-              <div className="kpi-tile-category kpi-tile-category--execution">
-                <ClipboardCheck size={12} />
-                <span>Execution</span>
+              <div style={{ padding: '14px 16px 0', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                <div className="kpi-tile-category kpi-tile-category--execution">
+                  <AssignmentTurnedInOutlined sx={{ fontSize: 12 }}/>
+                  <span>Execution</span>
+                </div>
+                <div className="kpi-tile-value-row">
+                  <span className="kpi-tile-primary">{kpi.primaryValue}</span>
+                  {kpi.primaryUnit && <span className="kpi-tile-unit">{kpi.primaryUnit}</span>}
+                </div>
+                <span className="kpi-tile-label">{kpi.label}</span>
+                <div className={`kpi-tile-delta delta-${kpi.deltaDirection}`}>
+                  {kpi.deltaDirection === 'up' && <NorthEast sx={{ fontSize: 12 }}/>}
+                  {kpi.deltaDirection === 'down' && <SouthEast sx={{ fontSize: 12 }}/>}
+                  <span>{kpi.delta}</span>
+                  {kpi.deltaContext && <span className="kpi-delta-ctx">{kpi.deltaContext}</span>}
+                </div>
+                {kpi.trendData && (() => {
+                  const data = kpi.trendData;
+                  const min = Math.min(...data);
+                  const max = Math.max(...data);
+                  const range = max - min || 1;
+                  const W = 120, H = 44, P = 3;
+                  const points = data.map((v, i) => ({
+                    x: (i / (data.length - 1)) * W,
+                    y: H - P - ((v - min) / range) * (H - P * 2),
+                  }));
+                  const path = points.map((p, i) => i === 0 ? `M ${p.x},${p.y}` : `L ${p.x},${p.y}`).join(' ');
+                  const areaPath = `${path} L ${W},${H} L 0,${H} Z`;
+                  const last = points[points.length - 1];
+                  const color = kpi.status === 'positive' ? '#047857' : kpi.status === 'negative' ? '#991b1b' : kpi.status === 'warning' ? '#b45309' : 'var(--ia-color-primary-pressed)';
+                  return (
+                    <div className="kpi-tile-sparkline">
+                      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+                        <defs>
+                          <linearGradient id={`spark-${kpi.id}`} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor={color} stopOpacity="0.06" />
+                            <stop offset="100%" stopColor={color} stopOpacity="0" />
+                          </linearGradient>
+                        </defs>
+                        <path d={areaPath} fill={`url(#spark-${kpi.id})`} />
+                        <path d={path} fill="none" stroke={color} strokeWidth="1.3" strokeLinecap="square" strokeLinejoin="miter" />
+                        <circle cx={last.x} cy={last.y} r="1.8" fill={color} stroke="#ffffff" strokeWidth="1" />
+                      </svg>
+                    </div>
+                  );
+                })()}
+                {kpi.clickable && <KeyboardArrowRight sx={{ fontSize: 14 }} className="kpi-tile-arrow"/>}
               </div>
-              <div className="kpi-tile-value-row">
-                <span className="kpi-tile-primary">{kpi.primaryValue}</span>
-                {kpi.primaryUnit && <span className="kpi-tile-unit">{kpi.primaryUnit}</span>}
-              </div>
-              <span className="kpi-tile-label">{kpi.label}</span>
-              <div className={`kpi-tile-delta delta-${kpi.deltaDirection}`}>
-                {kpi.deltaDirection === 'up' && <ArrowUpRight size={12} />}
-                {kpi.deltaDirection === 'down' && <ArrowDownRight size={12} />}
-                <span>{kpi.delta}</span>
-                {kpi.deltaContext && <span className="kpi-delta-ctx">{kpi.deltaContext}</span>}
-              </div>
-              {kpi.trendData && (() => {
-                const data = kpi.trendData;
-                const min = Math.min(...data);
-                const max = Math.max(...data);
-                const range = max - min || 1;
-                const W = 120, H = 44, P = 3;
-                const points = data.map((v, i) => ({
-                  x: (i / (data.length - 1)) * W,
-                  y: H - P - ((v - min) / range) * (H - P * 2),
-                }));
-                // Linear (straight-line) path — sharp angles convey precision
-                const path = points.map((p, i) => i === 0 ? `M ${p.x},${p.y}` : `L ${p.x},${p.y}`).join(' ');
-                const areaPath = `${path} L ${W},${H} L 0,${H} Z`;
-                const last = points[points.length - 1];
-                const color = kpi.status === 'positive' ? '#047857' : kpi.status === 'negative' ? '#991b1b' : kpi.status === 'warning' ? '#b45309' : '#4338ca';
-                return (
-                  <div className="kpi-tile-sparkline">
-                    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
-                      <defs>
-                        <linearGradient id={`spark-${kpi.id}`} x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor={color} stopOpacity="0.06" />
-                          <stop offset="100%" stopColor={color} stopOpacity="0" />
-                        </linearGradient>
-                      </defs>
-                      <path d={areaPath} fill={`url(#spark-${kpi.id})`} />
-                      <path d={path} fill="none" stroke={color} strokeWidth="1.3" strokeLinecap="square" strokeLinejoin="miter" />
-                      <circle cx={last.x} cy={last.y} r="1.8" fill={color} stroke="#ffffff" strokeWidth="1" />
-                    </svg>
-                  </div>
-                );
-              })()}
-              {kpi.clickable && <ChevronRight size={14} className="kpi-tile-arrow" />}
-            </div>
+            </Card>
           ))}
 
           {/* 4. Profitability */}
           {adjustedKPIs.filter(k => k.category === 'profitability').map(kpi => (
-            <div
+            <Card
               key={kpi.id}
-              className={`kpi-tile kpi-tile--${kpi.status} ${kpi.clickable ? 'kpi-tile--clickable' : ''} ${activeKPIPanel?.id === kpi.id ? 'kpi-tile--active' : ''}`}
+              className={`kpi-tile--${kpi.status}`}
               onClick={() => kpi.clickable && setActiveKPIPanel(activeKPIPanel?.id === kpi.id ? null : kpi)}
+              sx={{
+                maxWidth: '100%',
+                minHeight: 'unset',
+                padding: 0,
+                width: '100%',
+                borderRadius: '8px',
+                border: activeKPIPanel?.id === kpi.id ? '1px solid var(--ia-color-text-primary)' : '1px solid var(--ia-color-border)',
+                boxShadow: activeKPIPanel?.id === kpi.id ? '0 0 0 1px var(--ia-color-text-primary), 0 1px 3px rgba(15,23,42,0.04)' : '0 1px 3px rgba(15,23,42,0.04)',
+                cursor: kpi.clickable ? 'pointer' : 'default',
+                transition: 'all 0.15s ease',
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+                position: 'relative',
+                '&:hover': kpi.clickable ? { borderColor: 'var(--ia-color-text-tertiary)', boxShadow: '0 1px 4px rgba(15,23,42,0.08)', transform: 'translateY(-1px)' } : {},
+              }}
             >
-              <div className="kpi-tile-category kpi-tile-category--profitability">
-                <Target size={12} />
-                <span>Profitability</span>
-              </div>
-              <div className="kpi-tile-value-row">
-                <span className="kpi-tile-primary">{kpi.primaryValue}</span>
-                {kpi.primaryUnit && <span className="kpi-tile-unit">{kpi.primaryUnit}</span>}
-              </div>
-              <span className="kpi-tile-label">{kpi.label}</span>
-              {kpi.microInsight && (
-                <div className="kpi-tile-insight">
-                  <span className="kpi-tile-insight-dot" />
-                  <span>{kpi.microInsight}</span>
+              <div style={{ padding: '14px 16px 0', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                <div className="kpi-tile-category kpi-tile-category--profitability">
+                  <TrackChangesOutlined sx={{ fontSize: 12 }}/>
+                  <span>Profitability</span>
                 </div>
-              )}
-              <div className={`kpi-tile-delta delta-${kpi.deltaDirection}`}>
-                {kpi.deltaDirection === 'up' && <ArrowUpRight size={12} />}
-                {kpi.deltaDirection === 'down' && <ArrowDownRight size={12} />}
-                <span>{kpi.delta}</span>
-                {kpi.deltaContext && <span className="kpi-delta-ctx">{kpi.deltaContext}</span>}
-              </div>
-              {kpi.trendData && (() => {
-                const data = kpi.trendData;
-                const min = Math.min(...data);
-                const max = Math.max(...data);
-                const range = max - min || 1;
-                const W = 120, H = 44, P = 3;
-                const points = data.map((v, i) => ({
-                  x: (i / (data.length - 1)) * W,
-                  y: H - P - ((v - min) / range) * (H - P * 2),
-                }));
-                // Linear (straight-line) path — sharp angles convey precision
-                const path = points.map((p, i) => i === 0 ? `M ${p.x},${p.y}` : `L ${p.x},${p.y}`).join(' ');
-                const areaPath = `${path} L ${W},${H} L 0,${H} Z`;
-                const last = points[points.length - 1];
-                const color = kpi.status === 'positive' ? '#047857' : kpi.status === 'negative' ? '#991b1b' : kpi.status === 'warning' ? '#b45309' : '#4338ca';
-                return (
-                  <div className="kpi-tile-sparkline">
-                    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
-                      <defs>
-                        <linearGradient id={`spark-${kpi.id}`} x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor={color} stopOpacity="0.06" />
-                          <stop offset="100%" stopColor={color} stopOpacity="0" />
-                        </linearGradient>
-                      </defs>
-                      <path d={areaPath} fill={`url(#spark-${kpi.id})`} />
-                      <path d={path} fill="none" stroke={color} strokeWidth="1.3" strokeLinecap="square" strokeLinejoin="miter" />
-                      <circle cx={last.x} cy={last.y} r="1.8" fill={color} stroke="#ffffff" strokeWidth="1" />
-                    </svg>
+                <div className="kpi-tile-value-row">
+                  <span className="kpi-tile-primary">{kpi.primaryValue}</span>
+                  {kpi.primaryUnit && <span className="kpi-tile-unit">{kpi.primaryUnit}</span>}
+                </div>
+                <span className="kpi-tile-label">{kpi.label}</span>
+                {kpi.microInsight && (
+                  <div className="kpi-tile-insight">
+                    <span className="kpi-tile-insight-dot" />
+                    <span>{kpi.microInsight}</span>
                   </div>
-                );
-              })()}
-              {kpi.clickable && <ChevronRight size={14} className="kpi-tile-arrow" />}
-            </div>
+                )}
+                <div className={`kpi-tile-delta delta-${kpi.deltaDirection}`}>
+                  {kpi.deltaDirection === 'up' && <NorthEast sx={{ fontSize: 12 }}/>}
+                  {kpi.deltaDirection === 'down' && <SouthEast sx={{ fontSize: 12 }}/>}
+                  <span>{kpi.delta}</span>
+                  {kpi.deltaContext && <span className="kpi-delta-ctx">{kpi.deltaContext}</span>}
+                </div>
+                {kpi.trendData && (() => {
+                  const data = kpi.trendData;
+                  const min = Math.min(...data);
+                  const max = Math.max(...data);
+                  const range = max - min || 1;
+                  const W = 120, H = 44, P = 3;
+                  const points = data.map((v, i) => ({
+                    x: (i / (data.length - 1)) * W,
+                    y: H - P - ((v - min) / range) * (H - P * 2),
+                  }));
+                  const path = points.map((p, i) => i === 0 ? `M ${p.x},${p.y}` : `L ${p.x},${p.y}`).join(' ');
+                  const areaPath = `${path} L ${W},${H} L 0,${H} Z`;
+                  const last = points[points.length - 1];
+                  const color = kpi.status === 'positive' ? '#047857' : kpi.status === 'negative' ? '#991b1b' : kpi.status === 'warning' ? '#b45309' : 'var(--ia-color-primary-pressed)';
+                  return (
+                    <div className="kpi-tile-sparkline">
+                      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+                        <defs>
+                          <linearGradient id={`spark-${kpi.id}`} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor={color} stopOpacity="0.06" />
+                            <stop offset="100%" stopColor={color} stopOpacity="0" />
+                          </linearGradient>
+                        </defs>
+                        <path d={areaPath} fill={`url(#spark-${kpi.id})`} />
+                        <path d={path} fill="none" stroke={color} strokeWidth="1.3" strokeLinecap="square" strokeLinejoin="miter" />
+                        <circle cx={last.x} cy={last.y} r="1.8" fill={color} stroke="#ffffff" strokeWidth="1" />
+                      </svg>
+                    </div>
+                  );
+                })()}
+                {kpi.clickable && <KeyboardArrowRight sx={{ fontSize: 14 }} className="kpi-tile-arrow"/>}
+              </div>
+            </Card>
           ))}
 
         </div>
@@ -2074,7 +2141,7 @@ export const DistrictIntelligence: React.FC = () => {
         <div className="leaderboard-header-premium">
           <div className="header-title-row">
             <div className="title-group">
-              <h2><Store size={20} /> Store Leaderboard {isAnyFilterActive && <Filter size={12} className="filter-active-icon" />}</h2>
+              <h2><StoreOutlined sx={{ fontSize: 20 }}/> Store Leaderboard {isAnyFilterActive && <FilterListOutlined sx={{ fontSize: 12 }} className="filter-active-icon"/>}</h2>
               <span className="header-subtitle">Performance ranking across all stores</span>
             </div>
             <div className="header-stats">
@@ -2094,7 +2161,7 @@ export const DistrictIntelligence: React.FC = () => {
           </div>
           <div className="leaderboard-controls">
             <div className="search-filter">
-              <Search size={16} />
+              <SearchOutlined sx={{ fontSize: 16 }}/>
               <input
                 type="text"
                 placeholder="Search stores, issues, status..."
@@ -2104,36 +2171,21 @@ export const DistrictIntelligence: React.FC = () => {
               />
               {leaderboardSearch && (
                 <button className="store-search-clear" onClick={() => setLeaderboardSearch('')} aria-label="Clear search">
-                  <X size={14} />
+                  <CloseOutlined sx={{ fontSize: 14 }}/>
                 </button>
               )}
             </div>
-            <div className="filter-tabs">
-              <button
-                className={`filter-tab ${leaderboardFilter === 'all' ? 'active' : ''}`}
-                onClick={() => setLeaderboardFilter('all')}
-              >
-                All Stores
-              </button>
-              <button
-                className={`filter-tab ${leaderboardFilter === 'risk' ? 'active' : ''}`}
-                onClick={() => setLeaderboardFilter('risk')}
-              >
-                At Risk
-              </button>
-              <button
-                className={`filter-tab ${leaderboardFilter === 'top' ? 'active' : ''}`}
-                onClick={() => setLeaderboardFilter('top')}
-              >
-                Top Performers
-              </button>
-              <button
-                className={`filter-tab ${leaderboardFilter === 'revenue' ? 'active' : ''}`}
-                onClick={() => setLeaderboardFilter('revenue')}
-              >
-                Revenue Leakers
-              </button>
-            </div>
+            <Tabs
+              tabNames={[
+                { value: 'all', label: 'All Stores' },
+                { value: 'risk', label: 'At Risk' },
+                { value: 'top', label: 'Top Performers' },
+                { value: 'revenue', label: 'Revenue Leakers' },
+              ]}
+              tabPanels={[]}
+              value={leaderboardFilter}
+              onChange={(_, val) => setLeaderboardFilter(val as 'all' | 'risk' | 'top' | 'revenue')}
+            />
           </div>
         </div>
         <div className="leaderboard-table-premium">
@@ -2211,13 +2263,13 @@ export const DistrictIntelligence: React.FC = () => {
                       <span className={`view-store-link ${navigatingStore === store.storeNumber ? 'loading' : ''}`}>
                         {navigatingStore === store.storeNumber ? (
                           <>
-                            <RefreshCw size={13} className="spinning" />
+                            <RefreshOutlined sx={{ fontSize: 13 }} className="spinning"/>
                             <span>Loading…</span>
                           </>
                         ) : (
                           <>
                             <span>View store</span>
-                            <ChevronRight size={14} />
+                            <KeyboardArrowRight sx={{ fontSize: 14 }}/>
                           </>
                         )}
                       </span>
@@ -2235,7 +2287,7 @@ export const DistrictIntelligence: React.FC = () => {
         <div className="heatmap-header">
           <div className="header-title-row">
             <div className="title-group">
-              <h2><ClipboardCheck size={20} /> Audit Compliance Heatmap {isAnyFilterActive && <Filter size={12} className="filter-active-icon" />}</h2>
+              <h2><AssignmentTurnedInOutlined sx={{ fontSize: 20 }}/> Audit Compliance Heatmap {isAnyFilterActive && <FilterListOutlined sx={{ fontSize: 12 }} className="filter-active-icon"/>}</h2>
               <span className="header-subtitle">Store-level compliance across audit categories</span>
             </div>
             <div className="heatmap-legend">
@@ -2245,7 +2297,7 @@ export const DistrictIntelligence: React.FC = () => {
                 <span className="legend-text">0%</span>
                 <div className="legend-swatch" style={{ background: '#fde2e2' }}></div>
                 <span className="legend-text">25%</span>
-                <div className="legend-swatch" style={{ background: '#fef3c7' }}></div>
+                <div className="legend-swatch" style={{ background: 'var(--ia-color-warning-bg)' }}></div>
                 <span className="legend-text">50%</span>
                 <div className="legend-swatch" style={{ background: '#d9f2e0' }}></div>
                 <span className="legend-text">75%</span>
@@ -2369,7 +2421,7 @@ export const DistrictIntelligence: React.FC = () => {
           <div className="detail-panel">
             <div className="detail-panel-header">
               <button className="detail-panel-close" onClick={() => setHeatmapDetail(null)}>
-                <X size={18} />
+                <CloseOutlined sx={{ fontSize: 18 }}/>
               </button>
             </div>
             <div className="detail-panel-body">
@@ -2382,7 +2434,7 @@ export const DistrictIntelligence: React.FC = () => {
                   {heatmapDetail.score}% COMPLIANCE
                 </span>
                 <span className="dp-source">
-                  <ClipboardCheck size={11} />
+                  <AssignmentTurnedInOutlined sx={{ fontSize: 11 }}/>
                   Audit Heatmap
                 </span>
               </div>
@@ -2395,9 +2447,9 @@ export const DistrictIntelligence: React.FC = () => {
 
               {/* Trend pill */}
               <div className="dp-impact-summary">
-                {heatmapDetail.detail.trend === 'improving' && <TrendingUp size={14} />}
-                {heatmapDetail.detail.trend === 'declining' && <TrendingDown size={14} />}
-                {heatmapDetail.detail.trend === 'stable' && <Minus size={14} />}
+                {heatmapDetail.detail.trend === 'improving' && <TrendingUpOutlined sx={{ fontSize: 14 }}/>}
+                {heatmapDetail.detail.trend === 'declining' && <TrendingDownOutlined sx={{ fontSize: 14 }}/>}
+                {heatmapDetail.detail.trend === 'stable' && <Remove sx={{ fontSize: 14 }}/>}
                 <span>Trend: {heatmapDetail.detail.trend.charAt(0).toUpperCase() + heatmapDetail.detail.trend.slice(1)}</span>
               </div>
 
@@ -2417,7 +2469,7 @@ export const DistrictIntelligence: React.FC = () => {
                 return (
                   <div className="dp-section">
                     <h3 className="dp-section-title">
-                      <BarChart3 size={14} />
+                      <BarChartOutlined sx={{ fontSize: 14 }}/>
                       Performance Comparison
                     </h3>
                     <div className="kpi-period-metrics">
@@ -2475,11 +2527,11 @@ export const DistrictIntelligence: React.FC = () => {
                 const linePath = points.map((p, i) => i === 0 ? `M ${p.x},${p.y}` : `L ${p.x},${p.y}`).join(' ');
                 const areaPath = `${linePath} L ${W},${H} L 0,${H} Z`;
                 const last = points[points.length - 1];
-                const accent = base >= 90 ? '#16a34a' : base >= 75 ? '#d97706' : '#dc2626';
+                const accent = base >= 90 ? 'var(--ia-color-success)' : base >= 75 ? 'var(--ia-color-warning-text)' : 'var(--ia-color-error-strong)';
                 return (
                   <div className="dp-section">
                     <h3 className="dp-section-title">
-                      <Activity size={14} />
+                      <ShowChartOutlined sx={{ fontSize: 14 }}/>
                       Score History (12 weeks)
                     </h3>
                     <div className="kpi-panel-chart">
@@ -2527,7 +2579,7 @@ export const DistrictIntelligence: React.FC = () => {
                 return (
                   <div className="dp-section">
                     <h3 className="dp-section-title">
-                      <Clock size={14} />
+                      <AccessTimeOutlined sx={{ fontSize: 14 }}/>
                       Prior Audits
                     </h3>
                     <div className="kpi-panel-details">
@@ -2547,7 +2599,7 @@ export const DistrictIntelligence: React.FC = () => {
               {/* Findings */}
               <div className="dp-section">
                 <h3 className="dp-section-title">
-                  <AlertCircle size={14} />
+                  <ErrorOutlined sx={{ fontSize: 14 }}/>
                   Findings ({heatmapDetail.detail.findings.length})
                 </h3>
                 <div className="dp-stores-list">
@@ -2565,11 +2617,11 @@ export const DistrictIntelligence: React.FC = () => {
               {/* AI Recommendation */}
               <div className="dp-section">
                 <h3 className="dp-section-title">
-                  <Sparkles size={14} />
+                  <AutoAwesomeOutlined sx={{ fontSize: 14 }}/>
                   AI Recommendation
                 </h3>
                 <div className="kpi-ai-insight">
-                  <Sparkles size={14} className="kpi-ai-insight-icon" />
+                  <AutoAwesomeOutlined sx={{ fontSize: 14 }} className="kpi-ai-insight-icon"/>
                   <p>{heatmapDetail.detail.recommendation}</p>
                 </div>
               </div>
@@ -2578,7 +2630,7 @@ export const DistrictIntelligence: React.FC = () => {
               {heatmapDetail.detail.findings.length > 0 && (
                 <div className="dp-section">
                   <h3 className="dp-section-title">
-                    <CheckCircle2 size={14} />
+                    <TaskAltOutlined sx={{ fontSize: 14 }}/>
                     Action Plan
                   </h3>
                   <div className="hm-action-plan">
@@ -2593,9 +2645,9 @@ export const DistrictIntelligence: React.FC = () => {
                           <div className="hm-action-content">
                             <span className="hm-action-title">{finding}</span>
                             <div className="hm-action-meta">
-                              <span className="hm-action-owner"><Users size={11} /> {owner}</span>
+                              <span className="hm-action-owner"><GroupOutlined sx={{ fontSize: 11 }}/> {owner}</span>
                               <span className={`hm-action-due ${due <= 2 ? 'urgent' : ''}`}>
-                                <Clock size={11} /> Due in {due} day{due > 1 ? 's' : ''}
+                                <AccessTimeOutlined sx={{ fontSize: 11 }}/> Due in {due} day{due > 1 ? 's' : ''}
                               </span>
                             </div>
                           </div>
@@ -2609,14 +2661,17 @@ export const DistrictIntelligence: React.FC = () => {
               {/* AI Copilot Skill mapping */}
               <div className="dp-section">
                 <h3 className="dp-section-title">
-                  <Activity size={14} />
+                  <ShowChartOutlined sx={{ fontSize: 14 }}/>
                   AI Copilot Skill
                 </h3>
                 <div className="kpi-panel-detail-row status-neutral">
                   <span className="kpi-panel-detail-label">
                     {heatmapDetail.skill === 'pog' ? 'POG' : heatmapDetail.skill === 'knowledge' ? 'Knowledge' : heatmapDetail.skill === 'actions' ? 'Action' : 'Analytics'}
                   </span>
-                  <span className="kpi-panel-detail-value" style={{ fontWeight: 500, fontSize: 11, color: '#475569' }}>
+                  <span
+                    className="kpi-panel-detail-value"
+                    style={{ fontWeight: 'var(--ia-font-weight-medium)', fontSize: 'var(--ia-text-2xs)', color: 'var(--ia-color-text-secondary)' }}
+                  >
                     {heatmapDetail.skillLogic}
                   </span>
                 </div>
@@ -2629,7 +2684,7 @@ export const DistrictIntelligence: React.FC = () => {
                   setHeatmapDetail(null);
                   navigate(`/command-center/ai-copilot?mode=${d.skill}&context=audit-${d.category.toLowerCase().replace(/ /g, '-')}&store=${d.storeNumber}&storeName=${encodeURIComponent(d.storeName)}&score=${d.score}`);
                 }}>
-                  <Sparkles size={14} />
+                  <AutoAwesomeOutlined sx={{ fontSize: 14 }}/>
                   <span>Investigate in AI Copilot</span>
                 </button>
                 <button className="dp-action-btn outlined navigate" onClick={() => {
@@ -2638,13 +2693,13 @@ export const DistrictIntelligence: React.FC = () => {
                   navigate(`/store-operations/store-deep-dive?store=${d.storeNumber}&name=${encodeURIComponent(d.storeName)}`);
                 }}>
                   <span>View Store Deep Dive</span>
-                  <ExternalLink size={14} />
+                  <OpenInNewOutlined sx={{ fontSize: 14 }}/>
                 </button>
               </div>
 
               {/* Timestamp */}
               <div className="dp-timestamp">
-                <Clock size={11} />
+                <AccessTimeOutlined sx={{ fontSize: 11 }}/>
                 <span>Last audit: {heatmapDetail.detail.lastAudit}</span>
               </div>
             </div>
@@ -2681,14 +2736,14 @@ export const DistrictIntelligence: React.FC = () => {
             <div className="bw-modal" onClick={(e) => e.stopPropagation()}>
               <div className="bw-header">
                 <div className="bw-header-icon">
-                  <Megaphone size={18} />
+                  <CampaignOutlined sx={{ fontSize: 18 }}/>
                 </div>
                 <div className="bw-header-text">
                   <h2>Create Broadcast</h2>
                   <p>Send a broadcast to selected stores or managers in your district</p>
                 </div>
                 <button className="bw-close" onClick={() => !bwSending && setShowBroadcastWizard(false)} aria-label="Close">
-                  <X size={16} />
+                  <CloseOutlined sx={{ fontSize: 16 }}/>
                 </button>
               </div>
 
@@ -2701,7 +2756,7 @@ export const DistrictIntelligence: React.FC = () => {
                 ].map((s, i, arr) => (
                   <React.Fragment key={s.n}>
                     <div className={`bw-step ${bwStep === s.n ? 'active' : ''} ${bwStep > s.n ? 'done' : ''}`}>
-                      <div className="bw-step-dot">{bwStep > s.n ? <Check size={12} /> : s.n}</div>
+                      <div className="bw-step-dot">{bwStep > s.n ? <Check sx={{ fontSize: 12 }}/> : s.n}</div>
                       <span className="bw-step-label">{s.label}</span>
                     </div>
                     {i < arr.length - 1 && <div className={`bw-step-connector ${bwStep > s.n ? 'done' : ''}`} />}
@@ -2718,21 +2773,21 @@ export const DistrictIntelligence: React.FC = () => {
                       <div className={`bw-audience-card ${bwAudience === 'all-stores' ? 'selected' : ''}`} onClick={() => setBwAudience('all-stores')}>
                         <div className="bw-audience-radio">{bwAudience === 'all-stores' && <div className="bw-audience-dot" />}</div>
                         <div className="bw-audience-body">
-                          <div className="bw-audience-title"><Store size={14} /> All Stores in District</div>
+                          <div className="bw-audience-title"><StoreOutlined sx={{ fontSize: 14 }}/> All Stores in District</div>
                           <div className="bw-audience-desc">Send to every store ({totalStores}) and their managers</div>
                         </div>
                       </div>
                       <div className={`bw-audience-card ${bwAudience === 'specific-stores' ? 'selected' : ''}`} onClick={() => setBwAudience('specific-stores')}>
                         <div className="bw-audience-radio">{bwAudience === 'specific-stores' && <div className="bw-audience-dot" />}</div>
                         <div className="bw-audience-body">
-                          <div className="bw-audience-title"><Filter size={14} /> Specific Stores</div>
+                          <div className="bw-audience-title"><FilterListOutlined sx={{ fontSize: 14 }}/> Specific Stores</div>
                           <div className="bw-audience-desc">Pick one or more stores from your district</div>
                         </div>
                       </div>
                       <div className={`bw-audience-card ${bwAudience === 'managers' ? 'selected' : ''}`} onClick={() => setBwAudience('managers')}>
                         <div className="bw-audience-radio">{bwAudience === 'managers' && <div className="bw-audience-dot" />}</div>
                         <div className="bw-audience-body">
-                          <div className="bw-audience-title"><Users size={14} /> District Managers Only</div>
+                          <div className="bw-audience-title"><GroupOutlined sx={{ fontSize: 14 }}/> District Managers Only</div>
                           <div className="bw-audience-desc">Send to selected store/area managers</div>
                         </div>
                       </div>
@@ -2753,7 +2808,7 @@ export const DistrictIntelligence: React.FC = () => {
                               <div key={s.storeNumber} className={`bw-selector-item ${selected ? 'selected' : ''}`} onClick={() =>
                                 setBwSelectedStores(prev => selected ? prev.filter(id => id !== s.storeNumber) : [...prev, s.storeNumber])
                               }>
-                                <div className={`bw-checkbox ${selected ? 'checked' : ''}`}>{selected && <Check size={11} />}</div>
+                                <div className={`bw-checkbox ${selected ? 'checked' : ''}`}>{selected && <Check sx={{ fontSize: 11 }}/>}</div>
                                 <div className="bw-selector-item-body">
                                   <span className="bw-selector-item-title">{s.storeName} #{s.storeNumber}</span>
                                   <span className="bw-selector-item-sub">{s.dpiTier} · DPI {s.dpi} · {s.status}</span>
@@ -2780,7 +2835,7 @@ export const DistrictIntelligence: React.FC = () => {
                               <div key={m.id} className={`bw-selector-item ${selected ? 'selected' : ''}`} onClick={() =>
                                 setBwSelectedManagers(prev => selected ? prev.filter(id => id !== m.id) : [...prev, m.id])
                               }>
-                                <div className={`bw-checkbox ${selected ? 'checked' : ''}`}>{selected && <Check size={11} />}</div>
+                                <div className={`bw-checkbox ${selected ? 'checked' : ''}`}>{selected && <Check sx={{ fontSize: 11 }}/>}</div>
                                 <div className="bw-selector-item-body">
                                   <span className="bw-selector-item-title">{m.name}</span>
                                   <span className="bw-selector-item-sub">{m.role}</span>
@@ -2864,21 +2919,30 @@ export const DistrictIntelligence: React.FC = () => {
               {/* Footer */}
               <div className="bw-footer">
                 <div className="bw-footer-meta">
-                  {recipientCount > 0 && <><Users size={13} /> Will reach <strong>{recipientCount}</strong> recipient{recipientCount === 1 ? '' : 's'}</>}
+                  {recipientCount > 0 && <><GroupOutlined sx={{ fontSize: 13 }}/> Will reach <strong>{recipientCount}</strong> recipient{recipientCount === 1 ? '' : 's'}</>}
                 </div>
                 <div className="bw-footer-actions">
                   {bwStep > 1 && (
-                    <button className="bw-btn bw-btn--ghost" onClick={() => setBwStep((bwStep - 1) as 1 | 2 | 3)} disabled={bwSending}>Back</button>
+                    <Button variant="outlined" color="primary" className="bw-btn bw-btn--ghost" onClick={() => setBwStep((bwStep - 1) as 1 | 2 | 3)} disabled={bwSending}>
+                      Back
+                    </Button>
                   )}
                   {bwStep < 3 && (
-                    <button
+                    <Button
+                      variant="contained"
+                      color="primary"
                       className="bw-btn bw-btn--primary"
                       onClick={() => setBwStep((bwStep + 1) as 1 | 2 | 3)}
                       disabled={bwStep === 1 ? !canAdvanceStep1 : !(bwSubject.trim() && bwMessage.trim())}
-                    >Continue <ChevronRight size={14} /></button>
+                      endIcon={<KeyboardArrowRight sx={{ fontSize: 14 }}/>}
+                    >
+                      Continue
+                    </Button>
                   )}
                   {bwStep === 3 && (
-                    <button
+                    <Button
+                      variant="contained"
+                      color="primary"
                       className="bw-btn bw-btn--primary"
                       disabled={!canSend || bwSending}
                       onClick={() => {
@@ -2889,9 +2953,10 @@ export const DistrictIntelligence: React.FC = () => {
                           showToast(`✓ Broadcast sent to ${recipientCount} ${bwAudience === 'managers' ? 'manager(s)' : 'store(s)'}`);
                         }, 1000);
                       }}
+                      startIcon={bwSending ? <div className="bw-spinner" /> : <SendOutlined sx={{ fontSize: 14 }}/>}
                     >
-                      {bwSending ? <><div className="bw-spinner" /> Sending…</> : <><Send size={14} /> Send Broadcast</>}
-                    </button>
+                      {bwSending ? 'Sending…' : 'Send Broadcast'}
+                    </Button>
                   )}
                 </div>
               </div>
@@ -2906,11 +2971,11 @@ export const DistrictIntelligence: React.FC = () => {
           <div className="investigation-panel" onClick={(e) => e.stopPropagation()}>
             <div className="investigation-panel-header">
               <div className="panel-header-title">
-                <AlertCircle size={20} />
+                <ErrorOutlined sx={{ fontSize: 20 }}/>
                 <h3>VoC Crisis Investigation</h3>
               </div>
               <button className="panel-close-btn" onClick={() => setShowVocPanel(false)}>
-                <X size={20} />
+                <CloseOutlined sx={{ fontSize: 20 }}/>
               </button>
             </div>
             
@@ -2949,14 +3014,14 @@ export const DistrictIntelligence: React.FC = () => {
                   showToast('Scheduling review meeting with store managers...');
                 }}>
                   Schedule Review
-                  <ChevronRight size={14} />
+                  <KeyboardArrowRight sx={{ fontSize: 14 }}/>
                 </button>
                 <button className="action-btn secondary" onClick={() => {
                   setShowVocPanel(false);
                   openBroadcastWizard();
                 }}>
                   Send Broadcast
-                  <ChevronRight size={14} />
+                  <KeyboardArrowRight sx={{ fontSize: 14 }}/>
                 </button>
               </div>
             </div>
@@ -2970,11 +3035,11 @@ export const DistrictIntelligence: React.FC = () => {
           <div className="investigation-panel" onClick={(e) => e.stopPropagation()}>
             <div className="investigation-panel-header">
               <div className="panel-header-title">
-                <AlertCircle size={20} />
+                <ErrorOutlined sx={{ fontSize: 20 }}/>
                 <h3>SEA Compliance Audit</h3>
               </div>
               <button className="panel-close-btn" onClick={() => setShowSeaPanel(false)}>
-                <X size={20} />
+                <CloseOutlined sx={{ fontSize: 20 }}/>
               </button>
             </div>
             
@@ -3009,14 +3074,14 @@ export const DistrictIntelligence: React.FC = () => {
                   showToast('Opening full SEA audit report...');
                 }}>
                   View Full Audit
-                  <ChevronRight size={14} />
+                  <KeyboardArrowRight sx={{ fontSize: 14 }}/>
                 </button>
                 <button className="action-btn secondary" onClick={() => {
                   setShowSeaPanel(false);
                   showToast('Assigning corrective actions to store managers...');
                 }}>
                   Assign Actions
-                  <ChevronRight size={14} />
+                  <KeyboardArrowRight sx={{ fontSize: 14 }}/>
                 </button>
               </div>
             </div>
@@ -3030,11 +3095,11 @@ export const DistrictIntelligence: React.FC = () => {
           <div className="investigation-panel triage-detail-panel" onClick={(e) => e.stopPropagation()}>
             <div className="investigation-panel-header">
               <div className="panel-header-title">
-                <AlertTriangle size={20} />
+                <WarningAmberOutlined sx={{ fontSize: 20 }}/>
                 <h3>{activeTriageItems.find(t => t.id === showTriageDetail)?.title || 'Triage Detail'}</h3>
               </div>
               <button className="panel-close-btn" onClick={() => setShowTriageDetail(null)}>
-                <X size={20} />
+                <CloseOutlined sx={{ fontSize: 20 }}/>
               </button>
             </div>
             
@@ -3070,21 +3135,21 @@ export const DistrictIntelligence: React.FC = () => {
                       setShowTriageDetail(null);
                       showToast('Assigning task to store managers...');
                     }}>
-                      <Store size={14} />
+                      <StoreOutlined sx={{ fontSize: 14 }}/>
                       Assign to Store
                     </button>
                     <button className="action-btn secondary" onClick={() => {
                       setShowTriageDetail(null);
                       showToast('Escalating to Regional Manager...');
                     }}>
-                      <AlertTriangle size={14} />
+                      <WarningAmberOutlined sx={{ fontSize: 14 }}/>
                       Escalate
                     </button>
                     <button className="action-btn tertiary" onClick={() => {
                       setShowTriageDetail(null);
                       openBroadcastWizard();
                     }}>
-                      <Megaphone size={14} />
+                      <CampaignOutlined sx={{ fontSize: 14 }}/>
                       Send Broadcast
                     </button>
                   </div>
@@ -3128,21 +3193,21 @@ export const DistrictIntelligence: React.FC = () => {
                       setShowTriageDetail(null);
                       showToast('Calling store manager...');
                     }}>
-                      <MessageSquare size={14} />
+                      <ChatOutlined sx={{ fontSize: 14 }}/>
                       Contact Store
                     </button>
                     <button className="action-btn secondary" onClick={() => {
                       setShowTriageDetail(null);
                       showToast('Escalating to Regional Safety Officer...');
                     }}>
-                      <AlertTriangle size={14} />
+                      <WarningAmberOutlined sx={{ fontSize: 14 }}/>
                       Escalate Further
                     </button>
                     <button className="action-btn tertiary" onClick={() => {
                       setShowTriageDetail(null);
                       showToast('Opening full audit report...');
                     }}>
-                      <ExternalLink size={14} />
+                      <OpenInNewOutlined sx={{ fontSize: 14 }}/>
                       View Full Audit
                     </button>
                   </div>
@@ -3180,21 +3245,21 @@ export const DistrictIntelligence: React.FC = () => {
                       setShowTriageDetail(null);
                       showToast('Approving adaptation plan...');
                     }}>
-                      <Check size={14} />
+                      <Check sx={{ fontSize: 14 }}/>
                       Approve Adaptation
                     </button>
                     <button className="action-btn secondary" onClick={() => {
                       setShowTriageDetail(null);
                       showToast('Assigning to store for local sourcing...');
                     }}>
-                      <Store size={14} />
+                      <StoreOutlined sx={{ fontSize: 14 }}/>
                       Assign to Store
                     </button>
                     <button className="action-btn tertiary" onClick={() => {
                       setShowTriageDetail(null);
                       showToast('Opening supply chain details...');
                     }}>
-                      <Package size={14} />
+                      <InventoryOutlined sx={{ fontSize: 14 }}/>
                       View Supply Chain
                     </button>
                   </div>
@@ -3231,21 +3296,21 @@ export const DistrictIntelligence: React.FC = () => {
                         setShowTriageDetail(null);
                         showToast('Assigning task to store managers...');
                       }}>
-                        <Store size={14} />
+                        <StoreOutlined sx={{ fontSize: 14 }}/>
                         Assign to Store
                       </button>
                       <button className="action-btn secondary" onClick={() => {
                         setShowTriageDetail(null);
                         showToast('Escalating to Regional Manager...');
                       }}>
-                        <AlertTriangle size={14} />
+                        <WarningAmberOutlined sx={{ fontSize: 14 }}/>
                         Escalate
                       </button>
                       <button className="action-btn tertiary" onClick={() => {
                         setShowTriageDetail(null);
                         openBroadcastWizard();
                       }}>
-                        <Megaphone size={14} />
+                        <CampaignOutlined sx={{ fontSize: 14 }}/>
                         Send Broadcast
                       </button>
                     </div>
@@ -3288,14 +3353,14 @@ export const DistrictIntelligence: React.FC = () => {
           return { value: `${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%`, direction };
         };
         const periodDelta = computePeriodDelta();
-        const accent = activeKPIPanel.status === 'positive' ? '#047857' : activeKPIPanel.status === 'negative' ? '#991b1b' : activeKPIPanel.status === 'warning' ? '#b45309' : '#4338ca';
+        const accent = activeKPIPanel.status === 'positive' ? '#047857' : activeKPIPanel.status === 'negative' ? '#991b1b' : activeKPIPanel.status === 'warning' ? '#b45309' : 'var(--ia-color-primary-pressed)';
         return (
           <>
             <div className="detail-panel-overlay" onClick={() => setActiveKPIPanel(null)} />
             <div className="detail-panel">
               <div className="detail-panel-header">
                 <button className="detail-panel-close" onClick={() => setActiveKPIPanel(null)}>
-                  <X size={18} />
+                  <CloseOutlined sx={{ fontSize: 18 }}/>
                 </button>
               </div>
               <div className="detail-panel-body">
@@ -3305,7 +3370,7 @@ export const DistrictIntelligence: React.FC = () => {
                     {activeKPIPanel.category.toUpperCase()}
                   </span>
                   <span className="dp-source">
-                    <BarChart3 size={11} />
+                    <BarChartOutlined sx={{ fontSize: 11 }}/>
                     52-Week Trend
                   </span>
                 </div>
@@ -3320,15 +3385,15 @@ export const DistrictIntelligence: React.FC = () => {
                 {/* Period Comparison Metrics */}
                 <div className="dp-section">
                   <h3 className="dp-section-title">
-                    <Activity size={14} />
+                    <ShowChartOutlined sx={{ fontSize: 14 }}/>
                     Period Comparison
                   </h3>
                   <div className="kpi-period-metrics">
                     <div className="kpi-period-metric">
                       <span className="kpi-period-label">{periodLabel}</span>
                       <span className={`kpi-period-val delta-${periodDelta.direction}`}>
-                        {periodDelta.direction === 'up' && <ArrowUpRight size={14} />}
-                        {periodDelta.direction === 'down' && <ArrowDownRight size={14} />}
+                        {periodDelta.direction === 'up' && <NorthEast sx={{ fontSize: 14 }}/>}
+                        {periodDelta.direction === 'down' && <SouthEast sx={{ fontSize: 14 }}/>}
                         {periodDelta.value}
                       </span>
                       <span className="kpi-period-sub">vs prior {calendarMode}</span>
@@ -3336,8 +3401,8 @@ export const DistrictIntelligence: React.FC = () => {
                     <div className="kpi-period-metric">
                       <span className="kpi-period-label">YoY</span>
                       <span className={`kpi-period-val delta-${activeKPIPanel.deltaDirection || 'flat'}`}>
-                        {activeKPIPanel.deltaDirection === 'up' && <ArrowUpRight size={14} />}
-                        {activeKPIPanel.deltaDirection === 'down' && <ArrowDownRight size={14} />}
+                        {activeKPIPanel.deltaDirection === 'up' && <NorthEast sx={{ fontSize: 14 }}/>}
+                        {activeKPIPanel.deltaDirection === 'down' && <SouthEast sx={{ fontSize: 14 }}/>}
                         {activeKPIPanel.delta}
                       </span>
                       <span className="kpi-period-sub">{activeKPIPanel.deltaContext || 'Year over Year'}</span>
@@ -3349,7 +3414,7 @@ export const DistrictIntelligence: React.FC = () => {
                 {td.length > 0 && (
                   <div className="dp-section">
                     <h3 className="dp-section-title">
-                      <BarChart3 size={14} />
+                      <BarChartOutlined sx={{ fontSize: 14 }}/>
                       Trend
                     </h3>
                     <div className="kpi-panel-chart">
@@ -3389,11 +3454,11 @@ export const DistrictIntelligence: React.FC = () => {
                 {activeKPIPanel.trendInsight && (
                   <div className="dp-section">
                     <h3 className="dp-section-title">
-                      <Sparkles size={14} />
+                      <AutoAwesomeOutlined sx={{ fontSize: 14 }}/>
                       AI Insight
                     </h3>
                     <div className="kpi-ai-insight">
-                      <Sparkles size={14} className="kpi-ai-insight-icon" />
+                      <AutoAwesomeOutlined sx={{ fontSize: 14 }} className="kpi-ai-insight-icon"/>
                       <p>{activeKPIPanel.trendInsight}</p>
                     </div>
                   </div>
@@ -3403,7 +3468,7 @@ export const DistrictIntelligence: React.FC = () => {
                 {activeKPIPanel.panelDetails && activeKPIPanel.panelDetails.length > 0 && (
                   <div className="dp-section">
                     <h3 className="dp-section-title">
-                      <Activity size={14} />
+                      <ShowChartOutlined sx={{ fontSize: 14 }}/>
                       Key Details
                     </h3>
                     <div className="kpi-panel-details">
@@ -3419,7 +3484,7 @@ export const DistrictIntelligence: React.FC = () => {
 
                 {/* Timestamp */}
                 <div className="dp-timestamp">
-                  <Clock size={11} />
+                  <AccessTimeOutlined sx={{ fontSize: 11 }}/>
                   <span>Updated just now · Showing {calendarMode === 'week' ? 'weekly' : calendarMode === 'month' ? 'monthly' : 'quarterly'} comparison</span>
                 </div>
               </div>
@@ -3435,7 +3500,7 @@ export const DistrictIntelligence: React.FC = () => {
           <div className="detail-panel">
             <div className="detail-panel-header">
               <button className="detail-panel-close" onClick={closeBcaPanel}>
-                <X size={18} />
+                <CloseOutlined sx={{ fontSize: 18 }}/>
               </button>
             </div>
             <div className="detail-panel-body">
@@ -3445,7 +3510,7 @@ export const DistrictIntelligence: React.FC = () => {
                   {bcaSelectedBroadcast.priority.toUpperCase()} PRIORITY
                 </span>
                 <span className="dp-source">
-                  <Megaphone size={11} />
+                  <CampaignOutlined sx={{ fontSize: 11 }}/>
                   {bcaSelectedBroadcast.type}
                 </span>
               </div>
@@ -3459,7 +3524,7 @@ export const DistrictIntelligence: React.FC = () => {
               {/* Impact Summary */}
               {bcaSelectedBroadcast.status === 'at-risk' && (
                 <div className="dp-impact-summary">
-                  <AlertCircle size={14} />
+                  <ErrorOutlined sx={{ fontSize: 14 }}/>
                   <span>
                     {bcaSelectedBroadcast.stores - bcaSelectedBroadcast.acked} stores still pending · {bcaSelectedBroadcast.ackRate}% ack rate — needs follow-up to meet compliance target
                   </span>
@@ -3469,7 +3534,7 @@ export const DistrictIntelligence: React.FC = () => {
               {/* Store-Level Compliance Table */}
               <div className="dp-section">
                 <h3 className="dp-section-title">
-                  <Store size={14} />
+                  <StoreOutlined sx={{ fontSize: 14 }}/>
                   Store-Level Compliance
                 </h3>
                 <div className="bca-panel-table-wrapper">
@@ -3508,22 +3573,22 @@ export const DistrictIntelligence: React.FC = () => {
               {/* Smart Insights */}
               <div className="dp-section">
                 <h3 className="dp-section-title">
-                  <Sparkles size={14} />
+                  <AutoAwesomeOutlined sx={{ fontSize: 14 }}/>
                   Smart Insights
                 </h3>
                 <div className="dp-stores-list">
                   {activeBroadcasts.insights.map((insight, idx) => (
                     <div key={idx} className="dp-store-card info">
                       <div className="dp-store-header">
-                        <span className="dp-store-name" style={{ fontSize: 12 }}>
-                          <Activity size={12} style={{ marginRight: 6, verticalAlign: 'middle' }} />
+                        <span className="dp-store-name" style={{ fontSize: 'var(--ia-text-xs)' }}>
+                          <ShowChartOutlined sx={{ fontSize: 12 }} style={{ marginRight: 6, verticalAlign: 'middle' }}/>
                           Pattern
                         </span>
                       </div>
                       <p className="dp-store-detail">{insight.pattern}</p>
                       <div className="dp-store-header" style={{ marginTop: 8 }}>
-                        <span className="dp-store-name" style={{ fontSize: 12, color: '#7c3aed' }}>
-                          <Sparkles size={12} style={{ marginRight: 6, verticalAlign: 'middle' }} />
+                        <span className="dp-store-name" style={{ fontSize: 'var(--ia-text-xs)', color: 'var(--ia-color-primary-pressed)' }}>
+                          <AutoAwesomeOutlined sx={{ fontSize: 12 }} style={{ marginRight: 6, verticalAlign: 'middle' }}/>
                           Recommendation
                         </span>
                       </div>
@@ -3536,22 +3601,22 @@ export const DistrictIntelligence: React.FC = () => {
               {/* Action CTAs */}
               <div className="dp-actions">
                 <button className="dp-action-btn outlined" onClick={() => { closeBcaPanel(); showToast(`Nudge sent to ${bcaSelectedBroadcast.stores - bcaSelectedBroadcast.acked} pending stores`); }}>
-                  <Send size={14} />
+                  <SendOutlined sx={{ fontSize: 14 }}/>
                   <span>Send Nudge</span>
                 </button>
                 <button className="dp-action-btn outlined" onClick={() => { closeBcaPanel(); showToast(`Follow-up assigned for "${bcaSelectedBroadcast.name}"`); }}>
-                  <ClipboardCheck size={14} />
+                  <AssignmentTurnedInOutlined sx={{ fontSize: 14 }}/>
                   <span>Assign Follow-up</span>
                 </button>
                 <button className="dp-action-btn outlined" onClick={() => { closeBcaPanel(); showToast(`Escalated "${bcaSelectedBroadcast.name}" to Regional`); }}>
-                  <AlertTriangle size={14} />
+                  <WarningAmberOutlined sx={{ fontSize: 14 }}/>
                   <span>Escalate</span>
                 </button>
               </div>
 
               {/* Timestamp */}
               <div className="dp-timestamp">
-                <Clock size={11} />
+                <AccessTimeOutlined sx={{ fontSize: 11 }}/>
                 <span>Sent {bcaSelectedBroadcast.sentAt}</span>
               </div>
             </div>

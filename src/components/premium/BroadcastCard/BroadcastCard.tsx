@@ -1,5 +1,9 @@
 import React from 'react';
-import { Clock, User, CheckCircle } from 'lucide-react';
+import AccessTimeOutlined from '@mui/icons-material/AccessTimeOutlined';
+import PersonOutlined from '@mui/icons-material/PersonOutlined';
+import CheckCircleOutlined from '@mui/icons-material/CheckCircleOutlined';
+import VisibilityOutlined from '@mui/icons-material/VisibilityOutlined';
+import { Badge, Button, Card } from 'impact-ui';
 import { Broadcast } from '../../../types/home';
 import './BroadcastCard.css';
 
@@ -18,6 +22,12 @@ export const BroadcastCard: React.FC<BroadcastCardProps> = ({
     return `broadcast-card-${broadcast.priority}`;
   };
 
+  const priorityBadgeColor = (): 'error' | 'warning' | 'info' => {
+    if (broadcast.priority === 'critical') return 'error';
+    if (broadcast.priority === 'high') return 'warning';
+    return 'info';
+  };
+
   const formatTime = (date: Date) => {
     const now = new Date();
     const diff = now.getTime() - date.getTime();
@@ -30,11 +40,10 @@ export const BroadcastCard: React.FC<BroadcastCardProps> = ({
   };
 
   return (
-    <div className={`broadcast-card ${getPriorityClass()} ${!broadcast.isRead ? 'broadcast-card-unread' : ''}`}>
+    <Card size="small" sx={{ maxWidth: '100%', minHeight: 0, padding: 0 }}>
+      <div className={`broadcast-card-inner ${getPriorityClass()} ${!broadcast.isRead ? 'broadcast-card-unread' : ''}`}>
       <div className="broadcast-card-header">
-        <div className="broadcast-card-priority-badge">
-          {broadcast.priority}
-        </div>
+        <Badge label={broadcast.priority.toUpperCase()} color={priorityBadgeColor()} size="small" className="broadcast-card-priority-badge" />
         {!broadcast.isRead && <div className="broadcast-card-unread-dot" />}
       </div>
 
@@ -43,26 +52,26 @@ export const BroadcastCard: React.FC<BroadcastCardProps> = ({
 
       <div className="broadcast-card-meta">
         <div className="broadcast-card-sender">
-          <User size={14} />
+          <PersonOutlined sx={{ fontSize: 14 }} />
           <span>{broadcast.sender} • {broadcast.senderRole}</span>
         </div>
         <div className="broadcast-card-time">
-          <Clock size={14} />
+          <AccessTimeOutlined sx={{ fontSize: 14 }} />
           <span>{formatTime(broadcast.timestamp)}</span>
         </div>
       </div>
 
       <div className="broadcast-card-actions">
-        <button className="broadcast-card-action-primary" onClick={onView}>
+        <Button variant="contained" color="primary" size="small" className="broadcast-card-action-primary" onClick={onView} startIcon={<VisibilityOutlined sx={{ fontSize: 16 }} />}>
           View Details
-        </button>
+        </Button>
         {onAcknowledge && !broadcast.isAcknowledged && (
-          <button className="broadcast-card-action-secondary" onClick={onAcknowledge}>
-            <CheckCircle size={16} />
+          <Button variant="outlined" color="primary" size="small" className="broadcast-card-action-secondary" onClick={onAcknowledge} startIcon={<CheckCircleOutlined sx={{ fontSize: 16 }} />}>
             Acknowledge
-          </button>
+          </Button>
         )}
       </div>
-    </div>
+      </div>
+    </Card>
   );
 };

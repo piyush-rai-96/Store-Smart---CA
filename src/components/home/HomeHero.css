@@ -2,7 +2,7 @@
 
 .home-hero {
   position: relative;
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  background: linear-gradient(135deg, var(--ia-color-surface) 0%, #f8f9fa 100%);
   border-radius: 8px;
   overflow: hidden;
   border: 1px solid #dee2e6;
@@ -68,8 +68,8 @@
 }
 
 .home-hero-title {
-  font-size: 36px;
-  font-weight: 700;
+  font-size: var(--ia-text-36);
+  font-weight: var(--ia-font-weight-bold);
   color: #212529;
   margin: 0 0 8px 0;
   letter-spacing: -0.02em;
@@ -80,7 +80,7 @@
   color: #0066cc;
   position: relative;
   display: inline-block;
-  font-weight: 700;
+  font-weight: var(--ia-font-weight-bold);
   background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -100,10 +100,10 @@
 }
 
 .home-hero-subtitle {
-  font-size: 15px;
+  font-size: var(--ia-text-15);
   color: #6c757d;
   margin: 0;
-  font-weight: 500;
+  font-weight: var(--ia-font-weight-medium);
   letter-spacing: -0.01em;
 }
 
@@ -130,8 +130,8 @@
   background: linear-gradient(135deg, #e7f3ff 0%, #d4e9ff 100%);
   border: 1px solid #b3d9ff;
   border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--ia-text-sm);
+  font-weight: var(--ia-font-weight-semibold);
   color: #0052a3;
   box-shadow: 0 2px 6px rgba(0, 102, 204, 0.08);
   transition: all 0.3s ease;
@@ -149,8 +149,8 @@
 }
 
 .home-hero-region {
-  color: #64748b;
-  font-weight: 600;
+  color: var(--ia-color-text-secondary);
+  font-weight: var(--ia-font-weight-semibold);
   margin-left: 4px;
 }
 
@@ -168,8 +168,8 @@
   padding: 6px 12px;
   background: #f8f9fa;
   border-radius: 4px;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--ia-text-13);
+  font-weight: var(--ia-font-weight-semibold);
   color: #495057;
   border: 1px solid #e9ecef;
 }
@@ -179,9 +179,9 @@
 }
 
 .home-hero-sync {
-  font-size: 12px;
-  color: #94a3b8;
-  font-weight: 500;
+  font-size: var(--ia-text-xs);
+  color: var(--ia-color-text-tertiary);
+  font-weight: var(--ia-font-weight-medium);
 }
 
 /* Responsive */
@@ -191,7 +191,7 @@
   }
 
   .home-hero-title {
-    font-size: 32px;
+    font-size: var(--ia-text-5xl);
   }
 
   .home-hero-meta {
@@ -210,10 +210,10 @@
   }
 
   .home-hero-title {
-    font-size: 28px;
+    font-size: var(--ia-text-4xl);
   }
 
   .home-hero-subtitle {
-    font-size: 14px;
+    font-size: var(--ia-text-sm);
   }
 }

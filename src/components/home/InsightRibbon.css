@@ -24,7 +24,7 @@
 }
 
 .insight-ribbon::-webkit-scrollbar-thumb:hover {
-  background: #cbd5e1;
+  background: var(--ia-color-border-strong);
 }
 
 .insight-ribbon-container {
@@ -36,7 +36,7 @@
 
 .insight-ribbon-card {
   position: relative;
-  background: #ffffff;
+  background: var(--ia-color-surface);
   border-radius: 16px;
   padding: 24px;
   border: none;
@@ -81,7 +81,7 @@
 .insight-ribbon-card-warning,
 .insight-ribbon-card-negative,
 .insight-ribbon-card-neutral {
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  background: linear-gradient(135deg, var(--ia-color-surface) 0%, #f8f9fa 100%);
 }
 
 .insight-ribbon-card-positive .insight-ribbon-card-accent {
@@ -126,9 +126,9 @@
 }
 
 .insight-ribbon-label {
-  font-size: 10px;
-  font-weight: 700;
-  color: #6b7280;
+  font-size: var(--ia-text-3xs);
+  font-weight: var(--ia-font-weight-bold);
+  color: var(--ia-color-text-secondary);
   letter-spacing: 0.8px;
   text-transform: uppercase;
   line-height: 1.4;
@@ -141,8 +141,8 @@
   gap: 4px;
   padding: 6px 12px;
   border-radius: 12px;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: var(--ia-text-xs);
+  font-weight: var(--ia-font-weight-bold);
   white-space: nowrap;
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
@@ -173,9 +173,9 @@
 }
 
 .insight-ribbon-value {
-  font-size: 44px;
+  font-size: var(--ia-text-44);
   font-weight: 900;
-  color: #0f172a;
+  color: var(--ia-color-text-primary);
   line-height: 1;
   margin-bottom: 10px;
   letter-spacing: -0.04em;
@@ -183,9 +183,9 @@
 }
 
 .insight-ribbon-subtitle {
-  font-size: 14px;
-  color: #64748b;
-  font-weight: 600;
+  font-size: var(--ia-text-sm);
+  color: var(--ia-color-text-secondary);
+  font-weight: var(--ia-font-weight-semibold);
   letter-spacing: -0.01em;
 }
 
@@ -207,7 +207,7 @@
   }
 
   .insight-ribbon-value {
-    font-size: 36px;
+    font-size: var(--ia-text-36);
   }
 }
 
@@ -217,6 +217,6 @@
   }
 
   .insight-ribbon-value {
-    font-size: 32px;
+    font-size: var(--ia-text-5xl);
   }
 }

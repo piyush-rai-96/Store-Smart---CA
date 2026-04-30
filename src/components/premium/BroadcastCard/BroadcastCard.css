@@ -1,39 +1,30 @@
 /* Premium Broadcast Card Styles */
 
-.broadcast-card {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
+/* Card shell handled by Impact UI Card component */
+.broadcast-card-inner {
   padding: 20px;
-  transition: all 0.2s;
   position: relative;
 }
 
-.broadcast-card:hover {
-  border-color: #d1d5db;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
 .broadcast-card-unread {
-  background: #f9fafb;
-  border-color: #3b82f6;
+  background: var(--ia-color-primary-soft);
 }
 
 /* Priority Styles */
 .broadcast-card-critical {
-  border-left: 4px solid #dc2626;
+  border-left: 4px solid var(--ia-color-error-strong);
 }
 
 .broadcast-card-high {
-  border-left: 4px solid #f59e0b;
+  border-left: 4px solid var(--ia-color-warning);
 }
 
 .broadcast-card-medium {
-  border-left: 4px solid #3b82f6;
+  border-left: 4px solid var(--ia-color-primary);
 }
 
 .broadcast-card-low {
-  border-left: 4px solid #6b7280;
+  border-left: 4px solid var(--ia-color-text-secondary);
 }
 
 /* Header */
@@ -47,55 +38,55 @@
 .broadcast-card-priority-badge {
   padding: 4px 10px;
   border-radius: 6px;
-  font-size: 11px;
-  font-weight: 700;
+  font-size: var(--ia-text-2xs);
+  font-weight: var(--ia-font-weight-bold);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .broadcast-card-critical .broadcast-card-priority-badge {
-  background: #fee2e2;
-  color: #991b1b;
+  background: var(--ia-color-error-bg);
+  color: var(--ia-color-error-strong);
 }
 
 .broadcast-card-high .broadcast-card-priority-badge {
-  background: #fef3c7;
-  color: #92400e;
+  background: var(--ia-color-warning-bg);
+  color: var(--ia-color-warning-text);
 }
 
 .broadcast-card-medium .broadcast-card-priority-badge {
-  background: #dbeafe;
+  background: var(--ia-color-primary-soft);
   color: #1e40af;
 }
 
 .broadcast-card-low .broadcast-card-priority-badge {
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--ia-color-bg-muted);
+  color: var(--ia-color-text-secondary);
 }
 
 .broadcast-card-unread-dot {
   width: 8px;
   height: 8px;
-  background: #3b82f6;
+  background: var(--ia-color-primary);
   border-radius: 50%;
 }
 
 /* Content */
 .broadcast-card-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #0f172a;
+  font-size: var(--ia-text-md);
+  font-weight: var(--ia-font-weight-semibold);
+  color: var(--ia-color-text-primary);
   margin: 0 0 8px 0;
   line-height: 1.4;
 }
 
 .broadcast-card-unread .broadcast-card-title {
-  font-weight: 700;
+  font-weight: var(--ia-font-weight-bold);
 }
 
 .broadcast-card-description {
-  font-size: 14px;
-  color: #6b7280;
+  font-size: var(--ia-text-sm);
+  color: var(--ia-color-text-secondary);
   margin: 0 0 16px 0;
   line-height: 1.6;
   display: -webkit-box;
@@ -118,14 +109,14 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
-  color: #6b7280;
-  font-weight: 500;
+  font-size: var(--ia-text-xs);
+  color: var(--ia-color-text-secondary);
+  font-weight: var(--ia-font-weight-medium);
 }
 
 .broadcast-card-sender svg,
 .broadcast-card-time svg {
-  color: #9ca3af;
+  color: var(--ia-color-text-tertiary);
 }
 
 /* Actions */
@@ -139,8 +130,8 @@
   padding: 8px 16px;
   border: none;
   border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--ia-text-13);
+  font-weight: var(--ia-font-weight-semibold);
   cursor: pointer;
   transition: all 0.2s;
   display: flex;
@@ -149,27 +140,27 @@
 }
 
 .broadcast-card-action-primary {
-  background: #3b82f6;
+  background: var(--ia-color-primary);
   color: white;
   flex: 1;
 }
 
 .broadcast-card-action-primary:hover {
-  background: #2563eb;
+  background: var(--ia-color-primary);
 }
 
 .broadcast-card-action-secondary {
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--ia-color-bg-muted);
+  color: var(--ia-color-text-secondary);
 }
 
 .broadcast-card-action-secondary:hover {
-  background: #e5e7eb;
+  background: var(--ia-color-border);
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-  .broadcast-card {
+  .broadcast-card-inner {
     padding: 16px;
   }
 

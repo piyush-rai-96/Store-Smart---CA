@@ -1,5 +1,6 @@
 import React from 'react';
-import { Sparkles, ChevronRight } from 'lucide-react';
+import AutoAwesomeOutlined from '@mui/icons-material/AutoAwesomeOutlined';
+import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import { RecommendedAction } from '../../../types/home';
 import './RecommendedActions.css';
 
@@ -11,7 +12,7 @@ export const RecommendedActions: React.FC<RecommendedActionsProps> = ({ actions 
   return (
     <div className="recommended-actions">
       <div className="recommended-actions-header">
-        <Sparkles size={18} />
+        <AutoAwesomeOutlined sx={{ fontSize: 18 }} />
         <h3 className="recommended-actions-title">Recommended Actions</h3>
       </div>
       <div className="recommended-actions-list">
@@ -27,7 +28,7 @@ export const RecommendedActions: React.FC<RecommendedActionsProps> = ({ actions 
                 <div className="recommended-action-description">{action.description}</div>
               )}
             </div>
-            <ChevronRight size={16} className="recommended-action-arrow" />
+            <KeyboardArrowRight sx={{ fontSize: 16 }} className="recommended-action-arrow" />
           </button>
         ))}
       </div>

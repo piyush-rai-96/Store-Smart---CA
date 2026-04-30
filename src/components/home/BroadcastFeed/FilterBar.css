@@ -13,8 +13,8 @@
 }
 
 .filter-bar-title {
-  font-size: 20px;
-  font-weight: 600;
+  font-size: var(--ia-text-xl);
+  font-weight: var(--ia-font-weight-semibold);
   color: #1a1a1a;
   margin: 0;
 }
@@ -40,8 +40,8 @@
   border-radius: 6px;
   background: white;
   color: #666;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--ia-text-sm);
+  font-weight: var(--ia-font-weight-medium);
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -73,8 +73,8 @@
   border: 1px solid #ddd;
   border-radius: 16px;
   background: white;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--ia-text-13);
+  font-weight: var(--ia-font-weight-medium);
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -85,7 +85,7 @@
 }
 
 .filter-category-chip-active {
-  font-weight: 600;
+  font-weight: var(--ia-font-weight-semibold);
 }
 
 /* Responsive adjustments */

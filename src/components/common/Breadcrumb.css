@@ -3,7 +3,7 @@
   display: flex;
   align-items: center;
   padding: 8px 28px;
-  background: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
+  background: var(--ia-color-surface);
+  border-bottom: 1px solid var(--ia-color-border);
   min-height: 40px;
 }

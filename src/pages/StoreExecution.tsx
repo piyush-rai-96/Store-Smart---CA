@@ -1,23 +1,22 @@
 import React, { useState } from 'react';
-import { 
-  CheckCircle, 
-  ChevronRight,
-  Store,
-  Calendar,
-  ArrowRight,
-  Plus,
-  Minus,
-  Move,
-  Target,
-  TrendingUp,
-  FileText,
-  Package,
-  RefreshCw,
-  Tag,
-  Wrench,
-  UserPlus,
-  X
-} from 'lucide-react';
+import CheckCircleOutlined from '@mui/icons-material/CheckCircleOutlined';
+import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
+import StoreOutlined from '@mui/icons-material/StoreOutlined';
+import CalendarTodayOutlined from '@mui/icons-material/CalendarTodayOutlined';
+import ArrowForwardOutlined from '@mui/icons-material/ArrowForwardOutlined';
+import Add from '@mui/icons-material/Add';
+import Remove from '@mui/icons-material/Remove';
+import OpenWithOutlined from '@mui/icons-material/OpenWithOutlined';
+import TrackChangesOutlined from '@mui/icons-material/TrackChangesOutlined';
+import TrendingUpOutlined from '@mui/icons-material/TrendingUpOutlined';
+import DescriptionOutlined from '@mui/icons-material/DescriptionOutlined';
+import InventoryOutlined from '@mui/icons-material/InventoryOutlined';
+import RefreshOutlined from '@mui/icons-material/RefreshOutlined';
+import LabelOutlined from '@mui/icons-material/LabelOutlined';
+import BuildOutlined from '@mui/icons-material/BuildOutlined';
+import PersonAddAlt1Outlined from '@mui/icons-material/PersonAddAlt1Outlined';
+import CloseOutlined from '@mui/icons-material/CloseOutlined';
+import { Chips } from 'impact-ui';
 import { useExecutionTasks, ExecutionTask as SharedExecutionTask } from '../context/ExecutionTasksContext';
 import './StoreExecution.css';
 
@@ -85,10 +84,10 @@ export const StoreExecution: React.FC = () => {
 
   const getTaskTypeIcon = (type: TaskType) => {
     switch (type) {
-      case 'Add': return <Plus size={16} />;
-      case 'Remove': return <Minus size={16} />;
-      case 'Move': return <Move size={16} />;
-      case 'Adjust Facing': return <Target size={16} />;
+      case 'Add': return <Add sx={{ fontSize: 16 }}/>;
+      case 'Remove': return <Remove sx={{ fontSize: 16 }}/>;
+      case 'Move': return <OpenWithOutlined sx={{ fontSize: 16 }}/>;
+      case 'Adjust Facing': return <TrackChangesOutlined sx={{ fontSize: 16 }}/>;
     }
   };
 
@@ -132,14 +131,14 @@ export const StoreExecution: React.FC = () => {
 
   const getSharedTaskTypeIcon = (type: string) => {
     switch (type) {
-      case 'Add': return <Plus size={16} />;
-      case 'Remove': return <Minus size={16} />;
-      case 'Move': return <Move size={16} />;
-      case 'Adjust Facing': return <Target size={16} />;
-      case 'Reset Shelf': return <RefreshCw size={16} />;
-      case 'Update Label': return <Tag size={16} />;
-      case 'Install Fixture': return <Wrench size={16} />;
-      default: return <Package size={16} />;
+      case 'Add': return <Add sx={{ fontSize: 16 }}/>;
+      case 'Remove': return <Remove sx={{ fontSize: 16 }}/>;
+      case 'Move': return <OpenWithOutlined sx={{ fontSize: 16 }}/>;
+      case 'Adjust Facing': return <TrackChangesOutlined sx={{ fontSize: 16 }}/>;
+      case 'Reset Shelf': return <RefreshOutlined sx={{ fontSize: 16 }}/>;
+      case 'Update Label': return <LabelOutlined sx={{ fontSize: 16 }}/>;
+      case 'Install Fixture': return <BuildOutlined sx={{ fontSize: 16 }}/>;
+      default: return <InventoryOutlined sx={{ fontSize: 16 }}/>;
     }
   };
 
@@ -155,31 +154,35 @@ export const StoreExecution: React.FC = () => {
     <div className="exec-task-list-view">
       <div className="exec-task-list-header">
         <h3>All Execution Tasks</h3>
-        <div className="exec-task-list-filters">
-          <button 
-            className={`exec-filter-btn ${taskFilter === 'all' ? 'active' : ''}`}
+        <div className="exec-task-list-filters exec-task-list-filters--impact">
+          <Chips
+            label={`All (${allTasks.length})`}
+            variant={taskFilter === 'all' ? 'filled' : 'outlined'}
+            color={taskFilter === 'all' ? 'primary' : undefined}
+            size="small"
             onClick={() => setTaskFilter('all')}
-          >
-            All ({allTasks.length})
-          </button>
-          <button 
-            className={`exec-filter-btn ${taskFilter === 'Pending' ? 'active' : ''}`}
+          />
+          <Chips
+            label={`Pending (${allTasks.filter(t => t.status === 'Pending').length})`}
+            variant={taskFilter === 'Pending' ? 'filled' : 'outlined'}
+            color={taskFilter === 'Pending' ? 'primary' : undefined}
+            size="small"
             onClick={() => setTaskFilter('Pending')}
-          >
-            Pending ({allTasks.filter(t => t.status === 'Pending').length})
-          </button>
-          <button 
-            className={`exec-filter-btn ${taskFilter === 'In Progress' ? 'active' : ''}`}
+          />
+          <Chips
+            label={`In Progress (${allTasks.filter(t => t.status === 'In Progress').length})`}
+            variant={taskFilter === 'In Progress' ? 'filled' : 'outlined'}
+            color={taskFilter === 'In Progress' ? 'primary' : undefined}
+            size="small"
             onClick={() => setTaskFilter('In Progress')}
-          >
-            In Progress ({allTasks.filter(t => t.status === 'In Progress').length})
-          </button>
-          <button 
-            className={`exec-filter-btn ${taskFilter === 'Completed' ? 'active' : ''}`}
+          />
+          <Chips
+            label={`Completed (${allTasks.filter(t => t.status === 'Completed').length})`}
+            variant={taskFilter === 'Completed' ? 'filled' : 'outlined'}
+            color={taskFilter === 'Completed' ? 'primary' : undefined}
+            size="small"
             onClick={() => setTaskFilter('Completed')}
-          >
-            Completed ({allTasks.filter(t => t.status === 'Completed').length})
-          </button>
+          />
         </div>
       </div>
 
@@ -198,7 +201,7 @@ export const StoreExecution: React.FC = () => {
                   : `All Localizations (${localizationGroups.length})`
                 }
               </span>
-              <ChevronRight size={16} className={`exec-loc-dropdown-icon ${isLocDropdownOpen ? 'rotated' : ''}`} />
+              <KeyboardArrowRight sx={{ fontSize: 16 }} className={`exec-loc-dropdown-icon ${isLocDropdownOpen ? 'rotated' : ''}`}/>
             </button>
             {isLocDropdownOpen && (
               <div className="exec-loc-dropdown-menu">
@@ -213,7 +216,7 @@ export const StoreExecution: React.FC = () => {
                     <span className="exec-loc-dropdown-item-title">All Localizations</span>
                     <span className="exec-loc-dropdown-item-count">{localizationGroups.length} groups</span>
                   </div>
-                  {!selectedLocalization && <CheckCircle size={16} className="exec-loc-dropdown-check" />}
+                  {!selectedLocalization && <CheckCircleOutlined sx={{ fontSize: 16 }} className="exec-loc-dropdown-check"/>}
                 </div>
                 {localizationGroups.map(loc => (
                   <div 
@@ -231,7 +234,7 @@ export const StoreExecution: React.FC = () => {
                         <span className="exec-loc-dropdown-item-count">{loc.tasks.length} tasks</span>
                       </div>
                     </div>
-                    {selectedLocalization === loc.id && <CheckCircle size={16} className="exec-loc-dropdown-check" />}
+                    {selectedLocalization === loc.id && <CheckCircleOutlined sx={{ fontSize: 16 }} className="exec-loc-dropdown-check"/>}
                   </div>
                 ))}
               </div>
@@ -242,7 +245,7 @@ export const StoreExecution: React.FC = () => {
 
       {allTasks.length === 0 ? (
         <div className="exec-no-tasks">
-          <Package size={48} />
+          <InventoryOutlined sx={{ fontSize: 48 }}/>
           <h4>No Tasks Yet</h4>
           <p>Use AI Copilot to audit shelves and generate execution tasks, or create tasks directly in Operations Queue.</p>
         </div>
@@ -265,13 +268,13 @@ export const StoreExecution: React.FC = () => {
                   onClick={() => toggleLocalizationExpand(locGroup.id)}
                 >
                   <div className="exec-loc-group-info">
-                    <ChevronRight size={18} className={`exec-loc-chevron ${isExpanded ? 'rotated' : ''}`} />
+                    <KeyboardArrowRight sx={{ fontSize: 18 }} className={`exec-loc-chevron ${isExpanded ? 'rotated' : ''}`}/>
                     <div className="exec-loc-group-details">
-                      <h4>{locGroup.pogName} <ArrowRight size={14} /> {locGroup.storeGroup}</h4>
+                      <h4>{locGroup.pogName} <ArrowForwardOutlined sx={{ fontSize: 14 }}/> {locGroup.storeGroup}</h4>
                       <div className="exec-loc-group-meta">
                         <span className="exec-loc-tag category">{locGroup.category}</span>
                         <span className="exec-loc-tag date">
-                          <Calendar size={12} />
+                          <CalendarTodayOutlined sx={{ fontSize: 12 }}/>
                           {new Date(locGroup.createdAt).toLocaleDateString()}
                         </span>
                         <span className="exec-loc-id">ID: {locGroup.id.slice(-8)}</span>
@@ -308,17 +311,17 @@ export const StoreExecution: React.FC = () => {
 
                           <div className="exec-task-card-meta">
                             <span className="exec-task-meta-item">
-                              <Store size={14} />
+                              <StoreOutlined sx={{ fontSize: 14 }}/>
                               {task.storeName}
                             </span>
                             <span className="exec-task-meta-item">
-                              <FileText size={14} />
+                              <DescriptionOutlined sx={{ fontSize: 14 }}/>
                               {task.pogName}
                             </span>
                           </div>
 
                           <div className="exec-task-card-impact">
-                            <TrendingUp size={14} />
+                            <TrendingUpOutlined sx={{ fontSize: 14 }}/>
                             <span>{task.impact}</span>
                           </div>
 
@@ -347,7 +350,7 @@ export const StoreExecution: React.FC = () => {
                                   className="exec-assign-btn"
                                   onClick={() => setAssigningTaskId(task.id)}
                                 >
-                                  <UserPlus size={14} />
+                                  <PersonAddAlt1Outlined sx={{ fontSize: 14 }}/>
                                   Assign
                                 </button>
                               )}
@@ -406,7 +409,7 @@ export const StoreExecution: React.FC = () => {
                       <p className="exec-task-card-desc">{task.reason}</p>
 
                       <div className="exec-task-card-impact">
-                        <TrendingUp size={14} />
+                        <TrendingUpOutlined sx={{ fontSize: 14 }}/>
                         <span>{task.impact}</span>
                       </div>
 
@@ -450,7 +453,7 @@ export const StoreExecution: React.FC = () => {
         <div className="image-modal-overlay" onClick={() => setExpandedImage(null)}>
           <div className="image-modal-content" onClick={(e) => e.stopPropagation()}>
             <button className="image-modal-close" onClick={() => setExpandedImage(null)}>
-              <X size={24} />
+              <CloseOutlined sx={{ fontSize: 24 }}/>
             </button>
             <img src={expandedImage} alt="Expanded view" />
           </div>

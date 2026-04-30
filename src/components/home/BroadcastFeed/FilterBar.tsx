@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search } from 'lucide-react';
+import SearchOutlined from '@mui/icons-material/SearchOutlined';
 import { Input } from 'impact-ui';
 import { BroadcastFilters, BroadcastPriority, BroadcastCategory } from '../../../types/broadcast';
 import { CATEGORY_CONFIG } from '../../../constants/broadcasts';
@@ -78,7 +78,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             placeholder="Search broadcasts..."
             value={filters.searchQuery}
             onChange={handleSearchChange}
-            leftIcon={<Search size={16} />}
+            leftIcon={<SearchOutlined sx={{ fontSize: 16 }} />}
             size="small"
           />
         </div>

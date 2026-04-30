@@ -1,27 +1,26 @@
 import React, { useState } from 'react';
-import {
-  ShieldCheck,
-  UserPlus,
-  Search,
-  X,
-  Send,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  Check,
-  AlertCircle,
-  User as UserIcon,
-  Mail,
-  Briefcase,
-  MapPin,
-  Monitor,
-  Shield,
-  CheckCircle2,
-  Settings2,
-  RotateCcw,
-  Trash2,
-  AlertTriangle,
-} from 'lucide-react';
+import GppGoodOutlined from '@mui/icons-material/GppGoodOutlined';
+import PersonAddAlt1Outlined from '@mui/icons-material/PersonAddAlt1Outlined';
+import SearchOutlined from '@mui/icons-material/SearchOutlined';
+import CloseOutlined from '@mui/icons-material/CloseOutlined';
+import SendOutlined from '@mui/icons-material/SendOutlined';
+import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
+import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
+import Check from '@mui/icons-material/Check';
+import ErrorOutlined from '@mui/icons-material/ErrorOutlined';
+import PersonOutlined from '@mui/icons-material/PersonOutlined';
+import MailOutlined from '@mui/icons-material/MailOutlined';
+import WorkOutlined from '@mui/icons-material/WorkOutlined';
+import PlaceOutlined from '@mui/icons-material/PlaceOutlined';
+import MonitorOutlined from '@mui/icons-material/MonitorOutlined';
+import SecurityOutlined from '@mui/icons-material/SecurityOutlined';
+import TaskAltOutlined from '@mui/icons-material/TaskAltOutlined';
+import TuneOutlined from '@mui/icons-material/TuneOutlined';
+import RotateLeftOutlined from '@mui/icons-material/RotateLeftOutlined';
+import DeleteOutlined from '@mui/icons-material/DeleteOutlined';
+import WarningAmberOutlined from '@mui/icons-material/WarningAmberOutlined';
+import { Button, Card } from 'impact-ui';
 import { useAuth } from '../context/AuthContext';
 import { User, UserRole, ROLE_LABELS, ROLE_ACCESS, ScreenAccess } from '../types';
 import './UserAccessManagement.css';
@@ -206,33 +205,32 @@ export const UserAccessManagement: React.FC = () => {
       <div className="district-intel-header uam-di-header">
         <div className="header-left">
           <div className="header-title">
-            <ShieldCheck size={24} />
+            <GppGoodOutlined sx={{ fontSize: 24 }}/>
             <h1>User Access Management</h1>
           </div>
           <div className="header-meta">
             <span className="district-badge">
-              <Shield size={14} />
+              <SecurityOutlined sx={{ fontSize: 14 }}/>
               Team Directory
             </span>
             <span className="district-badge uam-meta-pill">
-              <UserIcon size={14} />
+              <PersonOutlined sx={{ fontSize: 14 }}/>
               {statCounts.total} members
             </span>
             <span className="uam-meta-updated">Manage roles, scope &amp; platform access</span>
           </div>
         </div>
         <div className="uam-header-right">
-          <button className="uam-create-btn" onClick={() => { resetForm(); setShowCreateModal(true); }}>
-            <UserPlus size={15} />
-            <span>Create User</span>
-          </button>
+          <Button variant="contained" color="primary" size="medium" className="uam-create-btn" onClick={() => { resetForm(); setShowCreateModal(true); }} startIcon={<PersonAddAlt1Outlined sx={{ fontSize: 15 }}/>}>
+            Create User
+          </Button>
         </div>
       </div>
 
       {/* Success toast */}
       {inviteSuccess && (
         <div className="uam-toast">
-          <div className="uam-toast-icon"><Check size={14} /></div>
+          <div className="uam-toast-icon"><Check sx={{ fontSize: 14 }}/></div>
           <span>Invitation sent successfully to <strong>{inviteSuccess}</strong></span>
         </div>
       )}
@@ -240,13 +238,13 @@ export const UserAccessManagement: React.FC = () => {
       {/* Delete success toast */}
       {deleteSuccess && (
         <div className="uam-toast uam-toast--danger">
-          <div className="uam-toast-icon uam-toast-icon--danger"><Trash2 size={14} /></div>
+          <div className="uam-toast-icon uam-toast-icon--danger"><DeleteOutlined sx={{ fontSize: 14 }}/></div>
           <span><strong>{deleteSuccess}</strong> was removed</span>
         </div>
       )}
 
       {/* ── Stats Strip (DI bca-overview-grid pattern) ── */}
-      <div className="uam-stats-card">
+      <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: 0, overflow: 'hidden', margin: '0 16px 16px' }}>
         <div className="bca-overview-grid uam-stats-grid">
           <div className="bca-kpi-card">
             <span className="bca-kpi-label">Total Users</span>
@@ -274,12 +272,12 @@ export const UserAccessManagement: React.FC = () => {
             <span className="bca-kpi-context">matching search</span>
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* ── Search toolbar (above table, mirrors DI Leaderboard) ── */}
       <div className="uam-table-toolbar">
         <div className="uam-search-bar">
-          <Search size={15} />
+          <SearchOutlined sx={{ fontSize: 15 }}/>
           <input
             type="text"
             placeholder="Search by name, email, or role..."
@@ -288,7 +286,7 @@ export const UserAccessManagement: React.FC = () => {
           />
           {searchQuery && (
             <button className="uam-search-clear" onClick={() => setSearchQuery('')}>
-              <X size={13} />
+              <CloseOutlined sx={{ fontSize: 13 }}/>
             </button>
           )}
         </div>
@@ -342,7 +340,7 @@ export const UserAccessManagement: React.FC = () => {
                   </td>
                   <td className="uam-td-screens">
                     <div className="uam-screen-badge">
-                      <Monitor size={12} />
+                      <MonitorOutlined sx={{ fontSize: 12 }}/>
                       <span>{u.accessRoutes.length}</span>
                     </div>
                   </td>
@@ -356,7 +354,7 @@ export const UserAccessManagement: React.FC = () => {
                         title={`Remove ${u.name}`}
                         onClick={() => setConfirmDelete(u)}
                       >
-                        <Trash2 size={14} />
+                        <DeleteOutlined sx={{ fontSize: 14 }}/>
                       </button>
                     )}
                   </td>
@@ -381,7 +379,7 @@ export const UserAccessManagement: React.FC = () => {
             {filteredUsers.length === 0 && (
               <tr>
                 <td colSpan={6} className="uam-empty">
-                  <Search size={20} />
+                  <SearchOutlined sx={{ fontSize: 20 }}/>
                   <span>No users match your search</span>
                 </td>
               </tr>
@@ -397,23 +395,23 @@ export const UserAccessManagement: React.FC = () => {
             {/* Modal header */}
             <div className="uam-m-header">
               <div className="uam-m-header-icon">
-                <UserPlus size={18} />
+                <PersonAddAlt1Outlined sx={{ fontSize: 18 }}/>
               </div>
               <div className="uam-m-header-text">
                 <h3>Create New User</h3>
                 <p>Add a team member and configure their access</p>
               </div>
               <button className="uam-m-close" onClick={() => setShowCreateModal(false)}>
-                <X size={16} />
+                <CloseOutlined sx={{ fontSize: 16 }}/>
               </button>
             </div>
 
             {/* Step indicator */}
             <div className="uam-m-steps">
               {[
-                { num: 1 as const, key: 'identity', label: 'Identity', done: stepState.identity, icon: <UserIcon size={13} /> },
-                { num: 2 as const, key: 'roleScope', label: 'Role & Scope', done: stepState.roleScope, icon: <Briefcase size={13} /> },
-                { num: 3 as const, key: 'access', label: 'Screen Access', done: stepState.access, icon: <Shield size={13} /> },
+                { num: 1 as const, key: 'identity', label: 'Identity', done: stepState.identity, icon: <PersonOutlined sx={{ fontSize: 13 }}/> },
+                { num: 2 as const, key: 'roleScope', label: 'Role & Scope', done: stepState.roleScope, icon: <WorkOutlined sx={{ fontSize: 13 }}/> },
+                { num: 3 as const, key: 'access', label: 'Screen Access', done: stepState.access, icon: <SecurityOutlined sx={{ fontSize: 13 }}/> },
               ].map((step, idx, arr) => {
                 const isActive = currentStep === step.num;
                 const isComplete = currentStep > step.num;
@@ -421,7 +419,7 @@ export const UserAccessManagement: React.FC = () => {
                   <React.Fragment key={step.key}>
                     <div className={`uam-m-step ${isActive ? 'uam-m-step--active' : ''} ${isComplete ? 'uam-m-step--done' : ''}`}>
                       <span className="uam-m-step-num">
-                        {isComplete ? <CheckCircle2 size={14} /> : step.num}
+                        {isComplete ? <TaskAltOutlined sx={{ fontSize: 14 }}/> : step.num}
                       </span>
                       <span className="uam-m-step-label">
                         {step.icon}
@@ -440,7 +438,7 @@ export const UserAccessManagement: React.FC = () => {
               {currentStep === 1 && (
               <div className="uam-m-section">
                 <div className="uam-m-section-label">
-                  <UserIcon size={13} />
+                  <PersonOutlined sx={{ fontSize: 13 }}/>
                   <span>Identity</span>
                 </div>
                 <div className="uam-m-fields-row">
@@ -455,13 +453,13 @@ export const UserAccessManagement: React.FC = () => {
                       onBlur={() => { if (!newName.trim()) setFieldErrors(prev => ({ ...prev, name: 'Full name is required' })); }}
                     />
                     {fieldErrors.name && (
-                      <span className="uam-m-field-error"><AlertCircle size={12} />{fieldErrors.name}</span>
+                      <span className="uam-m-field-error"><ErrorOutlined sx={{ fontSize: 12 }}/>{fieldErrors.name}</span>
                     )}
                   </div>
                   <div className="uam-m-field">
                     <label>Email Address <span className="uam-m-req">*</span></label>
                     <div className={`uam-m-input-icon ${fieldErrors.email ? 'uam-m-input-icon--error' : ''}`}>
-                      <Mail size={14} />
+                      <MailOutlined sx={{ fontSize: 14 }}/>
                       <input
                         type="email"
                         placeholder="sarah.johnson@company.co"
@@ -474,7 +472,7 @@ export const UserAccessManagement: React.FC = () => {
                       />
                     </div>
                     {fieldErrors.email && (
-                      <span className="uam-m-field-error"><AlertCircle size={12} />{fieldErrors.email}</span>
+                      <span className="uam-m-field-error"><ErrorOutlined sx={{ fontSize: 12 }}/>{fieldErrors.email}</span>
                     )}
                   </div>
                 </div>
@@ -485,7 +483,7 @@ export const UserAccessManagement: React.FC = () => {
               {currentStep === 2 && (
               <div className="uam-m-section">
                 <div className="uam-m-section-label">
-                  <Briefcase size={13} />
+                  <WorkOutlined sx={{ fontSize: 13 }}/>
                   <span>Role & Scope</span>
                 </div>
                 <div className="uam-m-fields-row">
@@ -498,7 +496,7 @@ export const UserAccessManagement: React.FC = () => {
                       >
                         <span className={`uam-dd-role-dot uam-dd-role-dot--${newRole.toLowerCase()}`} />
                         <span>{ROLE_LABELS[newRole]}</span>
-                        <ChevronDown size={14} className="uam-dd-chevron" />
+                        <KeyboardArrowDown sx={{ fontSize: 14 }} className="uam-dd-chevron"/>
                       </button>
                       {showRoleDropdown && (
                         <div className="uam-dd-menu">
@@ -523,7 +521,7 @@ export const UserAccessManagement: React.FC = () => {
                                   <span className="uam-dd-item-desc">{ROLE_DESCRIPTIONS[r]}</span>
                                 </div>
                               </div>
-                              {r === newRole && <Check size={14} />}
+                              {r === newRole && <Check sx={{ fontSize: 14 }}/>}
                             </button>
                           ))}
                         </div>
@@ -542,9 +540,9 @@ export const UserAccessManagement: React.FC = () => {
                         }}
                         disabled={newRole === 'ADMIN'}
                       >
-                        <MapPin size={14} className="uam-dd-icon-muted" />
+                        <PlaceOutlined sx={{ fontSize: 14 }} className="uam-dd-icon-muted"/>
                         <span>{newRole === 'ADMIN' ? 'Global (Full Access)' : newScope || 'Select assignment...'}</span>
-                        {newRole !== 'ADMIN' && <ChevronDown size={14} className="uam-dd-chevron" />}
+                        {newRole !== 'ADMIN' && <KeyboardArrowDown sx={{ fontSize: 14 }} className="uam-dd-chevron"/>}
                       </button>
                       {showScopeDropdown && (
                         <div className="uam-dd-menu">
@@ -555,14 +553,14 @@ export const UserAccessManagement: React.FC = () => {
                               onClick={() => { setNewScope(opt); setShowScopeDropdown(false); setFieldErrors(prev => ({ ...prev, scope: undefined })); }}
                             >
                               <span>{opt}</span>
-                              {opt === newScope && <Check size={14} />}
+                              {opt === newScope && <Check sx={{ fontSize: 14 }}/>}
                             </button>
                           ))}
                         </div>
                       )}
                     </div>
                     {fieldErrors.scope && (
-                      <span className="uam-m-field-error"><AlertCircle size={12} />{fieldErrors.scope}</span>
+                      <span className="uam-m-field-error"><ErrorOutlined sx={{ fontSize: 12 }}/>{fieldErrors.scope}</span>
                     )}
                   </div>
                 </div>
@@ -573,7 +571,7 @@ export const UserAccessManagement: React.FC = () => {
               {currentStep === 3 && (
               <div className="uam-m-section uam-m-section--access">
                 <div className="uam-m-section-label">
-                  <Shield size={13} />
+                  <SecurityOutlined sx={{ fontSize: 13 }}/>
                   <span>Screen Access</span>
                   <span className="uam-m-access-count">
                     {effectiveAccess.length} screen{effectiveAccess.length === 1 ? '' : 's'}{' '}
@@ -590,7 +588,7 @@ export const UserAccessManagement: React.FC = () => {
                         else setCustomAccess([]);
                       }}
                     />
-                    <Settings2 size={12} />
+                    <TuneOutlined sx={{ fontSize: 12 }}/>
                     <span>Customize Access</span>
                   </label>
                 </div>
@@ -603,7 +601,7 @@ export const UserAccessManagement: React.FC = () => {
                       className="uam-m-reset-btn"
                       onClick={() => setCustomAccess([...ROLE_ACCESS[newRole]])}
                     >
-                      <RotateCcw size={11} />
+                      <RotateLeftOutlined sx={{ fontSize: 11 }}/>
                       Reset to role defaults
                     </button>
                   </div>
@@ -627,14 +625,14 @@ export const UserAccessManagement: React.FC = () => {
                           onChange={() => toggleCustomScreen(screen)}
                         />
                         <span className="uam-m-access-check">
-                          {isChecked && <Check size={11} />}
+                          {isChecked && <Check sx={{ fontSize: 11 }}/>}
                         </span>
                         <span>{SCREEN_LABELS[screen]}</span>
                         {isAutoAssigned && <span className="uam-m-access-default" title="Default for this role">default</span>}
                       </label>
                     ) : (
                       <div key={screen} className="uam-m-access-item">
-                        <Check size={12} />
+                        <Check sx={{ fontSize: 12 }}/>
                         <span>{SCREEN_LABELS[screen]}</span>
                       </div>
                     );
@@ -642,7 +640,7 @@ export const UserAccessManagement: React.FC = () => {
                 </div>
 
                 {customizeAccess && customAccess.length === 0 && (
-                  <span className="uam-m-field-error"><AlertCircle size={12} />Select at least one screen</span>
+                  <span className="uam-m-field-error"><ErrorOutlined sx={{ fontSize: 12 }}/>Select at least one screen</span>
                 )}
               </div>
               )}
@@ -650,28 +648,30 @@ export const UserAccessManagement: React.FC = () => {
 
             {/* Modal footer — step-aware navigation */}
             <div className="uam-m-footer">
-              <button className="uam-m-cancel" onClick={() => setShowCreateModal(false)}>Cancel</button>
+              <Button variant="outlined" color="primary" className="uam-m-cancel" onClick={() => setShowCreateModal(false)}>
+                Cancel
+              </Button>
               <div className="uam-m-footer-right">
                 {currentStep > 1 && (
-                  <button className="uam-m-back" onClick={goBack}>
-                    <ChevronLeft size={14} />
-                    <span>Back</span>
-                  </button>
+                  <Button variant="outlined" color="primary" className="uam-m-back" onClick={goBack} startIcon={<KeyboardArrowLeft sx={{ fontSize: 14 }}/>}>
+                    Back
+                  </Button>
                 )}
                 {currentStep < 3 ? (
-                  <button className="uam-m-submit" onClick={goNext}>
-                    <span>Next</span>
-                    <ChevronRight size={14} />
-                  </button>
+                  <Button variant="contained" color="primary" className="uam-m-submit" onClick={goNext} endIcon={<KeyboardArrowRight sx={{ fontSize: 14 }}/>}>
+                    Next
+                  </Button>
                 ) : (
-                  <button
+                  <Button
+                    variant="contained"
+                    color="primary"
                     className="uam-m-submit"
                     onClick={handleCreateUser}
                     disabled={customizeAccess && customAccess.length === 0}
+                    startIcon={<SendOutlined sx={{ fontSize: 13 }}/>}
                   >
-                    <Send size={13} />
-                    <span>Send Invite</span>
-                  </button>
+                    Send Invite
+                  </Button>
                 )}
               </div>
             </div>
@@ -684,7 +684,7 @@ export const UserAccessManagement: React.FC = () => {
         <div className="uam-overlay" onClick={() => setConfirmDelete(null)}>
           <div className="uam-confirm" onClick={e => e.stopPropagation()}>
             <div className="uam-confirm-icon">
-              <AlertTriangle size={22} />
+              <WarningAmberOutlined sx={{ fontSize: 22 }}/>
             </div>
             <h3 className="uam-confirm-title">Remove user?</h3>
             <p className="uam-confirm-text">
@@ -693,13 +693,12 @@ export const UserAccessManagement: React.FC = () => {
               This action cannot be undone.
             </p>
             <div className="uam-confirm-actions">
-              <button className="uam-m-cancel" onClick={() => setConfirmDelete(null)}>
+              <Button variant="outlined" color="primary" className="uam-m-cancel" onClick={() => setConfirmDelete(null)}>
                 Cancel
-              </button>
-              <button className="uam-confirm-delete-btn" onClick={handleConfirmDelete}>
-                <Trash2 size={13} />
-                <span>Remove user</span>
-              </button>
+              </Button>
+              <Button variant="contained" color="error" className="uam-confirm-delete-btn" onClick={handleConfirmDelete} startIcon={<DeleteOutlined sx={{ fontSize: 13 }}/>}>
+                Remove user
+              </Button>
             </div>
           </div>
         </div>

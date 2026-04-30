@@ -17,8 +17,8 @@
   gap: 6px;
   padding: 6px 14px;
   border-radius: 12px;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: var(--ia-text-xs);
+  font-weight: var(--ia-font-weight-bold);
   color: white;
   letter-spacing: 0.5px;
 }
@@ -26,13 +26,13 @@
 .broadcast-modal-category {
   padding: 6px 14px;
   border-radius: 12px;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--ia-text-xs);
+  font-weight: var(--ia-font-weight-semibold);
   border: 1px solid currentColor;
 }
 
 .broadcast-modal-meta {
-  background-color: #f9fafb;
+  background-color: var(--ia-color-bg-subtle);
   padding: 16px;
   border-radius: 8px;
   margin-bottom: 20px;
@@ -42,7 +42,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
+  font-size: var(--ia-text-sm);
   color: #666;
   margin-bottom: 8px;
 }
@@ -60,16 +60,16 @@
   padding: 12px 16px;
   border-radius: 6px;
   margin-bottom: 20px;
-  font-size: 14px;
+  font-size: var(--ia-text-sm);
   color: #1976d2;
 }
 
 .broadcast-modal-linked strong {
-  font-weight: 600;
+  font-weight: var(--ia-font-weight-semibold);
 }
 
 .broadcast-modal-message {
-  font-size: 15px;
+  font-size: var(--ia-text-15);
   line-height: 1.7;
   color: #333;
   margin-bottom: 24px;
@@ -87,8 +87,8 @@
 }
 
 .broadcast-modal-attachments h4 {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--ia-text-sm);
+  font-weight: var(--ia-font-weight-semibold);
   color: #333;
   margin: 0 0 12px 0;
 }
@@ -106,7 +106,7 @@
 .broadcast-modal-attachments a {
   color: #1976d2;
   text-decoration: none;
-  font-size: 14px;
+  font-size: var(--ia-text-sm);
 }
 
 .broadcast-modal-attachments a:hover {
@@ -126,7 +126,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 14px;
+  font-size: var(--ia-text-sm);
   color: #4caf50;
-  font-weight: 500;
+  font-weight: var(--ia-font-weight-medium);
 }

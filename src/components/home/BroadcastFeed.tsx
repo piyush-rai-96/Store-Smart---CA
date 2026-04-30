@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search } from 'lucide-react';
+import SearchOutlined from '@mui/icons-material/SearchOutlined';
 import { Chips } from 'impact-ui';
 import { Broadcast } from '../../types/home';
 import { BroadcastCard } from './BroadcastCard';
@@ -50,7 +50,7 @@ export const BroadcastFeed: React.FC<BroadcastFeedProps> = ({
     <div className="broadcast-feed">
       <div className="broadcast-feed-header">
         <div className="broadcast-feed-search">
-          <Search size={16} />
+          <SearchOutlined sx={{ fontSize: 16 }} />
           <input
             type="text"
             placeholder="Search broadcasts..."

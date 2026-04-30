@@ -108,8 +108,8 @@
 }
 
 .login-tagline {
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--ia-text-13);
+  font-weight: var(--ia-font-weight-medium);
   color: rgba(255, 255, 255, 0.9);
   text-transform: uppercase;
   letter-spacing: 0.25em;
@@ -119,7 +119,7 @@
 /* Refined card */
 .login-container .MuiPaper-root,
 .login-container [class*="Card"] {
-  background: #ffffff !important;
+  background: var(--ia-color-surface) !important;
   border-radius: 20px !important;
   box-shadow: 
     0 20px 40px -10px rgba(99, 102, 241, 0.25),
@@ -140,8 +140,8 @@
 }
 
 .login-title {
-  font-size: 30px;
-  font-weight: 700;
+  font-size: var(--ia-text-30);
+  font-weight: var(--ia-font-weight-bold);
   margin: 0 0 10px 0;
   text-align: center;
   letter-spacing: -0.45px;
@@ -153,7 +153,7 @@
 }
 
 .login-subtitle {
-  font-size: 15px;
+  font-size: var(--ia-text-15);
   color: #7175a1;
   margin: 0 0 12px 0;
   text-align: center;
@@ -195,7 +195,7 @@
 .login-form .MuiOutlinedInput-root {
   width: 100% !important;
   box-sizing: border-box !important;
-  font-size: 15px !important;
+  font-size: var(--ia-text-15) !important;
   color: #141733 !important;
   font-weight: 600 !important;
 }
@@ -223,7 +223,7 @@
 .login-form .MuiInputBase-input:focus {
   border-color: #4730f1 !important;
   box-shadow: 0 10px 28px rgba(71, 48, 241, 0.18), inset 0 0 0 1px rgba(255, 255, 255, 0.9) !important;
-  background: #ffffff !important;
+  background: var(--ia-color-surface) !important;
 }
 
 /* Fix Impact UI input wrapper to position icon inside */
@@ -273,7 +273,7 @@
 .email-label,
 .password-label {
   margin-bottom: 6px !important;
-  font-size: 11px !important;
+  font-size: var(--ia-text-2xs) !important;
   letter-spacing: 0.22em !important;
   text-transform: uppercase;
   color: #5f6695 !important;
@@ -287,9 +287,9 @@
   padding: 14px 20px !important;
   border-radius: 14px !important;
   border: 1.5px solid #cad0ff !important;
-  background: #ffffff !important;
+  background: var(--ia-color-surface) !important;
   box-shadow: none !important;
-  font-size: 15px !important;
+  font-size: var(--ia-text-15) !important;
   font-weight: 600 !important;
   color: #0c1035 !important;
   box-sizing: border-box !important;
@@ -311,7 +311,7 @@
 .password-input:focus {
   border-color: #4730f1 !important;
   box-shadow: 0 0 0 3px rgba(71, 48, 241, 0.15) !important;
-  background: #ffffff !important;
+  background: var(--ia-color-surface) !important;
   outline: none !important;
 }
 
@@ -323,7 +323,7 @@
 
 .email-input.input-error,
 .password-input.input-error {
-  border-color: #dc2626 !important;
+  border-color: var(--ia-color-error-strong) !important;
 }
 
 .password-input-wrapper {
@@ -344,7 +344,7 @@
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  color: #9ca3af !important;
+  color: var(--ia-color-text-tertiary) !important;
   transition: color 0.2s ease !important;
   width: auto !important;
   height: auto !important;
@@ -352,7 +352,7 @@
 }
 
 .password-toggle:hover {
-  color: #7c3aed !important;
+  color: var(--ia-color-primary-pressed) !important;
   background: transparent !important;
 }
 
@@ -378,7 +378,7 @@
 .form-field .impact-input-label,
 .login-form .MuiInputLabel-root {
   margin-bottom: 6px !important;
-  font-size: 11px !important;
+  font-size: var(--ia-text-2xs) !important;
   letter-spacing: 0.22em !important;
   text-transform: uppercase;
   color: #5f6695 !important;
@@ -404,23 +404,23 @@
 .login-form .right-input-icon svg,
 .login-form [class*="icon"] svg,
 .login-form svg {
-  color: #9ca3af !important;
+  color: var(--ia-color-text-tertiary) !important;
   transition: color 0.2s ease !important;
 }
 
 .login-form .right-input-icon:hover svg,
 .login-form [class*="icon"]:hover svg,
 .form-field .right-input-icon:hover svg {
-  color: #7c3aed !important;
+  color: var(--ia-color-primary-pressed) !important;
 }
 
 .error-message {
   padding: 12px 16px;
-  background-color: #fef2f2;
-  border: 1px solid #fecaca;
+  background-color: var(--ia-color-error-bg);
+  border: 1px solid var(--ia-color-error-soft);
   border-radius: 10px;
-  color: #dc2626;
-  font-size: 13px;
+  color: var(--ia-color-error-strong);
+  font-size: var(--ia-text-13);
   text-align: center;
 }
 
@@ -430,17 +430,17 @@
 }
 
 .forgot-password-disabled {
-  color: #9ca3af;
+  color: var(--ia-color-text-tertiary);
   text-decoration: none;
-  font-size: 13px;
+  font-size: var(--ia-text-13);
   cursor: help;
 }
 
 .forgot-password-link a {
   color: #5b45e0;
   text-decoration: none;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--ia-text-13);
+  font-weight: var(--ia-font-weight-medium);
   transition: color 0.2s ease;
 }
 
@@ -460,11 +460,11 @@
 .login-form button[type="submit"],
 .login-form .login-button button {
   background: linear-gradient(135deg, #3c27c2 0%, #5b45e0 55%, #7a62ff 100%) !important;
-  color: #ffffff !important;
+  color: var(--ia-color-surface) !important;
   border: none !important;
   border-radius: 14px !important;
   padding: 14px 24px !important;
-  font-size: 15px !important;
+  font-size: var(--ia-text-15) !important;
   font-weight: 600 !important;
   text-transform: none !important;
   box-shadow: 0 4px 14px rgba(66, 46, 206, 0.35) !important;
@@ -483,15 +483,15 @@
 
 .signup-link {
   text-align: center;
-  font-size: 14px;
-  color: #6b7280;
+  font-size: var(--ia-text-sm);
+  color: var(--ia-color-text-secondary);
   margin-top: 20px;
 }
 
 .signup-link a {
   color: #5b45e0;
   text-decoration: none;
-  font-weight: 600;
+  font-weight: var(--ia-font-weight-semibold);
   margin-left: 4px;
   transition: color 0.2s ease;
 }
@@ -506,10 +506,10 @@
 }
 
 .login-footer p {
-  font-size: 12px;
+  font-size: var(--ia-text-xs);
   color: rgba(255, 255, 255, 0.9);
   margin: 0;
-  font-weight: 500;
+  font-weight: var(--ia-font-weight-medium);
 }
 
 /* Responsive adjustments */
@@ -519,7 +519,7 @@
   }
 
   .login-title {
-    font-size: 22px;
+    font-size: var(--ia-text-2xl);
   }
   
   .login-container::before {

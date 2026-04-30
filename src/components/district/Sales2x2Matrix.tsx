@@ -23,10 +23,10 @@ export const Sales2x2Matrix: React.FC<Sales2x2MatrixProps> = ({ data, onStoreCli
 
   const getQuadrantColor = (quadrant: string) => {
     switch (quadrant) {
-      case 'growth-engines': return '#28a745';
-      case 'critical': return '#dc3545';
-      case 'struggling': return '#ffc107';
-      case 'stable': return '#17a2b8';
+      case 'growth-engines': return 'var(--ia-color-success)';
+      case 'critical': return 'var(--ia-color-error)';
+      case 'struggling': return 'var(--ia-color-warning)';
+      case 'stable': return 'var(--ia-color-info)';
       default: return '#6c757d';
     }
   };
@@ -90,19 +90,19 @@ export const Sales2x2Matrix: React.FC<Sales2x2MatrixProps> = ({ data, onStoreCli
       {/* Legend */}
       <div className="sales-2x2-legend">
         <div className="legend-item">
-          <div className="legend-color" style={{ backgroundColor: '#28a745' }}></div>
+          <div className="legend-color" style={{ backgroundColor: 'var(--ia-color-success)' }}></div>
           <span>Growth Engines</span>
         </div>
         <div className="legend-item">
-          <div className="legend-color" style={{ backgroundColor: '#17a2b8' }}></div>
+          <div className="legend-color" style={{ backgroundColor: 'var(--ia-color-info)' }}></div>
           <span>Stable</span>
         </div>
         <div className="legend-item">
-          <div className="legend-color" style={{ backgroundColor: '#dc3545' }}></div>
+          <div className="legend-color" style={{ backgroundColor: 'var(--ia-color-error)' }}></div>
           <span>Critical</span>
         </div>
         <div className="legend-item">
-          <div className="legend-color" style={{ backgroundColor: '#ffc107' }}></div>
+          <div className="legend-color" style={{ backgroundColor: 'var(--ia-color-warning)' }}></div>
           <span>Struggling</span>
         </div>
       </div>

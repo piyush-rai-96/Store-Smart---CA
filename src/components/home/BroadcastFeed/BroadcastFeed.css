@@ -17,13 +17,13 @@
 }
 
 .broadcast-feed-empty p {
-  font-size: 16px;
+  font-size: var(--ia-text-md);
   color: #999;
   margin: 8px 0;
 }
 
 .broadcast-feed-empty p:first-child {
-  font-size: 18px;
-  font-weight: 500;
+  font-size: var(--ia-text-lg);
+  font-weight: var(--ia-font-weight-medium);
   color: #666;
 }

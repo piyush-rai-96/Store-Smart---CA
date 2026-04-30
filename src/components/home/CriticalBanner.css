@@ -41,31 +41,25 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: 16px;
-  font-weight: 700;
+  font-size: var(--ia-text-md);
+  font-weight: var(--ia-font-weight-bold);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .critical-banner-close {
-  background: none;
-  border: none;
-  color: white;
-  cursor: pointer;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  min-width: 0 !important;
+  padding: 4px !important;
+  color: white !important;
   border-radius: 4px;
-  transition: background-color 0.2s;
 }
 
 .critical-banner-close:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.1) !important;
 }
 
 .critical-banner-message {
-  font-size: 14px;
+  font-size: var(--ia-text-sm);
   line-height: 1.5;
   margin: 0 0 12px 0;
   opacity: 0.95;
@@ -106,11 +100,11 @@
   }
 
   .critical-banner-title {
-    font-size: 14px;
+    font-size: var(--ia-text-sm);
   }
 
   .critical-banner-message {
-    font-size: 13px;
+    font-size: var(--ia-text-13);
   }
 
   .critical-banner-actions {

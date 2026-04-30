@@ -1,6 +1,8 @@
 import React from 'react';
 import { Modal, Button } from 'impact-ui';
-import { Clock, User, Calendar } from 'lucide-react';
+import AccessTimeOutlined from '@mui/icons-material/AccessTimeOutlined';
+import PersonOutlined from '@mui/icons-material/PersonOutlined';
+import CalendarTodayOutlined from '@mui/icons-material/CalendarTodayOutlined';
 import { Broadcast } from '../../types/broadcast';
 import { PRIORITY_CONFIG, CATEGORY_CONFIG } from '../../constants/broadcasts';
 import './BroadcastModal.css';
@@ -69,15 +71,15 @@ export const BroadcastModal: React.FC<BroadcastModalProps> = ({
         {/* Meta Information */}
         <div className="broadcast-modal-meta">
           <div className="broadcast-modal-meta-item">
-            <User size={16} />
+            <PersonOutlined sx={{ fontSize: 16 }} />
             <span>From: {broadcast.sender.role} - {broadcast.sender.name}</span>
           </div>
           <div className="broadcast-modal-meta-item">
-            <Clock size={16} />
+            <AccessTimeOutlined sx={{ fontSize: 16 }} />
             <span>Posted: {formatDate(broadcast.createdAt)}</span>
           </div>
           <div className="broadcast-modal-meta-item">
-            <Calendar size={16} />
+            <CalendarTodayOutlined sx={{ fontSize: 16 }} />
             <span>Expires: {formatDate(broadcast.expiresAt)}</span>
           </div>
         </div>

@@ -1,34 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import {
-  TrendingUp,
-  TrendingDown,
-  Minus,
-  AlertTriangle,
-  ChevronRight,
-  ChevronDown,
-  CheckCircle2,
-  AlertCircle,
-  Sparkles,
-  RefreshCw,
-  Calendar,
-  BarChart3,
-  Clock,
-  Bell,
-  Store,
-  Users,
-  Star,
-  Zap,
-  X,
-  Send,
-  Filter,
-  Megaphone,
-  MessageSquare,
-  Check,
-  Globe,
-  Moon,
-  Activity,
-  ClipboardCheck,
-} from 'lucide-react';
+import TrendingUpOutlined from '@mui/icons-material/TrendingUpOutlined';
+import TrendingDownOutlined from '@mui/icons-material/TrendingDownOutlined';
+import Remove from '@mui/icons-material/Remove';
+import WarningAmberOutlined from '@mui/icons-material/WarningAmberOutlined';
+import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
+import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
+import TaskAltOutlined from '@mui/icons-material/TaskAltOutlined';
+import ErrorOutlined from '@mui/icons-material/ErrorOutlined';
+import AutoAwesomeOutlined from '@mui/icons-material/AutoAwesomeOutlined';
+import RefreshOutlined from '@mui/icons-material/RefreshOutlined';
+import CalendarTodayOutlined from '@mui/icons-material/CalendarTodayOutlined';
+import BarChartOutlined from '@mui/icons-material/BarChartOutlined';
+import AccessTimeOutlined from '@mui/icons-material/AccessTimeOutlined';
+import NotificationsOutlined from '@mui/icons-material/NotificationsOutlined';
+import StoreOutlined from '@mui/icons-material/StoreOutlined';
+import GroupOutlined from '@mui/icons-material/GroupOutlined';
+import StarBorderOutlined from '@mui/icons-material/StarBorderOutlined';
+import BoltOutlined from '@mui/icons-material/BoltOutlined';
+import CloseOutlined from '@mui/icons-material/CloseOutlined';
+import SendOutlined from '@mui/icons-material/SendOutlined';
+import FilterListOutlined from '@mui/icons-material/FilterListOutlined';
+import CampaignOutlined from '@mui/icons-material/CampaignOutlined';
+import ChatOutlined from '@mui/icons-material/ChatOutlined';
+import Check from '@mui/icons-material/Check';
+import LanguageOutlined from '@mui/icons-material/LanguageOutlined';
+import DarkModeOutlined from '@mui/icons-material/DarkModeOutlined';
+import ShowChartOutlined from '@mui/icons-material/ShowChartOutlined';
+import AssignmentTurnedInOutlined from '@mui/icons-material/AssignmentTurnedInOutlined';
+import { Button, Card } from 'impact-ui';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 // Reuse DM Home styles to mirror the same layout/components on HQ Home
@@ -140,9 +139,9 @@ const MOCK_BROADCASTS: BroadcastItem[] = [
 // ─── Helpers ───
 const getGreeting = (): { text: string; icon: React.ReactNode } => {
   const h = new Date().getHours();
-  if (h < 12) return { text: 'Good morning', icon: <Sparkles size={20} /> };
-  if (h < 17) return { text: 'Good afternoon', icon: <Sparkles size={20} /> };
-  return { text: 'Good evening', icon: <Moon size={20} /> };
+  if (h < 12) return { text: 'Good morning', icon: <AutoAwesomeOutlined sx={{ fontSize: 20 }}/> };
+  if (h < 17) return { text: 'Good afternoon', icon: <AutoAwesomeOutlined sx={{ fontSize: 20 }}/> };
+  return { text: 'Good evening', icon: <DarkModeOutlined sx={{ fontSize: 20 }}/> };
 };
 
 // ─── Component ───
@@ -370,7 +369,7 @@ export const HQHome: React.FC = () => {
       </p>
 
       <div className="ai-brief-section">
-        <h3 className="ai-brief-section-title"><TrendingUp size={14} /> Network Performance</h3>
+        <h3 className="ai-brief-section-title"><TrendingUpOutlined sx={{ fontSize: 14 }}/> Network Performance</h3>
         <ul className="ai-brief-bullets">
           <li>Network execution compliance moved to <strong>84.8%</strong> (+1.2pp WoW). 2 of 5 districts trending up; District 11 declined (–6%) and District 22 softened (–3%).</li>
           <li>Average District Performance Index (DPI) is <strong>73</strong> (+1 pt MoM). District 14 leads at 82 — top 10% nationally — and is the highest single-district score in 6 months.</li>
@@ -379,7 +378,7 @@ export const HQHome: React.FC = () => {
       </div>
 
       <div className="ai-brief-section">
-        <h3 className="ai-brief-section-title"><BarChart3 size={14} /> District Performance Index</h3>
+        <h3 className="ai-brief-section-title"><BarChartOutlined sx={{ fontSize: 14 }}/> District Performance Index</h3>
         <ul className="ai-brief-bullets">
           <li><strong>District 14 — Tennessee</strong> leads the network on planogram compliance for the 2nd consecutive week. Top 3 stores at 100% POG adherence; district-wide average 96%, camera audit scores averaging 96.2.</li>
           <li><strong>District 11 — Florida</strong> dropped 6 points in execution compliance due to audit misses in 3 stores on Monday. Estimated revenue impact: <strong>$18K</strong>. DM Lisa Nguyen has been notified.</li>
@@ -388,7 +387,7 @@ export const HQHome: React.FC = () => {
       </div>
 
       <div className="ai-brief-section">
-        <h3 className="ai-brief-section-title"><CheckCircle2 size={14} /> Compliance &amp; Operations</h3>
+        <h3 className="ai-brief-section-title"><TaskAltOutlined sx={{ fontSize: 14 }}/> Compliance &amp; Operations</h3>
         <ul className="ai-brief-bullets">
           <li><strong>Compliance:</strong> Network-wide POG adherence at <strong>84.8%</strong> (–0.4pp WoW). Decline concentrated in Districts 11 (78%) and 22 (83%); remaining districts held steady.</li>
           <li><strong>Critical issues:</strong> 14 open (+3 WoW). 2 are tied to the FDA Organic Baby Lotion recall (Batch #7742) — escalated to all impacted stores.</li>
@@ -397,7 +396,7 @@ export const HQHome: React.FC = () => {
       </div>
 
       <div className="ai-brief-section">
-        <h3 className="ai-brief-section-title"><Bell size={14} /> Broadcasts &amp; Communication</h3>
+        <h3 className="ai-brief-section-title"><NotificationsOutlined sx={{ fontSize: 14 }}/> Broadcasts &amp; Communication</h3>
         <ul className="ai-brief-bullets">
           <li>Broadcast reach is <strong>94.1%</strong> (+1.8pp WoW) — the highest in 8 weeks. Acknowledgement rate, however, declined in 3 districts (11, 19, 22) below the 85% threshold.</li>
           <li>Average response time to HQ broadcasts increased from <strong>2.1h to 4.8h</strong> over the last 7 days. Recommend a follow-up nudge to underperforming districts.</li>
@@ -406,7 +405,7 @@ export const HQHome: React.FC = () => {
       </div>
 
       <div className="ai-brief-section ai-brief-suggestions">
-        <h3 className="ai-brief-section-title"><Sparkles size={14} /> Suggestions</h3>
+        <h3 className="ai-brief-section-title"><AutoAwesomeOutlined sx={{ fontSize: 14 }}/> Suggestions</h3>
         <ul className="ai-brief-bullets">
           <li>District 14's execution playbook is a strong template for underperforming districts — <em>consider scheduling a best-practices share session</em> with Districts 11 and 22.</li>
           <li>The cross-sell POG in personal care is showing strong lift — <em>recommend extending the rollout to Districts 11, 22, and 19 next week</em>.</li>
@@ -434,11 +433,11 @@ export const HQHome: React.FC = () => {
           <div className="welcome-meta">
             <span className="role-badge">{user?.role || 'HQ'}</span>
             <span className="scope-info">
-              <Globe size={14} />
+              <LanguageOutlined sx={{ fontSize: 14 }}/>
               {user?.region || 'North America'} · Global View
             </span>
             <span className="last-refresh-date">
-              <Calendar size={14} />
+              <CalendarTodayOutlined sx={{ fontSize: 14 }}/>
               Last refreshed: {lastRefresh.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at {lastRefresh.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
             </span>
             <button
@@ -446,7 +445,7 @@ export const HQHome: React.FC = () => {
               onClick={handleRefresh}
               disabled={isRefreshing}
             >
-              <RefreshCw size={14} />
+              <RefreshOutlined sx={{ fontSize: 14 }}/>
             </button>
           </div>
         </div>
@@ -457,11 +456,11 @@ export const HQHome: React.FC = () => {
         <div className="ai-brief-header-bar" onClick={() => setIsBriefCollapsed(!isBriefCollapsed)}>
           <div className="ai-brief-header-left">
             <div className={`ai-brief-toggle ${isBriefCollapsed ? 'collapsed' : ''}`}>
-              <ChevronDown size={14} />
+              <KeyboardArrowDown sx={{ fontSize: 14 }}/>
             </div>
             <div className="ai-brief-header">
               <div className="ai-brief-badge-clean">
-                <Sparkles size={18} />
+                <AutoAwesomeOutlined sx={{ fontSize: 18 }}/>
                 <span>AI Daily Brief</span>
               </div>
             </div>
@@ -475,7 +474,7 @@ export const HQHome: React.FC = () => {
           {!isBriefCollapsed && (
             <button className="ai-brief-read-more" onClick={() => setShowBriefModal(true)}>
               <span>Read Full Brief</span>
-              <ChevronRight size={14} />
+              <KeyboardArrowRight sx={{ fontSize: 14 }}/>
             </button>
           )}
         </div>
@@ -486,45 +485,45 @@ export const HQHome: React.FC = () => {
         <div className="bca-header">
           <div className="bca-header-left">
             <div className="bca-title-row">
-              <Megaphone size={20} />
+              <CampaignOutlined sx={{ fontSize: 20 }}/>
               <h2>Broadcast Analytics</h2>
             </div>
             <p className="bca-subtitle">Track HQ broadcast effectiveness, district acknowledgement, and engagement</p>
           </div>
           <button className="bca-create-btn" onClick={openBroadcastWizard}>
-            <Megaphone size={13} /> Create Broadcast
+            <CampaignOutlined sx={{ fontSize: 13 }}/> Create Broadcast
           </button>
         </div>
 
         {/* Performance Overview */}
         <div className="bca-overview-grid">
-          <div className="bca-kpi-card">
+          <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '16px' }}>
             <span className="bca-kpi-label">Active Broadcasts</span>
             <span className="bca-kpi-value">{HQ_BROADCAST_OVERVIEW.active}</span>
             <span className="bca-kpi-context">currently live</span>
-          </div>
-          <div className="bca-kpi-card">
+          </Card>
+          <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '16px' }}>
             <span className="bca-kpi-label">Sent This Week</span>
             <span className="bca-kpi-value">{HQ_BROADCAST_OVERVIEW.sentThisWeek}</span>
             <span className="bca-kpi-context">broadcasts</span>
-          </div>
-          <div className="bca-kpi-card">
+          </Card>
+          <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '16px' }}>
             <span className="bca-kpi-label">Acknowledged</span>
             <span className="bca-kpi-value">{HQ_BROADCAST_OVERVIEW.ackPct}%</span>
             <span className="bca-kpi-context">of all districts</span>
-          </div>
-          <div className="bca-kpi-card">
+          </Card>
+          <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '16px' }}>
             <span className="bca-kpi-label">Avg Ack Time</span>
             <span className="bca-kpi-value">{HQ_BROADCAST_OVERVIEW.avgAckTime}</span>
             <span className="bca-kpi-context">time to acknowledge</span>
-          </div>
-          <div className="bca-kpi-card">
+          </Card>
+          <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '16px' }}>
             <span className="bca-kpi-label">Trend vs Last</span>
             <span className={`bca-kpi-value ${HQ_BROADCAST_OVERVIEW.trendVsLast >= 0 ? 'positive' : 'negative'}`}>
               {HQ_BROADCAST_OVERVIEW.trendVsLast >= 0 ? '+' : ''}{HQ_BROADCAST_OVERVIEW.trendVsLast}%
             </span>
             <span className="bca-kpi-context">vs last period</span>
-          </div>
+          </Card>
         </div>
 
         {/* Broadcast List */}
@@ -581,7 +580,7 @@ export const HQHome: React.FC = () => {
           <div className="store-ops-section insights-section-v3">
             <div className="section-header-v3">
               <div className="section-title-v3">
-                <AlertTriangle size={16} className="header-icon-risk" />
+                <WarningAmberOutlined sx={{ fontSize: 16 }} className="header-icon-risk"/>
                 <h2>Alerts</h2>
               </div>
               <div className="insights-meta">
@@ -592,124 +591,124 @@ export const HQHome: React.FC = () => {
             </div>
             <div className="insights-content-v3">
               {/* Compliance Risk — Critical */}
-              <div className="insight-hero-card">
+              <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: 0, overflow: 'hidden', marginBottom: 'var(--space-lg)' }}>
                 <div className="hero-card-content">
                   <div className="hero-card-header">
                     <div className="hero-signal critical">
-                      <AlertTriangle size={14} />
+                      <WarningAmberOutlined sx={{ fontSize: 14 }}/>
                       <span>COMPLIANCE RISK</span>
                     </div>
                   </div>
                   <h2 className="hero-headline">Execution Compliance Dropped 6% — District 11</h2>
                   <p className="hero-context">3 stores missed Monday audit window. Estimated revenue impact $18K. DM Lisa Nguyen has been notified.</p>
                   <div className="hero-impact">
-                    <AlertCircle size={14} />
+                    <ErrorOutlined sx={{ fontSize: 14 }}/>
                     <span>Compliance gap widening — escalation recommended within 24h</span>
                   </div>
                   <div className="hero-top-store">
-                    <Store size={12} />
+                    <StoreOutlined sx={{ fontSize: 12 }}/>
                     <span>District 11 — Florida (3 stores impacted)</span>
                   </div>
                   <div className="hero-actions">
                     <button className="hero-action-primary" onClick={() => openHqAlertPanel('compliance-risk')}>
                       <span>View district detail</span>
-                      <ChevronRight size={16} />
+                      <KeyboardArrowRight sx={{ fontSize: 16 }}/>
                     </button>
                   </div>
                 </div>
-              </div>
+              </Card>
 
               {/* District Performance Trending — Warning */}
-              <div className="insight-hero-card">
+              <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: 0, overflow: 'hidden', marginBottom: 'var(--space-lg)' }}>
                 <div className="hero-card-content">
                   <div className="hero-card-header">
                     <div className="hero-signal warning">
-                      <TrendingUp size={14} />
+                      <TrendingUpOutlined sx={{ fontSize: 14 }}/>
                       <span>DISTRICT TRENDING</span>
                     </div>
                     <div className="hero-overdue">
-                      <AlertTriangle size={12} />
+                      <WarningAmberOutlined sx={{ fontSize: 12 }}/>
                       <span>Action Needed</span>
                     </div>
                   </div>
                   <h2 className="hero-headline">Execution Gaps Widening in 2 Districts</h2>
                   <p className="hero-context">Compliance scores declining in District 11 and District 22. Correlated with audit misses and late broadcast acknowledgements.</p>
                   <div className="hero-impact">
-                    <Store size={14} />
+                    <StoreOutlined sx={{ fontSize: 14 }}/>
                     <span>District 14 +4% · District 08 +2% · District 22 –3%</span>
                   </div>
                   <div className="hero-top-store">
-                    <Sparkles size={12} />
+                    <AutoAwesomeOutlined sx={{ fontSize: 12 }}/>
                     <span>AI Copilot has prepared an action plan for these districts</span>
                   </div>
                   <div className="hero-actions">
                     <button className="hero-action-primary" onClick={() => openHqAlertPanel('district-trending')}>
                       <span>Open in AI Copilot</span>
-                      <ChevronRight size={16} />
+                      <KeyboardArrowRight sx={{ fontSize: 16 }}/>
                     </button>
                   </div>
                 </div>
-              </div>
+              </Card>
 
               {/* Communication Gap */}
-              <div className="insight-hero-card">
+              <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: 0, overflow: 'hidden', marginBottom: 'var(--space-lg)' }}>
                 <div className="hero-card-content">
                   <div className="hero-card-header">
                     <div className="hero-signal">
-                      <TrendingDown size={14} />
+                      <TrendingDownOutlined sx={{ fontSize: 14 }}/>
                       <span>COMMUNICATION GAP</span>
                     </div>
                     <div className="hero-overdue">
-                      <Clock size={12} />
+                      <AccessTimeOutlined sx={{ fontSize: 12 }}/>
                       <span>3 districts below 85%</span>
                     </div>
                   </div>
                   <h2 className="hero-headline">Broadcast Acknowledgement Rate Declining</h2>
                   <p className="hero-context">Districts 11, 22, and 19 below the 85% threshold. Average response time has increased from 2.1h to 4.8h over the last 7 days.</p>
                   <div className="hero-impact">
-                    <AlertCircle size={14} />
+                    <ErrorOutlined sx={{ fontSize: 14 }}/>
                     <span>14-store acknowledgement gap on the latest Safety Protocol broadcast</span>
                   </div>
                   <div className="hero-top-store">
-                    <Store size={12} />
+                    <StoreOutlined sx={{ fontSize: 12 }}/>
                     <span>Districts 11, 19, and 22 most impacted</span>
                   </div>
                   <div className="hero-actions">
                     <button className="hero-action-primary" onClick={() => openHqAlertPanel('communication-gap')}>
                       <span>View broadcast analytics</span>
-                      <ChevronRight size={16} />
+                      <KeyboardArrowRight sx={{ fontSize: 16 }}/>
                     </button>
                   </div>
                 </div>
-              </div>
+              </Card>
 
               {/* Performance Win — Positive */}
-              <div className="insight-hero-card">
+              <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: 0, overflow: 'hidden', marginBottom: 'var(--space-lg)' }}>
                 <div className="hero-card-content">
                   <div className="hero-card-header">
-                    <div className="hero-signal" style={{ background: '#dcfce7', color: '#15803d' }}>
-                      <CheckCircle2 size={14} />
+                    <div className="hero-signal" style={{ background: 'var(--ia-color-success-bg)', color: 'var(--ia-color-success)' }}>
+                      <TaskAltOutlined sx={{ fontSize: 14 }}/>
                       <span>PERFORMANCE WIN</span>
                     </div>
                   </div>
                   <h2 className="hero-headline">District 14 — Network-Leading Planogram Compliance, 2nd Week Running</h2>
                   <p className="hero-context">Top 3 stores at 100% POG adherence; district-wide average 96%. Camera audit scores averaging 96.2. Top performer: Store #2034.</p>
                   <div className="hero-impact">
-                    <Sparkles size={14} />
+                    <AutoAwesomeOutlined sx={{ fontSize: 14 }}/>
                     <span>This is a replicable template for underperforming districts</span>
                   </div>
                   <div className="hero-top-store">
-                    <Users size={12} />
+                    <GroupOutlined sx={{ fontSize: 12 }}/>
                     <span>DM John Doe — share-out recommended</span>
                   </div>
                   <div className="hero-actions">
                     <button className="hero-action-primary" onClick={() => openHqAlertPanel('performance-win')}>
                       <span>View district detail</span>
-                      <ChevronRight size={16} />
+                      <KeyboardArrowRight sx={{ fontSize: 16 }}/>
                     </button>
                   </div>
                 </div>
-              </div>
+              </Card>
             </div>
           </div>
         </div>
@@ -717,23 +716,23 @@ export const HQHome: React.FC = () => {
         {/* RIGHT COLUMN: Operational Pulse */}
         <div className="home-col-right">
           {/* Operational Pulse */}
-          <div className="store-ops-section kpi-snapshot-card">
+          <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '20px' }}>
             <div className="kpi-snapshot-header">
               <div className="kpi-snapshot-title-row">
-                <BarChart3 size={16} className="kpi-snapshot-icon" />
+                <BarChartOutlined sx={{ fontSize: 16 }} className="kpi-snapshot-icon"/>
                 <h2>Operational Pulse</h2>
               </div>
             </div>
             <div className="kpi-snapshot-grid">
               <div className="kpi-snapshot-item">
-                <div className="kpi-snapshot-item-icon stores"><Store size={16} /></div>
+                <div className="kpi-snapshot-item-icon stores"><StoreOutlined sx={{ fontSize: 16 }}/></div>
                 <div className="kpi-snapshot-item-data">
                   <span className="kpi-snapshot-value">5</span>
                   <span className="kpi-snapshot-label">Districts Managed</span>
                 </div>
               </div>
               <div className="kpi-snapshot-item">
-                <div className="kpi-snapshot-item-icon tasks"><Zap size={16} /></div>
+                <div className="kpi-snapshot-item-icon tasks"><BoltOutlined sx={{ fontSize: 16 }}/></div>
                 <div className="kpi-snapshot-item-data">
                   <span className="kpi-snapshot-value">14</span>
                   <span className="kpi-snapshot-label">Critical Issues</span>
@@ -741,7 +740,7 @@ export const HQHome: React.FC = () => {
                 <span className="kpi-snapshot-badge warning">+3</span>
               </div>
               <div className="kpi-snapshot-item">
-                <div className="kpi-snapshot-item-icon compliance"><CheckCircle2 size={16} /></div>
+                <div className="kpi-snapshot-item-icon compliance"><TaskAltOutlined sx={{ fontSize: 16 }}/></div>
                 <div className="kpi-snapshot-item-data">
                   <span className="kpi-snapshot-value">94.1%</span>
                   <span className="kpi-snapshot-label">Broadcast Reach</span>
@@ -749,7 +748,7 @@ export const HQHome: React.FC = () => {
                 <span className="kpi-snapshot-badge positive">+1.8%</span>
               </div>
               <div className="kpi-snapshot-item">
-                <div className="kpi-snapshot-item-icon nps"><Star size={16} /></div>
+                <div className="kpi-snapshot-item-icon nps"><StarBorderOutlined sx={{ fontSize: 16 }}/></div>
                 <div className="kpi-snapshot-item-data">
                   <span className="kpi-snapshot-value">73</span>
                   <span className="kpi-snapshot-label">District Perf. Index</span>
@@ -757,30 +756,30 @@ export const HQHome: React.FC = () => {
                 <span className="kpi-snapshot-badge positive">+1 pt</span>
               </div>
             </div>
-          </div>
+          </Card>
 
           {/* DISTRICT LEADERBOARD — Operational-Pulse-style list, click for full detail panel */}
-          <div className="store-ops-section kpi-snapshot-card" style={{ marginTop: 16 }}>
+          <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '20px', overflow: 'hidden', marginTop: '16px' }}>
             <div className="kpi-snapshot-header">
               <div className="kpi-snapshot-title-row">
-                <BarChart3 size={16} className="kpi-snapshot-icon" />
+                <BarChartOutlined sx={{ fontSize: 16 }} className="kpi-snapshot-icon"/>
                 <h2>District Leaderboard</h2>
               </div>
-              <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 500 }}>{MOCK_DISTRICTS.length} Districts · click for details</span>
+              <span style={{ fontSize: 'var(--ia-text-2xs)', color: 'var(--ia-color-text-tertiary)', fontWeight: 'var(--ia-font-weight-medium)' }}>{MOCK_DISTRICTS.length} Districts · click for details</span>
             </div>
             {broadcastToast && (
               <div className="hq-dt-toast">
-                <CheckCircle2 size={14} />
+                <TaskAltOutlined sx={{ fontSize: 14 }}/>
                 <span>{broadcastToast}</span>
               </div>
             )}
             <div className="kpi-snapshot-grid">
               {sortedDistricts.map((d, i) => {
                 const trendBadge = d.trend === 'up'
-                  ? { cls: 'positive', label: <><TrendingUp size={11} /> Up</> }
+                  ? { cls: 'positive', label: <><TrendingUpOutlined sx={{ fontSize: 11 }}/> Up</> }
                   : d.trend === 'down'
-                  ? { cls: 'negative', label: <><TrendingDown size={11} /> Down</> }
-                  : { cls: 'neutral', label: <><Minus size={11} /> Flat</> };
+                  ? { cls: 'negative', label: <><TrendingDownOutlined sx={{ fontSize: 11 }}/> Down</> }
+                  : { cls: 'neutral', label: <><Remove sx={{ fontSize: 11 }}/> Flat</> };
                 return (
                   <div
                     key={d.id}
@@ -791,15 +790,18 @@ export const HQHome: React.FC = () => {
                     <div
                       className="kpi-snapshot-item-icon"
                       style={{
-                        background: i === 0 ? '#fef3c7' : i < 3 ? '#e0e7ff' : '#f1f5f9',
-                        color: i === 0 ? '#92400e' : i < 3 ? '#3730a3' : '#475569',
-                        fontWeight: 700,
-                        fontSize: 13,
+                        background: i === 0 ? 'var(--ia-color-warning-bg)' : i < 3 ? '#e0e7ff' : 'var(--ia-color-bg-muted)',
+                        color: i === 0 ? '#92400e' : i < 3 ? '#3730a3' : 'var(--ia-color-text-secondary)',
+                        fontWeight: 'var(--ia-font-weight-bold)',
+                        fontSize: 'var(--ia-text-13)',
                       }}
                     >#{i + 1}</div>
                     <div className="kpi-snapshot-item-data">
-                      <span className="kpi-snapshot-value" style={{ fontSize: 18 }}>{d.dpi}</span>
-                      <span className="kpi-snapshot-label" style={{ textTransform: 'none', letterSpacing: 0, fontWeight: 600, color: '#0f172a' }}>{d.name}</span>
+                      <span className="kpi-snapshot-value" style={{ fontSize: 'var(--ia-text-lg)' }}>{d.dpi}</span>
+                      <span
+                        className="kpi-snapshot-label"
+                        style={{ textTransform: 'none', letterSpacing: 0, fontWeight: 'var(--ia-font-weight-semibold)', color: 'var(--ia-color-text-primary)' }}
+                      >{d.name}</span>
                     </div>
                     <span className={`kpi-snapshot-badge ${trendBadge.cls}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
                       {trendBadge.label}
@@ -808,7 +810,7 @@ export const HQHome: React.FC = () => {
                 );
               })}
             </div>
-          </div>
+          </Card>
         </div>
       </div>
 
@@ -829,7 +831,7 @@ export const HQHome: React.FC = () => {
             }}
           >
             <button className="hq-modal-close" onClick={() => setLbSelectedDistrict(null)}>
-              <X size={18} />
+              <CloseOutlined sx={{ fontSize: 18 }}/>
             </button>
             <div className="hq-modal-badges">
               <span className={`hq-modal-badge hq-modal-badge--${lbSelectedDistrict.riskLevel === 'low' ? 'info' : lbSelectedDistrict.riskLevel === 'high' || lbSelectedDistrict.riskLevel === 'critical' ? 'high' : 'info'}`}>
@@ -845,48 +847,111 @@ export const HQHome: React.FC = () => {
             </p>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 16 }}>
-              <div style={{ padding: 14, background: '#f8fafc', borderRadius: 8, border: '1px solid #e2e8f0' }}>
-                <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>DPI Score</div>
-                <div style={{ fontSize: 28, fontWeight: 700, color: lbSelectedDistrict.dpi >= 75 ? '#059669' : lbSelectedDistrict.dpi >= 65 ? '#d97706' : '#dc2626' }}>
+              <div style={{ padding: 14, background: 'var(--ia-color-bg-subtle)', borderRadius: 8, border: '1px solid #e2e8f0' }}>
+                <div
+                  style={{
+                    fontSize: 'var(--ia-text-2xs)',
+                    color: 'var(--ia-color-text-secondary)',
+                    textTransform: 'uppercase',
+                    letterSpacing: 0.5,
+                    marginBottom: 4,
+                  }}
+                >DPI Score</div>
+                <div
+                  style={{
+                    fontSize: 'var(--ia-text-4xl)',
+                    fontWeight: 'var(--ia-font-weight-bold)',
+                    color: lbSelectedDistrict.dpi >= 75 ? '#059669' : lbSelectedDistrict.dpi >= 65 ? 'var(--ia-color-warning-text)' : 'var(--ia-color-error-strong)',
+                  }}
+                >
                   {lbSelectedDistrict.dpi}
                 </div>
-                <div style={{ fontSize: 11, color: '#64748b' }}>out of 100</div>
+                <div style={{ fontSize: 'var(--ia-text-2xs)', color: 'var(--ia-color-text-secondary)' }}>out of 100</div>
               </div>
-              <div style={{ padding: 14, background: '#f8fafc', borderRadius: 8, border: '1px solid #e2e8f0' }}>
-                <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Compliance</div>
-                <div style={{ fontSize: 28, fontWeight: 700, color: '#0f172a' }}>{lbSelectedDistrict.compliance}%</div>
+              <div style={{ padding: 14, background: 'var(--ia-color-bg-subtle)', borderRadius: 8, border: '1px solid #e2e8f0' }}>
+                <div
+                  style={{
+                    fontSize: 'var(--ia-text-2xs)',
+                    color: 'var(--ia-color-text-secondary)',
+                    textTransform: 'uppercase',
+                    letterSpacing: 0.5,
+                    marginBottom: 4,
+                  }}
+                >Compliance</div>
+                <div style={{ fontSize: 'var(--ia-text-4xl)', fontWeight: 'var(--ia-font-weight-bold)', color: 'var(--ia-color-text-primary)' }}>{lbSelectedDistrict.compliance}%</div>
                 <div className="hq-compliance-bar" style={{ marginTop: 6 }}>
                   <div className="hq-compliance-fill" style={{ width: `${lbSelectedDistrict.compliance}%` }} />
                 </div>
               </div>
-              <div style={{ padding: 14, background: '#f8fafc', borderRadius: 8, border: '1px solid #e2e8f0' }}>
-                <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Risk Level</div>
+              <div style={{ padding: 14, background: 'var(--ia-color-bg-subtle)', borderRadius: 8, border: '1px solid #e2e8f0' }}>
+                <div
+                  style={{
+                    fontSize: 'var(--ia-text-2xs)',
+                    color: 'var(--ia-color-text-secondary)',
+                    textTransform: 'uppercase',
+                    letterSpacing: 0.5,
+                    marginBottom: 4,
+                  }}
+                >Risk Level</div>
                 <span className={`hq-risk-level hq-risk-level--${lbSelectedDistrict.riskLevel}`}>{lbSelectedDistrict.riskLevel}</span>
               </div>
-              <div style={{ padding: 14, background: '#f8fafc', borderRadius: 8, border: '1px solid #e2e8f0' }}>
-                <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Trend</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, fontWeight: 600, color: lbSelectedDistrict.trend === 'up' ? '#059669' : lbSelectedDistrict.trend === 'down' ? '#dc2626' : '#64748b' }}>
-                  {lbSelectedDistrict.trend === 'up' && <><TrendingUp size={16} /> Improving</>}
-                  {lbSelectedDistrict.trend === 'down' && <><TrendingDown size={16} /> Declining</>}
-                  {lbSelectedDistrict.trend === 'flat' && <><Minus size={16} /> Stable</>}
+              <div style={{ padding: 14, background: 'var(--ia-color-bg-subtle)', borderRadius: 8, border: '1px solid #e2e8f0' }}>
+                <div
+                  style={{
+                    fontSize: 'var(--ia-text-2xs)',
+                    color: 'var(--ia-color-text-secondary)',
+                    textTransform: 'uppercase',
+                    letterSpacing: 0.5,
+                    marginBottom: 4,
+                  }}
+                >Trend</div>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    fontSize: 'var(--ia-text-sm)',
+                    fontWeight: 'var(--ia-font-weight-semibold)',
+                    color: lbSelectedDistrict.trend === 'up' ? '#059669' : lbSelectedDistrict.trend === 'down' ? 'var(--ia-color-error-strong)' : 'var(--ia-color-text-secondary)',
+                  }}
+                >
+                  {lbSelectedDistrict.trend === 'up' && <><TrendingUpOutlined sx={{ fontSize: 16 }}/> Improving</>}
+                  {lbSelectedDistrict.trend === 'down' && <><TrendingDownOutlined sx={{ fontSize: 16 }}/> Declining</>}
+                  {lbSelectedDistrict.trend === 'flat' && <><Remove sx={{ fontSize: 16 }}/> Stable</>}
                 </div>
               </div>
             </div>
 
-            <div style={{ marginTop: 20, padding: 14, background: '#f8fafc', borderRadius: 8, border: '1px solid #e2e8f0' }}>
-              <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 10 }}>District Manager</div>
+            <div style={{ marginTop: 20, padding: 14, background: 'var(--ia-color-bg-subtle)', borderRadius: 8, border: '1px solid #e2e8f0' }}>
+              <div
+                style={{
+                  fontSize: 'var(--ia-text-2xs)',
+                  color: 'var(--ia-color-text-secondary)',
+                  textTransform: 'uppercase',
+                  letterSpacing: 0.5,
+                  marginBottom: 10,
+                }}
+              >District Manager</div>
               <div className="hq-dm-cell">
                 <div className="hq-dm-avatar">{lbSelectedDistrict.dm.split(' ').map(n => n[0]).join('')}</div>
                 <div className="hq-dm-info">
-                  <span className="hq-dm-name" style={{ fontWeight: 600 }}>{lbSelectedDistrict.dm}</span>
-                  <span style={{ fontSize: 12, color: '#64748b' }}>{lbSelectedDistrict.dmEmail}</span>
+                  <span className="hq-dm-name" style={{ fontWeight: 'var(--ia-font-weight-semibold)' }}>{lbSelectedDistrict.dm}</span>
+                  <span style={{ fontSize: 'var(--ia-text-xs)', color: 'var(--ia-color-text-secondary)' }}>{lbSelectedDistrict.dmEmail}</span>
                 </div>
               </div>
             </div>
 
             <div style={{ marginTop: 20 }}>
-              <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 10 }}>Key Highlights</div>
-              <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13, color: '#334155', lineHeight: 1.7 }}>
+              <div
+                style={{
+                  fontSize: 'var(--ia-text-2xs)',
+                  color: 'var(--ia-color-text-secondary)',
+                  textTransform: 'uppercase',
+                  letterSpacing: 0.5,
+                  marginBottom: 10,
+                }}
+              >Key Highlights</div>
+              <ul style={{ margin: 0, paddingLeft: 18, fontSize: 'var(--ia-text-13)', color: 'var(--ia-color-text-primary)', lineHeight: 1.7 }}>
                 <li>DPI {lbSelectedDistrict.dpi >= 75 ? 'exceeds' : lbSelectedDistrict.dpi >= 65 ? 'meets' : 'below'} the network average (72)</li>
                 <li>Compliance {lbSelectedDistrict.compliance >= 85 ? 'on track' : 'requires attention'} ({lbSelectedDistrict.compliance}% vs 85% target)</li>
                 <li>{lbSelectedDistrict.riskLevel === 'low' ? 'No critical risk flags' : lbSelectedDistrict.riskLevel === 'medium' ? '1–2 risk flags to review' : 'Multiple risk flags — escalate'}</li>
@@ -894,22 +959,28 @@ export const HQHome: React.FC = () => {
             </div>
 
             <div className="hq-modal-actions" style={{ marginTop: 24 }}>
-              <button
+              <Button
+                variant="outlined"
+                color="primary"
                 className="hq-modal-btn hq-modal-btn--secondary"
                 onClick={() => {
                   const d = lbSelectedDistrict;
                   setLbSelectedDistrict(null);
                   navigate(`/store-operations/district-intelligence?district=${d.id}`);
                 }}
+                startIcon={<BarChartOutlined sx={{ fontSize: 16 }}/>}
               >
-                <BarChart3 size={16} /> Open District Intelligence
-              </button>
-              <button
+                Open District Intelligence
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
                 className="hq-modal-btn hq-modal-btn--primary"
                 onClick={() => { setLbSelectedDistrict(null); navigate('/command-center/communications'); }}
+                startIcon={<ChatOutlined sx={{ fontSize: 16 }}/>}
               >
-                <MessageSquare size={16} /> Message DM
-              </button>
+                Message DM
+              </Button>
             </div>
           </div>
         </div>
@@ -922,7 +993,7 @@ export const HQHome: React.FC = () => {
           <div className="detail-panel">
             <div className="detail-panel-header">
               <button className="detail-panel-close" onClick={closeHqAlertPanel}>
-                <X size={18} />
+                <CloseOutlined sx={{ fontSize: 18 }}/>
               </button>
             </div>
             <div className="detail-panel-body">
@@ -930,15 +1001,15 @@ export const HQHome: React.FC = () => {
               <div className="dp-severity-row">
                 <span
                   className={`dp-severity-badge ${hqAlertPanel.severity === 'success' ? 'risk' : hqAlertPanel.severity}`}
-                  style={hqAlertPanel.severity === 'success' ? { background: '#dcfce7', color: '#15803d' } : undefined}
+                  style={hqAlertPanel.severity === 'success' ? { background: 'var(--ia-color-success-bg)', color: 'var(--ia-color-success)' } : undefined}
                 >
-                  {hqAlertPanel.severity !== 'success' && <AlertTriangle size={12} />}
-                  {hqAlertPanel.severity === 'success' && <CheckCircle2 size={12} />}
+                  {hqAlertPanel.severity !== 'success' && <WarningAmberOutlined sx={{ fontSize: 12 }}/>}
+                  {hqAlertPanel.severity === 'success' && <TaskAltOutlined sx={{ fontSize: 12 }}/>}
                   {hqAlertPanel.signalLabel}
                 </span>
                 {hqAlertPanel.source && (
                   <span className="dp-source">
-                    <Users size={11} />
+                    <GroupOutlined sx={{ fontSize: 11 }}/>
                     {hqAlertPanel.source}
                   </span>
                 )}
@@ -950,14 +1021,14 @@ export const HQHome: React.FC = () => {
 
               {/* Impact Summary */}
               <div className="dp-impact-summary">
-                {hqAlertPanel.severity === 'success' ? <Sparkles size={14} /> : <AlertCircle size={14} />}
+                {hqAlertPanel.severity === 'success' ? <AutoAwesomeOutlined sx={{ fontSize: 14 }}/> : <ErrorOutlined sx={{ fontSize: 14 }}/>}
                 <span>{hqAlertPanel.impactSummary}</span>
               </div>
 
               {/* Impacted Districts/Stores */}
               <div className="dp-section">
                 <h3 className="dp-section-title">
-                  {hqAlertPanel.entityLabel === 'Districts' ? <BarChart3 size={14} /> : <Store size={14} />}
+                  {hqAlertPanel.entityLabel === 'Districts' ? <BarChartOutlined sx={{ fontSize: 14 }}/> : <StoreOutlined sx={{ fontSize: 14 }}/>}
                   Impacted {hqAlertPanel.entityLabel} ({hqAlertPanel.entities.length})
                 </h3>
                 <div className="dp-stores-list">
@@ -985,14 +1056,14 @@ export const HQHome: React.FC = () => {
                             }
                           }}
                         >
-                          {hqAlertPanel.entityLabel === 'Districts' ? 'Open District' : 'View Store'} <ChevronRight size={11} />
+                          {hqAlertPanel.entityLabel === 'Districts' ? 'Open District' : 'View Store'} <KeyboardArrowRight sx={{ fontSize: 11 }}/>
                         </button>
                         {e.manager && (
                           <button
                             className="dp-store-assign-btn"
                             onClick={() => showToast(`✓ Message sent to ${e.manager} (${e.name})`)}
                           >
-                            <MessageSquare size={11} />
+                            <ChatOutlined sx={{ fontSize: 11 }}/>
                             Message {hqAlertPanel.entityLabel === 'Districts' ? 'DM' : 'Manager'}
                           </button>
                         )}
@@ -1011,7 +1082,7 @@ export const HQHome: React.FC = () => {
                     onClick={() => handleHqAlertCTA(cta)}
                   >
                     <span>{cta.label}</span>
-                    <ChevronRight size={15} />
+                    <KeyboardArrowRight sx={{ fontSize: 15 }}/>
                   </button>
                 ))}
               </div>
@@ -1019,7 +1090,7 @@ export const HQHome: React.FC = () => {
               {/* Timestamp */}
               {hqAlertPanel.timestamp && (
                 <div className="dp-timestamp">
-                  <Clock size={11} />
+                  <AccessTimeOutlined sx={{ fontSize: 11 }}/>
                   <span>Just now</span>
                 </div>
               )}
@@ -1035,7 +1106,7 @@ export const HQHome: React.FC = () => {
           <div className="detail-panel">
             <div className="detail-panel-header">
               <button className="detail-panel-close" onClick={closeBcaPanel}>
-                <X size={18} />
+                <CloseOutlined sx={{ fontSize: 18 }}/>
               </button>
             </div>
             <div className="detail-panel-body">
@@ -1045,7 +1116,7 @@ export const HQHome: React.FC = () => {
                   {bcaSelectedBroadcast.priority.toUpperCase()} PRIORITY
                 </span>
                 <span className="dp-source">
-                  <Megaphone size={11} />
+                  <CampaignOutlined sx={{ fontSize: 11 }}/>
                   {bcaSelectedBroadcast.type}
                 </span>
               </div>
@@ -1059,7 +1130,7 @@ export const HQHome: React.FC = () => {
               {/* Impact Summary — only when at-risk */}
               {bcaSelectedBroadcast.status === 'at-risk' && (
                 <div className="dp-impact-summary">
-                  <AlertCircle size={14} />
+                  <ErrorOutlined sx={{ fontSize: 14 }}/>
                   <span>
                     {bcaSelectedBroadcast.districts - bcaSelectedBroadcast.ackedDistricts} districts still pending · {bcaSelectedBroadcast.ackRate}% ack rate — needs follow-up to meet compliance target
                   </span>
@@ -1069,7 +1140,7 @@ export const HQHome: React.FC = () => {
               {/* District-Level Compliance Table */}
               <div className="dp-section">
                 <h3 className="dp-section-title">
-                  <Store size={14} />
+                  <StoreOutlined sx={{ fontSize: 14 }}/>
                   District-Level Compliance
                 </h3>
                 <div className="bca-panel-table-wrapper">
@@ -1108,22 +1179,22 @@ export const HQHome: React.FC = () => {
               {/* Smart Insights */}
               <div className="dp-section">
                 <h3 className="dp-section-title">
-                  <Sparkles size={14} />
+                  <AutoAwesomeOutlined sx={{ fontSize: 14 }}/>
                   Smart Insights
                 </h3>
                 <div className="dp-stores-list">
                   {HQ_BROADCAST_INSIGHTS.map((insight, idx) => (
                     <div key={idx} className="dp-store-card info">
                       <div className="dp-store-header">
-                        <span className="dp-store-name" style={{ fontSize: 12 }}>
-                          <Activity size={12} style={{ marginRight: 6, verticalAlign: 'middle' }} />
+                        <span className="dp-store-name" style={{ fontSize: 'var(--ia-text-xs)' }}>
+                          <ShowChartOutlined sx={{ fontSize: 12 }} style={{ marginRight: 6, verticalAlign: 'middle' }}/>
                           Pattern
                         </span>
                       </div>
                       <p className="dp-store-detail">{insight.pattern}</p>
                       <div className="dp-store-header" style={{ marginTop: 8 }}>
-                        <span className="dp-store-name" style={{ fontSize: 12, color: '#7c3aed' }}>
-                          <Sparkles size={12} style={{ marginRight: 6, verticalAlign: 'middle' }} />
+                        <span className="dp-store-name" style={{ fontSize: 'var(--ia-text-xs)', color: 'var(--ia-color-primary-pressed)' }}>
+                          <AutoAwesomeOutlined sx={{ fontSize: 12 }} style={{ marginRight: 6, verticalAlign: 'middle' }}/>
                           Recommendation
                         </span>
                       </div>
@@ -1136,22 +1207,22 @@ export const HQHome: React.FC = () => {
               {/* Action CTAs */}
               <div className="dp-actions">
                 <button className="dp-action-btn outlined" onClick={() => { const bc = bcaSelectedBroadcast; closeBcaPanel(); showToast(`Nudge sent to ${bc.districts - bc.ackedDistricts} pending districts`); }}>
-                  <Send size={14} />
+                  <SendOutlined sx={{ fontSize: 14 }}/>
                   <span>Send Nudge</span>
                 </button>
                 <button className="dp-action-btn outlined" onClick={() => { const bc = bcaSelectedBroadcast; closeBcaPanel(); showToast(`Follow-up assigned for "${bc.name}"`); }}>
-                  <ClipboardCheck size={14} />
+                  <AssignmentTurnedInOutlined sx={{ fontSize: 14 }}/>
                   <span>Assign Follow-up</span>
                 </button>
                 <button className="dp-action-btn outlined" onClick={() => { const bc = bcaSelectedBroadcast; closeBcaPanel(); showToast(`Escalated "${bc.name}" to Regional`); }}>
-                  <AlertTriangle size={14} />
+                  <WarningAmberOutlined sx={{ fontSize: 14 }}/>
                   <span>Escalate</span>
                 </button>
               </div>
 
               {/* Timestamp */}
               <div className="dp-timestamp">
-                <Clock size={11} />
+                <AccessTimeOutlined sx={{ fontSize: 11 }}/>
                 <span>Sent {bcaSelectedBroadcast.sentAt}</span>
               </div>
             </div>
@@ -1181,14 +1252,14 @@ export const HQHome: React.FC = () => {
             <div className="bw-modal" onClick={(e) => e.stopPropagation()}>
               <div className="bw-header">
                 <div className="bw-header-icon">
-                  <Megaphone size={18} />
+                  <CampaignOutlined sx={{ fontSize: 18 }}/>
                 </div>
                 <div className="bw-header-text">
                   <h2>Create Broadcast</h2>
                   <p>Send a broadcast to selected districts or managers across the network</p>
                 </div>
                 <button className="bw-close" onClick={() => !bwSending && setShowBroadcastWizard(false)} aria-label="Close">
-                  <X size={16} />
+                  <CloseOutlined sx={{ fontSize: 16 }}/>
                 </button>
               </div>
 
@@ -1200,7 +1271,7 @@ export const HQHome: React.FC = () => {
                 ].map((s, i, arr) => (
                   <React.Fragment key={s.n}>
                     <div className={`bw-step ${bwStep === s.n ? 'active' : ''} ${bwStep > s.n ? 'done' : ''}`}>
-                      <div className="bw-step-dot">{bwStep > s.n ? <Check size={12} /> : s.n}</div>
+                      <div className="bw-step-dot">{bwStep > s.n ? <Check sx={{ fontSize: 12 }}/> : s.n}</div>
                       <span className="bw-step-label">{s.label}</span>
                     </div>
                     {i < arr.length - 1 && <div className={`bw-step-connector ${bwStep > s.n ? 'done' : ''}`} />}
@@ -1217,21 +1288,21 @@ export const HQHome: React.FC = () => {
                       <div className={`bw-audience-card ${bwAudience === 'all-districts' ? 'selected' : ''}`} onClick={() => setBwAudience('all-districts')}>
                         <div className="bw-audience-radio">{bwAudience === 'all-districts' && <div className="bw-audience-dot" />}</div>
                         <div className="bw-audience-body">
-                          <div className="bw-audience-title"><Globe size={14} /> All Districts</div>
+                          <div className="bw-audience-title"><LanguageOutlined sx={{ fontSize: 14 }}/> All Districts</div>
                           <div className="bw-audience-desc">Send to every district ({totalDistricts}) and all stores within</div>
                         </div>
                       </div>
                       <div className={`bw-audience-card ${bwAudience === 'specific-districts' ? 'selected' : ''}`} onClick={() => setBwAudience('specific-districts')}>
                         <div className="bw-audience-radio">{bwAudience === 'specific-districts' && <div className="bw-audience-dot" />}</div>
                         <div className="bw-audience-body">
-                          <div className="bw-audience-title"><Filter size={14} /> Specific Districts</div>
+                          <div className="bw-audience-title"><FilterListOutlined sx={{ fontSize: 14 }}/> Specific Districts</div>
                           <div className="bw-audience-desc">Pick one or more districts from the network</div>
                         </div>
                       </div>
                       <div className={`bw-audience-card ${bwAudience === 'managers' ? 'selected' : ''}`} onClick={() => setBwAudience('managers')}>
                         <div className="bw-audience-radio">{bwAudience === 'managers' && <div className="bw-audience-dot" />}</div>
                         <div className="bw-audience-body">
-                          <div className="bw-audience-title"><Users size={14} /> District Managers Only</div>
+                          <div className="bw-audience-title"><GroupOutlined sx={{ fontSize: 14 }}/> District Managers Only</div>
                           <div className="bw-audience-desc">Send directly to selected District Managers</div>
                         </div>
                       </div>
@@ -1252,7 +1323,7 @@ export const HQHome: React.FC = () => {
                               <div key={d.id} className={`bw-selector-item ${selected ? 'selected' : ''}`} onClick={() =>
                                 setBwSelectedDistrictIds(prev => selected ? prev.filter(id => id !== d.id) : [...prev, d.id])
                               }>
-                                <div className={`bw-checkbox ${selected ? 'checked' : ''}`}>{selected && <Check size={11} />}</div>
+                                <div className={`bw-checkbox ${selected ? 'checked' : ''}`}>{selected && <Check sx={{ fontSize: 11 }}/>}</div>
                                 <div className="bw-selector-item-body">
                                   <span className="bw-selector-item-title">{d.name}</span>
                                   <span className="bw-selector-item-sub">DM {d.dm} · DPI {d.dpi} · {d.riskLevel} risk</span>
@@ -1279,7 +1350,7 @@ export const HQHome: React.FC = () => {
                               <div key={d.id} className={`bw-selector-item ${selected ? 'selected' : ''}`} onClick={() =>
                                 setBwSelectedManagerIds(prev => selected ? prev.filter(id => id !== d.id) : [...prev, d.id])
                               }>
-                                <div className={`bw-checkbox ${selected ? 'checked' : ''}`}>{selected && <Check size={11} />}</div>
+                                <div className={`bw-checkbox ${selected ? 'checked' : ''}`}>{selected && <Check sx={{ fontSize: 11 }}/>}</div>
                                 <div className="bw-selector-item-body">
                                   <span className="bw-selector-item-title">{d.dm}</span>
                                   <span className="bw-selector-item-sub">{d.name}</span>
@@ -1362,7 +1433,7 @@ export const HQHome: React.FC = () => {
 
               <div className="bw-footer">
                 <div className="bw-footer-meta">
-                  {recipientCount > 0 && <><Users size={13} /> Will reach <strong>{recipientCount}</strong> recipient{recipientCount === 1 ? '' : 's'}</>}
+                  {recipientCount > 0 && <><GroupOutlined sx={{ fontSize: 13 }}/> Will reach <strong>{recipientCount}</strong> recipient{recipientCount === 1 ? '' : 's'}</>}
                 </div>
                 <div className="bw-footer-actions">
                   {bwStep > 1 && (
@@ -1373,7 +1444,7 @@ export const HQHome: React.FC = () => {
                       className="bw-btn bw-btn--primary"
                       onClick={() => setBwStep((bwStep + 1) as 1 | 2 | 3)}
                       disabled={bwStep === 1 ? !canAdvanceStep1 : !(bwSubject.trim() && bwMessage.trim())}
-                    >Continue <ChevronRight size={14} /></button>
+                    >Continue <KeyboardArrowRight sx={{ fontSize: 14 }}/></button>
                   )}
                   {bwStep === 3 && (
                     <button
@@ -1388,7 +1459,7 @@ export const HQHome: React.FC = () => {
                         }, 1000);
                       }}
                     >
-                      {bwSending ? 'Sending…' : <><Send size={14} /> Send Broadcast</>}
+                      {bwSending ? 'Sending…' : <><SendOutlined sx={{ fontSize: 14 }}/> Send Broadcast</>}
                     </button>
                   )}
                 </div>
@@ -1401,7 +1472,7 @@ export const HQHome: React.FC = () => {
       {/* Toast */}
       {toastMessage && (
         <div className="hq-toast hq-toast--broadcast">
-          <Send size={14} />
+          <SendOutlined sx={{ fontSize: 14 }}/>
           {toastMessage}
         </div>
       )}
@@ -1412,11 +1483,11 @@ export const HQHome: React.FC = () => {
           <div className="brief-modal" onClick={(e) => e.stopPropagation()}>
             <div className="brief-modal-header">
               <div className="brief-modal-title">
-                <Sparkles size={18} />
+                <AutoAwesomeOutlined sx={{ fontSize: 18 }}/>
                 <h2>AI Daily Brief</h2>
               </div>
               <button className="brief-modal-close" onClick={() => setShowBriefModal(false)}>
-                <X size={20} />
+                <CloseOutlined sx={{ fontSize: 20 }}/>
               </button>
             </div>
             <div className="brief-modal-content">
@@ -1431,7 +1502,7 @@ export const HQHome: React.FC = () => {
         <div className="hq-modal-overlay" onClick={closeBroadcastModal}>
           <div className="hq-modal-card" onClick={(e) => e.stopPropagation()}>
             <button className="hq-modal-close" onClick={closeBroadcastModal}>
-              <X size={18} />
+              <CloseOutlined sx={{ fontSize: 18 }}/>
             </button>
 
             <div className="hq-modal-badges">
@@ -1448,24 +1519,22 @@ export const HQHome: React.FC = () => {
 
             <div className="hq-modal-meta">
               <div className="hq-modal-meta-item">
-                <Users size={14} />
+                <GroupOutlined sx={{ fontSize: 14 }}/>
                 <span>{selectedBroadcast.sender}</span>
               </div>
               <div className="hq-modal-meta-item">
-                <Clock size={14} />
+                <AccessTimeOutlined sx={{ fontSize: 14 }}/>
                 <span>{selectedBroadcast.timeSent}</span>
               </div>
             </div>
 
             <div className="hq-modal-actions">
-              <button className="hq-modal-btn hq-modal-btn--secondary" onClick={() => { closeBroadcastModal(); navigate('/command-center/communications'); }}>
-                <MessageSquare size={16} />
+              <Button variant="outlined" color="primary" className="hq-modal-btn hq-modal-btn--secondary" onClick={() => { closeBroadcastModal(); navigate('/command-center/communications'); }} startIcon={<ChatOutlined sx={{ fontSize: 16 }}/>}>
                 Chat
-              </button>
-              <button className="hq-modal-btn hq-modal-btn--primary" onClick={handleMarkAsRead}>
-                <Check size={16} />
+              </Button>
+              <Button variant="contained" color="primary" className="hq-modal-btn hq-modal-btn--primary" onClick={handleMarkAsRead} startIcon={<Check sx={{ fontSize: 16 }}/>}>
                 Mark as Read
-              </button>
+              </Button>
             </div>
           </div>
         </div>

@@ -1,23 +1,19 @@
 /* Premium Insight Card Styles */
+/* Card shell handled by Impact UI Card component */
 
-.insight-card {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 20px;
-  transition: all 0.2s;
+.insight-card-inner {
   position: relative;
   overflow: hidden;
 }
 
-.insight-card::before {
+.insight-card-inner::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
+  top: -16px;
+  left: -16px;
+  right: -16px;
   height: 3px;
-  background: #e5e7eb;
+  background: var(--ia-color-border);
   transition: background 0.2s;
 }
 
@@ -25,27 +21,21 @@
   cursor: pointer;
 }
 
-.insight-card-clickable:hover {
-  border-color: #d1d5db;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transform: translateY(-2px);
-}
-
 /* Status Colors */
-.insight-card-positive::before {
-  background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+.insight-card-positive.insight-card-inner::before {
+  background: linear-gradient(90deg, var(--ia-color-success) 0%, var(--ia-color-success) 100%);
 }
 
-.insight-card-negative::before {
-  background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+.insight-card-negative.insight-card-inner::before {
+  background: linear-gradient(90deg, var(--ia-color-error) 0%, var(--ia-color-error-strong) 100%);
 }
 
-.insight-card-warning::before {
-  background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
+.insight-card-warning.insight-card-inner::before {
+  background: linear-gradient(90deg, var(--ia-color-warning) 0%, var(--ia-color-warning-text) 100%);
 }
 
-.insight-card-neutral::before {
-  background: linear-gradient(90deg, #6b7280 0%, #4b5563 100%);
+.insight-card-neutral.insight-card-inner::before {
+  background: linear-gradient(90deg, var(--ia-color-text-secondary) 0%, #4b5563 100%);
 }
 
 /* Header */
@@ -58,9 +48,9 @@
 }
 
 .insight-card-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: #6b7280;
+  font-size: var(--ia-text-13);
+  font-weight: var(--ia-font-weight-semibold);
+  color: var(--ia-color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   line-height: 1.4;
@@ -73,8 +63,8 @@
   gap: 4px;
   padding: 4px 8px;
   border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--ia-text-xs);
+  font-weight: var(--ia-font-weight-semibold);
 }
 
 .insight-card-trend-up {
@@ -83,38 +73,34 @@
 }
 
 .insight-card-trend-down {
-  background: #fee2e2;
-  color: #991b1b;
+  background: var(--ia-color-error-bg);
+  color: var(--ia-color-error-strong);
 }
 
 .insight-card-trend-neutral {
-  background: #f3f4f6;
+  background: var(--ia-color-bg-muted);
   color: #4b5563;
 }
 
 /* Value */
 .insight-card-value {
-  font-size: 32px;
-  font-weight: 700;
-  color: #0f172a;
+  font-size: var(--ia-text-5xl);
+  font-weight: var(--ia-font-weight-bold);
+  color: var(--ia-color-text-primary);
   line-height: 1.2;
   margin-bottom: 4px;
 }
 
 /* Subtitle */
 .insight-card-subtitle {
-  font-size: 13px;
-  color: #6b7280;
-  font-weight: 500;
+  font-size: var(--ia-text-13);
+  color: var(--ia-color-text-secondary);
+  font-weight: var(--ia-font-weight-medium);
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-  .insight-card {
-    padding: 16px;
-  }
-
   .insight-card-value {
-    font-size: 28px;
+    font-size: var(--ia-text-4xl);
   }
 }

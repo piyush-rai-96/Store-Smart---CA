@@ -1,5 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Upload, Search, Eye, Edit, Trash2, Clock, CheckCircle, ChevronDown, ChevronUp, Check, Layers } from 'lucide-react';
+import FileUploadOutlined from '@mui/icons-material/FileUploadOutlined';
+import SearchOutlined from '@mui/icons-material/SearchOutlined';
+import VisibilityOutlined from '@mui/icons-material/VisibilityOutlined';
+import EditOutlined from '@mui/icons-material/EditOutlined';
+import DeleteOutlined from '@mui/icons-material/DeleteOutlined';
+import AccessTimeOutlined from '@mui/icons-material/AccessTimeOutlined';
+import CheckCircleOutlined from '@mui/icons-material/CheckCircleOutlined';
+import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUp from '@mui/icons-material/KeyboardArrowUp';
+import Check from '@mui/icons-material/Check';
+import LayersOutlined from '@mui/icons-material/LayersOutlined';
+import { Button, Badge, Card, Tabs } from 'impact-ui';
 import './MasterPOGManagement.css';
 import WomensWallStandard from '../assets/C&A_WOMENS_WALL_STANDARD.png';
 import MensDenimWall from '../assets/C&A_MENS_DENIM_WALL.png';
@@ -127,7 +138,7 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({ label, value, options, 
           type="button"
         >
           <span className={value ? 'has-value' : ''}>{selectedOption?.label || options[0]?.label}</span>
-          {isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+          {isOpen ? <KeyboardArrowUp sx={{ fontSize: 14 }} /> : <KeyboardArrowDown sx={{ fontSize: 14 }} />}
         </button>
         {isOpen && (
           <div className="custom-dropdown-menu">
@@ -142,7 +153,7 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({ label, value, options, 
                 type="button"
               >
                 <span>{option.label}</span>
-                {value === option.value && <Check size={16} className="check-icon" />}
+                {value === option.value && <Check sx={{ fontSize: 16 }} className="check-icon" />}
               </button>
             ))}
           </div>
@@ -197,13 +208,13 @@ export const MasterPOGManagement: React.FC = () => {
   });
 
   const getStatusBadge = (status: POGItem['status']) => {
-    const statusConfig = {
-      active: { label: 'Active', className: 'status-active' },
-      draft: { label: 'Draft', className: 'status-draft' },
-      archived: { label: 'Archived', className: 'status-archived' },
+    const map = {
+      active: { label: 'Active', color: 'success' as const },
+      draft: { label: 'Draft', color: 'warning' as const },
+      archived: { label: 'Archived', color: 'info' as const },
     };
-    const config = statusConfig[status];
-    return <span className={`pog-status-badge ${config.className}`}>{config.label}</span>;
+    const m = map[status];
+    return <Badge label={m.label} color={m.color} size="small" className="pog-status-badge" />;
   };
 
   return (
@@ -212,60 +223,37 @@ export const MasterPOGManagement: React.FC = () => {
         <div className="pi-header-row">
           <div className="master-pog-title-section">
             <div className="master-pog-title-row">
-              <Layers size={24} />
+              <LayersOutlined sx={{ fontSize: 24 }} />
               <h1 className="master-pog-title">Master POG Management</h1>
             </div>
             <p className="master-pog-subtitle">Manage and organize your planogram library</p>
             <div className="pi-header-meta">
-              <span className="pi-meta-pill">
-                <Layers size={12} />
-                {mockPOGData.length} POGs
-              </span>
-              <span className="pi-meta-pill pi-meta-pill--success">
-                {mockPOGData.filter(p => p.status === 'active').length} Active
-              </span>
-              <span className="pi-meta-pill pi-meta-pill--warning">
-                {mockPOGData.filter(p => p.status === 'draft').length} Drafts
-              </span>
-              <span className="pi-meta-pill pi-meta-pill--neutral">
-                {mockPOGData.filter(p => p.status === 'archived').length} Archived
-              </span>
+              <Badge label={`${mockPOGData.length} POGs`} color="info" size="small" className="pi-meta-pill" />
+              <Badge label={`${mockPOGData.filter(p => p.status === 'active').length} Active`} color="success" size="small" className="pi-meta-pill" />
+              <Badge label={`${mockPOGData.filter(p => p.status === 'draft').length} Drafts`} color="warning" size="small" className="pi-meta-pill" />
+              <Badge label={`${mockPOGData.filter(p => p.status === 'archived').length} Archived`} color="info" size="small" className="pi-meta-pill" />
             </div>
           </div>
           <div className="pi-header-right">
-            <button className="pi-btn-primary">
-              <Upload size={15} />
-              <span>Upload POG</span>
-            </button>
+            <Button variant="contained" color="primary" size="medium" className="pi-btn-primary" startIcon={<FileUploadOutlined sx={{ fontSize: 15 }} />}>
+              Upload POG
+            </Button>
           </div>
         </div>
       </div>
 
-      <div className="master-pog-tabs">
-        <div className="pog-tabs-container">
-          <button 
-            className={`pog-tab ${activeTab === 'library' ? 'active' : ''}`}
-            onClick={() => setActiveTab('library')}
-          >
-            POG Library
-          </button>
-          <button 
-            className={`pog-tab ${activeTab === 'workspace' ? 'active' : ''}`}
-            onClick={() => selectedPOG && setActiveTab('workspace')}
-            disabled={!selectedPOG}
-          >
-            POG Workspace
-          </button>
-        </div>
-      </div>
-
-      <div className="master-pog-content">
-        {activeTab === 'library' && (
+      <div style={{ marginTop: '24px' }}>
+      <Tabs
+        tabNames={[
+          { value: 'library', label: 'POG Library' },
+          { value: 'workspace', label: 'POG Workspace', disabled: !selectedPOG },
+        ]}
+        tabPanels={[
           <div className="pog-library">
             {/* Combined toolbar: search + filters (DI-style) */}
             <div className="pi-toolbar">
               <div className="pi-toolbar-search">
-                <Search size={15} />
+                <SearchOutlined sx={{ fontSize: 15 }} />
                 <input
                   type="text"
                   placeholder="Search planograms..."
@@ -340,16 +328,17 @@ export const MasterPOGManagement: React.FC = () => {
                 ]}
                 onChange={(value) => handleFilterChange('createdBy', value)}
               />
-              <button className="pi-toolbar-clear" onClick={clearAllFilters}>
+              <Button variant="text" color="primary" size="small" className="pi-toolbar-clear" onClick={clearAllFilters}>
                 Clear All
-              </button>
+              </Button>
             </div>
 
             <div className="pog-library-grid">
               {filteredPOGs.map(pog => (
-                <div 
-                  key={pog.id} 
-                  className="pog-card"
+                <Card
+                  key={pog.id}
+                  size="extraSmall"
+                  sx={{ maxWidth: '100%', minHeight: 0, padding: '20px', cursor: 'pointer' }}
                   onClick={() => handlePOGSelect(pog)}
                 >
                   <div className="pog-card-header">
@@ -374,18 +363,15 @@ export const MasterPOGManagement: React.FC = () => {
                       <span className="pog-card-clusters">{pog.clusters} clusters</span>
                     </div>
                     <div className="pog-card-date">
-                      <Clock size={12} />
+                      <AccessTimeOutlined sx={{ fontSize: 12 }} />
                       <span>{pog.lastModified}</span>
                     </div>
                   </div>
-                </div>
+                </Card>
               ))}
             </div>
-          </div>
-        )}
-
-        {activeTab === 'workspace' && selectedPOG && (
-          <div className="pog-workspace">
+          </div>,
+          selectedPOG ? <div className="pog-workspace">
             <div className="pog-workspace-header">
               <div className="pog-workspace-info">
                 <h2 className="pog-workspace-name">{selectedPOG.name}</h2>
@@ -396,18 +382,15 @@ export const MasterPOGManagement: React.FC = () => {
                 </div>
               </div>
               <div className="pog-workspace-actions">
-                <button className="pog-action-btn">
-                  <Eye size={16} />
-                  <span>Preview</span>
-                </button>
-                <button className="pog-action-btn">
-                  <Edit size={16} />
-                  <span>Edit</span>
-                </button>
-                <button className="pog-action-btn danger">
-                  <Trash2 size={16} />
-                  <span>Delete</span>
-                </button>
+                <Button variant="outlined" color="primary" size="medium" className="pog-action-btn" startIcon={<VisibilityOutlined sx={{ fontSize: 16 }} />}>
+                  Preview
+                </Button>
+                <Button variant="outlined" color="primary" size="medium" className="pog-action-btn" startIcon={<EditOutlined sx={{ fontSize: 16 }} />}>
+                  Edit
+                </Button>
+                <Button variant="outlined" color="error" size="medium" className="pog-action-btn danger" startIcon={<DeleteOutlined sx={{ fontSize: 16 }} />}>
+                  Delete
+                </Button>
               </div>
             </div>
 
@@ -425,15 +408,15 @@ export const MasterPOGManagement: React.FC = () => {
                   <h4 className="pog-sidebar-title">Version Control</h4>
                   <div className="pog-version-list">
                     <div className="pog-version-item active">
-                      <CheckCircle size={14} />
+                      <CheckCircleOutlined sx={{ fontSize: 14 }} />
                       <span>v2.1 - Current</span>
                     </div>
                     <div className="pog-version-item">
-                      <Clock size={14} />
+                      <AccessTimeOutlined sx={{ fontSize: 14 }} />
                       <span>v2.0 - Apr 10, 2025</span>
                     </div>
                     <div className="pog-version-item">
-                      <Clock size={14} />
+                      <AccessTimeOutlined sx={{ fontSize: 14 }} />
                       <span>v1.5 - Mar 28, 2025</span>
                     </div>
                   </div>
@@ -457,9 +440,15 @@ export const MasterPOGManagement: React.FC = () => {
                 <div className="pog-sidebar-section">
                   <h4 className="pog-sidebar-title">Quick Actions</h4>
                   <div className="pog-quick-actions">
-                    <button className="pog-quick-action-btn">Clone POG</button>
-                    <button className="pog-quick-action-btn">Export</button>
-                    <button className="pog-quick-action-btn">Share</button>
+                    <Button variant="outlined" color="primary" size="small" className="pog-quick-action-btn" fullWidth>
+                      Clone POG
+                    </Button>
+                    <Button variant="outlined" color="primary" size="small" className="pog-quick-action-btn" fullWidth>
+                      Export
+                    </Button>
+                    <Button variant="outlined" color="primary" size="small" className="pog-quick-action-btn" fullWidth>
+                      Share
+                    </Button>
                   </div>
                 </div>
 
@@ -468,7 +457,7 @@ export const MasterPOGManagement: React.FC = () => {
                   <p className="pog-rules-description">Rules dynamically applied based on category, cluster, and fixture mappings.</p>
                   <div className="pog-rules-list premium">
                     {pogRulesMapping[selectedPOG.id]?.map((rule, idx) => (
-                      <div key={idx} className="pog-rule-card">
+                      <Card key={idx} size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '14px' }}>
                         <div className="pog-rule-card-header">
                           <div className={`pog-rule-icon-badge ${rule.type.toLowerCase()}`}>
                             <span>{rule.icon}</span>
@@ -480,14 +469,17 @@ export const MasterPOGManagement: React.FC = () => {
                           <span className={`pog-rule-status ${rule.status.toLowerCase()}`}>{rule.status}</span>
                         </div>
                         <p className="pog-rule-description">{rule.description}</p>
-                      </div>
+                      </Card>
                     ))}
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          </div> : <div />,
+        ]}
+        value={activeTab}
+        onChange={(_, val) => setActiveTab(val as 'library' | 'workspace')}
+      />
       </div>
     </div>
   );

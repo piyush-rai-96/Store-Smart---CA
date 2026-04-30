@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar } from 'lucide-react';
+import CalendarTodayOutlined from '@mui/icons-material/CalendarTodayOutlined';
 import { User } from '../../types';
 import { ROLE_NAMES, ROLE_COLORS, ROLE_ABBR } from '../../constants/roles';
 import './WelcomeBar.css';
@@ -32,7 +32,7 @@ export const WelcomeBar: React.FC<WelcomeBarProps> = ({ user }) => {
       <div className="welcome-row-1">
         <h1 className="welcome-greeting">Welcome back, {user.name}</h1>
         <div className="welcome-date">
-          <Calendar size={16} />
+          <CalendarTodayOutlined sx={{ fontSize: 16 }} />
           <span>{formatDate(new Date())}</span>
         </div>
       </div>

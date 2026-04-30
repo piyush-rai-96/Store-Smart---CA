@@ -1,5 +1,7 @@
 import React from 'react';
-import { ArrowRight, AlertCircle } from 'lucide-react';
+import { Card } from 'impact-ui';
+import ArrowForwardOutlined from '@mui/icons-material/ArrowForwardOutlined';
+import ErrorOutlined from '@mui/icons-material/ErrorOutlined';
 import { RecommendedAction } from '../../types/home';
 import './RecommendationCard.css';
 
@@ -20,7 +22,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({ recommen
   };
 
   return (
-    <div className="recommendation-card">
+    <Card size="small" sx={{ maxWidth: '100%', minHeight: 0, padding: '14px 16px' }}>
       <div className="recommendation-list">
         {recommendations.map((rec) => (
           <button
@@ -30,7 +32,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({ recommen
           >
             <div className="recommendation-content">
               <div className="recommendation-header">
-                {rec.priority === 'high' && <AlertCircle size={16} />}
+                {rec.priority === 'high' && <ErrorOutlined sx={{ fontSize: 16 }} />}
                 <div className="recommendation-item-title">{rec.title}</div>
               </div>
               {rec.description && (
@@ -38,10 +40,10 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({ recommen
               )}
             </div>
             
-            <ArrowRight size={16} className="recommendation-arrow" />
+            <ArrowForwardOutlined sx={{ fontSize: 16 }} className="recommendation-arrow" />
           </button>
         ))}
       </div>
-    </div>
+    </Card>
   );
 };

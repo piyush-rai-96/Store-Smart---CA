@@ -1,6 +1,8 @@
 import React from 'react';
 import { VoCDistribution as VoCDistributionType } from '../../types/district';
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import TrendingUpOutlined from '@mui/icons-material/TrendingUpOutlined';
+import TrendingDownOutlined from '@mui/icons-material/TrendingDownOutlined';
+import Remove from '@mui/icons-material/Remove';
 import './VoCDistribution.css';
 
 interface VoCDistributionProps {
@@ -10,15 +12,15 @@ interface VoCDistributionProps {
 
 export const VoCDistribution: React.FC<VoCDistributionProps> = ({ data, onIssueClick }) => {
   const getTrendIcon = (trend: 'up' | 'down' | 'stable') => {
-    if (trend === 'up') return <TrendingUp size={14} />;
-    if (trend === 'down') return <TrendingDown size={14} />;
-    return <Minus size={14} />;
+    if (trend === 'up') return <TrendingUpOutlined sx={{ fontSize: 14 }} />;
+    if (trend === 'down') return <TrendingDownOutlined sx={{ fontSize: 14 }} />;
+    return <Remove sx={{ fontSize: 14 }} />;
   };
 
   const getTrendColor = (trend: 'up' | 'down' | 'stable') => {
     // For VoC issues, 'up' is bad (more complaints)
-    if (trend === 'up') return '#dc3545';
-    if (trend === 'down') return '#28a745';
+    if (trend === 'up') return 'var(--ia-color-error)';
+    if (trend === 'down') return 'var(--ia-color-success)';
     return '#6c757d';
   };
 

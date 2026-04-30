@@ -1,5 +1,9 @@
 import React from 'react';
-import { AlertTriangle, Clock, Users, CheckCircle, Eye } from 'lucide-react';
+import WarningAmberOutlined from '@mui/icons-material/WarningAmberOutlined';
+import AccessTimeOutlined from '@mui/icons-material/AccessTimeOutlined';
+import GroupOutlined from '@mui/icons-material/GroupOutlined';
+import CheckCircleOutlined from '@mui/icons-material/CheckCircleOutlined';
+import VisibilityOutlined from '@mui/icons-material/VisibilityOutlined';
 import { Button } from 'impact-ui';
 import { BroadcastScope, BroadcastCategory } from '../../types/home';
 import './FeaturedBroadcast.css';
@@ -63,11 +67,11 @@ export const FeaturedBroadcast: React.FC<FeaturedBroadcastProps> = ({
         <div className="featured-broadcast-header">
           <div className="featured-broadcast-header-top">
             <div className="featured-broadcast-badge">
-              <AlertTriangle size={16} />
+              <WarningAmberOutlined sx={{ fontSize: 16 }} />
               <span>{getSeverityLabel()}</span>
             </div>
             <div className="featured-broadcast-required-badge">
-              <CheckCircle size={14} />
+              <CheckCircleOutlined sx={{ fontSize: 14 }} />
               <span>ACKNOWLEDGEMENT REQUIRED</span>
             </div>
           </div>
@@ -79,15 +83,15 @@ export const FeaturedBroadcast: React.FC<FeaturedBroadcastProps> = ({
             </div>
             <div className="featured-broadcast-meta-item">
               <span className="featured-broadcast-meta-label">Scope:</span>
-              <Users size={14} />
+              <GroupOutlined sx={{ fontSize: 14 }} />
               <span>{scopeDetails}</span>
             </div>
             <div className="featured-broadcast-meta-item">
-              <Clock size={14} />
+              <AccessTimeOutlined sx={{ fontSize: 14 }} />
               <span>Posted {postedTime.toLocaleString()}</span>
             </div>
             <div className="featured-broadcast-meta-item featured-broadcast-due">
-              <Clock size={14} />
+              <AccessTimeOutlined sx={{ fontSize: 14 }} />
               <span>Due: {dueTime.toLocaleString()}</span>
             </div>
           </div>
@@ -107,7 +111,7 @@ export const FeaturedBroadcast: React.FC<FeaturedBroadcastProps> = ({
             variant="outlined"
             color="primary"
             size="medium"
-            startIcon={<Eye size={18} />}
+            startIcon={<VisibilityOutlined sx={{ fontSize: 18 }} />}
             onClick={onViewDetails}
           >
             View Details
@@ -116,7 +120,7 @@ export const FeaturedBroadcast: React.FC<FeaturedBroadcastProps> = ({
             variant="contained"
             color="success"
             size="medium"
-            startIcon={<CheckCircle size={18} />}
+            startIcon={<CheckCircleOutlined sx={{ fontSize: 18 }} />}
             onClick={onAcknowledge}
           >
             Acknowledge Now

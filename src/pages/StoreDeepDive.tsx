@@ -2,53 +2,52 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { AIDailyBrief, AIDailyBriefData } from '../components/common/AIDailyBrief';
-import {
-  Store,
-  MapPin,
-  Clock,
-  TrendingUp,
-  TrendingDown,
-  Minus,
-  AlertTriangle,
-  AlertCircle,
-  CheckCircle2,
-  Users,
-  DollarSign,
-  ShieldCheck,
-  Package,
-  MessageSquare,
-  ChevronRight,
-  ChevronDown,
-  ArrowUpRight,
-  ArrowDownRight,
-  RefreshCw,
-  Sparkles,
-  BarChart3,
-  Eye,
-  X,
-  ExternalLink,
-  Zap,
-  Award,
-  Target,
-  Layers,
-  Truck,
-  Camera,
-  FileText,
-  Grid3X3,
-  ThumbsUp,
-  Smile,
-  Meh,
-  Frown,
-  AlertOctagon,
-  LayoutGrid,
-  ClipboardCheck,
-  MessageCircle,
-  Search,
-  Check,
-  Calendar,
-  Filter,
-  ChevronUp
-} from 'lucide-react';
+import StoreOutlined from '@mui/icons-material/StoreOutlined';
+import PlaceOutlined from '@mui/icons-material/PlaceOutlined';
+import AccessTimeOutlined from '@mui/icons-material/AccessTimeOutlined';
+import TrendingUpOutlined from '@mui/icons-material/TrendingUpOutlined';
+import TrendingDownOutlined from '@mui/icons-material/TrendingDownOutlined';
+import Remove from '@mui/icons-material/Remove';
+import WarningAmberOutlined from '@mui/icons-material/WarningAmberOutlined';
+import ErrorOutlined from '@mui/icons-material/ErrorOutlined';
+import TaskAltOutlined from '@mui/icons-material/TaskAltOutlined';
+import GroupOutlined from '@mui/icons-material/GroupOutlined';
+import AttachMoneyOutlined from '@mui/icons-material/AttachMoneyOutlined';
+import GppGoodOutlined from '@mui/icons-material/GppGoodOutlined';
+import InventoryOutlined from '@mui/icons-material/InventoryOutlined';
+import ChatOutlined from '@mui/icons-material/ChatOutlined';
+import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
+import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUp from '@mui/icons-material/KeyboardArrowUp';
+import NorthEast from '@mui/icons-material/NorthEast';
+import SouthEast from '@mui/icons-material/SouthEast';
+import RefreshOutlined from '@mui/icons-material/RefreshOutlined';
+import AutoAwesomeOutlined from '@mui/icons-material/AutoAwesomeOutlined';
+import BarChartOutlined from '@mui/icons-material/BarChartOutlined';
+import VisibilityOutlined from '@mui/icons-material/VisibilityOutlined';
+import CloseOutlined from '@mui/icons-material/CloseOutlined';
+import OpenInNewOutlined from '@mui/icons-material/OpenInNewOutlined';
+import BoltOutlined from '@mui/icons-material/BoltOutlined';
+import EmojiEventsOutlined from '@mui/icons-material/EmojiEventsOutlined';
+import TrackChangesOutlined from '@mui/icons-material/TrackChangesOutlined';
+import LayersOutlined from '@mui/icons-material/LayersOutlined';
+import LocalShippingOutlined from '@mui/icons-material/LocalShippingOutlined';
+import CameraAltOutlined from '@mui/icons-material/CameraAltOutlined';
+import DescriptionOutlined from '@mui/icons-material/DescriptionOutlined';
+import GridOnOutlined from '@mui/icons-material/GridOnOutlined';
+import ThumbUpOutlined from '@mui/icons-material/ThumbUpOutlined';
+import SentimentSatisfiedOutlined from '@mui/icons-material/SentimentSatisfiedOutlined';
+import SentimentNeutralOutlined from '@mui/icons-material/SentimentNeutralOutlined';
+import SentimentVeryDissatisfiedOutlined from '@mui/icons-material/SentimentVeryDissatisfiedOutlined';
+import CrisisAlert from '@mui/icons-material/CrisisAlert';
+import DashboardOutlined from '@mui/icons-material/DashboardOutlined';
+import AssignmentTurnedInOutlined from '@mui/icons-material/AssignmentTurnedInOutlined';
+import ChatBubbleOutlineOutlined from '@mui/icons-material/ChatBubbleOutlineOutlined';
+import SearchOutlined from '@mui/icons-material/SearchOutlined';
+import Check from '@mui/icons-material/Check';
+import CalendarTodayOutlined from '@mui/icons-material/CalendarTodayOutlined';
+import FilterListOutlined from '@mui/icons-material/FilterListOutlined';
+import { Card, Tabs } from 'impact-ui';
 import './StoreDeepDive.css';
 
 // Import localized planogram image
@@ -91,7 +90,7 @@ const PremiumDropdown: React.FC<PremiumDropdownProps> = ({ value, options, onCha
         type="button"
       >
         <span className={value ? 'has-value' : ''}>{selectedOption?.label || placeholder || options[0]?.label}</span>
-        <ChevronDown size={14} className={`dropdown-chevron ${isOpen ? 'rotated' : ''}`} />
+        <KeyboardArrowDown sx={{ fontSize: 14 }} className={`dropdown-chevron ${isOpen ? 'rotated' : ''}`}/>
       </button>
       {isOpen && (
         <div className="premium-dropdown-menu">
@@ -106,7 +105,7 @@ const PremiumDropdown: React.FC<PremiumDropdownProps> = ({ value, options, onCha
               type="button"
             >
               <span>{option.label}</span>
-              {value === option.value && <Check size={16} className="check-icon" />}
+              {value === option.value && <Check sx={{ fontSize: 16 }} className="check-icon"/>}
             </button>
           ))}
         </div>
@@ -271,29 +270,29 @@ const getStreamDiagnostics = (store: DistrictStore): StreamDiagnostic[] => {
   if (tier === 'Excellence' || tier === 'Stable') {
     const sev = tier === 'Excellence' ? 'healthy' : 'healthy';
     return [
-      { stream: 'Sales', icon: <DollarSign size={16} />, primaryIssue: tier === 'Excellence' ? 'Apparel outperforming' : 'On plan', finding: tier === 'Excellence' ? `${store.storeName} leading district in Women's and Men's` : 'Comp sales tracking plan with minor softness in accessories', variance: `${tier === 'Excellence' ? '+4.2' : '+0.4'}% vs district`, varianceType: 'positive', severity: sev },
-      { stream: 'VoC', icon: <MessageSquare size={16} />, primaryIssue: 'Positive sentiment', finding: 'Staff helpfulness & cleanliness themes trending positive', variance: `+${tier === 'Excellence' ? 3.1 : 1.2}% vs district`, varianceType: 'positive', severity: sev },
-      { stream: 'Visual', icon: <ShieldCheck size={16} />, primaryIssue: 'Compliance on target', finding: 'Planogram and display standards consistently met', variance: `+${tier === 'Excellence' ? 2.4 : 0.8} vs district`, varianceType: 'positive', severity: sev },
-      { stream: 'Inventory', icon: <Truck size={16} />, primaryIssue: tier === 'Excellence' ? 'Availability strong' : 'Minor size-run gaps', finding: tier === 'Excellence' ? 'Availability at 97%, no size-run issues' : '2 SKUs below safety stock — replenishment in flight', variance: tier === 'Excellence' ? 'On track' : '2 styles impacted', varianceType: tier === 'Excellence' ? 'positive' : 'neutral', severity: sev },
-      { stream: 'Field Intel', icon: <Eye size={16} />, primaryIssue: 'No Active Flags', finding: 'Last visual audit clean, no escalations', variance: 'On track', varianceType: 'neutral', severity: 'healthy' },
+      { stream: 'Sales', icon: <AttachMoneyOutlined sx={{ fontSize: 16 }}/>, primaryIssue: tier === 'Excellence' ? 'Apparel outperforming' : 'On plan', finding: tier === 'Excellence' ? `${store.storeName} leading district in Women's and Men's` : 'Comp sales tracking plan with minor softness in accessories', variance: `${tier === 'Excellence' ? '+4.2' : '+0.4'}% vs district`, varianceType: 'positive', severity: sev },
+      { stream: 'VoC', icon: <ChatOutlined sx={{ fontSize: 16 }}/>, primaryIssue: 'Positive sentiment', finding: 'Staff helpfulness & cleanliness themes trending positive', variance: `+${tier === 'Excellence' ? 3.1 : 1.2}% vs district`, varianceType: 'positive', severity: sev },
+      { stream: 'Visual', icon: <GppGoodOutlined sx={{ fontSize: 16 }}/>, primaryIssue: 'Compliance on target', finding: 'Planogram and display standards consistently met', variance: `+${tier === 'Excellence' ? 2.4 : 0.8} vs district`, varianceType: 'positive', severity: sev },
+      { stream: 'Inventory', icon: <LocalShippingOutlined sx={{ fontSize: 16 }}/>, primaryIssue: tier === 'Excellence' ? 'Availability strong' : 'Minor size-run gaps', finding: tier === 'Excellence' ? 'Availability at 97%, no size-run issues' : '2 SKUs below safety stock — replenishment in flight', variance: tier === 'Excellence' ? 'On track' : '2 styles impacted', varianceType: tier === 'Excellence' ? 'positive' : 'neutral', severity: sev },
+      { stream: 'Field Intel', icon: <VisibilityOutlined sx={{ fontSize: 16 }}/>, primaryIssue: 'No Active Flags', finding: 'Last visual audit clean, no escalations', variance: 'On track', varianceType: 'neutral', severity: 'healthy' },
     ];
   }
   if (tier === 'AtRisk') {
     return [
-      { stream: 'Sales', icon: <DollarSign size={16} />, primaryIssue: 'Apparel Revenue Decline', finding: "Women's Dresses and Tops underperforming vs plan by 12%", variance: '-3.2% vs district', varianceType: 'negative', severity: 'critical' },
-      { stream: 'VoC', icon: <MessageSquare size={16} />, primaryIssue: 'Fitting Room Wait', finding: 'Peak hour complaints up 28%, fitting room availability cited', variance: '-5.1% vs district', varianceType: 'negative', severity: 'critical' },
-      { stream: 'Visual', icon: <ShieldCheck size={16} />, primaryIssue: 'Display Compliance', finding: 'Mannequin styling outdated, color blocking needs refresh', variance: '-4.8 vs district', varianceType: 'negative', severity: 'warning' },
-      { stream: 'Inventory', icon: <Truck size={16} />, primaryIssue: 'Size-Run Gaps', finding: '12 SKUs with broken size runs, Basics most affected', variance: '8 styles impacted', varianceType: 'negative', severity: 'warning' },
-      { stream: 'Field Intel', icon: <Eye size={16} />, primaryIssue: 'No Active Flags', finding: 'Last visual audit 3 days ago, no escalations', variance: 'On track', varianceType: 'neutral', severity: 'healthy' },
+      { stream: 'Sales', icon: <AttachMoneyOutlined sx={{ fontSize: 16 }}/>, primaryIssue: 'Apparel Revenue Decline', finding: "Women's Dresses and Tops underperforming vs plan by 12%", variance: '-3.2% vs district', varianceType: 'negative', severity: 'critical' },
+      { stream: 'VoC', icon: <ChatOutlined sx={{ fontSize: 16 }}/>, primaryIssue: 'Fitting Room Wait', finding: 'Peak hour complaints up 28%, fitting room availability cited', variance: '-5.1% vs district', varianceType: 'negative', severity: 'critical' },
+      { stream: 'Visual', icon: <GppGoodOutlined sx={{ fontSize: 16 }}/>, primaryIssue: 'Display Compliance', finding: 'Mannequin styling outdated, color blocking needs refresh', variance: '-4.8 vs district', varianceType: 'negative', severity: 'warning' },
+      { stream: 'Inventory', icon: <LocalShippingOutlined sx={{ fontSize: 16 }}/>, primaryIssue: 'Size-Run Gaps', finding: '12 SKUs with broken size runs, Basics most affected', variance: '8 styles impacted', varianceType: 'negative', severity: 'warning' },
+      { stream: 'Field Intel', icon: <VisibilityOutlined sx={{ fontSize: 16 }}/>, primaryIssue: 'No Active Flags', finding: 'Last visual audit 3 days ago, no escalations', variance: 'On track', varianceType: 'neutral', severity: 'healthy' },
     ];
   }
   // Crisis
   return [
-    { stream: 'Sales', icon: <DollarSign size={16} />, primaryIssue: 'Sustained Sales Miss', finding: 'Comp sales -12% for 4 straight weeks, Apparel leading the drop', variance: '-9.1% vs district', varianceType: 'negative', severity: 'critical' },
-    { stream: 'VoC', icon: <MessageSquare size={16} />, primaryIssue: 'Negative Sentiment Spike', finding: '"Messy aisles" and "staff availability" complaints up 38%', variance: '-8.4% vs district', varianceType: 'negative', severity: 'critical' },
-    { stream: 'Visual', icon: <ShieldCheck size={16} />, primaryIssue: 'SEA Auto-Fail', finding: 'Fire exit blocked in Zone B — regulatory risk', variance: 'Auto-fail triggered', varianceType: 'negative', severity: 'critical' },
-    { stream: 'Inventory', icon: <Truck size={16} />, primaryIssue: 'OOS Spike', finding: '14 SKUs out-of-stock, 4 shipments delayed', variance: 'Availability 84%', varianceType: 'negative', severity: 'critical' },
-    { stream: 'Field Intel', icon: <Eye size={16} />, primaryIssue: 'Active Escalation', finding: 'DM visit scheduled — 2 open escalations unresolved', variance: '2 flags open', varianceType: 'negative', severity: 'warning' },
+    { stream: 'Sales', icon: <AttachMoneyOutlined sx={{ fontSize: 16 }}/>, primaryIssue: 'Sustained Sales Miss', finding: 'Comp sales -12% for 4 straight weeks, Apparel leading the drop', variance: '-9.1% vs district', varianceType: 'negative', severity: 'critical' },
+    { stream: 'VoC', icon: <ChatOutlined sx={{ fontSize: 16 }}/>, primaryIssue: 'Negative Sentiment Spike', finding: '"Messy aisles" and "staff availability" complaints up 38%', variance: '-8.4% vs district', varianceType: 'negative', severity: 'critical' },
+    { stream: 'Visual', icon: <GppGoodOutlined sx={{ fontSize: 16 }}/>, primaryIssue: 'SEA Auto-Fail', finding: 'Fire exit blocked in Zone B — regulatory risk', variance: 'Auto-fail triggered', varianceType: 'negative', severity: 'critical' },
+    { stream: 'Inventory', icon: <LocalShippingOutlined sx={{ fontSize: 16 }}/>, primaryIssue: 'OOS Spike', finding: '14 SKUs out-of-stock, 4 shipments delayed', variance: 'Availability 84%', varianceType: 'negative', severity: 'critical' },
+    { stream: 'Field Intel', icon: <VisibilityOutlined sx={{ fontSize: 16 }}/>, primaryIssue: 'Active Escalation', finding: 'DM visit scheduled — 2 open escalations unresolved', variance: '2 flags open', varianceType: 'negative', severity: 'warning' },
   ];
 };
 
@@ -477,33 +476,33 @@ const getStoreBrief = (store: DistrictStore): AIDailyBriefData => {
 // Helper functions
 const getSPIColor = (tier: SPITier) => {
   switch (tier) {
-    case 'Excellence': return '#10b981';
+    case 'Excellence': return 'var(--ia-color-success)';
     case 'Stable': return '#0ea5e9';
-    case 'AtRisk': return '#f59e0b';
-    case 'Crisis': return '#ef4444';
-    default: return '#64748b';
+    case 'AtRisk': return 'var(--ia-color-warning)';
+    case 'Crisis': return 'var(--ia-color-error)';
+    default: return 'var(--ia-color-text-secondary)';
   }
 };
 
 const getImpactIcon = (type: string) => {
   switch (type) {
-    case 'revenue': return <DollarSign size={14} />;
-    case 'compliance': return <ShieldCheck size={14} />;
-    case 'customer': return <Users size={14} />;
-    case 'safety': return <AlertOctagon size={14} />;
-    case 'inventory': return <Package size={14} />;
-    default: return <AlertCircle size={14} />;
+    case 'revenue': return <AttachMoneyOutlined sx={{ fontSize: 14 }}/>;
+    case 'compliance': return <GppGoodOutlined sx={{ fontSize: 14 }}/>;
+    case 'customer': return <GroupOutlined sx={{ fontSize: 14 }}/>;
+    case 'safety': return <CrisisAlert sx={{ fontSize: 14 }}/>;
+    case 'inventory': return <InventoryOutlined sx={{ fontSize: 14 }}/>;
+    default: return <ErrorOutlined sx={{ fontSize: 14 }}/>;
   }
 };
 
 const getDiscrepancyColor = (cls: DiscrepancyClass) => {
   switch (cls) {
     case 'Silent Risk': return '#8b5cf6';
-    case 'Leading Indicator': return '#f59e0b';
-    case 'Imminent Gap': return '#ef4444';
-    case 'Ground Truth Confirmed': return '#10b981';
+    case 'Leading Indicator': return 'var(--ia-color-warning)';
+    case 'Imminent Gap': return 'var(--ia-color-error)';
+    case 'Ground Truth Confirmed': return 'var(--ia-color-success)';
     case 'Stable': return '#0ea5e9';
-    default: return '#64748b';
+    default: return 'var(--ia-color-text-secondary)';
   }
 };
 
@@ -748,7 +747,7 @@ export const StoreDeepDive: React.FC = () => {
       {/* DM Read-Only Banner */}
       {isDMReadOnly && (
         <div className="sdd-readonly-banner">
-          <Eye size={14} />
+          <VisibilityOutlined sx={{ fontSize: 14 }}/>
           <span>View-Only Mode — You have read-only access to Store Deep Dive</span>
         </div>
       )}
@@ -763,19 +762,19 @@ export const StoreDeepDive: React.FC = () => {
               onClick={() => setIsStoreFilterOpen(!isStoreFilterOpen)}
             >
               <div className="store-filter-icon">
-                <Store size={16} />
+                <StoreOutlined sx={{ fontSize: 16 }}/>
               </div>
               <div className="store-filter-info">
                 <span className="store-filter-number">#{selectedStore.storeNumber}</span>
                 <span className="store-filter-name">{selectedStore.storeName}</span>
               </div>
-              <ChevronDown size={14} className={`store-filter-chevron ${isStoreFilterOpen ? 'open' : ''}`} />
+              <KeyboardArrowDown sx={{ fontSize: 14 }} className={`store-filter-chevron ${isStoreFilterOpen ? 'open' : ''}`}/>
             </button>
 
             {isStoreFilterOpen && (
               <div className="store-filter-dropdown">
                 <div className="store-filter-search">
-                  <Search size={14} />
+                  <SearchOutlined sx={{ fontSize: 14 }}/>
                   <input
                     type="text"
                     placeholder="Search stores..."
@@ -804,7 +803,7 @@ export const StoreDeepDive: React.FC = () => {
                         <span className={`store-option-spi tier-${store.spiTier.toLowerCase()}`}>
                           {store.spi}
                         </span>
-                        {selectedStore.id === store.id && <Check size={14} className="store-option-check" />}
+                        {selectedStore.id === store.id && <Check sx={{ fontSize: 14 }} className="store-option-check"/>}
                       </div>
                     </button>
                   ))}
@@ -818,7 +817,7 @@ export const StoreDeepDive: React.FC = () => {
 
           <div className="store-meta-tags">
             <span className="meta-tag">
-              <MapPin size={11} />
+              <PlaceOutlined sx={{ fontSize: 11 }}/>
               {storeInfo.district}
             </span>
             <span className="meta-tag">{selectedStore.format}</span>
@@ -826,9 +825,9 @@ export const StoreDeepDive: React.FC = () => {
           </div>
           <div className="sdd-period-selector" style={{ position: 'relative' }}>
             <button className="sdd-period-btn" onClick={() => setShowCalendar(!showCalendar)}>
-              <Calendar size={13} />
+              <CalendarTodayOutlined sx={{ fontSize: 13 }}/>
               <span>{getSelectedPeriodLabel()}</span>
-              <ChevronDown size={13} className={showCalendar ? 'rotated' : ''} />
+              <KeyboardArrowDown sx={{ fontSize: 13 }} className={showCalendar ? 'rotated' : ''}/>
             </button>
             {showCalendar && (
               <div className="sdd-calendar-dropdown">
@@ -849,9 +848,9 @@ export const StoreDeepDive: React.FC = () => {
                 ) : (
                   <>
                     <div className="sdd-calendar-nav">
-                      <button onClick={() => navigateMonth(-1)}><ChevronUp size={14} style={{ transform: 'rotate(-90deg)' }} /></button>
+                      <button onClick={() => navigateMonth(-1)}><KeyboardArrowUp sx={{ fontSize: 14 }} style={{ transform: 'rotate(-90deg)' }}/></button>
                       <span>{new Date(viewingYear, viewingMonth).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
-                      <button onClick={() => navigateMonth(1)}><ChevronUp size={14} style={{ transform: 'rotate(90deg)' }} /></button>
+                      <button onClick={() => navigateMonth(1)}><KeyboardArrowUp sx={{ fontSize: 14 }} style={{ transform: 'rotate(90deg)' }}/></button>
                     </div>
                     <div className="sdd-calendar-grid">
                       <div className="sdd-calendar-weekdays">
@@ -882,140 +881,150 @@ export const StoreDeepDive: React.FC = () => {
             )}
           </div>
           <div className="last-refresh">
-            <Clock size={10} />
+            <AccessTimeOutlined sx={{ fontSize: 10 }}/>
             Updated {storeInfo.lastRefresh.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </div>
         </div>
-
-        {/* SPI Gauge */}
-        <div className="spi-gauge-container">
-          <div className="spi-gauge">
-            <svg viewBox="0 0 120 120">
-              <circle cx="60" cy="60" r="52" fill="none" stroke="#e2e8f0" strokeWidth="8" />
-              <circle
-                cx="60"
-                cy="60"
-                r="52"
-                fill="none"
-                stroke={getSPIColor(adjustedSPI.spiTier)}
-                strokeWidth="8"
-                strokeLinecap="round"
-                strokeDasharray={`${(adjustedSPI.spi / 100) * 327} 327`}
-                transform="rotate(-90 60 60)"
-                className="spi-progress-ring"
-              />
-            </svg>
-            <div className="spi-center">
-              <span className="spi-value">{adjustedSPI.spi}</span>
-              <span className="spi-label">SPI</span>
-            </div>
-          </div>
-          <div className={`spi-tier-badge tier-${adjustedSPI.spiTier.toLowerCase()}`}>
-            {adjustedSPI.spiTier === 'Excellence' && <Award size={12} />}
-            {adjustedSPI.spiTier === 'Stable' && <ThumbsUp size={12} />}
-            {adjustedSPI.spiTier === 'AtRisk' && <AlertTriangle size={12} />}
-            {adjustedSPI.spiTier === 'Crisis' && <AlertCircle size={12} />}
-            {adjustedSPI.spiTier === 'AtRisk' ? 'At Risk' : adjustedSPI.spiTier}
-          </div>
-        </div>
-
-        {/* Momentum & Comparison Strip */}
-        <div className="momentum-strip">
-          <div className="momentum-item">
-            <span className="momentum-label">Momentum</span>
-            <div className={`momentum-value ${adjustedSPI.momentum.toLowerCase()}`}>
-              {adjustedSPI.momentum === 'Improving' && <TrendingUp size={16} />}
-              {adjustedSPI.momentum === 'Slipping' && <TrendingDown size={16} />}
-              {adjustedSPI.momentum === 'Flat' && <Minus size={16} />}
-              <span>{adjustedSPI.momentumDelta >= 0 ? '+' : ''}{adjustedSPI.momentumDelta}%</span>
-            </div>
-            <span className="momentum-period">{varianceContext}</span>
-          </div>
-          <div className="momentum-item">
-            <span className="momentum-label">vs District</span>
-            <div className={`momentum-value ${adjustedSPI.vsDistrictAvg >= 0 ? 'improving' : 'slipping'}`}>
-              {adjustedSPI.vsDistrictAvg >= 0 ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
-              <span>{adjustedSPI.vsDistrictAvg >= 0 ? '+' : ''}{adjustedSPI.vsDistrictAvg}%</span>
-            </div>
-            <span className="momentum-period">avg SPI</span>
-          </div>
-        </div>
-
-        {/* Comp Rank Badge */}
-        <div className="comp-rank-container">
-          <div className={`comp-rank-badge ${adjustedSPI.compRank <= 4 ? 'top' : adjustedSPI.compRank <= 8 ? 'middle' : 'bottom'}`}>
-            <span className="rank-number">#{adjustedSPI.compRank}</span>
-            <span className="rank-total">of {adjustedSPI.compTotal}</span>
-          </div>
-          <div className="rank-movement">
-            {adjustedSPI.compMovement < 0 ? (
-              <span className="movement-down">
-                <ArrowDownRight size={12} />
-                {Math.abs(adjustedSPI.compMovement)} spots
-              </span>
-            ) : adjustedSPI.compMovement > 0 ? (
-              <span className="movement-up">
-                <ArrowUpRight size={12} />
-                {adjustedSPI.compMovement} spots
-              </span>
-            ) : (
-              <span className="movement-flat">No change</span>
-            )}
-          </div>
-          <span className="comp-label">Comp Stores</span>
-        </div>
-
-        {/* Inbound Risk Banner */}
-        {adjustedSPI.inboundRiskActive && (
-          <div className="inbound-risk-banner">
-            <div className="risk-icon">
-              <Truck size={18} />
-            </div>
-            <div className="risk-content">
-              <span className="risk-title">Inbound Risk Active</span>
-              <span className="risk-details">
-                {adjustedSPI.delayedShipments} delayed • {adjustedSPI.oosRiskSkus} OOS-risk SKUs
-              </span>
-            </div>
-            {!isDMReadOnly && (
-              <button className="risk-cta">
-                View Inbound
-                <ChevronRight size={14} />
-              </button>
-            )}
-          </div>
-        )}
-
-        {/* AI Store Narrative */}
-        <div className="ai-narrative">
-          <div className="narrative-icon">
-            <Sparkles size={16} />
-          </div>
-          <div className="narrative-content">
-            <p className="narrative-verdict">
-              <strong>Store performance declining</strong> — SPI dropped 6 points in 4 weeks, now in At Risk tier.
-            </p>
-            <p className="narrative-explanation">
-              VoC dissatisfaction (fitting room wait times) is preceding sales decline. Planogram gaps in Women's Wall Display compounding size-run availability issues before delayed inbound arrives.
-            </p>
-          </div>
-        </div>
       </div>
 
-      {/* Store-Level AI Daily Brief — shared component (matches District Intelligence) */}
-      <div className="sdd-pulse-section">
-        <AIDailyBrief
-          brief={getStoreBrief(selectedStore)}
-          userName={user?.name}
-        />
-      </div>
+      {/* Executive Pulse — SPI Performance Card + AI Brief side-by-side (matches District Intelligence) */}
+      <div className="sdd-executive-pulse">
+
+        {/* Left: SPI Performance Card */}
+        <div className="sdd-spi-card">
+
+          {/* SPI Gauge */}
+          <div className="spi-gauge-container">
+            <div className="spi-gauge">
+              <svg viewBox="0 0 120 120">
+                <circle cx="60" cy="60" r="52" fill="none" stroke="#e2e8f0" strokeWidth="8" />
+                <circle
+                  cx="60"
+                  cy="60"
+                  r="52"
+                  fill="none"
+                  stroke={getSPIColor(adjustedSPI.spiTier)}
+                  strokeWidth="8"
+                  strokeLinecap="round"
+                  strokeDasharray={`${(adjustedSPI.spi / 100) * 327} 327`}
+                  transform="rotate(-90 60 60)"
+                  className="spi-progress-ring"
+                />
+              </svg>
+              <div className="spi-center">
+                <span className="spi-value">{adjustedSPI.spi}</span>
+                <span className="spi-label">SPI</span>
+              </div>
+            </div>
+            <div className={`spi-tier-badge tier-${adjustedSPI.spiTier.toLowerCase()}`}>
+              {adjustedSPI.spiTier === 'Excellence' && <EmojiEventsOutlined sx={{ fontSize: 12 }}/>}
+              {adjustedSPI.spiTier === 'Stable' && <ThumbUpOutlined sx={{ fontSize: 12 }}/>}
+              {adjustedSPI.spiTier === 'AtRisk' && <WarningAmberOutlined sx={{ fontSize: 12 }}/>}
+              {adjustedSPI.spiTier === 'Crisis' && <ErrorOutlined sx={{ fontSize: 12 }}/>}
+              {adjustedSPI.spiTier === 'AtRisk' ? 'At Risk' : adjustedSPI.spiTier}
+            </div>
+          </div>
+
+          {/* Momentum & Comparison Strip */}
+          <div className="momentum-strip">
+            <div className="momentum-item">
+              <span className="momentum-label">Momentum</span>
+              <div className={`momentum-value ${adjustedSPI.momentum.toLowerCase()}`}>
+                {adjustedSPI.momentum === 'Improving' && <TrendingUpOutlined sx={{ fontSize: 16 }}/>}
+                {adjustedSPI.momentum === 'Slipping' && <TrendingDownOutlined sx={{ fontSize: 16 }}/>}
+                {adjustedSPI.momentum === 'Flat' && <Remove sx={{ fontSize: 16 }}/>}
+                <span>{adjustedSPI.momentumDelta >= 0 ? '+' : ''}{adjustedSPI.momentumDelta}%</span>
+              </div>
+              <span className="momentum-period">{varianceContext}</span>
+            </div>
+            <div className="momentum-item">
+              <span className="momentum-label">vs District</span>
+              <div className={`momentum-value ${adjustedSPI.vsDistrictAvg >= 0 ? 'improving' : 'slipping'}`}>
+                {adjustedSPI.vsDistrictAvg >= 0 ? <NorthEast sx={{ fontSize: 16 }}/> : <SouthEast sx={{ fontSize: 16 }}/>}
+                <span>{adjustedSPI.vsDistrictAvg >= 0 ? '+' : ''}{adjustedSPI.vsDistrictAvg}%</span>
+              </div>
+              <span className="momentum-period">avg SPI</span>
+            </div>
+          </div>
+
+          {/* Comp Rank Badge */}
+          <div className="comp-rank-container">
+            <div className={`comp-rank-badge ${adjustedSPI.compRank <= 4 ? 'top' : adjustedSPI.compRank <= 8 ? 'middle' : 'bottom'}`}>
+              <span className="rank-number">#{adjustedSPI.compRank}</span>
+              <span className="rank-total">of {adjustedSPI.compTotal}</span>
+            </div>
+            <div className="rank-movement">
+              {adjustedSPI.compMovement < 0 ? (
+                <span className="movement-down">
+                  <SouthEast sx={{ fontSize: 12 }}/>
+                  {Math.abs(adjustedSPI.compMovement)} spots
+                </span>
+              ) : adjustedSPI.compMovement > 0 ? (
+                <span className="movement-up">
+                  <NorthEast sx={{ fontSize: 12 }}/>
+                  {adjustedSPI.compMovement} spots
+                </span>
+              ) : (
+                <span className="movement-flat">No change</span>
+              )}
+            </div>
+            <span className="comp-label">Comp Stores</span>
+          </div>
+
+          {/* Inbound Risk Banner */}
+          {adjustedSPI.inboundRiskActive && (
+            <div className="inbound-risk-banner">
+              <div className="risk-icon">
+                <LocalShippingOutlined sx={{ fontSize: 18 }}/>
+              </div>
+              <div className="risk-content">
+                <span className="risk-title">Inbound Risk Active</span>
+                <span className="risk-details">
+                  {adjustedSPI.delayedShipments} delayed • {adjustedSPI.oosRiskSkus} OOS-risk SKUs
+                </span>
+              </div>
+              {!isDMReadOnly && (
+                <button className="risk-cta">
+                  View Inbound
+                  <KeyboardArrowRight sx={{ fontSize: 14 }}/>
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* AI Store Narrative */}
+          <div className="ai-narrative">
+            <div className="narrative-icon">
+              <AutoAwesomeOutlined sx={{ fontSize: 16 }}/>
+            </div>
+            <div className="narrative-content">
+              <p className="narrative-verdict">
+                <strong>Store performance declining</strong> — SPI dropped 6 points in 4 weeks, now in At Risk tier.
+              </p>
+              <p className="narrative-explanation">
+                VoC dissatisfaction (fitting room wait times) is preceding sales decline. Planogram gaps in Women's Wall Display compounding size-run availability issues before delayed inbound arrives.
+              </p>
+            </div>
+          </div>
+
+        </div>{/* end sdd-spi-card */}
+
+        {/* Right: Store-Level AI Daily Brief */}
+        <div className="sdd-pulse-section">
+          <AIDailyBrief
+            brief={getStoreBrief(selectedStore)}
+            userName={user?.name}
+          />
+        </div>
+
+      </div>{/* end sdd-executive-pulse */}
 
       {/* Store Action Queue */}
       <div className="action-queue-section">
         <div className="section-header">
           <h2>
-            <Zap size={18} />
-            Priority Actions {isDateFilterActive && <Filter size={12} className="sdd-filter-icon" />}
+            <BoltOutlined sx={{ fontSize: 18 }}/>
+            Priority Actions {isDateFilterActive && <FilterListOutlined sx={{ fontSize: 12 }} className="sdd-filter-icon"/>}
           </h2>
           <span className="section-subtitle">What to fix first</span>
         </div>
@@ -1031,7 +1040,7 @@ export const StoreDeepDive: React.FC = () => {
                 <p className="action-reason">{action.reason}</p>
                 {action.location && (
                   <span className="action-location">
-                    <MapPin size={10} />
+                    <PlaceOutlined sx={{ fontSize: 10 }}/>
                     {action.location}
                   </span>
                 )}
@@ -1039,7 +1048,7 @@ export const StoreDeepDive: React.FC = () => {
               {!isDMReadOnly && (
                 <button className={`action-cta priority-${action.priority}`}>
                   {action.cta}
-                  <ChevronRight size={14} />
+                  <KeyboardArrowRight sx={{ fontSize: 14 }}/>
                 </button>
               )}
             </div>
@@ -1051,23 +1060,36 @@ export const StoreDeepDive: React.FC = () => {
       <div className="kpi-strip">
         <div className="section-header">
           <h2>
-            <BarChart3 size={18} />
-            Key Performance Indicators {isDateFilterActive && <Filter size={12} className="sdd-filter-icon" />}
+            <BarChartOutlined sx={{ fontSize: 18 }}/>
+            Key Performance Indicators {isDateFilterActive && <FilterListOutlined sx={{ fontSize: 12 }} className="sdd-filter-icon"/>}
           </h2>
         </div>
         <div className="kpi-cards">
           {mockKPIs.map((kpi) => (
-            <div
+            <Card
               key={kpi.id}
-              className={`kpi-card tier-${kpi.tier} ${selectedKPI?.id === kpi.id ? 'selected' : ''}`}
+              className={`kpi-card-tier--${kpi.tier}${selectedKPI?.id === kpi.id ? ' kpi-card--selected' : ''}`}
               onClick={() => setSelectedKPI(selectedKPI?.id === kpi.id ? null : kpi)}
+              sx={{
+                maxWidth: '100%',
+                minHeight: 'unset',
+                padding: '14px',
+                width: '100%',
+                borderRadius: '12px',
+                position: 'relative',
+                border: selectedKPI?.id === kpi.id ? '1px solid var(--ia-color-primary)' : '1px solid var(--ia-color-border)',
+                boxShadow: selectedKPI?.id === kpi.id ? '0 0 0 3px rgba(99,102,241,0.1)' : 'none',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+                '&:hover': { borderColor: 'var(--ia-color-primary)', transform: 'translateY(-2px)' },
+              }}
             >
               <span className="kpi-label">{kpi.label}</span>
               <span className="kpi-value">{kpi.value}</span>
               <div className="kpi-variance">
                 <span className={`variance-primary ${kpi.varianceType}`}>
-                  {kpi.varianceType === 'positive' && <ArrowUpRight size={12} />}
-                  {kpi.varianceType === 'negative' && <ArrowDownRight size={12} />}
+                  {kpi.varianceType === 'positive' && <NorthEast sx={{ fontSize: 12 }}/>}
+                  {kpi.varianceType === 'negative' && <SouthEast sx={{ fontSize: 12 }}/>}
                   {kpi.variance}
                 </span>
                 {kpi.secondaryVariance && (
@@ -1078,16 +1100,16 @@ export const StoreDeepDive: React.FC = () => {
                 <svg viewBox="0 0 100 30" preserveAspectRatio="none">
                   <polyline
                     fill="none"
-                    stroke={kpi.varianceType === 'positive' ? '#10b981' : kpi.varianceType === 'negative' ? '#ef4444' : '#64748b'}
+                    stroke={kpi.varianceType === 'positive' ? 'var(--ia-color-success)' : kpi.varianceType === 'negative' ? 'var(--ia-color-error)' : 'var(--ia-color-text-secondary)'}
                     strokeWidth="2"
                     points={kpi.trend.map((v, i) => `${(i / (kpi.trend.length - 1)) * 100},${30 - ((v - Math.min(...kpi.trend)) / (Math.max(...kpi.trend) - Math.min(...kpi.trend) || 1)) * 25}`).join(' ')}
                   />
                 </svg>
               </div>
               <div className="kpi-click-hint">
-                <ExternalLink size={12} />
+                <OpenInNewOutlined sx={{ fontSize: 12 }}/>
               </div>
-            </div>
+            </Card>
           ))}
         </div>
       </div>
@@ -1096,8 +1118,8 @@ export const StoreDeepDive: React.FC = () => {
       <div className="diagnostic-section">
         <div className="section-header">
           <h2>
-            <Grid3X3 size={18} />
-            Cross-Stream Diagnosis {isDateFilterActive && <Filter size={12} className="sdd-filter-icon" />}
+            <GridOnOutlined sx={{ fontSize: 18 }}/>
+            Cross-Stream Diagnosis {isDateFilterActive && <FilterListOutlined sx={{ fontSize: 12 }} className="sdd-filter-icon"/>}
           </h2>
           <span className="section-subtitle">Understanding the root cause</span>
         </div>
@@ -1118,8 +1140,8 @@ export const StoreDeepDive: React.FC = () => {
                 </div>
                 <p className="stream-finding">{stream.finding}</p>
                 <div className={`stream-variance ${stream.varianceType}`}>
-                  {stream.varianceType === 'negative' && <ArrowDownRight size={12} />}
-                  {stream.varianceType === 'positive' && <ArrowUpRight size={12} />}
+                  {stream.varianceType === 'negative' && <SouthEast sx={{ fontSize: 12 }}/>}
+                  {stream.varianceType === 'positive' && <NorthEast sx={{ fontSize: 12 }}/>}
                   {stream.variance}
                 </div>
               </div>
@@ -1148,7 +1170,7 @@ export const StoreDeepDive: React.FC = () => {
             {!isDMReadOnly && (
               <div className="verdict-cta">
                 <button className="verdict-btn primary">
-                  <Zap size={14} />
+                  <BoltOutlined sx={{ fontSize: 14 }}/>
                   Execute Action Plan
                 </button>
               </div>
@@ -1159,61 +1181,18 @@ export const StoreDeepDive: React.FC = () => {
 
       {/* Tabbed Tactical Deep Dive Area */}
       <div className="tactical-tabs-section">
-        <div className="tabs-header">
-          <button 
-            className={`tab-btn ${activeTab === 'overall' ? 'active' : ''}`}
-            onClick={() => setActiveTab('overall')}
-          >
-            <LayoutGrid size={14} />
-            Overall Summary
-          </button>
-          <button 
-            className={`tab-btn ${activeTab === 'sea' ? 'active' : ''}`}
-            onClick={() => setActiveTab('sea')}
-          >
-            <ClipboardCheck size={14} />
-            SEA Audit
-          </button>
-          <button 
-            className={`tab-btn ${activeTab === 'voc' ? 'active' : ''}`}
-            onClick={() => setActiveTab('voc')}
-          >
-            <MessageCircle size={14} />
-            VoC Survey
-          </button>
-          <button 
-            className={`tab-btn ${activeTab === 'shelf' ? 'active' : ''}`}
-            onClick={() => setActiveTab('shelf')}
-          >
-            <Camera size={14} />
-            Shelf Audit
-          </button>
-          <button 
-            className={`tab-btn ${activeTab === 'pog' ? 'active' : ''}`}
-            onClick={() => setActiveTab('pog')}
-          >
-            <Layers size={14} />
-            Store POG
-          </button>
-          <button 
-            className={`tab-btn ${activeTab === 'inbound' ? 'active' : ''}`}
-            onClick={() => setActiveTab('inbound')}
-          >
-            <Truck size={14} />
-            Inbound Delivery
-          </button>
-          <button 
-            className={`tab-btn ${activeTab === 'comp' ? 'active' : ''}`}
-            onClick={() => setActiveTab('comp')}
-          >
-            <Target size={14} />
-            Comp Benchmarking
-          </button>
-        </div>
-
-        <div className="tab-content">
-          {/* Overall Summary Tab */}
-          {activeTab === 'overall' && (
+        <Tabs
+          tabNames={[
+            { value: 'overall', label: 'Overall Summary', icon: <DashboardOutlined sx={{ fontSize: 14 }}/> },
+            { value: 'sea', label: 'SEA Audit', icon: <AssignmentTurnedInOutlined sx={{ fontSize: 14 }}/> },
+            { value: 'voc', label: 'VoC Survey', icon: <ChatBubbleOutlineOutlined sx={{ fontSize: 14 }}/> },
+            { value: 'shelf', label: 'Shelf Audit', icon: <CameraAltOutlined sx={{ fontSize: 14 }}/> },
+            { value: 'pog', label: 'Store POG', icon: <LayersOutlined sx={{ fontSize: 14 }}/> },
+            { value: 'inbound', label: 'Inbound Delivery', icon: <LocalShippingOutlined sx={{ fontSize: 14 }}/> },
+            { value: 'comp', label: 'Comp Benchmarking', icon: <TrackChangesOutlined sx={{ fontSize: 14 }}/> },
+          ]}
+          tabPanels={[
+            /* Overall Summary Panel */
             <div className="tab-panel overall-panel">
               <div className="overall-grid">
                 {/* Recent Alerts Timeline */}
@@ -1257,7 +1236,7 @@ export const StoreDeepDive: React.FC = () => {
                   <div className="recommendation-list">
                     <div className="recommendation-item">
                       <div className="rec-icon urgent">
-                        <AlertTriangle size={14} />
+                        <WarningAmberOutlined sx={{ fontSize: 14 }}/>
                       </div>
                       <div className="rec-content">
                         <span className="rec-title">Address safety compliance immediately</span>
@@ -1266,7 +1245,7 @@ export const StoreDeepDive: React.FC = () => {
                     </div>
                     <div className="recommendation-item">
                       <div className="rec-icon high">
-                        <Users size={14} />
+                        <GroupOutlined sx={{ fontSize: 14 }}/>
                       </div>
                       <div className="rec-content">
                         <span className="rec-title">Review peak hour staffing</span>
@@ -1275,7 +1254,7 @@ export const StoreDeepDive: React.FC = () => {
                     </div>
                     <div className="recommendation-item">
                       <div className="rec-icon high">
-                        <Package size={14} />
+                        <InventoryOutlined sx={{ fontSize: 14 }}/>
                       </div>
                       <div className="rec-content">
                         <span className="rec-title">Prepare for delayed inbound</span>
@@ -1286,17 +1265,15 @@ export const StoreDeepDive: React.FC = () => {
                 </div>
               </div>
             </div>
-          )}
-
-          {/* SEA Audit Tab */}
-          {activeTab === 'sea' && (
+            ,
+            /* SEA Audit Panel */
             <div className="tab-panel sea-panel">
               <div className="sea-header">
-                <div className="sea-score-card">
+                <Card sx={{ maxWidth: '100%', minHeight: 'unset', padding: '16px 28px', borderRadius: '10px', background: 'var(--ia-color-warning-bg)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                   <span className="sea-score-label">Current SEA Score</span>
                   <span className="sea-score-value">76.4</span>
                   <span className="sea-score-change negative">-2.8 vs last audit</span>
-                </div>
+                </Card>
                 <div className="sea-summary">
                   <div className="summary-stat">
                     <span className="stat-value">12</span>
@@ -1316,7 +1293,7 @@ export const StoreDeepDive: React.FC = () => {
               {/* What Must Be Fixed */}
               <div className="fix-before-visit">
                 <h3>
-                  <AlertTriangle size={16} />
+                  <WarningAmberOutlined sx={{ fontSize: 16 }}/>
                   What Must Be Fixed Before Next Visit
                 </h3>
                 <div className="fix-list">
@@ -1359,7 +1336,7 @@ export const StoreDeepDive: React.FC = () => {
                       <td>88</td>
                       <td>85</td>
                       <td>45</td>
-                      <td><TrendingDown size={14} className="trend-down" /></td>
+                      <td><TrendingDownOutlined sx={{ fontSize: 14 }} className="trend-down"/></td>
                       <td><span className="status-badge critical">Auto-Fail</span></td>
                     </tr>
                     <tr className="status-warning">
@@ -1368,7 +1345,7 @@ export const StoreDeepDive: React.FC = () => {
                       <td>85</td>
                       <td>80</td>
                       <td>68</td>
-                      <td><TrendingDown size={14} className="trend-down" /></td>
+                      <td><TrendingDownOutlined sx={{ fontSize: 14 }} className="trend-down"/></td>
                       <td><span className="status-badge warning">Below Target</span></td>
                     </tr>
                     <tr>
@@ -1377,7 +1354,7 @@ export const StoreDeepDive: React.FC = () => {
                       <td>88</td>
                       <td>86</td>
                       <td>82</td>
-                      <td><TrendingDown size={14} className="trend-down" /></td>
+                      <td><TrendingDownOutlined sx={{ fontSize: 14 }} className="trend-down"/></td>
                       <td><span className="status-badge stable">On Track</span></td>
                     </tr>
                     <tr>
@@ -1386,7 +1363,7 @@ export const StoreDeepDive: React.FC = () => {
                       <td>94</td>
                       <td>92</td>
                       <td>90</td>
-                      <td><Minus size={14} className="trend-flat" /></td>
+                      <td><Remove sx={{ fontSize: 14 }} className="trend-flat"/></td>
                       <td><span className="status-badge stable">On Track</span></td>
                     </tr>
                     <tr>
@@ -1395,24 +1372,21 @@ export const StoreDeepDive: React.FC = () => {
                       <td>86</td>
                       <td>84</td>
                       <td>82</td>
-                      <td><TrendingDown size={14} className="trend-down" /></td>
+                      <td><TrendingDownOutlined sx={{ fontSize: 14 }} className="trend-down"/></td>
                       <td><span className="status-badge stable">On Track</span></td>
                     </tr>
                   </tbody>
                 </table>
               </div>
-            </div>
-          )}
-
-          {/* VoC Survey Tab */}
-          {activeTab === 'voc' && (
+            </div>,
+            /* VoC Survey Panel */
             <div className="tab-panel voc-panel">
               <div className="voc-header">
-                <div className="voc-score-card">
+                <Card sx={{ maxWidth: '100%', minHeight: 'unset', padding: '20px 32px', borderRadius: '12px', background: 'linear-gradient(135deg, var(--ia-color-error-bg) 0%, var(--ia-color-error-soft) 100%)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                   <span className="voc-score-label">VoC Satisfaction</span>
                   <span className="voc-score-value">72%</span>
                   <span className="voc-score-change negative">-5.1% vs last month</span>
-                </div>
+                </Card>
                 <div className="voc-volume">
                   <span className="volume-value">156</span>
                   <span className="volume-label">Responses this month</span>
@@ -1425,7 +1399,7 @@ export const StoreDeepDive: React.FC = () => {
                 <div className="sentiment-bars">
                   <div className="sentiment-bar-row">
                     <span className="sentiment-label">
-                      <Smile size={14} className="satisfied" />
+                      <SentimentSatisfiedOutlined sx={{ fontSize: 14 }} className="satisfied"/>
                       Satisfied
                     </span>
                     <div className="sentiment-bar">
@@ -1435,7 +1409,7 @@ export const StoreDeepDive: React.FC = () => {
                   </div>
                   <div className="sentiment-bar-row">
                     <span className="sentiment-label">
-                      <Meh size={14} className="neutral" />
+                      <SentimentNeutralOutlined sx={{ fontSize: 14 }} className="neutral"/>
                       Neutral
                     </span>
                     <div className="sentiment-bar">
@@ -1445,7 +1419,7 @@ export const StoreDeepDive: React.FC = () => {
                   </div>
                   <div className="sentiment-bar-row">
                     <span className="sentiment-label">
-                      <Frown size={14} className="dissatisfied" />
+                      <SentimentVeryDissatisfiedOutlined sx={{ fontSize: 14 }} className="dissatisfied"/>
                       Dissatisfied
                     </span>
                     <div className="sentiment-bar">
@@ -1493,7 +1467,7 @@ export const StoreDeepDive: React.FC = () => {
                 <div className="comments-list">
                   <div className="comment-item negative">
                     <div className="comment-header">
-                      <Frown size={14} />
+                      <SentimentVeryDissatisfiedOutlined sx={{ fontSize: 14 }}/>
                       <span className="comment-date">Today, 2:15 PM</span>
                     </div>
                     <p>"Waited 15 minutes in line with only 2 registers open during lunch rush. Very frustrating."</p>
@@ -1501,7 +1475,7 @@ export const StoreDeepDive: React.FC = () => {
                   </div>
                   <div className="comment-item negative">
                     <div className="comment-header">
-                      <Frown size={14} />
+                      <SentimentVeryDissatisfiedOutlined sx={{ fontSize: 14 }}/>
                       <span className="comment-date">Today, 11:30 AM</span>
                     </div>
                     <p>"Couldn't find anyone to help me in the electronics section. Ended up leaving without buying."</p>
@@ -1509,7 +1483,7 @@ export const StoreDeepDive: React.FC = () => {
                   </div>
                   <div className="comment-item positive">
                     <div className="comment-header">
-                      <Smile size={14} />
+                      <SentimentSatisfiedOutlined sx={{ fontSize: 14 }}/>
                       <span className="comment-date">Yesterday, 4:45 PM</span>
                     </div>
                     <p>"Great selection and the staff member in produce was very helpful with my questions."</p>
@@ -1517,11 +1491,8 @@ export const StoreDeepDive: React.FC = () => {
                   </div>
                 </div>
               </div>
-            </div>
-          )}
-
-          {/* Shelf Audit Tab */}
-          {activeTab === 'shelf' && (
+            </div>,
+            /* Shelf Audit Panel */
             <div className="tab-panel shelf-panel">
               <div className="shelf-header">
                 <div className="shelf-score-card">
@@ -1532,11 +1503,11 @@ export const StoreDeepDive: React.FC = () => {
                 {!isDMReadOnly && (
                   <div className="shelf-actions">
                     <button className="shelf-action-btn">
-                      <Camera size={14} />
+                      <CameraAltOutlined sx={{ fontSize: 14 }}/>
                       New Scan
                     </button>
                     <button className="shelf-action-btn secondary">
-                      <RefreshCw size={14} />
+                      <RefreshOutlined sx={{ fontSize: 14 }}/>
                       Re-scan Section
                     </button>
                   </div>
@@ -1559,7 +1530,7 @@ export const StoreDeepDive: React.FC = () => {
               {/* Delta Task List */}
               <div className="delta-tasks">
                 <h3>
-                  <CheckCircle2 size={16} />
+                  <TaskAltOutlined sx={{ fontSize: 16 }}/>
                   Delta Task List — Women's Wall Display
                 </h3>
                 <div className="task-list">
@@ -1617,11 +1588,8 @@ export const StoreDeepDive: React.FC = () => {
                   </div>
                 </div>
               </div>
-            </div>
-          )}
-
-          {/* Store POG Tab */}
-          {activeTab === 'pog' && (
+            </div>,
+            /* Store POG Panel */
             <div className="tab-panel pog-panel">
               <div className="pog-header">
                 <div className="pog-info">
@@ -1631,7 +1599,7 @@ export const StoreDeepDive: React.FC = () => {
                 </div>
                 {!isDMReadOnly && (
                   <button className="request-change-btn">
-                    <FileText size={14} />
+                    <DescriptionOutlined sx={{ fontSize: 14 }}/>
                     Request POG Change
                   </button>
                 )}
@@ -1689,16 +1657,13 @@ export const StoreDeepDive: React.FC = () => {
                 <h3>OOS Adaptation Notifications</h3>
                 <div className="adaptation-list">
                   <div className="adaptation-item">
-                    <AlertTriangle size={14} />
+                    <WarningAmberOutlined sx={{ fontSize: 14 }}/>
                     <span>Temporary substitution active for SKU 49000028904 — use adjacent facing</span>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
-
-          {/* Inbound Delivery Tab */}
-          {activeTab === 'inbound' && (
+            </div>,
+            /* Inbound Delivery Panel */
             <div className="tab-panel inbound-panel">
               <div className="inbound-header">
                 <div className="inbound-summary">
@@ -1725,7 +1690,7 @@ export const StoreDeepDive: React.FC = () => {
                     <span className="day-label">Today</span>
                     <div className="day-shipments">
                       <div className="shipment-badge delayed">
-                        <Truck size={12} />
+                        <LocalShippingOutlined sx={{ fontSize: 12 }}/>
                         <span>APL-2041 (Delayed)</span>
                       </div>
                     </div>
@@ -1734,11 +1699,11 @@ export const StoreDeepDive: React.FC = () => {
                     <span className="day-label">Tomorrow</span>
                     <div className="day-shipments">
                       <div className="shipment-badge delayed">
-                        <Truck size={12} />
+                        <LocalShippingOutlined sx={{ fontSize: 12 }}/>
                         <span>APL-2042 (Delayed)</span>
                       </div>
                       <div className="shipment-badge scheduled">
-                        <Truck size={12} />
+                        <LocalShippingOutlined sx={{ fontSize: 12 }}/>
                         <span>APL-2045</span>
                       </div>
                     </div>
@@ -1747,7 +1712,7 @@ export const StoreDeepDive: React.FC = () => {
                     <span className="day-label">Apr 29</span>
                     <div className="day-shipments">
                       <div className="shipment-badge scheduled">
-                        <Truck size={12} />
+                        <LocalShippingOutlined sx={{ fontSize: 12 }}/>
                         <span>APL-2048</span>
                       </div>
                     </div>
@@ -1756,7 +1721,7 @@ export const StoreDeepDive: React.FC = () => {
                     <span className="day-label">Apr 30</span>
                     <div className="day-shipments">
                       <div className="shipment-badge scheduled">
-                        <Truck size={12} />
+                        <LocalShippingOutlined sx={{ fontSize: 12 }}/>
                         <span>APL-2050</span>
                       </div>
                     </div>
@@ -1788,11 +1753,8 @@ export const StoreDeepDive: React.FC = () => {
                   </div>
                 </div>
               </div>
-            </div>
-          )}
-
-          {/* Comp Benchmarking Tab */}
-          {activeTab === 'comp' && (
+            </div>,
+            /* Comp Benchmarking Panel */
             <div className="tab-panel comp-panel">
               <div className="comp-header">
                 <div className="comp-rank-large">
@@ -1836,13 +1798,13 @@ export const StoreDeepDive: React.FC = () => {
               {/* Prescriptive Actions */}
               <div className="prescriptive-actions">
                 <h3>
-                  <Sparkles size={16} />
+                  <AutoAwesomeOutlined sx={{ fontSize: 16 }}/>
                   Prescriptive Actions Based on Comp Analysis
                 </h3>
                 <div className="prescriptive-list">
                   <div className="prescriptive-item">
                     <div className="prescriptive-icon">
-                      <Users size={14} />
+                      <GroupOutlined sx={{ fontSize: 14 }}/>
                     </div>
                     <div className="prescriptive-content">
                       <span className="prescriptive-title">Staffing optimization opportunity</span>
@@ -1851,7 +1813,7 @@ export const StoreDeepDive: React.FC = () => {
                   </div>
                   <div className="prescriptive-item">
                     <div className="prescriptive-icon">
-                      <ShieldCheck size={14} />
+                      <GppGoodOutlined sx={{ fontSize: 14 }}/>
                     </div>
                     <div className="prescriptive-content">
                       <span className="prescriptive-title">SEA improvement potential</span>
@@ -1860,7 +1822,7 @@ export const StoreDeepDive: React.FC = () => {
                   </div>
                   <div className="prescriptive-item">
                     <div className="prescriptive-icon">
-                      <DollarSign size={14} />
+                      <AttachMoneyOutlined sx={{ fontSize: 14 }}/>
                     </div>
                     <div className="prescriptive-content">
                       <span className="prescriptive-title">Revenue recovery path</span>
@@ -1869,9 +1831,11 @@ export const StoreDeepDive: React.FC = () => {
                   </div>
                 </div>
               </div>
-            </div>
-          )}
-        </div>
+            </div>,
+          ]}
+          value={activeTab}
+          onChange={(_, val) => setActiveTab(val)}
+        />
       </div>
 
       {/* KPI Detail Side Panel */}
@@ -1881,7 +1845,7 @@ export const StoreDeepDive: React.FC = () => {
             <div className="panel-header">
               <h3>{selectedKPI.label}</h3>
               <button className="panel-close" onClick={() => setSelectedKPI(null)}>
-                <X size={20} />
+                <CloseOutlined sx={{ fontSize: 20 }}/>
               </button>
             </div>
             <div className="panel-content">
@@ -1911,7 +1875,7 @@ export const StoreDeepDive: React.FC = () => {
                   <svg viewBox="0 0 300 100" preserveAspectRatio="none">
                     <polyline
                       fill="none"
-                      stroke={selectedKPI.varianceType === 'positive' ? '#10b981' : '#ef4444'}
+                      stroke={selectedKPI.varianceType === 'positive' ? 'var(--ia-color-success)' : 'var(--ia-color-error)'}
                       strokeWidth="2"
                       points="0,20 40,25 80,35 120,40 160,50 200,60 240,70 300,80"
                     />
@@ -1919,7 +1883,7 @@ export const StoreDeepDive: React.FC = () => {
                 </div>
               </div>
               <div className="panel-ai-summary">
-                <Sparkles size={14} />
+                <AutoAwesomeOutlined sx={{ fontSize: 14 }}/>
                 <p>Declining trend over 8 weeks. Performance is 4.2% below district average. Immediate attention required on staffing and shelf availability.</p>
               </div>
             </div>

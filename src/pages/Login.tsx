@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Card } from 'impact-ui';
-import { Eye, EyeOff } from 'lucide-react';
+import VisibilityOutlined from '@mui/icons-material/VisibilityOutlined';
+import VisibilityOffOutlined from '@mui/icons-material/VisibilityOffOutlined';
 import { useAuth } from '../context/AuthContext';
 import { getDefaultRouteForAccess } from '../types';
 import { AUTH_ERRORS } from '../constants/auth';
@@ -97,7 +98,7 @@ export const Login: React.FC = () => {
                     onClick={togglePasswordVisibility}
                     className="password-toggle"
                   >
-                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    {showPassword ? <VisibilityOffOutlined sx={{ fontSize: 20 }} /> : <VisibilityOutlined sx={{ fontSize: 20 }} />}
                   </button>
                 </div>
               </div>

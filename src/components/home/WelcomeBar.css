@@ -1,7 +1,7 @@
 /* Welcome Bar Styles */
 
 .welcome-bar {
-  background: linear-gradient(to bottom, #ffffff 0%, #f0f4ff 100%);
+  background: linear-gradient(to bottom, var(--ia-color-surface) 0%, #f0f4ff 100%);
   border-bottom: 1px solid #e0e0e0;
   padding: 24px 32px;
 }
@@ -14,8 +14,8 @@
 }
 
 .welcome-greeting {
-  font-size: 24px;
-  font-weight: 600;
+  font-size: var(--ia-text-3xl);
+  font-weight: var(--ia-font-weight-semibold);
   color: #1a1a1a;
   margin: 0;
 }
@@ -24,7 +24,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 16px;
+  font-size: var(--ia-text-md);
   color: #666;
 }
 
@@ -42,26 +42,26 @@
 .role-badge {
   padding: 4px 12px;
   border-radius: 12px;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: var(--ia-text-xs);
+  font-weight: var(--ia-font-weight-bold);
   color: white;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .role-title {
-  font-size: 16px;
-  font-weight: 500;
+  font-size: var(--ia-text-md);
+  font-weight: var(--ia-font-weight-medium);
   color: #333;
 }
 
 .separator {
   color: #999;
-  font-size: 16px;
+  font-size: var(--ia-text-md);
 }
 
 .assignment {
-  font-size: 16px;
+  font-size: var(--ia-text-md);
   color: #666;
 }
 
@@ -78,11 +78,11 @@
   }
 
   .welcome-greeting {
-    font-size: 20px;
+    font-size: var(--ia-text-xl);
   }
 
   .welcome-date {
-    font-size: 14px;
+    font-size: var(--ia-text-sm);
   }
 
   .welcome-row-2 {
@@ -93,7 +93,7 @@
 
   .role-title,
   .assignment {
-    font-size: 14px;
+    font-size: var(--ia-text-sm);
   }
 
   .separator {

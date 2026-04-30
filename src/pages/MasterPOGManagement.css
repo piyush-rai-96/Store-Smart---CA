@@ -5,7 +5,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: #f8fafc;
+  background: var(--ia-color-bg-subtle);
   overflow: hidden;
   min-height: 0;
   height: 100%;
@@ -14,8 +14,8 @@
 /* Header — matches District Intelligence header style */
 .master-pog-header {
   padding: 16px 32px;
-  background: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
+  background: var(--ia-color-surface);
+  border-bottom: 1px solid var(--ia-color-border);
 }
 
 .master-pog-title-section {
@@ -31,61 +31,23 @@
 }
 
 .master-pog-title-row svg {
-  color: #6366f1;
+  color: var(--ia-color-primary);
 }
 
 .master-pog-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: #0f172a;
+  font-size: var(--ia-text-lg);
+  font-weight: var(--ia-font-weight-bold);
+  color: var(--ia-color-text-primary);
   margin: 0;
   letter-spacing: -0.02em;
 }
 
 .master-pog-subtitle {
-  font-size: 14px;
-  color: #64748b;
+  font-size: var(--ia-text-sm);
+  color: var(--ia-color-text-secondary);
   margin: 0;
 }
 
-/* Tabs */
-.master-pog-tabs {
-  background: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
-  padding: 0 32px;
-}
-
-.pog-tabs-container {
-  display: flex;
-  gap: 0;
-}
-
-.pog-tab {
-  padding: 14px 20px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--pi-text-secondary);
-  background: transparent;
-  border: none;
-  border-bottom: 2px solid transparent;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  position: relative;
-}
-
-.pog-tab:hover:not(:disabled) {
-  color: var(--pi-primary);
-}
-
-.pog-tab.active {
-  color: var(--pi-primary);
-  border-bottom-color: var(--pi-primary);
-}
-
-.pog-tab:disabled {
-  color: #cbd5e1;
-  cursor: not-allowed;
-}
 
 /* Content */
 .master-pog-content {
@@ -105,8 +67,8 @@
 }
 
 .pi-toolbar .pog-filter-label {
-  font-size: 11.5px;
-  font-weight: 600;
+  font-size: var(--ia-text-11-5);
+  font-weight: var(--ia-font-weight-semibold);
   color: var(--pi-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -119,15 +81,15 @@
   padding: 0 12px;
   border-radius: 8px;
   border: 1px solid var(--pi-border);
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--ia-text-13);
+  font-weight: var(--ia-font-weight-medium);
   color: var(--pi-text-body);
   background: var(--pi-bg-white);
   min-width: 140px;
 }
 
 .pi-toolbar .custom-dropdown-trigger:hover {
-  border-color: #cbd5e1;
+  border-color: var(--ia-color-border-strong);
   background: var(--pi-bg-subtle);
 }
 
@@ -156,7 +118,7 @@
   left: 14px;
   top: 50%;
   transform: translateY(-50%);
-  color: #94a3b8;
+  color: var(--ia-color-text-tertiary);
   pointer-events: none;
 }
 
@@ -164,22 +126,22 @@
   width: 100%;
   height: 44px;
   padding: 0 16px 0 44px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--ia-color-border);
   border-radius: 10px;
-  font-size: 14px;
-  color: #1e293b;
-  background: #ffffff;
+  font-size: var(--ia-text-sm);
+  color: var(--ia-color-text-primary);
+  background: var(--ia-color-surface);
   transition: all 0.2s ease;
 }
 
 .pog-search-input:focus {
   outline: none;
-  border-color: #818cf8;
+  border-color: var(--ia-color-primary-hover);
   box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.15);
 }
 
 .pog-search-input::placeholder {
-  color: #94a3b8;
+  color: var(--ia-color-text-tertiary);
 }
 
 .pog-toolbar-actions {
@@ -193,27 +155,27 @@
   gap: 8px;
   padding: 10px 20px;
   border-radius: 10px;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--ia-text-sm);
+  font-weight: var(--ia-font-weight-medium);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .pog-toolbar-btn.secondary {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  color: #475569;
+  background: var(--ia-color-surface);
+  border: 1px solid var(--ia-color-border);
+  color: var(--ia-color-text-secondary);
 }
 
 .pog-toolbar-btn.secondary:hover {
-  background: #f8fafc;
-  border-color: #cbd5e1;
+  background: var(--ia-color-bg-subtle);
+  border-color: var(--ia-color-border-strong);
 }
 
 .pog-toolbar-btn.primary {
-  background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
+  background: linear-gradient(135deg, var(--ia-color-primary-hover) 0%, var(--ia-color-primary) 100%);
   border: none;
-  color: #ffffff;
+  color: var(--ia-color-surface);
   box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
 }
 
@@ -228,8 +190,8 @@
   align-items: flex-end;
   gap: 16px;
   padding: 16px 20px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--ia-color-surface);
+  border: 1px solid var(--ia-color-border);
   border-radius: 12px;
   margin-bottom: 24px;
   flex-wrap: wrap;
@@ -244,9 +206,9 @@
 }
 
 .pog-filter-label {
-  font-size: 11px;
-  font-weight: 600;
-  color: #64748b;
+  font-size: var(--ia-text-2xs);
+  font-weight: var(--ia-font-weight-semibold);
+  color: var(--ia-color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -254,11 +216,11 @@
 .pog-filter-select {
   height: 38px;
   padding: 0 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--ia-color-border);
   border-radius: 8px;
-  font-size: 13px;
-  color: #1e293b;
-  background: #f8fafc;
+  font-size: var(--ia-text-13);
+  color: var(--ia-color-text-primary);
+  background: var(--ia-color-bg-subtle);
   cursor: pointer;
   transition: all 0.2s ease;
   appearance: none;
@@ -269,24 +231,24 @@
 }
 
 .pog-filter-select:hover {
-  border-color: #cbd5e1;
-  background-color: #ffffff;
+  border-color: var(--ia-color-border-strong);
+  background-color: var(--ia-color-surface);
 }
 
 .pog-filter-select:focus {
   outline: none;
-  border-color: #818cf8;
+  border-color: var(--ia-color-primary-hover);
   box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.15);
 }
 
 .pog-filter-clear {
   height: 38px;
   padding: 0 16px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--ia-color-border);
   border-radius: 8px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #64748b;
+  font-size: var(--ia-text-13);
+  font-weight: var(--ia-font-weight-medium);
+  color: var(--ia-color-text-secondary);
   background: transparent;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -294,9 +256,9 @@
 }
 
 .pog-filter-clear:hover {
-  background: #f3f4f6;
-  color: #374151;
-  border-color: #d1d5db;
+  background: var(--ia-color-bg-muted);
+  color: var(--ia-color-text-secondary);
+  border-color: var(--ia-color-border);
 }
 
 /* Custom Dropdown - Premium */
@@ -311,24 +273,24 @@
   width: 100%;
   height: 40px;
   padding: 0 14px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--ia-color-border);
   border-radius: 6px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #6b7280;
-  background: #ffffff;
+  font-size: var(--ia-text-13);
+  font-weight: var(--ia-font-weight-medium);
+  color: var(--ia-color-text-secondary);
+  background: var(--ia-color-surface);
   cursor: pointer;
   transition: all 0.15s ease;
   text-align: left;
 }
 
 .custom-dropdown-trigger span.has-value {
-  color: #0f172a;
+  color: var(--ia-color-text-primary);
 }
 
 .custom-dropdown-trigger:hover {
-  border-color: #d1d5db;
-  background: #f9fafb;
+  border-color: var(--ia-color-border);
+  background: var(--ia-color-bg-subtle);
 }
 
 .custom-dropdown-trigger.open {
@@ -337,7 +299,7 @@
 }
 
 .custom-dropdown-trigger svg {
-  color: #9ca3af;
+  color: var(--ia-color-text-tertiary);
   flex-shrink: 0;
 }
 
@@ -347,8 +309,8 @@
   left: 0;
   right: 0;
   min-width: 200px;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: var(--ia-color-surface);
+  border: 1px solid var(--ia-color-border);
   border-radius: 8px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
   z-index: 100;
@@ -369,20 +331,20 @@
   padding: 12px 16px;
   border: none;
   background: transparent;
-  font-size: 14px;
-  font-weight: 500;
-  color: #374151;
+  font-size: var(--ia-text-sm);
+  font-weight: var(--ia-font-weight-medium);
+  color: var(--ia-color-text-secondary);
   cursor: pointer;
   transition: all 0.1s ease;
   text-align: left;
 }
 
 .custom-dropdown-option:hover {
-  background: #f9fafb;
+  background: var(--ia-color-bg-subtle);
 }
 
 .custom-dropdown-option.selected {
-  background: #eff6ff;
+  background: var(--ia-color-primary-soft);
   color: #1e40af;
 }
 
@@ -398,10 +360,6 @@
 }
 
 .pog-card {
-  background: var(--pi-bg-white);
-  border-radius: 12px;
-  border: 1px solid var(--pi-border);
-  padding: 20px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -422,7 +380,7 @@
 .pog-card-icon {
   width: 48px;
   height: 48px;
-  background: linear-gradient(135deg, #ede9fe 0%, #e0e7ff 100%);
+  background: linear-gradient(135deg, var(--ia-color-primary-soft) 0%, var(--ia-color-primary-soft) 100%);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -432,31 +390,31 @@
 .pog-card-icon svg {
   width: 24px;
   height: 24px;
-  color: #6366f1;
+  color: var(--ia-color-primary);
 }
 
 .pog-status-badge {
   padding: 4px 10px;
   border-radius: 20px;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--ia-text-2xs);
+  font-weight: var(--ia-font-weight-semibold);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .pog-status-badge.status-active {
-  background: #dcfce7;
-  color: #15803d;
+  background: var(--ia-color-success-bg);
+  color: var(--ia-color-success);
 }
 
 .pog-status-badge.status-draft {
-  background: #fef3c7;
-  color: #b45309;
+  background: var(--ia-color-warning-bg);
+  color: var(--ia-color-warning-text);
 }
 
 .pog-status-badge.status-archived {
-  background: #f1f5f9;
-  color: #64748b;
+  background: var(--ia-color-bg-muted);
+  color: var(--ia-color-text-secondary);
 }
 
 .pog-card-body {
@@ -465,10 +423,10 @@
 
 .pog-card-id {
   display: inline-block;
-  font-size: 11px;
-  font-weight: 600;
-  color: #6366f1;
-  background: #eef2ff;
+  font-size: var(--ia-text-2xs);
+  font-weight: var(--ia-font-weight-semibold);
+  color: var(--ia-color-primary);
+  background: var(--ia-color-primary-soft);
   padding: 3px 8px;
   border-radius: 4px;
   margin-bottom: 8px;
@@ -476,15 +434,15 @@
 }
 
 .pog-card-name {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1e293b;
+  font-size: var(--ia-text-md);
+  font-weight: var(--ia-font-weight-semibold);
+  color: var(--ia-color-text-primary);
   margin: 0 0 4px 0;
 }
 
 .pog-card-category {
-  font-size: 13px;
-  color: #64748b;
+  font-size: var(--ia-text-13);
+  color: var(--ia-color-text-secondary);
   margin: 0;
 }
 
@@ -493,7 +451,7 @@
   justify-content: space-between;
   align-items: center;
   padding-top: 16px;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--ia-color-bg-muted);
 }
 
 .pog-card-meta {
@@ -503,9 +461,9 @@
 
 .pog-card-version,
 .pog-card-clusters {
-  font-size: 12px;
-  color: #64748b;
-  background: #f8fafc;
+  font-size: var(--ia-text-xs);
+  color: var(--ia-color-text-secondary);
+  background: var(--ia-color-bg-subtle);
   padding: 4px 8px;
   border-radius: 6px;
 }
@@ -514,8 +472,8 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 12px;
-  color: #94a3b8;
+  font-size: var(--ia-text-xs);
+  color: var(--ia-color-text-tertiary);
 }
 
 /* POG Workspace */
@@ -525,15 +483,15 @@
   align-items: flex-start;
   margin-bottom: 24px;
   padding: 20px 24px;
-  background: #ffffff;
+  background: var(--ia-color-surface);
   border-radius: 16px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--ia-color-border);
 }
 
 .pog-workspace-name {
-  font-size: 20px;
-  font-weight: 600;
-  color: #1e293b;
+  font-size: var(--ia-text-xl);
+  font-weight: var(--ia-font-weight-semibold);
+  color: var(--ia-color-text-primary);
   margin: 0 0 8px 0;
 }
 
@@ -545,8 +503,8 @@
 
 .pog-workspace-version,
 .pog-workspace-category {
-  font-size: 13px;
-  color: #64748b;
+  font-size: var(--ia-text-13);
+  color: var(--ia-color-text-secondary);
 }
 
 .pog-workspace-actions {
@@ -560,26 +518,26 @@
   gap: 6px;
   padding: 8px 16px;
   border-radius: 8px;
-  font-size: 13px;
-  font-weight: 500;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  color: #475569;
+  font-size: var(--ia-text-13);
+  font-weight: var(--ia-font-weight-medium);
+  background: var(--ia-color-bg-subtle);
+  border: 1px solid var(--ia-color-border);
+  color: var(--ia-color-text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .pog-action-btn:hover {
-  background: #f1f5f9;
+  background: var(--ia-color-bg-muted);
 }
 
 .pog-action-btn.danger {
-  color: #dc2626;
+  color: var(--ia-color-error-strong);
 }
 
 .pog-action-btn.danger:hover {
-  background: #fef2f2;
-  border-color: #fecaca;
+  background: var(--ia-color-error-bg);
+  border-color: var(--ia-color-error-soft);
 }
 
 /* Workspace Content */
@@ -590,9 +548,9 @@
 }
 
 .pog-workspace-viewer {
-  background: #ffffff;
+  background: var(--ia-color-surface);
   border-radius: 16px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--ia-color-border);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -618,7 +576,7 @@
 .pog-viewer-icon {
   width: 80px;
   height: 80px;
-  background: linear-gradient(135deg, #ede9fe 0%, #e0e7ff 100%);
+  background: linear-gradient(135deg, var(--ia-color-primary-soft) 0%, var(--ia-color-primary-soft) 100%);
   border-radius: 20px;
   display: flex;
   align-items: center;
@@ -629,19 +587,19 @@
 .pog-viewer-icon svg {
   width: 40px;
   height: 40px;
-  color: #6366f1;
+  color: var(--ia-color-primary);
 }
 
 .pog-viewer-placeholder h3 {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1e293b;
+  font-size: var(--ia-text-lg);
+  font-weight: var(--ia-font-weight-semibold);
+  color: var(--ia-color-text-primary);
   margin: 0 0 8px 0;
 }
 
 .pog-viewer-placeholder p {
-  font-size: 14px;
-  color: #64748b;
+  font-size: var(--ia-text-sm);
+  color: var(--ia-color-text-secondary);
   margin: 0;
 }
 
@@ -653,16 +611,16 @@
 }
 
 .pog-sidebar-section {
-  background: #ffffff;
+  background: var(--ia-color-surface);
   border-radius: 16px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--ia-color-border);
   padding: 20px;
 }
 
 .pog-sidebar-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: #1e293b;
+  font-size: var(--ia-text-sm);
+  font-weight: var(--ia-font-weight-semibold);
+  color: var(--ia-color-text-primary);
   margin: 0 0 16px 0;
 }
 
@@ -678,33 +636,33 @@
   gap: 8px;
   padding: 10px 12px;
   border-radius: 8px;
-  font-size: 13px;
-  color: #64748b;
-  background: #f8fafc;
+  font-size: var(--ia-text-13);
+  color: var(--ia-color-text-secondary);
+  background: var(--ia-color-bg-subtle);
 }
 
 .pog-version-item.active {
-  background: #ede9fe;
-  color: #6366f1;
+  background: var(--ia-color-primary-soft);
+  color: var(--ia-color-primary);
 }
 
 .pog-cluster-stat {
   text-align: center;
   padding: 16px;
-  background: linear-gradient(135deg, #ede9fe 0%, #e0e7ff 100%);
+  background: linear-gradient(135deg, var(--ia-color-primary-soft) 0%, var(--ia-color-primary-soft) 100%);
   border-radius: 12px;
 }
 
 .pog-cluster-number {
   display: block;
-  font-size: 32px;
-  font-weight: 700;
-  color: #4f46e5;
+  font-size: var(--ia-text-5xl);
+  font-weight: var(--ia-font-weight-bold);
+  color: var(--ia-color-primary-hover);
 }
 
 .pog-cluster-label {
-  font-size: 11px;
-  color: #64748b;
+  font-size: var(--ia-text-2xs);
+  color: var(--ia-color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -715,17 +673,17 @@
   gap: 6px;
   margin-top: 12px;
   padding-top: 12px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--ia-color-border);
 }
 
 .pog-cluster-tag {
   display: inline-flex;
   padding: 4px 10px;
-  background: #f1f5f9;
-  color: #475569;
+  background: var(--ia-color-bg-muted);
+  color: var(--ia-color-text-secondary);
   border-radius: 6px;
-  font-size: 11px;
-  font-weight: 500;
+  font-size: var(--ia-text-2xs);
+  font-weight: var(--ia-font-weight-medium);
 }
 
 .pog-quick-actions {
@@ -737,20 +695,20 @@
 .pog-quick-action-btn {
   padding: 10px 16px;
   border-radius: 8px;
-  font-size: 13px;
-  font-weight: 500;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  color: #475569;
+  font-size: var(--ia-text-13);
+  font-weight: var(--ia-font-weight-medium);
+  background: var(--ia-color-bg-subtle);
+  border: 1px solid var(--ia-color-border);
+  color: var(--ia-color-text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: left;
 }
 
 .pog-quick-action-btn:hover {
-  background: #f1f5f9;
-  border-color: #818cf8;
-  color: #4f46e5;
+  background: var(--ia-color-bg-muted);
+  border-color: var(--ia-color-primary-hover);
+  color: var(--ia-color-primary-hover);
 }
 
 /* Responsive */
@@ -772,14 +730,14 @@
 
 /* Applied Rules Section */
 .pog-applied-rules {
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--ia-color-border);
   padding-top: 16px;
   margin-top: 8px;
 }
 
 .pog-rules-description {
-  font-size: 12px;
-  color: #64748b;
+  font-size: var(--ia-text-xs);
+  color: var(--ia-color-text-secondary);
   margin: 0 0 12px 0;
 }
 
@@ -794,15 +752,15 @@
   align-items: flex-start;
   gap: 10px;
   padding: 10px 12px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--ia-color-bg-subtle);
+  border: 1px solid var(--ia-color-border);
   border-radius: 8px;
   transition: all 0.2s ease;
 }
 
 .pog-rule-item:hover {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
+  background: var(--ia-color-bg-muted);
+  border-color: var(--ia-color-border-strong);
 }
 
 .pog-rule-icon {
@@ -812,12 +770,12 @@
   align-items: center;
   justify-content: center;
   border-radius: 6px;
-  font-size: 14px;
+  font-size: var(--ia-text-sm);
   flex-shrink: 0;
 }
 
 .pog-rule-icon.facing {
-  background: #dcfce7;
+  background: var(--ia-color-success-bg);
 }
 
 .pog-rule-icon.mandatory {
@@ -829,7 +787,7 @@
 }
 
 .pog-rule-icon.priority {
-  background: #fef3c7;
+  background: var(--ia-color-warning-bg);
 }
 
 .pog-rule-info {
@@ -840,17 +798,17 @@
 }
 
 .pog-rule-name {
-  font-size: 13px;
-  font-weight: 500;
-  color: #1e293b;
+  font-size: var(--ia-text-13);
+  font-weight: var(--ia-font-weight-medium);
+  color: var(--ia-color-text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .pog-rule-source {
-  font-size: 11px;
-  color: #64748b;
+  font-size: var(--ia-text-2xs);
+  color: var(--ia-color-text-secondary);
 }
 
 /* Premium Rules List */
@@ -861,15 +819,11 @@
 }
 
 .pog-rule-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 14px;
   transition: all 0.2s ease;
 }
 
 .pog-rule-card:hover {
-  border-color: #6366f1;
+  border-color: var(--ia-color-primary);
   box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
 }
 
@@ -887,24 +841,24 @@
   align-items: center;
   justify-content: center;
   border-radius: 8px;
-  font-size: 16px;
+  font-size: var(--ia-text-md);
   flex-shrink: 0;
 }
 
 .pog-rule-icon-badge.placement {
-  background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+  background: linear-gradient(135deg, var(--ia-color-primary-soft) 0%, var(--ia-color-primary-soft) 100%);
 }
 
 .pog-rule-icon-badge.facing {
-  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+  background: linear-gradient(135deg, var(--ia-color-success-bg) 0%, var(--ia-color-success-soft) 100%);
 }
 
 .pog-rule-icon-badge.priority {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  background: linear-gradient(135deg, var(--ia-color-warning-bg) 0%, var(--ia-color-warning-bg) 100%);
 }
 
 .pog-rule-icon-badge.space {
-  background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+  background: linear-gradient(135deg, var(--ia-color-primary-soft) 0%, #bae6fd 100%);
 }
 
 .pog-rule-icon-badge.tier {
@@ -920,7 +874,7 @@
 }
 
 .pog-rule-icon-badge.visual {
-  background: linear-gradient(135deg, #fef9c3 0%, #fef08a 100%);
+  background: linear-gradient(135deg, var(--ia-color-warning-bg) 0%, #fef08a 100%);
 }
 
 .pog-rule-card-title {
@@ -932,9 +886,9 @@
 }
 
 .pog-rule-card-title .pog-rule-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: #1e293b;
+  font-size: var(--ia-text-13);
+  font-weight: var(--ia-font-weight-semibold);
+  color: var(--ia-color-text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -944,11 +898,11 @@
   display: inline-flex;
   align-items: center;
   padding: 2px 8px;
-  background: #f1f5f9;
-  color: #64748b;
+  background: var(--ia-color-bg-muted);
+  color: var(--ia-color-text-secondary);
   border-radius: 4px;
-  font-size: 10px;
-  font-weight: 500;
+  font-size: var(--ia-text-3xs);
+  font-weight: var(--ia-font-weight-medium);
   text-transform: uppercase;
   letter-spacing: 0.3px;
   width: fit-content;
@@ -957,26 +911,26 @@
 .pog-rule-status {
   padding: 4px 10px;
   border-radius: 12px;
-  font-size: 11px;
-  font-weight: 500;
+  font-size: var(--ia-text-2xs);
+  font-weight: var(--ia-font-weight-medium);
   flex-shrink: 0;
 }
 
 .pog-rule-status.active {
-  background: #f0fdf4;
-  color: #166534;
-  border: 1px solid #bbf7d0;
+  background: var(--ia-color-success-bg);
+  color: var(--ia-color-success);
+  border: 1px solid var(--ia-color-success-soft);
 }
 
 .pog-rule-status.warning {
-  background: #fefce8;
+  background: var(--ia-color-warning-bg);
   color: #854d0e;
   border: 1px solid #fef08a;
 }
 
 .pog-rule-description {
-  font-size: 12px;
-  color: #64748b;
+  font-size: var(--ia-text-xs);
+  color: var(--ia-color-text-secondary);
   line-height: 1.5;
   margin: 0;
   padding-left: 42px;
@@ -984,7 +938,6 @@
 
 @media (max-width: 768px) {
   .master-pog-header,
-  .master-pog-tabs,
   .master-pog-content {
     padding-left: 16px;
     padding-right: 16px;

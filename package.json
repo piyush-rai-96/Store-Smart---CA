@@ -9,12 +9,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fontsource/manrope": "^5.2.8",
+    "@mui/icons-material": "^9.0.0",
+    "@mui/material": "^9.0.0",
     "@reduxjs/toolkit": "^2.11.2",
     "ag-grid-community": "^35.2.0",
     "ag-grid-enterprise": "^35.2.0",
     "ag-grid-react": "^35.2.0",
     "impact-ui": "^3.7.20",
-    "lucide-react": "^1.7.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-redux": "^9.2.0",

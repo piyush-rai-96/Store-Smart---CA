@@ -1,35 +1,34 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import {
-  Brain,
-  BarChart3,
-  Image as ImageIcon,
-  Zap,
-  Send,
-  Bot,
-  User,
-  FileText,
-  Upload,
-  CheckCircle2,
-  AlertTriangle,
-  AlertCircle,
-  TrendingUp,
-  TrendingDown,
-  Sparkles,
-  BookOpen,
-  ClipboardList,
-  X,
-  RefreshCw,
-  Search,
-  ChevronUp,
-  ChevronDown,
-  ChevronRight,
-  Clock,
-  Eye,
-  Wrench,
-  CheckCircle,
-  Store,
-} from 'lucide-react';
+import PsychologyOutlined from '@mui/icons-material/PsychologyOutlined';
+import BarChartOutlined from '@mui/icons-material/BarChartOutlined';
+import ImageOutlined from '@mui/icons-material/ImageOutlined';
+import BoltOutlined from '@mui/icons-material/BoltOutlined';
+import SendOutlined from '@mui/icons-material/SendOutlined';
+import SmartToyOutlined from '@mui/icons-material/SmartToyOutlined';
+import PersonOutlined from '@mui/icons-material/PersonOutlined';
+import DescriptionOutlined from '@mui/icons-material/DescriptionOutlined';
+import FileUploadOutlined from '@mui/icons-material/FileUploadOutlined';
+import TaskAltOutlined from '@mui/icons-material/TaskAltOutlined';
+import WarningAmberOutlined from '@mui/icons-material/WarningAmberOutlined';
+import ErrorOutlined from '@mui/icons-material/ErrorOutlined';
+import TrendingUpOutlined from '@mui/icons-material/TrendingUpOutlined';
+import TrendingDownOutlined from '@mui/icons-material/TrendingDownOutlined';
+import AutoAwesomeOutlined from '@mui/icons-material/AutoAwesomeOutlined';
+import MenuBookOutlined from '@mui/icons-material/MenuBookOutlined';
+import AssignmentOutlined from '@mui/icons-material/AssignmentOutlined';
+import CloseOutlined from '@mui/icons-material/CloseOutlined';
+import RefreshOutlined from '@mui/icons-material/RefreshOutlined';
+import SearchOutlined from '@mui/icons-material/SearchOutlined';
+import KeyboardArrowUp from '@mui/icons-material/KeyboardArrowUp';
+import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
+import AccessTimeOutlined from '@mui/icons-material/AccessTimeOutlined';
+import VisibilityOutlined from '@mui/icons-material/VisibilityOutlined';
+import BuildOutlined from '@mui/icons-material/BuildOutlined';
+import CheckCircleOutlined from '@mui/icons-material/CheckCircleOutlined';
+import StoreOutlined from '@mui/icons-material/StoreOutlined';
+import { Button, Card, Chips, Tabs, Badge } from 'impact-ui';
 import './AICopilot.css';
 
 // ── Types ──
@@ -201,8 +200,8 @@ const analyticsResponses: Record<string, { answer: string; kpiCards: { label: st
       { label: 'Avg Basket', value: '$38.40', delta: '-8%', direction: 'down' },
     ],
     chartData: [
-      { type: 'bar', title: 'Sales by Store ($K)', labels: ['Plaza', 'Riverside', 'Central', 'Westfield', 'Harbor', 'Oak St', 'Pine Gr', 'Maple'], values: [218, 195, 172, 164, 148, 132, 118, 113], color: '#6366f1' },
-      { type: 'line', title: 'Weekly Sales Trend ($K)', labels: ['Mar 2', 'Mar 9', 'Mar 16', 'Mar 23', 'Mar 30', 'Apr 6', 'Apr 13', 'Apr 20'], values: [1280, 1310, 1295, 1340, 1320, 1300, 1280, 1260], color: '#ef4444' },
+      { type: 'bar', title: 'Sales by Store ($K)', labels: ['Plaza', 'Riverside', 'Central', 'Westfield', 'Harbor', 'Oak St', 'Pine Gr', 'Maple'], values: [218, 195, 172, 164, 148, 132, 118, 113], color: 'var(--ia-color-primary)' },
+      { type: 'line', title: 'Weekly Sales Trend ($K)', labels: ['Mar 2', 'Mar 9', 'Mar 16', 'Mar 23', 'Mar 30', 'Apr 6', 'Apr 13', 'Apr 20'], values: [1280, 1310, 1295, 1340, 1320, 1300, 1280, 1260], color: 'var(--ia-color-error)' },
     ],
     followUpQuestions: [
       'Which stores are underperforming vs target this week?',
@@ -219,8 +218,8 @@ const analyticsResponses: Record<string, { answer: string; kpiCards: { label: st
       { label: 'Escalations', value: '3', delta: 'active', direction: 'down' },
     ],
     chartData: [
-      { type: 'horizontal-bar', title: 'DPI Score by Store', labels: ['Plaza #2034', 'Riverside #1876', 'Central #3421', 'Westfield #2198', 'Harbor #4532', 'Oak St #1234', 'Pine Gr #5678', 'Maple #9012'], values: [94, 91, 85, 79, 76, 72, 65, 58], color: '#6366f1' },
-      { type: 'line', title: 'Bottom 3 — DPI Trend (8 Weeks)', labels: ['Mar 2', 'Mar 9', 'Mar 16', 'Mar 23', 'Mar 30', 'Apr 6', 'Apr 13', 'Apr 20'], values: [78, 76, 74, 72, 70, 68, 66, 65], color: '#ef4444', secondaryValues: [85, 85, 85, 85, 85, 85, 85, 85], secondaryLabel: 'Target' },
+      { type: 'horizontal-bar', title: 'DPI Score by Store', labels: ['Plaza #2034', 'Riverside #1876', 'Central #3421', 'Westfield #2198', 'Harbor #4532', 'Oak St #1234', 'Pine Gr #5678', 'Maple #9012'], values: [94, 91, 85, 79, 76, 72, 65, 58], color: 'var(--ia-color-primary)' },
+      { type: 'line', title: 'Bottom 3 — DPI Trend (8 Weeks)', labels: ['Mar 2', 'Mar 9', 'Mar 16', 'Mar 23', 'Mar 30', 'Apr 6', 'Apr 13', 'Apr 20'], values: [78, 76, 74, 72, 70, 68, 66, 65], color: 'var(--ia-color-error)', secondaryValues: [85, 85, 85, 85, 85, 85, 85, 85], secondaryLabel: 'Target' },
     ],
     followUpQuestions: [
       'Show total sales in the last 4 weeks for Maple Heights',
@@ -237,8 +236,8 @@ const analyticsResponses: Record<string, { answer: string; kpiCards: { label: st
       { label: 'Avg VoC', value: '88.7%', delta: '+3.2pp', direction: 'up' },
     ],
     chartData: [
-      { type: 'bar', title: 'DPI Scores — All Stores', labels: ['Plaza', 'Riverside', 'Central', 'Westfield', 'Harbor', 'Oak St', 'Pine Gr', 'Maple'], values: [94, 91, 85, 79, 76, 72, 65, 58], color: '#10b981' },
-      { type: 'bar', title: 'Sales vs Plan (%)', labels: ['Plaza', 'Riverside', 'Central', 'Westfield', 'Harbor', 'Oak St', 'Pine Gr', 'Maple'], values: [108, 105, 102, 99, 95, 93, 91, 88], color: '#6366f1' },
+      { type: 'bar', title: 'DPI Scores — All Stores', labels: ['Plaza', 'Riverside', 'Central', 'Westfield', 'Harbor', 'Oak St', 'Pine Gr', 'Maple'], values: [94, 91, 85, 79, 76, 72, 65, 58], color: 'var(--ia-color-success)' },
+      { type: 'bar', title: 'Sales vs Plan (%)', labels: ['Plaza', 'Riverside', 'Central', 'Westfield', 'Harbor', 'Oak St', 'Pine Gr', 'Maple'], values: [108, 105, 102, 99, 95, 93, 91, 88], color: 'var(--ia-color-primary)' },
     ],
     followUpQuestions: [
       'What is the gross margin % trend for Downtown Plaza?',
@@ -255,8 +254,8 @@ const analyticsResponses: Record<string, { answer: string; kpiCards: { label: st
       { label: 'Response Rate', value: '67%', delta: '+5%', direction: 'up' },
     ],
     chartData: [
-      { type: 'line', title: 'VoC Score Trend (4 Weeks)', labels: ['Apr 6', 'Apr 13', 'Apr 20', 'Apr 27'], values: [82, 81, 80, 79], color: '#f59e0b', secondaryValues: [85, 85, 85, 85], secondaryLabel: 'Target' },
-      { type: 'horizontal-bar', title: 'VoC by Store', labels: ['Plaza', 'Riverside', 'Central', 'Westfield', 'Harbor', 'Oak St', 'Pine Gr', 'Maple'], values: [92, 89, 84, 80, 76, 72, 65, 58], color: '#6366f1' },
+      { type: 'line', title: 'VoC Score Trend (4 Weeks)', labels: ['Apr 6', 'Apr 13', 'Apr 20', 'Apr 27'], values: [82, 81, 80, 79], color: 'var(--ia-color-warning)', secondaryValues: [85, 85, 85, 85], secondaryLabel: 'Target' },
+      { type: 'horizontal-bar', title: 'VoC by Store', labels: ['Plaza', 'Riverside', 'Central', 'Westfield', 'Harbor', 'Oak St', 'Pine Gr', 'Maple'], values: [92, 89, 84, 80, 76, 72, 65, 58], color: 'var(--ia-color-primary)' },
     ],
     followUpQuestions: [
       'Which stores are driving the cleanliness complaints?',
@@ -273,8 +272,8 @@ const analyticsResponses: Record<string, { answer: string; kpiCards: { label: st
       { label: 'Avg Basket', value: '$38.63', delta: '+2.1%', direction: 'up' },
     ],
     chartData: [
-      { type: 'bar', title: 'Weekly Sales ($K)', labels: ['Apr 6', 'Apr 13', 'Apr 20', 'Apr 27'], values: [208, 215, 221, 228], color: '#10b981' },
-      { type: 'bar', title: '4-Week Sales by Store ($K)', labels: ['Plaza', 'Riverside', 'Central', 'Westfield', 'Harbor', 'Oak St', 'Pine Gr', 'Maple'], values: [872, 784, 692, 648, 596, 532, 476, 448], color: '#6366f1' },
+      { type: 'bar', title: 'Weekly Sales ($K)', labels: ['Apr 6', 'Apr 13', 'Apr 20', 'Apr 27'], values: [208, 215, 221, 228], color: 'var(--ia-color-success)' },
+      { type: 'bar', title: '4-Week Sales by Store ($K)', labels: ['Plaza', 'Riverside', 'Central', 'Westfield', 'Harbor', 'Oak St', 'Pine Gr', 'Maple'], values: [872, 784, 692, 648, 596, 532, 476, 448], color: 'var(--ia-color-primary)' },
     ],
     followUpQuestions: [
       'What is the gross margin % trend for this store?',
@@ -291,8 +290,8 @@ const analyticsResponses: Record<string, { answer: string; kpiCards: { label: st
       { label: 'Fresh Waste', value: '-34%', delta: 'improved', direction: 'up' },
     ],
     chartData: [
-      { type: 'line', title: 'Gross Margin % Trend (13 Weeks)', labels: ['Jan 27', 'Feb 3', 'Feb 10', 'Feb 17', 'Feb 24', 'Mar 3', 'Mar 10', 'Mar 17', 'Mar 24', 'Mar 31', 'Apr 7', 'Apr 14', 'Apr 21'], values: [28.4, 28.6, 28.9, 29.1, 29.3, 29.6, 29.8, 30.0, 30.2, 30.5, 30.8, 31.0, 31.2], color: '#10b981', secondaryValues: [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30], secondaryLabel: 'Target' },
-      { type: 'horizontal-bar', title: 'GM% by Department', labels: ['Health & Beauty', 'Fresh & Produce', 'Beverages', 'Household', 'Grocery'], values: [38.2, 34.8, 29.4, 26.8, 24.6], color: '#6366f1' },
+      { type: 'line', title: 'Gross Margin % Trend (13 Weeks)', labels: ['Jan 27', 'Feb 3', 'Feb 10', 'Feb 17', 'Feb 24', 'Mar 3', 'Mar 10', 'Mar 17', 'Mar 24', 'Mar 31', 'Apr 7', 'Apr 14', 'Apr 21'], values: [28.4, 28.6, 28.9, 29.1, 29.3, 29.6, 29.8, 30.0, 30.2, 30.5, 30.8, 31.0, 31.2], color: 'var(--ia-color-success)', secondaryValues: [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30], secondaryLabel: 'Target' },
+      { type: 'horizontal-bar', title: 'GM% by Department', labels: ['Health & Beauty', 'Fresh & Produce', 'Beverages', 'Household', 'Grocery'], values: [38.2, 34.8, 29.4, 26.8, 24.6], color: 'var(--ia-color-primary)' },
     ],
     followUpQuestions: [
       'What is the shrink rate trend for bottom 3 stores?',
@@ -309,8 +308,8 @@ const analyticsResponses: Record<string, { answer: string; kpiCards: { label: st
       { label: 'Avg Days to OOS', value: '3.1', delta: 'days', direction: 'down' },
     ],
     chartData: [
-      { type: 'horizontal-bar', title: 'Revenue at Risk by Store ($K)', labels: ['Pine Grove', 'Maple Heights', 'Oak Street', 'Harbor View', 'Central Stn'], values: [14.2, 11.8, 8.4, 4.8, 2.8], color: '#ef4444' },
-      { type: 'bar', title: 'At-Risk SKUs by Category', labels: ['Fresh', 'Baby', 'Household', 'Health', 'Dairy', 'Beverages'], values: [5, 3, 3, 2, 2, 3], color: '#f59e0b' },
+      { type: 'horizontal-bar', title: 'Revenue at Risk by Store ($K)', labels: ['Pine Grove', 'Maple Heights', 'Oak Street', 'Harbor View', 'Central Stn'], values: [14.2, 11.8, 8.4, 4.8, 2.8], color: 'var(--ia-color-error)' },
+      { type: 'bar', title: 'At-Risk SKUs by Category', labels: ['Fresh', 'Baby', 'Household', 'Health', 'Dairy', 'Beverages'], values: [5, 3, 3, 2, 2, 3], color: 'var(--ia-color-warning)' },
     ],
     followUpQuestions: [
       'Show total sales impact of OOS items last week',
@@ -326,7 +325,7 @@ const skills: { id: SkillMode; label: string; icon: React.ReactNode; description
   {
     id: 'knowledge',
     label: 'Knowledge Center',
-    icon: <Brain size={16} />,
+    icon: <PsychologyOutlined sx={{ fontSize: 16 }}/>,
     description: 'Ask SOP & policy questions — get cited answers',
     placeholder: 'Ask about SOPs, policies, procedures...',
     suggestions: ['What is the exact procedure if a fire exit is blocked?', 'How many days notice is required before a planogram change?', 'What steps should a store manager follow for a product recall?', 'What happens if a store misses two consecutive weekly audits?'],
@@ -334,7 +333,7 @@ const skills: { id: SkillMode; label: string; icon: React.ReactNode; description
   {
     id: 'analytics',
     label: 'Analytics',
-    icon: <BarChart3 size={16} />,
+    icon: <BarChartOutlined sx={{ fontSize: 16 }}/>,
     description: 'Ask performance questions — get KPI insights',
     placeholder: 'Ask about sales, performance, trends...',
     suggestions: ['Show total sales in the last 4 weeks for Downtown Plaza', 'Which stores are underperforming vs target this week?', 'What is the gross margin % trend over the last 13 weeks?', 'Which SKUs are likely to go out of stock in the next 7 days?'],
@@ -342,7 +341,7 @@ const skills: { id: SkillMode; label: string; icon: React.ReactNode; description
   {
     id: 'pog',
     label: 'POG Audit',
-    icon: <ImageIcon size={16} />,
+    icon: <ImageOutlined sx={{ fontSize: 16 }}/>,
     description: 'Upload shelf images — detect OOS, check compliance, or create tasks',
     placeholder: 'Upload a shelf image to detect OOS, check compliance, or create tasks',
     suggestions: ['Detect OOS items', 'Check compliance'],
@@ -350,7 +349,7 @@ const skills: { id: SkillMode; label: string; icon: React.ReactNode; description
   {
     id: 'actions',
     label: 'Actions',
-    icon: <Zap size={16} />,
+    icon: <BoltOutlined sx={{ fontSize: 16 }}/>,
     description: 'Create tasks & assignments via natural language',
     placeholder: 'Tell me what task to create...',
     suggestions: ['Create a planogram rule for brand blocking in Apparel', 'Create a planogram rule for price tier adjacency', 'Schedule planogram reset for next Monday', 'Create urgent task for fire exit clearance'],
@@ -384,7 +383,7 @@ const findAnalyticsResponse = (query: string) => {
       { label: 'On-Target Stores', value: '5/8', delta: '62.5%', direction: 'up' as const },
     ],
     chartData: [
-      { type: 'bar' as const, title: 'DPI by Store', labels: ['Plaza', 'Riverside', 'Central', 'Westfield', 'Harbor', 'Oak St', 'Pine Gr', 'Maple'], values: [94, 91, 85, 79, 76, 72, 65, 58], color: '#6366f1' },
+      { type: 'bar' as const, title: 'DPI by Store', labels: ['Plaza', 'Riverside', 'Central', 'Westfield', 'Harbor', 'Oak St', 'Pine Gr', 'Maple'], values: [94, 91, 85, 79, 76, 72, 65, 58], color: 'var(--ia-color-primary)' },
     ],
     followUpQuestions: [
       'Which stores are underperforming vs target this week?',
@@ -452,6 +451,7 @@ export const AICopilot: React.FC = () => {
   const [taskPushed, setTaskPushed] = useState<Set<string>>(new Set());
   const [taskPushing, setTaskPushing] = useState<string | null>(null); // loading state
   const [assigneeDropdownOpen, setAssigneeDropdownOpen] = useState(false);
+  const [copilotTab, setCopilotTab] = useState<'steps' | 'response'>('steps');
   const [openSource, setOpenSource] = useState<{ doc: string; section: string; page: string; tag?: string; updated?: string; excerpt?: string } | null>(null);
   const [sourcesPanelMsgId, setSourcesPanelMsgId] = useState<string | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -1306,41 +1306,56 @@ export const AICopilot: React.FC = () => {
       return (
         <div className="cop-agentic-card">
           <div className="cop-agentic-planning">
-            <Sparkles size={16} className="cop-agentic-planning-icon" />
+            <AutoAwesomeOutlined sx={{ fontSize: 16 }} className="cop-agentic-planning-icon"/>
             <span>{activeStep ? activeStep.step.replace(/\.{3}$/, '') : 'Planning next moves'}.....</span>
-            <ChevronDown size={14} />
+            <KeyboardArrowDown sx={{ fontSize: 14 }}/>
           </div>
           <div className="cop-agentic-tabbed">
-            <div className="cop-agentic-tabs">
-              <button className="cop-agentic-tab active"><ClipboardList size={14} /> Steps</button>
-              <button className="cop-agentic-tab"><Sparkles size={14} /> Agent Response</button>
-            </div>
-            <div className="cop-agentic-tab-content">
-              <div className="cop-agentic-section">
-                <div className="cop-agentic-section-header">
-                  <ChevronRight size={16} />
-                  <span>Processing Request</span>
-                  <span className="cop-agentic-step-count">{completedCount}/{msg.processingSteps.length}</span>
-                </div>
-                <div className="cop-agentic-step-list">
-                  {msg.processingSteps.map((step, idx) => (
-                    <div key={idx} className={`cop-agentic-step cop-agentic-step--${step.status}`}>
-                      <div className="cop-agentic-step-icon">
-                        {step.status === 'completed' && <CheckCircle size={16} className="cop-agentic-check" />}
-                        {step.status === 'active' && <div className="cop-agentic-spinner" />}
-                        {step.status === 'pending' && <div className="cop-agentic-pending-dot" />}
-                      </div>
-                      <div className="cop-agentic-step-content">
-                        <span className={`cop-agentic-step-title ${step.status === 'active' ? 'active' : ''}`}>{step.step}</span>
-                        {step.status === 'active' && (
-                          <span className="cop-agentic-step-desc">AI is processing this step...</span>
-                        )}
-                      </div>
+            <Tabs
+              tabNames={[
+                { value: 'steps', label: 'Steps', icon: <AssignmentOutlined sx={{ fontSize: 14 }}/> },
+                { value: 'response', label: 'Agent Response', icon: <AutoAwesomeOutlined sx={{ fontSize: 14 }}/> },
+              ]}
+              tabPanels={[
+                <div className="cop-agentic-tab-content">
+                  <div className="cop-agentic-section">
+                    <div className="cop-agentic-section-header">
+                      <KeyboardArrowRight sx={{ fontSize: 16 }}/>
+                      <span>Processing Request</span>
+                      <span className="cop-agentic-step-count">{completedCount}/{msg.processingSteps.length}</span>
                     </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+                    <div className="cop-agentic-step-list">
+                      {msg.processingSteps.map((step, idx) => (
+                        <div key={idx} className={`cop-agentic-step cop-agentic-step--${step.status}`}>
+                          <div className="cop-agentic-step-icon">
+                            {step.status === 'completed' && <CheckCircleOutlined sx={{ fontSize: 16 }} className="cop-agentic-check"/>}
+                            {step.status === 'active' && <div className="cop-agentic-spinner" />}
+                            {step.status === 'pending' && <div className="cop-agentic-pending-dot" />}
+                          </div>
+                          <div className="cop-agentic-step-content">
+                            <span className={`cop-agentic-step-title ${step.status === 'active' ? 'active' : ''}`}>{step.step}</span>
+                            {step.status === 'active' && (
+                              <span className="cop-agentic-step-desc">AI is processing this step...</span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>,
+                <div className="cop-agentic-tab-content">
+                  <div className="cop-agentic-section">
+                    <div className="cop-agentic-section-header">
+                      <AutoAwesomeOutlined sx={{ fontSize: 16 }}/>
+                      <span>Agent Response</span>
+                    </div>
+                    <p className="cop-agentic-step-desc">Agent response will appear here once processing completes.</p>
+                  </div>
+                </div>,
+              ]}
+              value={copilotTab}
+              onChange={(_, val) => setCopilotTab(val as 'steps' | 'response')}
+            />
           </div>
         </div>
       );
@@ -1462,14 +1477,14 @@ export const AICopilot: React.FC = () => {
         {/* Knowledge Sources — single-line inline link, opens right-side panel */}
         {msg.sources && msg.sources.length > 0 && (
           <div className="cop-sources-inline">
-            <BookOpen size={12} className="cop-sources-inline-icon" />
+            <MenuBookOutlined sx={{ fontSize: 12 }} className="cop-sources-inline-icon"/>
             <span className="cop-sources-inline-summary">
               Based on {msg.sources.length} source{msg.sources.length === 1 ? '' : 's'}: {msg.sources.slice(0, 2).map(s => s.doc).join(' · ')}
               {msg.sources.length > 2 && ` · +${msg.sources.length - 2} more`}
             </span>
-            <button className="cop-sources-inline-link" onClick={() => setSourcesPanelMsgId(msg.id)}>
+            <Button variant="text" color="primary" size="small" className="cop-sources-inline-link" onClick={() => setSourcesPanelMsgId(msg.id)}>
               View sources
-            </button>
+            </Button>
           </div>
         )}
 
@@ -1477,14 +1492,28 @@ export const AICopilot: React.FC = () => {
         {msg.kpiCards && msg.kpiCards.length > 0 && (
           <div className="cop-kpi-grid">
             {msg.kpiCards.map((kpi, i) => (
-              <div key={i} className={`cop-kpi-card cop-kpi--${kpi.direction}`}>
+              <Card
+                key={i}
+                className={`cop-kpi--${kpi.direction}`}
+                sx={{
+                  maxWidth: '100%',
+                  minHeight: 'unset',
+                  padding: '10px 12px',
+                  borderRadius: '10px',
+                  border: '1px solid var(--ia-color-border)',
+                  background: 'var(--ia-color-surface)',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                  transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+                  '&:hover': { transform: 'translateY(-1px)', boxShadow: '0 4px 12px rgba(0,0,0,0.06)' },
+                }}
+              >
                 <span className="cop-kpi-label">{kpi.label}</span>
                 <span className="cop-kpi-value">{kpi.value}</span>
                 <span className={`cop-kpi-delta cop-kpi-delta--${kpi.direction}`}>
-                  {kpi.direction === 'up' ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                  {kpi.direction === 'up' ? <TrendingUpOutlined sx={{ fontSize: 12 }}/> : <TrendingDownOutlined sx={{ fontSize: 12 }}/>}
                   {kpi.delta}
                 </span>
-              </div>
+              </Card>
             ))}
           </div>
         )}
@@ -1499,10 +1528,10 @@ export const AICopilot: React.FC = () => {
               const pad = { top: 10, right: 12, bottom: 28, left: 8 };
               const cw = W - pad.left - pad.right;
               const ch = H - pad.top - pad.bottom;
-              const color = chart.color || '#6366f1';
+              const color = chart.color || 'var(--ia-color-primary)';
 
               return (
-                <div key={ci} className="cop-chart-card">
+                <Card key={ci} size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '10px 12px 6px' }}>
                   <div className="cop-chart-title">{chart.title}</div>
                   <svg viewBox={`0 0 ${W} ${H}`} className="cop-chart-svg">
                     {/* Grid lines */}
@@ -1570,7 +1599,7 @@ export const AICopilot: React.FC = () => {
                       const barW = (v / maxVal) * (cw * 0.6);
                       const labelX = pad.left;
                       const barX = pad.left + cw * 0.35;
-                      const barColor = v >= 85 ? '#10b981' : v >= 70 ? '#f59e0b' : '#ef4444';
+                      const barColor = v >= 85 ? 'var(--ia-color-success)' : v >= 70 ? 'var(--ia-color-warning)' : 'var(--ia-color-error)';
                       return (
                         <g key={i}>
                           <text x={labelX} y={y + barH / 2 + 1} dominantBaseline="middle" fontSize="6.5" fill="#475569" fontWeight="500">{chart.labels[i]}</text>
@@ -1580,7 +1609,7 @@ export const AICopilot: React.FC = () => {
                       );
                     })}
                   </svg>
-                </div>
+                </Card>
               );
             })}
           </div>
@@ -1614,12 +1643,16 @@ export const AICopilot: React.FC = () => {
               <ul className="cop-followups-inline-list">
                 {all.map((q, i) => (
                   <li key={i}>
-                    <button
+                    <Button
+                      variant="text"
+                      color="primary"
+                      size="small"
                       className="cop-followup-prompt"
+                      fullWidth
                       onClick={() => { setInputValue(''); handleSend(q); }}
                     >
                       {q}
-                    </button>
+                    </Button>
                   </li>
                 ))}
               </ul>
@@ -1642,7 +1675,7 @@ export const AICopilot: React.FC = () => {
               <div className="cop-oos-image">
                 <img src={msg.oosImage} alt="Analyzed shelf" />
                 <div className="cop-oos-image-overlay">
-                  <Eye size={20} />
+                  <VisibilityOutlined sx={{ fontSize: 20 }}/>
                   <span>Analyzed Image</span>
                 </div>
               </div>
@@ -1667,7 +1700,7 @@ export const AICopilot: React.FC = () => {
           <div className="cop-pog-report">
             <div className="cop-pog-report-header">
               <div className="cop-pog-report-badge">
-                <ClipboardList size={16} />
+                <AssignmentOutlined sx={{ fontSize: 16 }}/>
                 <span>District Planogram Catalog</span>
               </div>
               <span className="cop-pog-report-count">{msg.pogPlanogramList.length} Active Planograms</span>
@@ -1712,7 +1745,7 @@ export const AICopilot: React.FC = () => {
                       {pog.status === 'pass' ? 'Compliant' : pog.status === 'warning' ? 'Review' : 'Critical'}
                     </span>
                   </div>
-                  <ChevronRight size={14} className="cop-pog-card-arrow" />
+                  <KeyboardArrowRight sx={{ fontSize: 14 }} className="cop-pog-card-arrow"/>
                 </div>
               ))}
             </div>
@@ -1726,7 +1759,7 @@ export const AICopilot: React.FC = () => {
             <div className="cop-audit-header">
               <div className="cop-audit-header-top">
                 <div className="cop-audit-badge">
-                  <FileText size={16} />
+                  <DescriptionOutlined sx={{ fontSize: 16 }}/>
                   <span>Compliance Audit Report</span>
                 </div>
                 <span className="cop-audit-date">{msg.complianceReport.auditDate}</span>
@@ -1772,7 +1805,7 @@ export const AICopilot: React.FC = () => {
             {/* Visual Comparison */}
             <div className="cop-audit-comparison">
               <h3 className="cop-audit-section-title">
-                <Eye size={16} />
+                <VisibilityOutlined sx={{ fontSize: 16 }}/>
                 Visual Comparison
               </h3>
               <div className="cop-audit-comparison-grid">
@@ -1783,7 +1816,7 @@ export const AICopilot: React.FC = () => {
                   </div>
                 </div>
                 <div className="cop-audit-comparison-arrow">
-                  <ChevronRight size={24} />
+                  <KeyboardArrowRight sx={{ fontSize: 24 }}/>
                 </div>
                 <div className="cop-audit-comparison-item">
                   <span className="cop-comparison-label">Actual Store Capture</span>
@@ -1797,7 +1830,7 @@ export const AICopilot: React.FC = () => {
             {/* Category Breakdown */}
             <div className="cop-audit-categories">
               <h3 className="cop-audit-section-title">
-                <BarChart3 size={16} />
+                <BarChartOutlined sx={{ fontSize: 16 }}/>
                 Category Breakdown
               </h3>
               <div className="cop-audit-categories-grid">
@@ -1826,7 +1859,7 @@ export const AICopilot: React.FC = () => {
             {/* Deviations Table */}
             <div className="cop-audit-deviations">
               <h3 className="cop-audit-section-title">
-                <AlertCircle size={16} />
+                <ErrorOutlined sx={{ fontSize: 16 }}/>
                 Identified Deviations
               </h3>
               <div className="cop-audit-dev-table">
@@ -1840,9 +1873,9 @@ export const AICopilot: React.FC = () => {
                   <div key={idx} className={`cop-dev-row cop-dev--${dev.severity}`}>
                     <div className="cop-dev-item-cell">
                       <span className={`cop-dev-severity cop-dev-sev--${dev.severity}`}>
-                        {dev.severity === 'critical' ? <X size={14} /> :
-                         dev.severity === 'warning' ? <AlertTriangle size={14} /> :
-                         <CheckCircle size={14} />}
+                        {dev.severity === 'critical' ? <CloseOutlined sx={{ fontSize: 14 }}/> :
+                         dev.severity === 'warning' ? <WarningAmberOutlined sx={{ fontSize: 14 }}/> :
+                         <CheckCircleOutlined sx={{ fontSize: 14 }}/>}
                       </span>
                       <span>{dev.item}</span>
                     </div>
@@ -1857,7 +1890,7 @@ export const AICopilot: React.FC = () => {
             {/* Recommendations */}
             <div className="cop-audit-recs">
               <h3 className="cop-audit-section-title">
-                <Wrench size={16} />
+                <BuildOutlined sx={{ fontSize: 16 }}/>
                 Recommended Actions
               </h3>
               <div className="cop-audit-recs-list">
@@ -1881,9 +1914,9 @@ export const AICopilot: React.FC = () => {
         {msg.taskCreated && (
           <div className={`cop-task-card ${taskPushed.has(msg.id) ? 'cop-task-pushed' : ''}`}>
             <div className="cop-task-header">
-              <ClipboardList size={15} />
+              <AssignmentOutlined sx={{ fontSize: 15 }}/>
               <span>{taskPushed.has(msg.id) ? 'Added to Operations Queue' : 'Action Item Created'}</span>
-              {taskPushed.has(msg.id) && <CheckCircle2 size={14} className="cop-task-check" />}
+              {taskPushed.has(msg.id) && <TaskAltOutlined sx={{ fontSize: 14 }} className="cop-task-check"/>}
             </div>
             <div className="cop-task-body">
               <div className="cop-task-row"><span className="cop-task-label">Title</span><span className="cop-task-value">{msg.taskCreated.title}</span></div>
@@ -1891,7 +1924,7 @@ export const AICopilot: React.FC = () => {
               {msg.taskCreated.stores && msg.taskCreated.stores.length > 0 && (
                 <div className="cop-task-stores">
                   <div className="cop-task-stores-label">
-                    <Store size={11} />
+                    <StoreOutlined sx={{ fontSize: 11 }}/>
                     <span>{msg.taskCreated.stores.length} stores · auto-tagged to store manager</span>
                   </div>
                   <div className="cop-task-stores-list">
@@ -1901,7 +1934,7 @@ export const AICopilot: React.FC = () => {
                           <span className="cop-task-store-name">{s.name}</span>
                           <span className="cop-task-store-manager">{s.manager} · Store Manager</span>
                         </div>
-                        {taskPushed.has(msg.id) && <CheckCircle2 size={13} className="cop-task-check" />}
+                        {taskPushed.has(msg.id) && <TaskAltOutlined sx={{ fontSize: 13 }} className="cop-task-check"/>}
                       </div>
                     ))}
                   </div>
@@ -1920,9 +1953,11 @@ export const AICopilot: React.FC = () => {
 
             {/* Multi-store: one-click push, no dropdown */}
             {!taskPushed.has(msg.id) && msg.taskCreated.stores && msg.taskCreated.stores.length > 0 && (
-              <button
+              <Button
                 className="cop-task-push-btn"
+                fullWidth
                 disabled={taskPushing === msg.id}
+                isLoading={taskPushing === msg.id}
                 onClick={() => {
                   setTaskPushing(msg.id);
                   setTaskPriority(msg.taskCreated?.priority || 'High');
@@ -1931,13 +1966,12 @@ export const AICopilot: React.FC = () => {
                     setTaskPushing(null);
                   }, 1200);
                 }}
+                startIcon={taskPushing === msg.id ? undefined : <BoltOutlined sx={{ fontSize: 14 }}/>}
               >
-                {taskPushing === msg.id ? (
-                  <><div className="cop-btn-spinner" /> Adding {msg.taskCreated.stores.length} tasks…</>
-                ) : (
-                  <><Zap size={14} /> Add {msg.taskCreated.stores.length} tasks to Operations Queue</>
-                )}
-              </button>
+                {taskPushing === msg.id
+                  ? `Adding ${msg.taskCreated.stores.length} tasks…`
+                  : `Add ${msg.taskCreated.stores.length} tasks to Operations Queue`}
+              </Button>
             )}
 
             {/* Add to Operations Queue — inline panel (single-task) */}
@@ -1964,7 +1998,7 @@ export const AICopilot: React.FC = () => {
                           ) : (
                             <span className="cop-dropdown-placeholder">Select team member...</span>
                           )}
-                          <ChevronDown size={14} className={`cop-dropdown-chevron ${assigneeDropdownOpen ? 'open' : ''}`} />
+                          <KeyboardArrowDown sx={{ fontSize: 14 }} className={`cop-dropdown-chevron ${assigneeDropdownOpen ? 'open' : ''}`}/>
                         </div>
                         {assigneeDropdownOpen && (
                           <div className="cop-dropdown-menu">
@@ -1988,7 +2022,7 @@ export const AICopilot: React.FC = () => {
                                   <span className="cop-dropdown-option-name">{person.name}</span>
                                   <span className="cop-dropdown-option-role">{person.role}</span>
                                 </div>
-                                {taskAssignee === person.name && <CheckCircle size={14} className="cop-dropdown-check" />}
+                                {taskAssignee === person.name && <CheckCircleOutlined sx={{ fontSize: 14 }} className="cop-dropdown-check"/>}
                               </div>
                             ))}
                           </div>
@@ -1999,20 +2033,27 @@ export const AICopilot: React.FC = () => {
                       <label>Priority</label>
                       <div className="cop-task-priority-pills">
                         {['Critical', 'High', 'Medium', 'Low'].map(p => (
-                          <button
+                          <Button
                             key={p}
+                            type="button"
+                            variant={taskPriority === p ? 'contained' : 'outlined'}
+                            color="primary"
+                            size="small"
                             className={`cop-priority-pill cop-pri--${p.toLowerCase()} ${taskPriority === p ? 'active' : ''}`}
                             onClick={() => setTaskPriority(p)}
                           >
                             {p}
-                          </button>
+                          </Button>
                         ))}
                       </div>
                     </div>
                     <div className="cop-task-push-actions">
-                      <button
+                      <Button
                         className="cop-task-push-confirm"
+                        variant="contained"
+                        color="primary"
                         disabled={!taskAssignee || taskPushing === msg.id}
+                        isLoading={taskPushing === msg.id}
                         onClick={() => {
                           setTaskPushing(msg.id);
                           setAssigneeDropdownOpen(false);
@@ -2022,37 +2063,38 @@ export const AICopilot: React.FC = () => {
                             setTaskPushing(null);
                           }, 1200);
                         }}
+                        startIcon={taskPushing === msg.id ? undefined : <SendOutlined sx={{ fontSize: 13 }}/>}
                       >
-                        {taskPushing === msg.id ? (
-                          <><div className="cop-btn-spinner" /> Adding...</>
-                        ) : (
-                          <><Send size={13} /> Add to Operations Queue</>
-                        )}
-                      </button>
+                        {taskPushing === msg.id ? 'Adding...' : 'Add to Operations Queue'}
+                      </Button>
                       {taskPushing !== msg.id && (
-                        <button className="cop-task-push-cancel" onClick={() => { setTaskPushOpen(null); setAssigneeDropdownOpen(false); }}>
+                        <Button variant="outlined" color="inherit" className="cop-task-push-cancel" onClick={() => { setTaskPushOpen(null); setAssigneeDropdownOpen(false); }}>
                           Cancel
-                        </button>
+                        </Button>
                       )}
                     </div>
                   </div>
                 ) : (
-                  <button className="cop-task-push-btn" onClick={() => {
-                    setTaskPushOpen(msg.id);
-                    setTaskAssignee('');
-                    setTaskPriority(msg.taskCreated?.priority || 'High');
-                    setAssigneeDropdownOpen(false);
-                  }}>
-                    <Zap size={14} />
+                  <Button
+                    className="cop-task-push-btn"
+                    fullWidth
+                    onClick={() => {
+                      setTaskPushOpen(msg.id);
+                      setTaskAssignee('');
+                      setTaskPriority(msg.taskCreated?.priority || 'High');
+                      setAssigneeDropdownOpen(false);
+                    }}
+                    startIcon={<BoltOutlined sx={{ fontSize: 14 }}/>}
+                  >
                     Add to Operations Queue
-                  </button>
+                  </Button>
                 )}
               </>
             )}
 
             {taskPushed.has(msg.id) && (
               <div className="cop-task-pushed-banner">
-                <CheckCircle2 size={14} />
+                <TaskAltOutlined sx={{ fontSize: 14 }}/>
                 <span>
                   {msg.taskCreated.stores && msg.taskCreated.stores.length > 0
                     ? `${msg.taskCreated.stores.length} tasks added to Operations Queue — assigned to ${msg.taskCreated.stores.map(s => s.manager).join(', ')}`
@@ -2067,9 +2109,9 @@ export const AICopilot: React.FC = () => {
         {msg.pogRuleCreated && (
           <div className={`cop-pog-rule-card ${pogRuleSent.has(msg.id) ? 'cop-pog-rule-sent' : ''}`}>
             <div className="cop-pog-rule-header">
-              <FileText size={15} />
+              <DescriptionOutlined sx={{ fontSize: 15 }}/>
               <span>{pogRuleSent.has(msg.id) ? 'Rule Sent to POG Engine' : 'Planogram Rule Created'}</span>
-              {pogRuleSent.has(msg.id) && <CheckCircle2 size={14} className="cop-task-check" />}
+              {pogRuleSent.has(msg.id) && <TaskAltOutlined sx={{ fontSize: 14 }} className="cop-task-check"/>}
             </div>
             <div className="cop-pog-rule-body">
               <div className="cop-task-row"><span className="cop-task-label">Rule Name</span><span className="cop-task-value">{msg.pogRuleCreated.name}</span></div>
@@ -2081,8 +2123,11 @@ export const AICopilot: React.FC = () => {
               )}
             </div>
             {!pogRuleSent.has(msg.id) ? (
-              <button
+              <Button
                 className="cop-pog-rule-send-btn"
+                fullWidth
+                variant="contained"
+                color="primary"
                 onClick={() => {
                   setPogRuleSent(prev => new Set(prev).add(msg.id));
                   setTimeout(() => {
@@ -2094,14 +2139,14 @@ export const AICopilot: React.FC = () => {
                     navigate(`/planogram/rule-management?${params.toString()}`);
                   }, 1500);
                 }}
+                startIcon={<SendOutlined sx={{ fontSize: 13 }}/>}
+                endIcon={<KeyboardArrowRight sx={{ fontSize: 14 }}/>}
               >
-                <Send size={13} />
                 Send to POG Rules
-                <ChevronRight size={14} />
-              </button>
+              </Button>
             ) : (
               <div className="cop-pog-rule-sent-banner">
-                <CheckCircle2 size={14} />
+                <TaskAltOutlined sx={{ fontSize: 14 }}/>
                 <span>Sent to POG Localization Engine — redirecting...</span>
               </div>
             )}
@@ -2112,9 +2157,7 @@ export const AICopilot: React.FC = () => {
         {msg.suggestedQueries && msg.suggestedQueries.length > 0 && !(msg.taskCreated && taskPushed.has(msg.id)) && !(msg.pogRuleCreated && pogRuleSent.has(msg.id)) && (
           <div className="cop-suggestions-inline">
             {msg.suggestedQueries.map((q, i) => (
-              <button key={i} className="cop-suggestion-chip" onClick={() => handleSuggestionClick(q)}>
-                {q}
-              </button>
+              <Chips key={i} label={q} variant="outlined" size="small" className="cop-suggestion-chip" onClick={() => handleSuggestionClick(q)} />
             ))}
           </div>
         )}
@@ -2173,43 +2216,49 @@ export const AICopilot: React.FC = () => {
       <div className="district-intel-header cop-di-header">
         <div className="header-left">
           <div className="header-title">
-            <Sparkles size={24} />
+            <AutoAwesomeOutlined sx={{ fontSize: 24 }}/>
             <h1>AI Copilot</h1>
           </div>
           <div className="header-meta">
-            <div className="cop-header-skills">
-              {skills.map(s => (
-                <button
-                  key={s.id}
-                  className={`cop-header-pill ${activeSkill === s.id ? 'cop-header-pill--active' : ''}`}
-                  onClick={() => setActiveSkill(s.id)}
-                >
-                  {s.icon}
-                  <span>{s.label}</span>
-                </button>
-              ))}
-            </div>
-            <span className="last-refresh">
-              <Clock size={12} />
-              {currentMessages.length > 0
+            <Badge
+              label={currentMessages.length > 0
                 ? `${currentMessages.length} message${currentMessages.length === 1 ? '' : 's'}`
                 : 'Ready to chat'}
-            </span>
+              size="small"
+              color={currentMessages.length > 0 ? 'primary' : 'success'}
+            />
           </div>
         </div>
         <div className="header-right">
           <div className="header-search">
-            <Search size={16} />
+            <SearchOutlined sx={{ fontSize: 16 }}/>
             <input type="text" placeholder="Search conversations..." />
           </div>
-          <button
+          <Button
+            variant="outlined"
+            color="primary"
             className="header-action-btn secondary"
             onClick={() => setMessages(prev => ({ ...prev, [activeSkill]: [] }))}
+            startIcon={<RefreshOutlined sx={{ fontSize: 16 }}/>}
           >
-            <RefreshCw size={16} />
             Clear
-          </button>
+          </Button>
         </div>
+      </div>
+
+      {/* Skill Tab Strip */}
+      <div className="cop-skill-tabs">
+        <Tabs
+          tabNames={[
+            { value: 'knowledge', label: 'Knowledge Center', icon: <PsychologyOutlined sx={{ fontSize: 15 }}/> },
+            { value: 'analytics', label: 'Analytics', icon: <BarChartOutlined sx={{ fontSize: 15 }}/> },
+            { value: 'pog', label: 'POG Audit', icon: <ImageOutlined sx={{ fontSize: 15 }}/> },
+            { value: 'actions', label: 'Actions', icon: <BoltOutlined sx={{ fontSize: 15 }}/> },
+          ]}
+          tabPanels={[]}
+          value={activeSkill}
+          onChange={(_, val) => setActiveSkill(val as SkillMode)}
+        />
       </div>
 
       {/* Messages Area — Full screen */}
@@ -2218,33 +2267,41 @@ export const AICopilot: React.FC = () => {
           <div className="cop-welcome">
             <div className="cop-welcome-top">
               <div className="cop-welcome-logo">
-                <Sparkles size={28} />
+                <div className="cop-welcome-logo-ring" />
+                <AutoAwesomeOutlined sx={{ fontSize: 32 }}/>
               </div>
-              <h2>Hello, how can I help you today?</h2>
+              <h2 className="cop-welcome-heading">Hello, how can I help you today?</h2>
               <p>I'm your <strong>AI Copilot</strong> — I can answer SOP questions, analyze store performance, audit planograms, and create tasks. Select a skill or just start typing.</p>
+              <div className="cop-welcome-skill-badge">
+                <Badge label={`${currentSkill.label} active`} size="small" color="primary" />
+              </div>
             </div>
 
             <div className="cop-welcome-grid">
               {skills.map(skill => (
-                <button
+                <Button
                   key={skill.id}
-                  className={`cop-welcome-card ${activeSkill === skill.id ? 'cop-welcome-card--active' : ''}`}
+                  type="button"
+                  variant="outlined"
+                  color="inherit"
+                  className={`cop-welcome-card cop-skill--${skill.id} ${activeSkill === skill.id ? 'cop-welcome-card--active' : ''}`}
                   onClick={() => setActiveSkill(skill.id)}
                 >
-                  <span className="cop-welcome-card-icon">{skill.icon}</span>
+                  <span className={`cop-welcome-card-icon cop-skill-icon--${skill.id}`}>{skill.icon}</span>
                   <span className="cop-welcome-card-name">{skill.label}</span>
                   <span className="cop-welcome-card-desc">{skill.description}</span>
-                </button>
+                </Button>
               ))}
             </div>
 
             <div className="cop-welcome-suggestions">
-              <span className="cop-welcome-suggestions-label">Suggested prompts</span>
+              <div className="cop-welcome-suggestions-header">
+                <span className="cop-welcome-suggestions-icon">{currentSkill.icon}</span>
+                <span className="cop-welcome-suggestions-label">Suggested prompts</span>
+              </div>
               <div className="cop-welcome-suggestions-grid">
                 {currentSkill.suggestions.map((q, i) => (
-                  <button key={i} className="cop-suggestion-btn" onClick={() => handleSuggestionClick(q)}>
-                    {q}
-                  </button>
+                  <Chips key={i} label={q} variant="outlined" size="small" className="cop-suggestion-btn" onClick={() => handleSuggestionClick(q)} />
                 ))}
               </div>
             </div>
@@ -2254,7 +2311,7 @@ export const AICopilot: React.FC = () => {
             <div key={msg.id} className={`cop-msg cop-msg--${msg.role}`}>
               <div className="cop-msg-inner">
                 <div className="cop-msg-avatar">
-                  {msg.role === 'user' ? <User size={16} /> : <Bot size={16} />}
+                  {msg.role === 'user' ? <PersonOutlined sx={{ fontSize: 16 }}/> : <SmartToyOutlined sx={{ fontSize: 16 }}/>}
                 </div>
                 <div className="cop-msg-content">
                   <div className="cop-msg-meta">
@@ -2276,17 +2333,17 @@ export const AICopilot: React.FC = () => {
           {uploadedImage && (
             <div className="cop-upload-preview">
               <img src={uploadedImage} alt="Upload preview" />
-              <button className="cop-upload-remove" onClick={() => setUploadedImage(null)}>
-                <X size={14} />
-              </button>
+              <Button variant="text" color="inherit" size="small" className="cop-upload-remove" aria-label="Remove image" onClick={() => setUploadedImage(null)}>
+                <CloseOutlined sx={{ fontSize: 14 }}/>
+              </Button>
             </div>
           )}
           <div className="cop-input-row">
             {activeSkill === 'pog' && (
               <>
-                <button className="cop-upload-btn" onClick={() => fileInputRef.current?.click()}>
-                  <Upload size={18} />
-                </button>
+                <Button variant="outlined" color="primary" className="cop-upload-btn" aria-label="Upload image" onClick={() => fileInputRef.current?.click()}>
+                  <FileUploadOutlined sx={{ fontSize: 18 }}/>
+                </Button>
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -2305,13 +2362,16 @@ export const AICopilot: React.FC = () => {
               onKeyDown={handleKeyDown}
               rows={1}
             />
-            <button
+            <Button
+              variant="contained"
+              color="primary"
               className={`cop-send-btn ${(inputValue.trim() || uploadedImage) && !isProcessing ? 'cop-send-btn--active' : ''}`}
               onClick={() => handleSend()}
               disabled={(!inputValue.trim() && !uploadedImage) || isProcessing}
+              aria-label="Send message"
             >
-              <Send size={18} />
-            </button>
+              <SendOutlined sx={{ fontSize: 18 }}/>
+            </Button>
           </div>
           <div className="cop-input-footer">
             AI Copilot uses retrieval-augmented generation. Responses are sourced from your organization's knowledge base.
@@ -2322,16 +2382,20 @@ export const AICopilot: React.FC = () => {
       {/* Bottom History Drawer */}
       {totalConversations > 0 && (
         <div className={`cop-drawer ${historyOpen ? 'cop-drawer--open' : ''}`}>
-          <button className="cop-drawer-toggle" onClick={() => setHistoryOpen(!historyOpen)}>
-            <Clock size={14} />
+          <Button variant="text" color="primary" fullWidth className="cop-drawer-toggle" onClick={() => setHistoryOpen(!historyOpen)}>
+            <AccessTimeOutlined sx={{ fontSize: 14 }}/>
             <span>Recent ({totalConversations})</span>
-            {historyOpen ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
-          </button>
+            {historyOpen ? <KeyboardArrowDown sx={{ fontSize: 14 }}/> : <KeyboardArrowUp sx={{ fontSize: 14 }}/>}
+          </Button>
           {historyOpen && (
             <div className="cop-drawer-body">
               {historyEntries.map((entry, i) => (
-                <button
+                <Button
                   key={i}
+                  type="button"
+                  variant="text"
+                  color="inherit"
+                  fullWidth
                   className="cop-drawer-item"
                   onClick={() => { setActiveSkill(entry.skill); setHistoryOpen(false); }}
                 >
@@ -2340,7 +2404,7 @@ export const AICopilot: React.FC = () => {
                     <span className="cop-drawer-item-query">{entry.query}</span>
                     <span className="cop-drawer-item-meta">{entry.label} · {entry.time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                   </div>
-                </button>
+                </Button>
               ))}
             </div>
           )}
@@ -2356,13 +2420,13 @@ export const AICopilot: React.FC = () => {
             <aside className="cop-sources-panel" onClick={(e) => e.stopPropagation()}>
               <div className="cop-sources-panel-header">
                 <div className="cop-sources-panel-title">
-                  <BookOpen size={15} />
+                  <MenuBookOutlined sx={{ fontSize: 15 }}/>
                   <h3>Sources</h3>
                   <span className="cop-sources-panel-count">{msg.sources.length}</span>
                 </div>
-                <button className="cop-sources-panel-close" onClick={() => setSourcesPanelMsgId(null)}>
-                  <X size={18} />
-                </button>
+                <Button variant="text" color="inherit" className="cop-sources-panel-close" aria-label="Close sources" onClick={() => setSourcesPanelMsgId(null)}>
+                  <CloseOutlined sx={{ fontSize: 18 }}/>
+                </Button>
               </div>
               <div className="cop-sources-panel-body">
                 <p className="cop-sources-panel-intro">
@@ -2372,9 +2436,11 @@ export const AICopilot: React.FC = () => {
                   {msg.sources.map((src, i) => {
                     const tag = src.tag || (i === 0 ? 'primary' : 'supporting');
                     const tagLabel = tag === 'primary' ? 'Primary' : tag === 'regulatory' ? 'Regulatory' : 'Supporting';
+                    const badgeColor: 'primary' | 'warning' | 'default' = tag === 'primary' ? 'primary' : tag === 'regulatory' ? 'warning' : 'default';
                     return (
                       <li key={i}>
                         <button
+                          type="button"
                           className="cop-sources-panel-row"
                           onClick={() => setOpenSource(src)}
                         >
@@ -2382,7 +2448,7 @@ export const AICopilot: React.FC = () => {
                           <div className="cop-sources-panel-main">
                             <div className="cop-sources-panel-title-row">
                               <span className="cop-sources-panel-doc">{src.doc}</span>
-                              <span className={`cop-source-tag cop-source-tag--${tag}`}>{tagLabel}</span>
+                              <Badge label={tagLabel} size="small" color={badgeColor} />
                             </div>
                             <div className="cop-sources-panel-meta">
                               <span>{src.section}</span>
@@ -2396,7 +2462,7 @@ export const AICopilot: React.FC = () => {
                               )}
                             </div>
                           </div>
-                          <ChevronRight size={14} className="cop-sources-panel-arrow" />
+                          <KeyboardArrowRight sx={{ fontSize: 16 }} className="cop-sources-panel-arrow"/>
                         </button>
                       </li>
                     );
@@ -2417,19 +2483,19 @@ export const AICopilot: React.FC = () => {
             <div className="cop-source-modal" onClick={(e) => e.stopPropagation()}>
               <div className="cop-source-modal-header">
                 <div className="cop-source-modal-title">
-                  <BookOpen size={16} />
+                  <MenuBookOutlined sx={{ fontSize: 16 }}/>
                   <h3>Source Detail</h3>
                 </div>
-                <button className="cop-source-modal-close" onClick={() => setOpenSource(null)}>
-                  <X size={18} />
-                </button>
+                <Button variant="text" color="inherit" className="cop-source-modal-close" aria-label="Close" onClick={() => setOpenSource(null)}>
+                  <CloseOutlined sx={{ fontSize: 18 }}/>
+                </Button>
               </div>
               <div className="cop-source-modal-body">
                 <div className="cop-source-modal-tagrow">
                   <span className={`cop-source-tag cop-source-tag--${tag}`}>{tagLabel}</span>
                   {openSource.updated && (
                     <span className="cop-source-modal-updated">
-                      <Clock size={11} />
+                      <AccessTimeOutlined sx={{ fontSize: 11 }}/>
                       Updated {openSource.updated}
                     </span>
                   )}
@@ -2454,11 +2520,10 @@ export const AICopilot: React.FC = () => {
                 </div>
               </div>
               <div className="cop-source-modal-footer">
-                <button className="cop-source-modal-secondary" onClick={() => setOpenSource(null)}>Close</button>
-                <button className="cop-source-modal-primary">
-                  <FileText size={13} />
+                <Button variant="outlined" color="primary" className="cop-source-modal-secondary" onClick={() => setOpenSource(null)}>Close</Button>
+                <Button variant="contained" color="primary" className="cop-source-modal-primary" startIcon={<DescriptionOutlined sx={{ fontSize: 13 }}/>}>
                   Open Full Document
-                </button>
+                </Button>
               </div>
             </div>
           </div>

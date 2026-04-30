@@ -1,5 +1,8 @@
 import React from 'react';
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { Card } from 'impact-ui';
+import TrendingUpOutlined from '@mui/icons-material/TrendingUpOutlined';
+import TrendingDownOutlined from '@mui/icons-material/TrendingDownOutlined';
+import Remove from '@mui/icons-material/Remove';
 import { InsightMetric } from '../../../types/home';
 import './InsightCard.css';
 
@@ -13,11 +16,11 @@ export const InsightCard: React.FC<InsightCardProps> = ({ metric }) => {
     
     switch (metric.trend) {
       case 'up':
-        return <TrendingUp size={16} />;
+        return <TrendingUpOutlined sx={{ fontSize: 16 }} />;
       case 'down':
-        return <TrendingDown size={16} />;
+        return <TrendingDownOutlined sx={{ fontSize: 16 }} />;
       case 'neutral':
-        return <Minus size={16} />;
+        return <Remove sx={{ fontSize: 16 }} />;
       default:
         return null;
     }
@@ -29,10 +32,12 @@ export const InsightCard: React.FC<InsightCardProps> = ({ metric }) => {
   };
 
   return (
-    <div 
-      className={`insight-card ${getStatusClass()} ${metric.onClick ? 'insight-card-clickable' : ''}`}
+    <Card
+      size="small"
+      sx={{ maxWidth: '100%', minHeight: 0, padding: '16px', cursor: metric.onClick ? 'pointer' : undefined }}
       onClick={metric.onClick}
     >
+      <div className={`insight-card-inner ${getStatusClass()} ${metric.onClick ? 'insight-card-clickable' : ''}`}>
       <div className="insight-card-header">
         <span className="insight-card-label">{metric.label}</span>
         {metric.trend && metric.trendValue && (
@@ -46,6 +51,7 @@ export const InsightCard: React.FC<InsightCardProps> = ({ metric }) => {
       {metric.subtitle && (
         <div className="insight-card-subtitle">{metric.subtitle}</div>
       )}
-    </div>
+      </div>
+    </Card>
   );
 };

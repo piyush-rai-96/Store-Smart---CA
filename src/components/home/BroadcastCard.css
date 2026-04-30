@@ -1,30 +1,12 @@
 /* Broadcast Card - Premium Communication Item */
 
-.broadcast-card {
-  background: #ffffff;
-  border-radius: 4px;
-  padding: 20px;
-  border: 1px solid #dee2e6;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  transition: all 0.2s ease;
+/* Card shell handled by Impact UI Card component */
+.broadcast-card-inner {
   position: relative;
 }
 
-.broadcast-card:hover {
-  border-color: #0066cc;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transform: translateY(-1px);
-}
-
 .broadcast-card-unread {
-  border-color: #0066cc;
-  background: #ffffff;
-  border-left: 4px solid #0066cc;
-}
-
-.broadcast-card-unread:hover {
-  border-color: #0052a3;
-  box-shadow: 0 2px 8px rgba(0, 102, 204, 0.15);
+  background: var(--ia-color-primary-soft);
 }
 
 .broadcast-card-header {
@@ -62,31 +44,31 @@
   padding: 6px 12px;
   background: #d1fae5;
   border-radius: 8px;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: var(--ia-text-xs);
+  font-weight: var(--ia-font-weight-bold);
   color: #065f46;
   margin-left: auto;
 }
 
 .broadcast-card-acknowledged svg {
-  color: #10b981;
+  color: var(--ia-color-success);
 }
 
 .broadcast-card-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: #0f172a;
+  font-size: var(--ia-text-lg);
+  font-weight: var(--ia-font-weight-bold);
+  color: var(--ia-color-text-primary);
   margin: 0 0 12px 0;
   letter-spacing: -0.01em;
   line-height: 1.4;
 }
 
 .broadcast-card-description {
-  font-size: 15px;
-  color: #475569;
+  font-size: var(--ia-text-15);
+  color: var(--ia-color-text-secondary);
   line-height: 1.7;
   margin: 0 0 20px 0;
-  font-weight: 500;
+  font-weight: var(--ia-font-weight-medium);
 }
 
 .broadcast-card-meta {
@@ -101,29 +83,29 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
-  color: #64748b;
-  font-weight: 600;
+  font-size: var(--ia-text-13);
+  color: var(--ia-color-text-secondary);
+  font-weight: var(--ia-font-weight-semibold);
 }
 
 .broadcast-card-meta-item svg {
-  color: #94a3b8;
+  color: var(--ia-color-text-tertiary);
   flex-shrink: 0;
 }
 
 .broadcast-card-role {
-  color: #94a3b8;
-  font-weight: 500;
+  color: var(--ia-color-text-tertiary);
+  font-weight: var(--ia-font-weight-medium);
   margin-left: 4px;
 }
 
 .broadcast-card-category {
   padding: 6px 12px;
-  background: #f1f5f9;
+  background: var(--ia-color-bg-muted);
   border-radius: 8px;
-  font-size: 12px;
-  font-weight: 700;
-  color: #475569;
+  font-size: var(--ia-text-xs);
+  font-weight: var(--ia-font-weight-bold);
+  color: var(--ia-color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -133,7 +115,7 @@
   gap: 10px;
   flex-wrap: wrap;
   padding-top: 20px;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--ia-color-bg-muted);
 }
 
 /* Responsive */
@@ -143,11 +125,11 @@
   }
 
   .broadcast-card-title {
-    font-size: 16px;
+    font-size: var(--ia-text-md);
   }
 
   .broadcast-card-description {
-    font-size: 14px;
+    font-size: var(--ia-text-sm);
   }
 
   .broadcast-card-actions {

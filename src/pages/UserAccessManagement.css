@@ -4,14 +4,14 @@
 
 .uam-page {
   padding: 0 0 40px;
-  background: #f8fafc;
+  background: var(--ia-color-bg-subtle);
   min-height: calc(100vh - 106px);
 }
 
 /* ---- HEADER CARD ---- */
 .uam-header-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--ia-color-surface);
+  border: 1px solid var(--ia-color-border);
   border-radius: 16px;
   overflow: hidden;
   margin-bottom: 20px;
@@ -20,7 +20,7 @@
 
 .uam-header-accent {
   height: 3px;
-  background: linear-gradient(90deg, #4f46e5 0%, #818cf8 40%, #c4b5fd 100%);
+  background: linear-gradient(90deg, var(--ia-color-primary-hover) 0%, var(--ia-color-primary-hover) 40%, #c4b5fd 100%);
 }
 
 .uam-header-inner {
@@ -40,8 +40,8 @@
   width: 46px;
   height: 46px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
-  color: #4f46e5;
+  background: linear-gradient(135deg, var(--ia-color-primary-soft) 0%, var(--ia-color-primary-soft) 100%);
+  color: var(--ia-color-primary-hover);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -49,18 +49,18 @@
 }
 
 .uam-page-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: #0f172a;
+  font-size: var(--ia-text-lg);
+  font-weight: var(--ia-font-weight-bold);
+  color: var(--ia-color-text-primary);
   margin: 0;
   letter-spacing: -0.025em;
 }
 
 .uam-page-subtitle {
-  font-size: 12.5px;
-  color: #64748b;
+  font-size: var(--ia-text-12-5);
+  color: var(--ia-color-text-secondary);
   margin: 3px 0 0;
-  font-weight: 400;
+  font-weight: var(--ia-font-weight-regular);
 }
 
 .uam-create-btn {
@@ -70,10 +70,10 @@
   padding: 9px 18px;
   border: none;
   border-radius: 9px;
-  background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%);
-  color: #ffffff;
-  font-size: 12.5px;
-  font-weight: 600;
+  background: linear-gradient(135deg, var(--ia-color-primary-pressed) 0%, var(--ia-color-primary) 100%);
+  color: var(--ia-color-surface);
+  font-size: var(--ia-text-12-5);
+  font-weight: var(--ia-font-weight-semibold);
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 1px 4px rgba(67, 56, 202, 0.3), 0 0 0 1px rgba(67, 56, 202, 0.08);
@@ -109,21 +109,21 @@
 .uam-stat-divider {
   width: 1px;
   height: 24px;
-  background: #e2e8f0;
+  background: var(--ia-color-border);
   flex-shrink: 0;
 }
 
 .uam-stat-value {
-  font-size: 16px;
-  font-weight: 700;
-  color: #0f172a;
+  font-size: var(--ia-text-md);
+  font-weight: var(--ia-font-weight-bold);
+  color: var(--ia-color-text-primary);
   letter-spacing: -0.02em;
 }
 
 .uam-stat-label {
-  font-size: 11.5px;
-  color: #94a3b8;
-  font-weight: 500;
+  font-size: var(--ia-text-11-5);
+  color: var(--ia-color-text-tertiary);
+  font-weight: var(--ia-font-weight-medium);
 }
 
 .uam-stat-dot {
@@ -133,8 +133,8 @@
   flex-shrink: 0;
 }
 
-.uam-stat-dot--active { background: #22c55e; box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.15); }
-.uam-stat-dot--invited { background: #f59e0b; box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.15); }
+.uam-stat-dot--active { background: var(--ia-color-success); box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.15); }
+.uam-stat-dot--invited { background: var(--ia-color-warning); box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.15); }
 
 /* ---- TOAST ---- */
 .uam-toast {
@@ -142,13 +142,13 @@
   align-items: center;
   gap: 10px;
   padding: 11px 18px;
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
+  background: var(--ia-color-success-bg);
+  border: 1px solid var(--ia-color-success-soft);
   border-radius: 10px;
   margin-bottom: 16px;
-  color: #166534;
-  font-size: 12.5px;
-  font-weight: 500;
+  color: var(--ia-color-success);
+  font-size: var(--ia-text-12-5);
+  font-weight: var(--ia-font-weight-medium);
   animation: uamSlideIn 0.3s ease;
 }
 
@@ -156,8 +156,8 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: #22c55e;
-  color: #ffffff;
+  background: var(--ia-color-success);
+  color: var(--ia-color-surface);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -183,38 +183,38 @@
   align-items: center;
   gap: 9px;
   padding: 9px 14px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--ia-color-surface);
+  border: 1px solid var(--ia-color-border);
   border-radius: 9px;
   transition: all 0.2s ease;
 }
 
 .uam-search-bar:focus-within {
-  border-color: #a5b4fc;
+  border-color: var(--ia-color-primary-border);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.05);
 }
 
-.uam-search-bar svg { color: #94a3b8; flex-shrink: 0; }
+.uam-search-bar svg { color: var(--ia-color-text-tertiary); flex-shrink: 0; }
 
 .uam-search-bar input {
   flex: 1;
   border: none;
   outline: none;
-  font-size: 12.5px;
-  color: #1e293b;
+  font-size: var(--ia-text-12-5);
+  color: var(--ia-color-text-primary);
   background: transparent;
   font-family: inherit;
 }
 
-.uam-search-bar input::placeholder { color: #94a3b8; }
+.uam-search-bar input::placeholder { color: var(--ia-color-text-tertiary); }
 
 .uam-search-clear {
   width: 22px;
   height: 22px;
   border: none;
-  background: #f1f5f9;
+  background: var(--ia-color-bg-muted);
   border-radius: 5px;
-  color: #64748b;
+  color: var(--ia-color-text-secondary);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -222,19 +222,19 @@
   transition: all 0.12s ease;
 }
 
-.uam-search-clear:hover { background: #e2e8f0; }
+.uam-search-clear:hover { background: var(--ia-color-border); }
 
 .uam-result-count {
-  font-size: 11.5px;
-  color: #94a3b8;
-  font-weight: 500;
+  font-size: var(--ia-text-11-5);
+  color: var(--ia-color-text-tertiary);
+  font-weight: var(--ia-font-weight-medium);
   white-space: nowrap;
 }
 
 /* ---- TABLE ---- */
 .uam-table-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--ia-color-surface);
+  border: 1px solid var(--ia-color-border);
   border-radius: 14px;
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(0,0,0,0.03);
@@ -248,13 +248,13 @@
 .uam-table thead th {
   padding: 12px 20px;
   text-align: left;
-  font-size: 10.5px;
-  font-weight: 600;
-  color: #94a3b8;
+  font-size: var(--ia-text-10-5);
+  font-weight: var(--ia-font-weight-semibold);
+  color: var(--ia-color-text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   background: #fafbfc;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--ia-color-bg-muted);
 }
 
 .uam-th-name { min-width: 260px; }
@@ -273,8 +273,8 @@
 
 .uam-row td {
   padding: 16px 20px;
-  font-size: 13px;
-  color: #334155;
+  font-size: var(--ia-text-13);
+  color: var(--ia-color-text-primary);
   vertical-align: middle;
 }
 
@@ -291,9 +291,9 @@
   width: 36px;
   height: 36px;
   border-radius: 10px;
-  color: #ffffff;
-  font-size: 12px;
-  font-weight: 700;
+  color: var(--ia-color-surface);
+  font-size: var(--ia-text-xs);
+  font-weight: var(--ia-font-weight-bold);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -302,9 +302,9 @@
 }
 
 .uam-avatar--admin { background: linear-gradient(135deg, #ea580c 0%, #f97316 100%); }
-.uam-avatar--dm { background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%); }
-.uam-avatar--sm { background: linear-gradient(135deg, #059669 0%, #34d399 100%); }
-.uam-avatar--hq { background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%); }
+.uam-avatar--dm { background: linear-gradient(135deg, var(--ia-color-primary) 0%, var(--ia-color-primary) 100%); }
+.uam-avatar--sm { background: linear-gradient(135deg, var(--ia-color-success) 0%, #34d399 100%); }
+.uam-avatar--hq { background: linear-gradient(135deg, var(--ia-color-primary-pressed) 0%, var(--ia-color-primary-hover) 100%); }
 
 .uam-user-details {
   display: flex;
@@ -313,16 +313,16 @@
 }
 
 .uam-user-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: #0f172a;
+  font-size: var(--ia-text-13);
+  font-weight: var(--ia-font-weight-semibold);
+  color: var(--ia-color-text-primary);
   letter-spacing: -0.01em;
 }
 
 .uam-user-email {
-  font-size: 11.5px;
-  color: #94a3b8;
-  font-weight: 400;
+  font-size: var(--ia-text-11-5);
+  color: var(--ia-color-text-tertiary);
+  font-weight: var(--ia-font-weight-regular);
 }
 
 /* Role tag */
@@ -331,20 +331,20 @@
   align-items: center;
   padding: 4px 10px;
   border-radius: 6px;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--ia-text-2xs);
+  font-weight: var(--ia-font-weight-semibold);
   letter-spacing: 0.01em;
 }
 
 .uam-role--admin { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
-.uam-role--dm { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
-.uam-role--sm { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
-.uam-role--hq { background: #faf5ff; color: #7c3aed; border: 1px solid #ddd6fe; }
+.uam-role--dm { background: var(--ia-color-primary-soft); color: var(--ia-color-primary); border: 1px solid var(--ia-color-primary-border); }
+.uam-role--sm { background: var(--ia-color-success-bg); color: var(--ia-color-success); border: 1px solid var(--ia-color-success-soft); }
+.uam-role--hq { background: var(--ia-color-bg-subtle); color: var(--ia-color-primary-pressed); border: 1px solid var(--ia-color-primary-border); }
 
 /* Scope */
 .uam-scope-text {
-  font-size: 12.5px;
-  color: #475569;
+  font-size: var(--ia-text-12-5);
+  color: var(--ia-color-text-secondary);
   font-weight: 450;
 }
 
@@ -353,8 +353,8 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: var(--ia-text-xs);
+  font-weight: var(--ia-font-weight-medium);
 }
 
 .uam-status .uam-status-dot {
@@ -364,10 +364,10 @@
   flex-shrink: 0;
 }
 
-.uam-status--active { color: #15803d; }
-.uam-status--active .uam-status-dot { background: #22c55e; box-shadow: 0 0 0 2px rgba(34,197,94,0.15); }
-.uam-status--invited { color: #b45309; }
-.uam-status--invited .uam-status-dot { background: #f59e0b; box-shadow: 0 0 0 2px rgba(245,158,11,0.15); }
+.uam-status--active { color: var(--ia-color-success); }
+.uam-status--active .uam-status-dot { background: var(--ia-color-success); box-shadow: 0 0 0 2px rgba(34,197,94,0.15); }
+.uam-status--invited { color: var(--ia-color-warning-text); }
+.uam-status--invited .uam-status-dot { background: var(--ia-color-warning); box-shadow: 0 0 0 2px rgba(245,158,11,0.15); }
 
 /* Screen badge */
 .uam-td-screens { text-align: center; }
@@ -377,25 +377,25 @@
   align-items: center;
   gap: 5px;
   padding: 4px 10px;
-  background: #f1f5f9;
+  background: var(--ia-color-bg-muted);
   border-radius: 6px;
-  font-size: 11.5px;
-  font-weight: 600;
-  color: #475569;
+  font-size: var(--ia-text-11-5);
+  font-weight: var(--ia-font-weight-semibold);
+  color: var(--ia-color-text-secondary);
 }
 
-.uam-screen-badge svg { color: #94a3b8; }
+.uam-screen-badge svg { color: var(--ia-color-text-tertiary); }
 
 /* Expanded row */
 .uam-expand-row td {
   padding: 0 20px 16px !important;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--ia-color-bg-muted);
 }
 
 .uam-expand-content {
   padding: 14px 18px;
   background: #fafafc;
-  border: 1px solid #f1f5f9;
+  border: 1px solid var(--ia-color-bg-muted);
   border-radius: 10px;
   animation: uamExpandIn 0.2s ease;
 }
@@ -406,9 +406,9 @@
 }
 
 .uam-expand-label {
-  font-size: 10.5px;
-  font-weight: 600;
-  color: #94a3b8;
+  font-size: var(--ia-text-10-5);
+  font-weight: var(--ia-font-weight-semibold);
+  color: var(--ia-color-text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   margin-bottom: 10px;
@@ -424,20 +424,20 @@
   display: inline-flex;
   align-items: center;
   padding: 4px 10px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--ia-color-surface);
+  border: 1px solid var(--ia-color-border);
   border-radius: 6px;
-  font-size: 11px;
-  font-weight: 500;
-  color: #475569;
+  font-size: var(--ia-text-2xs);
+  font-weight: var(--ia-font-weight-medium);
+  color: var(--ia-color-text-secondary);
 }
 
 /* Empty state */
 .uam-empty {
   text-align: center;
   padding: 48px 20px !important;
-  color: #94a3b8;
-  font-size: 13px;
+  color: var(--ia-color-text-tertiary);
+  font-size: var(--ia-text-13);
 }
 
 .uam-empty svg { margin-bottom: 8px; opacity: 0.4; }
@@ -466,7 +466,7 @@
 }
 
 .uam-modal {
-  background: #ffffff;
+  background: var(--ia-color-surface);
   border-radius: 20px;
   width: 760px;
   max-width: 94vw;
@@ -493,15 +493,15 @@
   align-items: flex-start;
   gap: 16px;
   padding: 26px 32px 22px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--ia-color-bg-muted);
 }
 
 .uam-m-header-icon {
   width: 46px;
   height: 46px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
-  color: #4f46e5;
+  background: linear-gradient(135deg, var(--ia-color-primary-soft) 0%, var(--ia-color-primary-soft) 100%);
+  color: var(--ia-color-primary-hover);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -515,27 +515,27 @@
 }
 
 .uam-m-header-text h3 {
-  font-size: 18px;
-  font-weight: 700;
-  color: #0f172a;
+  font-size: var(--ia-text-lg);
+  font-weight: var(--ia-font-weight-bold);
+  color: var(--ia-color-text-primary);
   margin: 0;
   letter-spacing: -0.02em;
 }
 
 .uam-m-header-text p {
-  font-size: 13px;
-  color: #94a3b8;
+  font-size: var(--ia-text-13);
+  color: var(--ia-color-text-tertiary);
   margin: 4px 0 0;
-  font-weight: 400;
+  font-weight: var(--ia-font-weight-regular);
 }
 
 .uam-m-close {
   width: 30px;
   height: 30px;
-  border: 1px solid #e2e8f0;
-  background: #ffffff;
+  border: 1px solid var(--ia-color-border);
+  background: var(--ia-color-surface);
   border-radius: 8px;
-  color: #94a3b8;
+  color: var(--ia-color-text-tertiary);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -545,7 +545,7 @@
   margin-top: 2px;
 }
 
-.uam-m-close:hover { background: #f8fafc; color: #475569; border-color: #cbd5e1; }
+.uam-m-close:hover { background: var(--ia-color-bg-subtle); color: var(--ia-color-text-secondary); border-color: var(--ia-color-border-strong); }
 
 /* Modal body — overflow visible so absolute-positioned dropdowns can escape */
 .uam-m-body {
@@ -563,12 +563,12 @@
   align-items: center;
   gap: 8px;
   padding: 10px 14px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: var(--ia-color-error-bg);
+  border: 1px solid var(--ia-color-error-soft);
   border-radius: 8px;
-  color: #dc2626;
-  font-size: 12px;
-  font-weight: 500;
+  color: var(--ia-color-error-strong);
+  font-size: var(--ia-text-xs);
+  font-weight: var(--ia-font-weight-medium);
   margin-bottom: 18px;
 }
 
@@ -576,7 +576,7 @@
 .uam-m-section {
   padding-bottom: 20px;
   margin-bottom: 20px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--ia-color-bg-muted);
 }
 
 .uam-m-section:last-child,
@@ -590,9 +590,9 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 11px;
-  font-weight: 600;
-  color: #94a3b8;
+  font-size: var(--ia-text-2xs);
+  font-weight: var(--ia-font-weight-semibold);
+  color: var(--ia-color-text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   margin-bottom: 14px;
@@ -602,12 +602,12 @@
 
 .uam-m-access-count {
   margin-left: auto;
-  font-size: 10.5px;
-  font-weight: 500;
-  color: #4f46e5;
+  font-size: var(--ia-text-10-5);
+  font-weight: var(--ia-font-weight-medium);
+  color: var(--ia-color-primary-hover);
   text-transform: none;
   letter-spacing: 0;
-  background: #eef2ff;
+  background: var(--ia-color-primary-soft);
   padding: 2px 8px;
   border-radius: 4px;
 }
@@ -626,26 +626,26 @@
 }
 
 .uam-m-field label {
-  font-size: 11.5px;
-  font-weight: 600;
-  color: #475569;
+  font-size: var(--ia-text-11-5);
+  font-weight: var(--ia-font-weight-semibold);
+  color: var(--ia-color-text-secondary);
   letter-spacing: 0.01em;
 }
 
 .uam-m-field input {
   padding: 9px 12px;
-  border: 1.5px solid #e2e8f0;
+  border: 1.5px solid var(--ia-color-border);
   border-radius: 8px;
-  font-size: 12.5px;
-  color: #1e293b;
+  font-size: var(--ia-text-12-5);
+  color: var(--ia-color-text-primary);
   outline: none;
   transition: all 0.2s ease;
-  background: #ffffff;
+  background: var(--ia-color-surface);
   font-family: inherit;
 }
 
 .uam-m-field input:focus {
-  border-color: #a5b4fc;
+  border-color: var(--ia-color-primary-border);
   box-shadow: 0 0 0 3px rgba(99,102,241,0.06);
 }
 
@@ -682,22 +682,22 @@
   align-items: center;
   gap: 8px;
   padding: 9px 12px;
-  border: 1.5px solid #e2e8f0;
+  border: 1.5px solid var(--ia-color-border);
   border-radius: 8px;
-  font-size: 12.5px;
-  color: #1e293b;
-  background: #ffffff;
+  font-size: var(--ia-text-12-5);
+  color: var(--ia-color-text-primary);
+  background: var(--ia-color-surface);
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: inherit;
 }
 
-.uam-dd-trigger:hover { border-color: #cbd5e1; }
-.uam-dd-trigger:disabled { background: #f8fafc; color: #94a3b8; cursor: not-allowed; }
+.uam-dd-trigger:hover { border-color: var(--ia-color-border-strong); }
+.uam-dd-trigger:disabled { background: var(--ia-color-bg-subtle); color: var(--ia-color-text-tertiary); cursor: not-allowed; }
 
 .uam-dd-chevron {
   margin-left: auto;
-  color: #94a3b8;
+  color: var(--ia-color-text-tertiary);
   flex-shrink: 0;
 }
 
@@ -710,9 +710,9 @@
   flex-shrink: 0;
 }
 
-.uam-dd-role-dot--sm { background: #22c55e; }
-.uam-dd-role-dot--dm { background: #3b82f6; }
-.uam-dd-role-dot--hq { background: #8b5cf6; }
+.uam-dd-role-dot--sm { background: var(--ia-color-success); }
+.uam-dd-role-dot--dm { background: var(--ia-color-primary); }
+.uam-dd-role-dot--hq { background: var(--ia-color-primary-hover); }
 .uam-dd-role-dot--admin { background: #f97316; }
 
 .uam-dd-menu {
@@ -720,8 +720,8 @@
   top: calc(100% + 4px);
   left: 0;
   right: 0;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--ia-color-surface);
+  border: 1px solid var(--ia-color-border);
   border-radius: 10px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.02);
   z-index: 1000;
@@ -745,21 +745,21 @@
   border: none;
   background: transparent;
   border-radius: 7px;
-  font-size: 12.5px;
-  color: #334155;
+  font-size: var(--ia-text-12-5);
+  color: var(--ia-color-text-primary);
   cursor: pointer;
   transition: background 0.12s ease;
   font-family: inherit;
 }
 
-.uam-dd-item:hover { background: #f8fafc; }
+.uam-dd-item:hover { background: var(--ia-color-bg-subtle); }
 
 .uam-dd-item--active {
-  background: #eef2ff;
-  color: #4338ca;
+  background: var(--ia-color-primary-soft);
+  color: var(--ia-color-primary-pressed);
 }
 
-.uam-dd-item--active svg { color: #4338ca; }
+.uam-dd-item--active svg { color: var(--ia-color-primary-pressed); }
 
 .uam-dd-item-left {
   display: flex;
@@ -774,17 +774,17 @@
 }
 
 .uam-dd-item-name {
-  font-size: 12.5px;
-  font-weight: 600;
-  color: #1e293b;
+  font-size: var(--ia-text-12-5);
+  font-weight: var(--ia-font-weight-semibold);
+  color: var(--ia-color-text-primary);
 }
 
-.uam-dd-item--active .uam-dd-item-name { color: #4338ca; }
+.uam-dd-item--active .uam-dd-item-name { color: var(--ia-color-primary-pressed); }
 
 .uam-dd-item-desc {
-  font-size: 10.5px;
-  color: #94a3b8;
-  font-weight: 400;
+  font-size: var(--ia-text-10-5);
+  color: var(--ia-color-text-tertiary);
+  font-weight: var(--ia-font-weight-regular);
 }
 
 /* Access grid */
@@ -799,16 +799,16 @@
   align-items: center;
   gap: 7px;
   padding: 7px 10px;
-  background: #f8fafc;
-  border: 1px solid #f1f5f9;
+  background: var(--ia-color-bg-subtle);
+  border: 1px solid var(--ia-color-bg-muted);
   border-radius: 7px;
-  font-size: 11.5px;
-  font-weight: 500;
-  color: #475569;
+  font-size: var(--ia-text-11-5);
+  font-weight: var(--ia-font-weight-medium);
+  color: var(--ia-color-text-secondary);
   transition: all 0.15s ease;
 }
 
-.uam-m-access-item svg { color: #22c55e; flex-shrink: 0; }
+.uam-m-access-item svg { color: var(--ia-color-success); flex-shrink: 0; }
 
 /* Modal footer */
 .uam-m-footer {
@@ -816,25 +816,25 @@
   align-items: center;
   justify-content: space-between;
   padding: 18px 32px;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--ia-color-bg-muted);
   background: #fafbfc;
   border-radius: 0 0 20px 20px;
 }
 
 .uam-m-cancel {
   padding: 8px 18px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--ia-color-border);
   border-radius: 8px;
-  background: #ffffff;
-  color: #64748b;
-  font-size: 12.5px;
-  font-weight: 500;
+  background: var(--ia-color-surface);
+  color: var(--ia-color-text-secondary);
+  font-size: var(--ia-text-12-5);
+  font-weight: var(--ia-font-weight-medium);
   cursor: pointer;
   transition: all 0.15s ease;
   font-family: inherit;
 }
 
-.uam-m-cancel:hover { background: #f8fafc; border-color: #cbd5e1; }
+.uam-m-cancel:hover { background: var(--ia-color-bg-subtle); border-color: var(--ia-color-border-strong); }
 
 .uam-m-submit {
   display: inline-flex;
@@ -843,10 +843,10 @@
   padding: 8px 20px;
   border: none;
   border-radius: 8px;
-  background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%);
-  color: #ffffff;
-  font-size: 12.5px;
-  font-weight: 600;
+  background: linear-gradient(135deg, var(--ia-color-primary-pressed) 0%, var(--ia-color-primary) 100%);
+  color: var(--ia-color-surface);
+  font-size: var(--ia-text-12-5);
+  font-weight: var(--ia-font-weight-semibold);
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 1px 4px rgba(67,56,202,0.3);
@@ -866,21 +866,21 @@
    ============================================================== */
 .uam-di-header {
   /* Inherits from .district-intel-header — just space-between layout */
-  background: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
+  background: var(--ia-color-surface);
+  border-bottom: 1px solid var(--ia-color-border);
   padding: 16px 32px;
   margin: 0 0 16px 0;
   border-radius: 0;
 }
 
 .uam-di-header .header-title svg {
-  color: #4338ca;
+  color: var(--ia-color-primary-pressed);
 }
 
 .uam-di-header .header-title h1 {
-  color: #0f172a;
-  font-size: 18px;
-  font-weight: 700;
+  color: var(--ia-color-text-primary);
+  font-size: var(--ia-text-lg);
+  font-weight: var(--ia-font-weight-bold);
   letter-spacing: -0.02em;
   margin: 0;
 }
@@ -890,22 +890,22 @@
 }
 
 .uam-di-header .district-badge {
-  background: #eef2ff;
-  color: #4338ca;
+  background: var(--ia-color-primary-soft);
+  color: var(--ia-color-primary-pressed);
   border-radius: 4px;
   padding: 4px 10px;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: var(--ia-text-xs);
+  font-weight: var(--ia-font-weight-medium);
 }
 
 .uam-di-header .uam-meta-pill {
-  background: #f1f5f9;
-  color: #475569;
+  background: var(--ia-color-bg-muted);
+  color: var(--ia-color-text-secondary);
 }
 
 .uam-meta-updated {
-  font-size: 12px;
-  color: #94a3b8;
+  font-size: var(--ia-text-xs);
+  color: var(--ia-color-text-tertiary);
 }
 
 .uam-header-right {
@@ -938,35 +938,17 @@
 }
 
 .uam-toolbar-count {
-  font-size: 12px;
-  color: #64748b;
-  font-weight: 500;
+  font-size: var(--ia-text-xs);
+  color: var(--ia-color-text-secondary);
+  font-weight: var(--ia-font-weight-medium);
 }
 
 /* ==============================================================
    Stats Strip (above table, mirrors DI bca-overview-grid)
    ============================================================== */
-.uam-stats-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  margin: 16px 16px 16px 16px;
-  overflow: hidden;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
-}
-
 .uam-stats-grid {
   grid-template-columns: repeat(5, 1fr) !important;
   border-bottom: none !important;
-}
-
-.uam-stats-card .bca-kpi-card {
-  padding: 18px 12px;
-  border-right: 1px solid #f1f5f9;
-}
-
-.uam-stats-card .bca-kpi-card:last-child {
-  border-right: none;
 }
 
 /* ==============================================================
@@ -988,9 +970,9 @@
 .uam-action-delete {
   width: 30px;
   height: 30px;
-  border: 1px solid #e2e8f0;
-  background: #ffffff;
-  color: #94a3b8;
+  border: 1px solid var(--ia-color-border);
+  background: var(--ia-color-surface);
+  color: var(--ia-color-text-tertiary);
   border-radius: 8px;
   cursor: pointer;
   display: inline-flex;
@@ -1000,19 +982,19 @@
 }
 
 .uam-action-delete:hover {
-  background: #fef2f2;
-  border-color: #fecaca;
-  color: #dc2626;
+  background: var(--ia-color-error-bg);
+  border-color: var(--ia-color-error-soft);
+  color: var(--ia-color-error-strong);
 }
 
 .uam-action-self {
   display: inline-block;
-  font-size: 10.5px;
-  font-weight: 600;
+  font-size: var(--ia-text-10-5);
+  font-weight: var(--ia-font-weight-semibold);
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #94a3b8;
-  background: #f1f5f9;
+  color: var(--ia-color-text-tertiary);
+  background: var(--ia-color-bg-muted);
   padding: 3px 9px;
   border-radius: 999px;
 }
@@ -1021,7 +1003,7 @@
    Confirm Delete Modal
    ============================================================== */
 .uam-confirm {
-  background: #ffffff;
+  background: var(--ia-color-surface);
   border-radius: 16px;
   width: 440px;
   max-width: 92vw;
@@ -1040,8 +1022,8 @@
   width: 52px;
   height: 52px;
   border-radius: 14px;
-  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
-  color: #dc2626;
+  background: linear-gradient(135deg, var(--ia-color-error-bg) 0%, var(--ia-color-error-bg) 100%);
+  color: var(--ia-color-error-strong);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1050,23 +1032,23 @@
 }
 
 .uam-confirm-title {
-  font-size: 17px;
-  font-weight: 700;
-  color: #0f172a;
+  font-size: var(--ia-text-17);
+  font-weight: var(--ia-font-weight-bold);
+  color: var(--ia-color-text-primary);
   margin: 0 0 8px;
   letter-spacing: -0.02em;
 }
 
 .uam-confirm-text {
-  font-size: 13px;
-  color: #64748b;
+  font-size: var(--ia-text-13);
+  color: var(--ia-color-text-secondary);
   line-height: 1.55;
   margin: 0 0 22px;
 }
 
 .uam-confirm-text strong {
-  color: #0f172a;
-  font-weight: 600;
+  color: var(--ia-color-text-primary);
+  font-weight: var(--ia-font-weight-semibold);
 }
 
 .uam-confirm-actions {
@@ -1083,10 +1065,10 @@
   padding: 9px 18px;
   border: 0;
   border-radius: 8px;
-  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
-  color: #ffffff;
-  font-size: 12.5px;
-  font-weight: 600;
+  background: linear-gradient(135deg, var(--ia-color-error-strong) 0%, var(--ia-color-error) 100%);
+  color: var(--ia-color-surface);
+  font-size: var(--ia-text-12-5);
+  font-weight: var(--ia-font-weight-semibold);
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: inherit;
@@ -1103,20 +1085,20 @@
 
 /* Danger toast variant */
 .uam-toast--danger {
-  background: #fef2f2;
-  border-color: #fecaca;
-  color: #b91c1c;
+  background: var(--ia-color-error-bg);
+  border-color: var(--ia-color-error-soft);
+  color: var(--ia-color-error-strong);
 }
 
 .uam-toast-icon--danger {
-  background: #dc2626;
-  color: #ffffff;
+  background: var(--ia-color-error-strong);
+  color: var(--ia-color-surface);
 }
 
 .uam-table-card.uam-table-card--modern {
   margin: 0 16px 24px 16px;
   border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--ia-color-border);
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
   overflow: hidden;
 }
@@ -1127,10 +1109,10 @@
 .uam-table-card--modern .uam-avatar--dm,
 .uam-table-card--modern .uam-avatar--sm,
 .uam-table-card--modern .uam-avatar--hq {
-  background: #f1f5f9;
-  color: #475569;
-  font-weight: 600;
-  border: 1px solid #e2e8f0;
+  background: var(--ia-color-bg-muted);
+  color: var(--ia-color-text-secondary);
+  font-weight: var(--ia-font-weight-semibold);
+  border: 1px solid var(--ia-color-border);
   border-radius: 8px;
   letter-spacing: 0.02em;
 }
@@ -1138,10 +1120,10 @@
 /* Subtle role tags — neutral pill with a small role-colored dot */
 .uam-table-card--modern .uam-role-tag {
   position: relative;
-  background: #f8fafc;
-  color: #334155;
-  border: 1px solid #e2e8f0;
-  font-weight: 500;
+  background: var(--ia-color-bg-subtle);
+  color: var(--ia-color-text-primary);
+  border: 1px solid var(--ia-color-border);
+  font-weight: var(--ia-font-weight-medium);
   padding: 4px 10px 4px 22px;
   border-radius: 6px;
 }
@@ -1155,44 +1137,44 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #94a3b8;
+  background: var(--ia-color-text-tertiary);
 }
 
 .uam-table-card--modern .uam-role--admin::before { background: #f97316; }
-.uam-table-card--modern .uam-role--dm::before    { background: #3b82f6; }
-.uam-table-card--modern .uam-role--sm::before    { background: #10b981; }
-.uam-table-card--modern .uam-role--hq::before    { background: #8b5cf6; }
+.uam-table-card--modern .uam-role--dm::before    { background: var(--ia-color-primary); }
+.uam-table-card--modern .uam-role--sm::before    { background: var(--ia-color-success); }
+.uam-table-card--modern .uam-role--hq::before    { background: var(--ia-color-primary-hover); }
 
 /* Reset background-only role styles to neutral so the tag is uniform */
 .uam-table-card--modern .uam-role--admin,
 .uam-table-card--modern .uam-role--dm,
 .uam-table-card--modern .uam-role--sm,
 .uam-table-card--modern .uam-role--hq {
-  background: #f8fafc;
-  color: #334155;
-  border-color: #e2e8f0;
+  background: var(--ia-color-bg-subtle);
+  color: var(--ia-color-text-primary);
+  border-color: var(--ia-color-border);
 }
 
 /* Quieter scope text */
 .uam-table-card--modern .uam-scope-text {
-  color: #475569;
-  font-size: 13px;
+  color: var(--ia-color-text-secondary);
+  font-size: var(--ia-text-13);
 }
 
 /* Status pill softened */
 .uam-table-card--modern .uam-status {
-  font-size: 12px;
-  font-weight: 500;
+  font-size: var(--ia-text-xs);
+  font-weight: var(--ia-font-weight-medium);
 }
 
-.uam-table-card--modern .uam-status--active { color: #15803d; }
-.uam-table-card--modern .uam-status--invited { color: #b45309; }
+.uam-table-card--modern .uam-status--active { color: var(--ia-color-success); }
+.uam-table-card--modern .uam-status--invited { color: var(--ia-color-warning-text); }
 
 /* Screen badge subtle */
 .uam-table-card--modern .uam-screen-badge {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  color: #475569;
+  background: var(--ia-color-bg-subtle);
+  border: 1px solid var(--ia-color-border);
+  color: var(--ia-color-text-secondary);
 }
 
 /* Cleaner hover/expand row */
@@ -1201,7 +1183,7 @@
 }
 
 .uam-table-card--modern .uam-row--expanded {
-  background: #f5f3ff !important;
+  background: var(--ia-color-primary-soft) !important;
 }
 
 .uam-table-card--modern .uam-expand-row td {
@@ -1216,9 +1198,9 @@
 }
 
 .uam-table-card--modern .uam-expand-label {
-  font-size: 11px;
-  font-weight: 600;
-  color: #64748b;
+  font-size: var(--ia-text-2xs);
+  font-weight: var(--ia-font-weight-semibold);
+  color: var(--ia-color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -1230,11 +1212,11 @@
 }
 
 .uam-table-card--modern .uam-expand-chip {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  color: #475569;
-  font-size: 11px;
-  font-weight: 500;
+  background: var(--ia-color-surface);
+  border: 1px solid var(--ia-color-border);
+  color: var(--ia-color-text-secondary);
+  font-size: var(--ia-text-2xs);
+  font-weight: var(--ia-font-weight-medium);
   padding: 3px 8px;
   border-radius: 4px;
 }
@@ -1243,8 +1225,8 @@
 .uam-table-card--modern .uam-empty {
   text-align: center;
   padding: 40px 16px;
-  color: #94a3b8;
-  font-size: 13px;
+  color: var(--ia-color-text-tertiary);
+  font-size: var(--ia-text-13);
 }
 
 /* Toolbar elements no longer needed — make sure stale margins don't break layout */
@@ -1260,29 +1242,29 @@
   align-items: center;
   gap: 12px;
   padding: 18px 32px;
-  background: linear-gradient(180deg, #fafbff 0%, #f8fafc 100%);
-  border-bottom: 1px solid #e2e8f0;
+  background: linear-gradient(180deg, #fafbff 0%, var(--ia-color-bg-subtle) 100%);
+  border-bottom: 1px solid var(--ia-color-border);
 }
 
 .uam-m-step {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #64748b;
+  color: var(--ia-color-text-secondary);
   transition: color 0.15s ease;
 }
 
 .uam-m-step--done {
-  color: #16a34a;
+  color: var(--ia-color-success);
 }
 
 .uam-m-step--active {
-  color: #4338ca;
+  color: var(--ia-color-primary-pressed);
 }
 
 .uam-m-step--active .uam-m-step-num {
-  background: #eef2ff;
-  color: #4338ca;
+  background: var(--ia-color-primary-soft);
+  color: var(--ia-color-primary-pressed);
   box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.12);
 }
 
@@ -1294,42 +1276,42 @@
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: #e2e8f0;
-  color: #64748b;
+  background: var(--ia-color-border);
+  color: var(--ia-color-text-secondary);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: var(--ia-text-xs);
+  font-weight: var(--ia-font-weight-bold);
   flex-shrink: 0;
   transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .uam-m-step--done .uam-m-step-num {
-  background: #dcfce7;
-  color: #15803d;
+  background: var(--ia-color-success-bg);
+  color: var(--ia-color-success);
 }
 
 .uam-m-step-label {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--ia-text-13);
+  font-weight: var(--ia-font-weight-semibold);
 }
 
 .uam-m-step-divider {
   flex: 1;
   height: 2px;
   border-radius: 2px;
-  background: #e2e8f0;
+  background: var(--ia-color-border);
   max-width: 80px;
 }
 
 /* Required-field asterisk */
 .uam-m-req {
-  color: #dc2626;
-  font-weight: 700;
+  color: var(--ia-color-error-strong);
+  font-weight: var(--ia-font-weight-bold);
   margin-left: 2px;
 }
 
@@ -1339,9 +1321,9 @@
   align-items: center;
   gap: 4px;
   margin-top: 6px;
-  font-size: 11.5px;
-  color: #dc2626;
-  font-weight: 500;
+  font-size: var(--ia-text-11-5);
+  color: var(--ia-color-error-strong);
+  font-weight: var(--ia-font-weight-medium);
 }
 
 .uam-m-input--error,
@@ -1357,20 +1339,20 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
-  font-weight: 500;
-  color: #4338ca;
+  font-size: var(--ia-text-xs);
+  font-weight: var(--ia-font-weight-medium);
+  color: var(--ia-color-primary-pressed);
   cursor: pointer;
   padding: 4px 10px;
-  border: 1px solid #e2e8f0;
-  background: #ffffff;
+  border: 1px solid var(--ia-color-border);
+  background: var(--ia-color-surface);
   border-radius: 6px;
   transition: background 0.15s ease, border-color 0.15s ease;
 }
 
 .uam-m-customize-toggle:hover {
-  background: #eef2ff;
-  border-color: #c7d2fe;
+  background: var(--ia-color-primary-soft);
+  border-color: var(--ia-color-primary-border);
 }
 
 .uam-m-customize-toggle input[type="checkbox"] {
@@ -1378,9 +1360,9 @@
   -webkit-appearance: none;
   width: 14px;
   height: 14px;
-  border: 1.5px solid #cbd5e1;
+  border: 1.5px solid var(--ia-color-border-strong);
   border-radius: 3px;
-  background: #ffffff;
+  background: var(--ia-color-surface);
   cursor: pointer;
   position: relative;
   margin: 0;
@@ -1389,8 +1371,8 @@
 }
 
 .uam-m-customize-toggle input[type="checkbox"]:checked {
-  background: #4338ca;
-  border-color: #4338ca;
+  background: var(--ia-color-primary-pressed);
+  border-color: var(--ia-color-primary-pressed);
 }
 
 .uam-m-customize-toggle input[type="checkbox"]:checked::after {
@@ -1400,7 +1382,7 @@
   top: 0px;
   width: 5px;
   height: 9px;
-  border: solid #ffffff;
+  border: solid var(--ia-color-surface);
   border-width: 0 1.5px 1.5px 0;
   transform: rotate(45deg);
 }
@@ -1411,12 +1393,12 @@
   justify-content: space-between;
   gap: 12px;
   padding: 8px 12px;
-  background: #eef2ff;
-  border: 1px solid #e0e7ff;
+  background: var(--ia-color-primary-soft);
+  border: 1px solid var(--ia-color-primary-soft);
   border-radius: 6px;
   margin-bottom: 10px;
-  font-size: 11.5px;
-  color: #4338ca;
+  font-size: var(--ia-text-11-5);
+  color: var(--ia-color-primary-pressed);
 }
 
 .uam-m-reset-btn {
@@ -1425,9 +1407,9 @@
   gap: 4px;
   background: transparent;
   border: none;
-  color: #4338ca;
-  font-size: 11.5px;
-  font-weight: 600;
+  color: var(--ia-color-primary-pressed);
+  font-size: var(--ia-text-11-5);
+  font-weight: var(--ia-font-weight-semibold);
   cursor: pointer;
   padding: 2px 6px;
   border-radius: 4px;
@@ -1443,21 +1425,21 @@
   cursor: pointer;
   position: relative;
   padding: 8px 10px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--ia-color-surface);
+  border: 1px solid var(--ia-color-border);
   border-radius: 6px;
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 12.5px;
-  color: #475569;
+  font-size: var(--ia-text-12-5);
+  color: var(--ia-color-text-secondary);
   transition: all 0.12s ease;
   user-select: none;
 }
 
 .uam-m-access-item--interactive:hover {
-  border-color: #c7d2fe;
-  background: #f8fafc;
+  border-color: var(--ia-color-primary-border);
+  background: var(--ia-color-bg-subtle);
 }
 
 .uam-m-access-item--interactive input[type="checkbox"] {
@@ -1467,37 +1449,37 @@
 .uam-m-access-check {
   width: 16px;
   height: 16px;
-  border: 1.5px solid #cbd5e1;
+  border: 1.5px solid var(--ia-color-border-strong);
   border-radius: 3px;
-  background: #ffffff;
+  background: var(--ia-color-surface);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  color: #ffffff;
+  color: var(--ia-color-surface);
   transition: background 0.12s ease, border-color 0.12s ease;
 }
 
 .uam-m-access-item--checked {
-  border-color: #c7d2fe;
-  background: #eef2ff;
-  color: #1e293b;
+  border-color: var(--ia-color-primary-border);
+  background: var(--ia-color-primary-soft);
+  color: var(--ia-color-text-primary);
 }
 
 .uam-m-access-item--checked .uam-m-access-check {
-  background: #4338ca;
-  border-color: #4338ca;
+  background: var(--ia-color-primary-pressed);
+  border-color: var(--ia-color-primary-pressed);
 }
 
 .uam-m-access-default {
   margin-left: auto;
-  font-size: 9.5px;
-  font-weight: 600;
+  font-size: var(--ia-text-9-5);
+  font-weight: var(--ia-font-weight-semibold);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   padding: 2px 6px;
-  background: #f1f5f9;
-  color: #64748b;
+  background: var(--ia-color-bg-muted);
+  color: var(--ia-color-text-secondary);
   border-radius: 3px;
 }
 
@@ -1514,20 +1496,20 @@
   align-items: center;
   gap: 6px;
   padding: 8px 14px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  color: #334155;
+  background: var(--ia-color-surface);
+  border: 1px solid var(--ia-color-border);
+  color: var(--ia-color-text-primary);
   border-radius: 8px;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--ia-text-13);
+  font-weight: var(--ia-font-weight-medium);
   cursor: pointer;
   font-family: inherit;
   transition: background 0.12s ease, border-color 0.12s ease;
 }
 
 .uam-m-back:hover {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
+  background: var(--ia-color-bg-muted);
+  border-color: var(--ia-color-border-strong);
 }
 
 .uam-m-submit:disabled {

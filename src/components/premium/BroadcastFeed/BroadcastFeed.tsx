@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Search, Filter } from 'lucide-react';
+import SearchOutlined from '@mui/icons-material/SearchOutlined';
+import FilterListOutlined from '@mui/icons-material/FilterListOutlined';
 import { Broadcast } from '../../../types/home';
 import { BroadcastCard } from '../BroadcastCard/BroadcastCard';
 import './BroadcastFeed.css';
@@ -34,7 +35,7 @@ export const BroadcastFeed: React.FC<BroadcastFeedProps> = ({
           📢 Broadcasts ({broadcasts.length})
         </h2>
         <div className="broadcast-feed-search">
-          <Search size={16} />
+          <SearchOutlined sx={{ fontSize: 16 }} />
           <input
             type="text"
             placeholder="Search broadcasts..."
@@ -89,7 +90,7 @@ export const BroadcastFeed: React.FC<BroadcastFeedProps> = ({
           ))
         ) : (
           <div className="broadcast-feed-empty">
-            <Filter size={48} />
+            <FilterListOutlined sx={{ fontSize: 48 }} />
             <p>No broadcasts match your filters</p>
           </div>
         )}

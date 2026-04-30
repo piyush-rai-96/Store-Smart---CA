@@ -1,5 +1,6 @@
 import React from 'react';
-import { AlertCircle, X } from 'lucide-react';
+import ErrorOutlined from '@mui/icons-material/ErrorOutlined';
+import CloseOutlined from '@mui/icons-material/CloseOutlined';
 import { Button } from 'impact-ui';
 import { Broadcast } from '../../types/broadcast';
 import './CriticalBanner.css';
@@ -26,16 +27,18 @@ export const CriticalBanner: React.FC<CriticalBannerProps> = ({
           <div className="critical-banner-content">
             <div className="critical-banner-header">
               <div className="critical-banner-title">
-                <AlertCircle size={20} />
+                <ErrorOutlined sx={{ fontSize: 20 }} />
                 <span>CRITICAL: {broadcast.title}</span>
               </div>
-              <button
+              <Button
+                variant="text"
+                size="small"
                 className="critical-banner-close"
                 onClick={() => onDismiss(broadcast.id)}
                 aria-label="Dismiss"
               >
-                <X size={20} />
-              </button>
+                <CloseOutlined sx={{ fontSize: 20 }} />
+              </Button>
             </div>
 
             <p className="critical-banner-message">

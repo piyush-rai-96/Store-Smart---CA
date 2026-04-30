@@ -1,65 +1,76 @@
-// Impact Analytics Color Theme - Matching IA Platform
+// Impact UI Color Theme — aligned with impact-ui@3.7.20 compiled palette
+// Source of truth: src/styles/impact-typography.css --ia-color-* tokens
+// Keep export shape stable so call-sites require no changes.
 export const IA_COLORS = {
-  // Primary Brand Colors - IA Platform Blue
+  // Primary Brand Colors — Impact UI #4259EE family
   primary: {
-    main: '#0066cc',      // IA Platform Primary Blue
-    dark: '#0052a3',      // Darker blue for hover
-    light: '#3385d6',     // Lighter blue for accents
+    main: '#4259EE',      // Impact UI primary blue
+    dark: '#3649C6',      // Hover state
+    light: '#ECEEFD',     // Soft tint surface
+    pressed: '#29399F',   // Pressed / deep accent
+    border: '#B3BDF8',    // Border / notification ring
+    info: '#5267F4',      // Info badge fill
   },
-  
+
   // Secondary Colors
   secondary: {
-    gray: '#6c757d',      // Professional gray
-    lightGray: '#f8f9fa', // Background gray
-    border: '#dee2e6',    // Border gray
+    gray: '#60697D',      // Impact UI text-secondary
+    lightGray: '#F8F9FB', // Impact UI bg-subtle
+    border: '#D9DDE7',    // Impact UI border
   },
-  
-  // Status Colors - Professional
+
+  // Status Colors — Impact UI semantic palette
   status: {
-    success: '#28a745',   // Professional green
-    warning: '#ffc107',   // Amber warning
-    error: '#dc3545',     // Professional red
-    info: '#17a2b8',      // Info teal
+    success: '#108431',   // Impact UI success
+    successSoft: '#C4E8D5',
+    successBg: '#ECFDF3',
+    warning: '#FFE174',   // Impact UI warning fill
+    warningText: '#8C6F06',
+    warningBg: '#FFF8E1',
+    error: '#EC4C5C',     // Impact UI error
+    errorStrong: '#D62F2D',
+    errorBg: '#FCEEEE',
+    info: '#5267F4',
   },
-  
-  // Neutral Colors
+
+  // Neutral Colors — Impact UI neutral ramp
   neutral: {
-    50: '#f8fafc',
-    100: '#f1f5f9',
-    200: '#e2e8f0',
-    300: '#cbd5e1',
-    400: '#94a3b8',
-    500: '#64748b',
-    600: '#475569',
-    700: '#334155',
-    800: '#1e293b',
-    900: '#0f172a',
+    50: '#F8F9FB',
+    100: '#F2F3F4',
+    200: '#D9DDE7',
+    300: '#C3C8D4',
+    400: '#B4BAC7',
+    500: '#60697D',
+    600: '#60697D',
+    700: '#1F2B4D',
+    800: '#1F2B4D',
+    900: '#1F2B4D',
   },
-  
+
   // Background & Surface
   background: {
-    primary: '#ffffff',
-    secondary: '#f8fafc',
-    tertiary: '#f1f5f9',
-    dark: '#1a2332',
+    primary: '#FFFFFF',
+    secondary: '#F8F9FB',
+    tertiary: '#F2F3F4',
+    dark: '#1F2B4D',
   },
-  
-  // Text Colors
+
+  // Text Colors — Impact UI text ramp
   text: {
-    primary: '#0f172a',
-    secondary: '#475569',
-    tertiary: '#64748b',
-    light: '#94a3b8',
-    inverse: '#ffffff',
+    primary: '#1F2B4D',
+    secondary: '#60697D',
+    tertiary: '#B4BAC7',
+    light: '#B4BAC7',
+    inverse: '#FFFFFF',
   },
 } as const;
 
-// Gradient definitions - IA Platform Style
+// Gradient definitions — Impact UI brand gradients
 export const IA_GRADIENTS = {
-  primary: 'linear-gradient(135deg, #0066cc 0%, #0052a3 100%)',
-  secondary: 'linear-gradient(135deg, #6c757d 0%, #495057 100%)',
-  accent: 'linear-gradient(135deg, #0066cc 0%, #17a2b8 100%)',
-  success: 'linear-gradient(135deg, #28a745 0%, #218838 100%)',
-  warning: 'linear-gradient(135deg, #ffc107 0%, #e0a800 100%)',
-  error: 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)',
+  primary: 'linear-gradient(135deg, #4259EE 0%, #3649C6 100%)',
+  secondary: 'linear-gradient(135deg, #60697D 0%, #1F2B4D 100%)',
+  accent: 'linear-gradient(135deg, #4259EE 0%, #5267F4 100%)',
+  success: 'linear-gradient(135deg, #108431 0%, #0B832F 100%)',
+  warning: 'linear-gradient(135deg, #FFE174 0%, #8C6F06 100%)',
+  error: 'linear-gradient(135deg, #EC4C5C 0%, #D62F2D 100%)',
 } as const;

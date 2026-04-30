@@ -33,8 +33,8 @@
   gap: 6px;
   padding: 4px 12px;
   border-radius: 12px;
-  font-size: 11px;
-  font-weight: 700;
+  font-size: var(--ia-text-2xs);
+  font-weight: var(--ia-font-weight-bold);
   color: white;
   letter-spacing: 0.5px;
 }
@@ -43,7 +43,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 13px;
+  font-size: var(--ia-text-13);
   color: #999;
 }
 
@@ -56,21 +56,21 @@
 
 .broadcast-unread-dot {
   color: #667eea;
-  font-size: 20px;
+  font-size: var(--ia-text-xl);
   line-height: 1;
   margin-top: -2px;
 }
 
 .broadcast-title h3 {
-  font-size: 18px;
-  font-weight: 600;
+  font-size: var(--ia-text-lg);
+  font-weight: var(--ia-font-weight-semibold);
   color: #1a1a1a;
   margin: 0;
   line-height: 1.4;
 }
 
 .broadcast-card-unread .broadcast-title h3 {
-  font-weight: 700;
+  font-weight: var(--ia-font-weight-bold);
 }
 
 .broadcast-meta {
@@ -78,7 +78,7 @@
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
-  font-size: 13px;
+  font-size: var(--ia-text-13);
   color: #666;
   margin-bottom: 12px;
 }
@@ -103,8 +103,8 @@
 .broadcast-tag {
   padding: 4px 10px;
   border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: var(--ia-text-xs);
+  font-weight: var(--ia-font-weight-medium);
 }
 
 .broadcast-tag-entity {
@@ -117,7 +117,7 @@
 }
 
 .broadcast-message {
-  font-size: 14px;
+  font-size: var(--ia-text-sm);
   line-height: 1.6;
   color: #444;
   margin: 0 0 16px 0;
@@ -134,9 +134,9 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 14px;
+  font-size: var(--ia-text-sm);
   color: #4caf50;
-  font-weight: 500;
+  font-weight: var(--ia-font-weight-medium);
 }
 
 /* Responsive adjustments */
@@ -147,11 +147,11 @@
   }
 
   .broadcast-title h3 {
-    font-size: 16px;
+    font-size: var(--ia-text-md);
   }
 
   .broadcast-message {
-    font-size: 13px;
+    font-size: var(--ia-text-13);
   }
 
   .broadcast-actions {

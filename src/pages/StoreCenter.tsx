@@ -1,44 +1,44 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import {
-  Store,
-  ChevronDown,
-  TrendingUp,
-  TrendingDown,
-  Minus,
-  AlertTriangle,
-  AlertCircle,
-  Sparkles,
-  X,
-  ChevronRight,
-  Target,
-  BarChart3,
-  Package,
-  Heart,
-  ClipboardCheck,
-  DollarSign,
-  ArrowUpRight,
-  ArrowDownRight,
-  Bell,
-  Search,
-  Download,
-  RefreshCw,
-  Clock,
-  CheckCircle2,
-  Megaphone,
-  Send,
-  ListChecks,
-  CircleCheck,
-  Timer,
-  CircleAlert,
-  FileText,
-  Zap,
-  Users,
-  Calendar,
-  Filter,
-  Award,
-  Grid3X3
-} from 'lucide-react';
+import StoreOutlined from '@mui/icons-material/StoreOutlined';
+import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
+import TrendingUpOutlined from '@mui/icons-material/TrendingUpOutlined';
+import TrendingDownOutlined from '@mui/icons-material/TrendingDownOutlined';
+import Remove from '@mui/icons-material/Remove';
+import WarningAmberOutlined from '@mui/icons-material/WarningAmberOutlined';
+import ErrorOutlined from '@mui/icons-material/ErrorOutlined';
+import AutoAwesomeOutlined from '@mui/icons-material/AutoAwesomeOutlined';
+import CloseOutlined from '@mui/icons-material/CloseOutlined';
+import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
+import TrackChangesOutlined from '@mui/icons-material/TrackChangesOutlined';
+import BarChartOutlined from '@mui/icons-material/BarChartOutlined';
+import InventoryOutlined from '@mui/icons-material/InventoryOutlined';
+import FavoriteOutlined from '@mui/icons-material/FavoriteOutlined';
+import AssignmentTurnedInOutlined from '@mui/icons-material/AssignmentTurnedInOutlined';
+import AttachMoneyOutlined from '@mui/icons-material/AttachMoneyOutlined';
+import NorthEast from '@mui/icons-material/NorthEast';
+import SouthEast from '@mui/icons-material/SouthEast';
+import NotificationsOutlined from '@mui/icons-material/NotificationsOutlined';
+import SearchOutlined from '@mui/icons-material/SearchOutlined';
+import FileDownloadOutlined from '@mui/icons-material/FileDownloadOutlined';
+import RefreshOutlined from '@mui/icons-material/RefreshOutlined';
+import AccessTimeOutlined from '@mui/icons-material/AccessTimeOutlined';
+import TaskAltOutlined from '@mui/icons-material/TaskAltOutlined';
+import CampaignOutlined from '@mui/icons-material/CampaignOutlined';
+import SendOutlined from '@mui/icons-material/SendOutlined';
+import PlaylistAddCheckOutlined from '@mui/icons-material/PlaylistAddCheckOutlined';
+import CheckCircleOutlined from '@mui/icons-material/CheckCircleOutlined';
+import TimerOutlined from '@mui/icons-material/TimerOutlined';
+import DescriptionOutlined from '@mui/icons-material/DescriptionOutlined';
+import BoltOutlined from '@mui/icons-material/BoltOutlined';
+import GroupOutlined from '@mui/icons-material/GroupOutlined';
+import CalendarTodayOutlined from '@mui/icons-material/CalendarTodayOutlined';
+import FilterListOutlined from '@mui/icons-material/FilterListOutlined';
+import EmojiEventsOutlined from '@mui/icons-material/EmojiEventsOutlined';
+import GridOnOutlined from '@mui/icons-material/GridOnOutlined';
+import ShowChartOutlined from '@mui/icons-material/ShowChartOutlined';
+import OpenInNewOutlined from '@mui/icons-material/OpenInNewOutlined';
+import { Button, Badge, Card, Tabs } from 'impact-ui';
 import { AIDailyBrief, AIDailyBriefData } from '../components/common/AIDailyBrief';
 import { useAuth } from '../context/AuthContext';
 import './StoreCenter.css';
@@ -941,14 +941,14 @@ const formatSMBroadcastTime = (timestamp: string) => {
 
 // ── Helpers ────────────────────────────────────────────
 const getComplianceColor = (val: number) => {
-  if (val >= 90) return '#dcfce7';
+  if (val >= 90) return 'var(--ia-color-success-bg)';
   if (val >= 75) return '#d9f2e0';
-  if (val >= 60) return '#fef3c7';
+  if (val >= 60) return 'var(--ia-color-warning-bg)';
   if (val >= 40) return '#fde2e2';
   return '#fcc';
 };
 const getComplianceTextColor = (val: number) => {
-  if (val >= 90) return '#15803d';
+  if (val >= 90) return 'var(--ia-color-success)';
   if (val >= 75) return '#166534';
   if (val >= 60) return '#92400e';
   if (val >= 40) return '#991b1b';
@@ -1001,7 +1001,7 @@ export const StoreCenter: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   // OCV state
-  const [activeBroadcast, setActiveBroadcast] = useState<BroadcastAction>(broadcastActions[0]);
+  const [activeTabId, setActiveTabId] = useState<string>(broadcastActions[0]?.broadcastId ?? '');
   const [ocvCompletedActions, setOcvCompletedActions] = useState<Set<string>>(new Set());
   const [ocvExpandedRow, setOcvExpandedRow] = useState<string | null>(null);
 
@@ -1173,10 +1173,13 @@ export const StoreCenter: React.FC = () => {
     return storeRow && storeRow.status !== 'completed';
   });
 
-  // Reset active broadcast when store changes
+  // Derive active broadcast from tab id (must be after storeBroadcasts is defined)
+  const activeBroadcast = storeBroadcasts.find(bc => bc.broadcastId === activeTabId) ?? storeBroadcasts[0];
+
+  // Reset active tab when store changes
   useEffect(() => {
     if (storeBroadcasts.length > 0) {
-      setActiveBroadcast(storeBroadcasts[0]);
+      setActiveTabId(storeBroadcasts[0].broadcastId);
     }
   }, [selectedStoreId]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -1228,7 +1231,7 @@ export const StoreCenter: React.FC = () => {
       <div className="district-intel-header sc-di-header">
         <div className="header-left">
           <div className="header-title">
-            <Store size={24} />
+            <StoreOutlined sx={{ fontSize: 24 }}/>
             <h1>Store Deep Dive</h1>
           </div>
           <div className="header-meta">
@@ -1239,16 +1242,16 @@ export const StoreCenter: React.FC = () => {
                 disabled={isSM}
                 title={isSM ? 'Your assigned store' : undefined}
               >
-                <Store size={14} />
+                <StoreOutlined sx={{ fontSize: 14 }}/>
                 <span>{store.name}</span>
                 <span className="di-district-dm">#{store.number} · {store.format}</span>
-                {!isSM && <ChevronDown size={14} className={showStoreSelector ? 'rotated' : ''} />}
+                {!isSM && <KeyboardArrowDown sx={{ fontSize: 14 }} className={showStoreSelector ? 'rotated' : ''}/>}
               </button>
 
               {!isSM && showStoreSelector && (
                 <div className="sc-store-dropdown">
                   <div className="sc-dropdown-search">
-                    <Search size={14} />
+                    <SearchOutlined sx={{ fontSize: 14 }}/>
                     <input
                       type="text"
                       placeholder="Search stores..."
@@ -1281,9 +1284,9 @@ export const StoreCenter: React.FC = () => {
             {/* Period Selector — uses same classes as District Intelligence Hub */}
             <div className="calendar-picker-wrapper">
             <button className="period-selector" onClick={() => setShowCalendar(!showCalendar)}>
-              <Calendar size={14} />
+              <CalendarTodayOutlined sx={{ fontSize: 14 }}/>
               <span>{getSelectedPeriodLabel()}</span>
-              <ChevronDown size={14} className={showCalendar ? 'rotated' : ''} />
+              <KeyboardArrowDown sx={{ fontSize: 14 }} className={showCalendar ? 'rotated' : ''}/>
             </button>
 
             {showCalendar && (
@@ -1320,14 +1323,14 @@ export const StoreCenter: React.FC = () => {
                   <>
                     <div className="calendar-nav">
                       <button className="nav-btn" onClick={() => navigateMonth(-1)}>
-                        <ChevronDown size={16} style={{ transform: 'rotate(90deg)' }} />
+                        <KeyboardArrowDown sx={{ fontSize: 16 }} style={{ transform: 'rotate(90deg)' }}/>
                       </button>
                       <div className="calendar-month-year">
                         <span className="calendar-month">{['January','February','March','April','May','June','July','August','September','October','November','December'][viewingMonth]}</span>
                         <span className="calendar-year">{viewingYear}</span>
                       </div>
                       <button className="nav-btn" onClick={() => navigateMonth(1)}>
-                        <ChevronDown size={16} style={{ transform: 'rotate(-90deg)' }} />
+                        <KeyboardArrowDown sx={{ fontSize: 16 }} style={{ transform: 'rotate(-90deg)' }}/>
                       </button>
                     </div>
 
@@ -1370,22 +1373,22 @@ export const StoreCenter: React.FC = () => {
             )}
             </div>
             <span className="last-refresh">
-              <Clock size={12} />
+              <AccessTimeOutlined sx={{ fontSize: 12 }}/>
               Updated {store.lastRefresh}
             </span>
           </div>
         </div>
         <div className="header-right">
           <div className="header-search">
-            <Search size={16} />
+            <SearchOutlined sx={{ fontSize: 16 }}/>
             <input type="text" placeholder="Search stores, metrics..." />
           </div>
           <button className="header-action-btn secondary">
-            <Download size={16} />
+            <FileDownloadOutlined sx={{ fontSize: 16 }}/>
             Export
           </button>
           <button className="header-icon-btn">
-            <RefreshCw size={18} />
+            <RefreshOutlined sx={{ fontSize: 18 }}/>
           </button>
         </div>
       </div>
@@ -1396,7 +1399,7 @@ export const StoreCenter: React.FC = () => {
       <div className="sc-scroll-area" ref={scrollRef}>
         {/* ── Hero Pulse: SPI Card + AI Daily Brief (matches DI) ── */}
         <div className="executive-pulse sc-pulse">
-          {/* SPI Card — reuses DI dpi-card-v2 visuals */}
+          {/* SPI Card — matches DI dpi-card-v2 exactly */}
           <div className="dpi-card-v2">
             <div className="dpi-hero-section">
               <div className="dpi-gauge-wrapper-v2">
@@ -1404,8 +1407,8 @@ export const StoreCenter: React.FC = () => {
                   <circle cx="80" cy="80" r="68" fill="none" stroke="#f1f5f9" strokeWidth="10" />
                   <defs>
                     <linearGradient id="spiGradientSC" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor={store.risk === 'high' ? '#ef4444' : store.risk === 'moderate' ? '#f59e0b' : '#10b981'} />
-                      <stop offset="50%" stopColor={store.risk === 'high' ? '#dc2626' : store.risk === 'moderate' ? '#d97706' : '#059669'} />
+                      <stop offset="0%" stopColor={store.risk === 'high' ? 'var(--ia-color-error)' : store.risk === 'moderate' ? 'var(--ia-color-warning)' : 'var(--ia-color-success)'} />
+                      <stop offset="50%" stopColor={store.risk === 'high' ? 'var(--ia-color-error-strong)' : store.risk === 'moderate' ? 'var(--ia-color-warning-text)' : '#059669'} />
                       <stop offset="100%" stopColor={store.risk === 'high' ? '#b91c1c' : store.risk === 'moderate' ? '#b45309' : '#047857'} />
                     </linearGradient>
                   </defs>
@@ -1436,17 +1439,17 @@ export const StoreCenter: React.FC = () => {
               </div>
 
               <div className="dpi-rank-stats">
-                <div className="dpi-rank-card">
+                <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '16px' }}>
                   <span className="dpi-rank-value">#{store.rank}</span>
                   <span className="dpi-rank-label">of {store.totalStores}</span>
-                </div>
-                <div className="dpi-change-card">
+                </Card>
+                <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '16px' }}>
                   <div className={`dpi-change-value ${store.dpiDelta < 0 ? 'negative' : ''}`}>
-                    {store.dpiDelta >= 0 ? <TrendingUp size={18} /> : <TrendingDown size={18} />}
+                    {store.dpiDelta >= 0 ? <TrendingUpOutlined sx={{ fontSize: 18 }}/> : <TrendingDownOutlined sx={{ fontSize: 18 }}/>}
                     <span>{store.dpiDelta >= 0 ? '+' : ''}{store.dpiDelta}%</span>
                   </div>
                   <span className="dpi-change-label">vs last period</span>
-                </div>
+                </Card>
               </div>
 
               <div className="dpi-breakdown-header">
@@ -1459,21 +1462,21 @@ export const StoreCenter: React.FC = () => {
                   const voc = Math.max(45, Math.min(98, store.dpi - 3));
                   return (
                     <>
-                      <div className="breakdown-card">
+                      <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '16px' }}>
                         <div className="breakdown-value">{sales}</div>
                         <div className="breakdown-label">Sales</div>
                         <div className="breakdown-bar"><div className="breakdown-fill" style={{ width: `${sales}%` }} /></div>
-                      </div>
-                      <div className="breakdown-card">
+                      </Card>
+                      <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '16px' }}>
                         <div className="breakdown-value">{exec}</div>
                         <div className="breakdown-label">Execution</div>
                         <div className="breakdown-bar"><div className="breakdown-fill" style={{ width: `${exec}%` }} /></div>
-                      </div>
-                      <div className="breakdown-card">
+                      </Card>
+                      <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '16px' }}>
                         <div className="breakdown-value">{voc}</div>
                         <div className="breakdown-label">VoC</div>
                         <div className="breakdown-bar"><div className="breakdown-fill" style={{ width: `${voc}%` }} /></div>
-                      </div>
+                      </Card>
                     </>
                   );
                 })()}
@@ -1549,13 +1552,13 @@ export const StoreCenter: React.FC = () => {
                     onClick={() => feed.setExpanded(!feed.expanded)}
                   >
                     <div className="hq-broadcasts-title">
-                      <Bell size={15} />
+                      <NotificationsOutlined sx={{ fontSize: 15 }}/>
                       <span>{feed.title}</span>
                       {unread > 0 && (
                         <span className="hq-broadcast-count">{unread}</span>
                       )}
                     </div>
-                    <ChevronDown size={14} className={`expand-icon ${feed.expanded ? 'expanded' : ''}`} />
+                    <KeyboardArrowDown sx={{ fontSize: 14 }} className={`expand-icon ${feed.expanded ? 'expanded' : ''}`}/>
                   </div>
                   {feed.expanded && (
                     <div className="hq-broadcasts-body">
@@ -1590,7 +1593,7 @@ export const StoreCenter: React.FC = () => {
                               <div className="hq-broadcast-title-row">
                                 {b.priority === 'CRITICAL' && (
                                   <span className="hq-broadcast-priority-badge critical">
-                                    <AlertTriangle size={10} />
+                                    <WarningAmberOutlined sx={{ fontSize: 10 }}/>
                                     CRITICAL
                                   </span>
                                 )}
@@ -1619,7 +1622,7 @@ export const StoreCenter: React.FC = () => {
           <div className="kpi-cards-header">
             <div className="kpi-header-title-row">
               <div className="kpi-title-group">
-                <h2><BarChart3 size={20} /> Store KPIs {isDateFilterActive && <Filter size={12} className="filter-active-icon" />}</h2>
+                <h2><BarChartOutlined sx={{ fontSize: 20 }}/> Store KPIs {isDateFilterActive && <FilterListOutlined sx={{ fontSize: 12 }} className="filter-active-icon"/>}</h2>
                 <span className="kpi-header-subtitle">Click any metric to explore 52-week trend</span>
               </div>
               <div className="kpi-header-stats">
@@ -1638,15 +1641,15 @@ export const StoreCenter: React.FC = () => {
               </div>
             </div>
           </div>
-          {isDateFilterActive && <div className="sc-section-filter-badge"><Filter size={11} className="filter-active-icon" /><span>{getSelectedPeriodLabel()}</span></div>}
+          {isDateFilterActive && <div className="sc-section-filter-badge"><FilterListOutlined sx={{ fontSize: 11 }} className="filter-active-icon"/><span>{getSelectedPeriodLabel()}</span></div>}
           <div className="kpi-cards-grid">
             {getStoreKPIs(store).map(kpi => {
               const categoryIcon =
-                kpi.category === 'commercial' ? <DollarSign size={12} /> :
-                kpi.category === 'customer' ? <Heart size={12} /> :
-                kpi.category === 'execution' ? <ClipboardCheck size={12} /> :
-                kpi.category === 'profitability' ? <Target size={12} /> :
-                <Package size={12} />;
+                kpi.category === 'commercial' ? <AttachMoneyOutlined sx={{ fontSize: 12 }}/> :
+                kpi.category === 'customer' ? <FavoriteOutlined sx={{ fontSize: 12 }}/> :
+                kpi.category === 'execution' ? <AssignmentTurnedInOutlined sx={{ fontSize: 12 }}/> :
+                kpi.category === 'profitability' ? <TrackChangesOutlined sx={{ fontSize: 12 }}/> :
+                <InventoryOutlined sx={{ fontSize: 12 }}/>;
               const categoryLabel =
                 kpi.category === 'commercial' ? 'Commercial' :
                 kpi.category === 'customer' ? 'Customer' :
@@ -1654,75 +1657,93 @@ export const StoreCenter: React.FC = () => {
                 kpi.category === 'profitability' ? 'Profitability' :
                 'Operations';
               return (
-                <div
+                <Card
                   key={kpi.id}
-                  className={`kpi-tile kpi-tile--${kpi.status} ${kpi.clickable ? 'kpi-tile--clickable' : ''} ${activeKPIPanel?.id === kpi.id ? 'kpi-tile--active' : ''}`}
+                  className={`kpi-tile--${kpi.status}`}
                   onClick={() => kpi.clickable && setActiveKPIPanel(activeKPIPanel?.id === kpi.id ? null : kpi)}
+                  sx={{
+                    maxWidth: '100%',
+                    minHeight: 'unset',
+                    padding: 0,
+                    width: '100%',
+                    borderRadius: '8px',
+                    border: activeKPIPanel?.id === kpi.id ? '1px solid var(--ia-color-text-primary)' : '1px solid var(--ia-color-border)',
+                    boxShadow: activeKPIPanel?.id === kpi.id ? '0 0 0 1px var(--ia-color-text-primary), 0 1px 3px rgba(15,23,42,0.04)' : '0 1px 3px rgba(15,23,42,0.04)',
+                    cursor: kpi.clickable ? 'pointer' : 'default',
+                    transition: 'all 0.15s ease',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    overflow: 'hidden',
+                    position: 'relative',
+                    '&:hover': kpi.clickable ? { borderColor: 'var(--ia-color-text-tertiary)', boxShadow: '0 1px 4px rgba(15,23,42,0.08)', transform: 'translateY(-1px)' } : {},
+                  }}
                 >
-                  <div className={`kpi-tile-category kpi-tile-category--${kpi.category}`}>
-                    {categoryIcon}
-                    <span>{categoryLabel}</span>
-                  </div>
-                  <div className="kpi-tile-value-row">
-                    <span className="kpi-tile-primary">{kpi.primaryValue}</span>
-                    {kpi.primaryUnit && <span className="kpi-tile-unit">{kpi.primaryUnit}</span>}
-                  </div>
-                  <span className="kpi-tile-label">{kpi.label}</span>
-                  {kpi.microInsight && (
-                    <div className="kpi-tile-insight">
-                      <span className="kpi-tile-insight-dot" />
-                      <span>{kpi.microInsight}</span>
+                  <div style={{ padding: '14px 16px 0', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                    <div className={`kpi-tile-category kpi-tile-category--${kpi.category}`}>
+                      {categoryIcon}
+                      <span>{categoryLabel}</span>
                     </div>
-                  )}
-                  <div className={`kpi-tile-delta delta-${kpi.deltaDirection}`}>
-                    {kpi.deltaDirection === 'up' && <ArrowUpRight size={12} />}
-                    {kpi.deltaDirection === 'down' && <ArrowDownRight size={12} />}
-                    <span>{kpi.delta}</span>
-                    {kpi.deltaContext && <span className="kpi-delta-ctx">{kpi.deltaContext}</span>}
-                  </div>
-                  {kpi.trendData && (() => {
-                    const data = kpi.trendData;
-                    const min = Math.min(...data);
-                    const max = Math.max(...data);
-                    const range = max - min || 1;
-                    const W = 120, H = 44, P = 3;
-                    const points = data.map((v, i) => ({
-                      x: (i / (data.length - 1)) * W,
-                      y: H - P - ((v - min) / range) * (H - P * 2),
-                    }));
-                    const path = points.map((p, i) => i === 0 ? `M ${p.x},${p.y}` : `L ${p.x},${p.y}`).join(' ');
-                    const areaPath = `${path} L ${W},${H} L 0,${H} Z`;
-                    const last = points[points.length - 1];
-                    const color = kpi.status === 'positive' ? '#047857' : kpi.status === 'negative' ? '#991b1b' : kpi.status === 'warning' ? '#b45309' : '#4338ca';
-                    return (
-                      <div className="kpi-tile-sparkline">
-                        <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
-                          <defs>
-                            <linearGradient id={`sc-spark-${kpi.id}`} x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor={color} stopOpacity="0.06" />
-                              <stop offset="100%" stopColor={color} stopOpacity="0" />
-                            </linearGradient>
-                          </defs>
-                          <path d={areaPath} fill={`url(#sc-spark-${kpi.id})`} />
-                          <path d={path} fill="none" stroke={color} strokeWidth="1.3" strokeLinecap="square" strokeLinejoin="miter" />
-                          <circle cx={last.x} cy={last.y} r="1.8" fill={color} stroke="#ffffff" strokeWidth="1" />
-                        </svg>
+                    <div className="kpi-tile-value-row">
+                      <span className="kpi-tile-primary">{kpi.primaryValue}</span>
+                      {kpi.primaryUnit && <span className="kpi-tile-unit">{kpi.primaryUnit}</span>}
+                    </div>
+                    <span className="kpi-tile-label">{kpi.label}</span>
+                    {kpi.microInsight && (
+                      <div className="kpi-tile-insight">
+                        <span className="kpi-tile-insight-dot" />
+                        <span>{kpi.microInsight}</span>
                       </div>
-                    );
-                  })()}
-                  {kpi.clickable && <ChevronRight size={14} className="kpi-tile-arrow" />}
-                </div>
+                    )}
+                    <div className={`kpi-tile-delta delta-${kpi.deltaDirection}`}>
+                      {kpi.deltaDirection === 'up' && <NorthEast sx={{ fontSize: 12 }}/>}
+                      {kpi.deltaDirection === 'down' && <SouthEast sx={{ fontSize: 12 }}/>}
+                      <span>{kpi.delta}</span>
+                      {kpi.deltaContext && <span className="kpi-delta-ctx">{kpi.deltaContext}</span>}
+                    </div>
+                    {kpi.trendData && (() => {
+                      const data = kpi.trendData;
+                      const min = Math.min(...data);
+                      const max = Math.max(...data);
+                      const range = max - min || 1;
+                      const W = 120, H = 44, P = 3;
+                      const points = data.map((v, i) => ({
+                        x: (i / (data.length - 1)) * W,
+                        y: H - P - ((v - min) / range) * (H - P * 2),
+                      }));
+                      const path = points.map((p, i) => i === 0 ? `M ${p.x},${p.y}` : `L ${p.x},${p.y}`).join(' ');
+                      const areaPath = `${path} L ${W},${H} L 0,${H} Z`;
+                      const last = points[points.length - 1];
+                      const color = kpi.status === 'positive' ? '#047857' : kpi.status === 'negative' ? '#991b1b' : kpi.status === 'warning' ? '#b45309' : 'var(--ia-color-primary-pressed)';
+                      return (
+                        <div className="kpi-tile-sparkline">
+                          <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+                            <defs>
+                              <linearGradient id={`sc-spark-${kpi.id}`} x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor={color} stopOpacity="0.06" />
+                                <stop offset="100%" stopColor={color} stopOpacity="0" />
+                              </linearGradient>
+                            </defs>
+                            <path d={areaPath} fill={`url(#sc-spark-${kpi.id})`} />
+                            <path d={path} fill="none" stroke={color} strokeWidth="1.3" strokeLinecap="square" strokeLinejoin="miter" />
+                            <circle cx={last.x} cy={last.y} r="1.8" fill={color} stroke="#ffffff" strokeWidth="1" />
+                          </svg>
+                        </div>
+                      );
+                    })()}
+                    {kpi.clickable && <KeyboardArrowRight sx={{ fontSize: 14 }} className="kpi-tile-arrow"/>}
+                  </div>
+                </Card>
               );
             })}
           </div>
         </div>
 
         {/* ── Operational Compliance View ──────────────────── */}
-        <div className="ocv-section">
+        <Card sx={{ padding: 0, overflow: 'hidden', marginBottom: '20px', borderRadius: '16px', maxWidth: '100%', minHeight: 0, width: '100%' }}>
           <div className="ocv-header">
             <div className="ocv-title-row">
               <div className="ocv-icon-wrap">
-                <ClipboardCheck size={20} />
+                <AssignmentTurnedInOutlined sx={{ fontSize: 20 }}/>
               </div>
               <div className="ocv-title-text">
                 <h3>Operational Compliance View</h3>
@@ -1746,250 +1767,298 @@ export const StoreCenter: React.FC = () => {
               </div>
             ) : (
               <div className="ocv-kpi-pills">
-                <div className="ocv-kpi-pill" style={{ background: '#dcfce7', borderColor: '#bbf7d0' }}>
-                  <span className="ocv-kpi-val" style={{ color: '#15803d' }}>All Clear</span>
+                <div className="ocv-kpi-pill" style={{ background: 'var(--ia-color-success-bg)', borderColor: 'var(--ia-color-success-soft)' }}>
+                  <span className="ocv-kpi-val" style={{ color: 'var(--ia-color-success)' }}>All Clear</span>
                 </div>
               </div>
             )}
           </div>
 
           {storeBroadcasts.length > 0 ? (
-            <>
-              <div className="ocv-broadcast-tabs">
-                {storeBroadcasts.map(bc => (
-                  <button
-                    key={bc.broadcastId}
-                    className={`ocv-bc-tab ${activeBroadcast.broadcastId === bc.broadcastId ? 'active' : ''}`}
-                    onClick={() => setActiveBroadcast(bc)}
-                  >
-                    <span className={`ocv-bc-tab-dot ocv-status--${bc.storeStatus}`} />
-                    <span className="ocv-bc-tab-title">{bc.broadcastTitle.length > 40 ? bc.broadcastTitle.slice(0, 40) + '…' : bc.broadcastTitle}</span>
-                    <span className={`ocv-bc-tab-priority ocv-pri--${bc.priority}`}>{bc.priority}</span>
-                  </button>
-                ))}
-              </div>
-
-              <div className="ocv-zones">
-            {/* LEFT: Broadcast Feed */}
-            <div className="ocv-zone ocv-zone-broadcast">
-              <div className="ocv-zone-label">
-                <Megaphone size={14} />
-                <span>Broadcast Feed</span>
-              </div>
-              <div className="ocv-broadcast-card">
-                <div className="ocv-bc-title">{activeBroadcast.broadcastTitle}</div>
-                <div className="ocv-bc-meta">
-                  <span className={`ocv-bc-priority ocv-pri--${activeBroadcast.priority}`}>
-                    {activeBroadcast.priority === 'critical' && <CircleAlert size={11} />}
-                    {activeBroadcast.priority === 'high' && <AlertTriangle size={11} />}
-                    {activeBroadcast.priority === 'medium' && <Bell size={11} />}
-                    {activeBroadcast.priority}
-                  </span>
-                  <span className="ocv-bc-time">
-                    <Clock size={11} />
-                    {activeBroadcast.sentAt}
-                  </span>
-                </div>
-                <div className="ocv-bc-sender">
-                  <Send size={11} />
-                  <span>{activeBroadcast.sender}</span>
-                  <span className="ocv-bc-source">· {activeBroadcast.source}</span>
-                </div>
-                <button className="ocv-cta-btn" onClick={() => setOcvExpandedRow(ocvExpandedRow === 'instructions' ? null : 'instructions')}>
-                  <FileText size={13} />
-                  View Instructions
-                  <ChevronRight size={13} />
-                </button>
-                {ocvExpandedRow === 'instructions' && (
-                  <div className="ocv-instructions-panel">
-                    <p className="ocv-instr-heading">Broadcast Instructions</p>
-                    <p><strong>Action Required:</strong> {activeBroadcast.actionTitle}</p>
-                    <p><strong>Priority:</strong> {activeBroadcast.priority.charAt(0).toUpperCase() + activeBroadcast.priority.slice(1)}</p>
-                    <p><strong>SLA / Due:</strong> {activeBroadcast.slaDue}</p>
-                    <p><strong>Issued By:</strong> {activeBroadcast.sender} — {activeBroadcast.source}</p>
-                    <p><strong>Scope:</strong> {activeBroadcast.actionCount} stores assigned</p>
-                    <p><strong>Sent:</strong> {activeBroadcast.sentAt}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* CENTER: Action Mapping */}
-            <div className="ocv-zone ocv-zone-actions">
-              <div className="ocv-zone-label">
-                <ListChecks size={14} />
-                <span>Action Mapping</span>
-              </div>
-              <div className="ocv-action-card">
-                <div className="ocv-action-flow">
-                  <div className="ocv-flow-step">
-                    <Megaphone size={13} />
-                    <span>Broadcast</span>
-                  </div>
-                  <div className="ocv-flow-arrow">→</div>
-                  <div className="ocv-flow-step">
-                    <ListChecks size={13} />
-                    <span>Action Created</span>
-                  </div>
-                  <div className="ocv-flow-arrow">→</div>
-                  <div className="ocv-flow-step">
-                    <CircleCheck size={13} />
-                    <span>Execution</span>
-                  </div>
-                </div>
-                <div className="ocv-action-detail">
-                  <div className="ocv-action-title">{activeBroadcast.actionTitle}</div>
-                  <div className="ocv-action-meta-row">
-                    <div className="ocv-action-meta-item">
-                      <Store size={12} />
-                      <span>{activeBroadcast.actionCount} store actions</span>
-                    </div>
-                    <div className="ocv-action-meta-item">
-                      <Timer size={12} />
-                      <span>SLA: {activeBroadcast.slaDue}</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="ocv-progress-bar-wrap">
-                  <div className="ocv-progress-label">
-                    <span>Progress</span>
-                    <span className="ocv-progress-pct">{activeBroadcast.completionPct}%</span>
-                  </div>
-                  <div className="ocv-progress-bar">
-                    <div
-                      className={`ocv-progress-fill ocv-status--${activeBroadcast.storeStatus}`}
-                      style={{ width: `${activeBroadcast.completionPct}%` }}
+            <Tabs
+              value={activeTabId}
+              onChange={(_: React.SyntheticEvent, val: string) => setActiveTabId(val)}
+              tabNames={storeBroadcasts.map(bc => ({
+                value: bc.broadcastId,
+                label: (
+                  <span className="ocv-tab-label">
+                    <Badge
+                      label={bc.priority.toUpperCase()}
+                      color={bc.priority === 'critical' ? 'error' : bc.priority === 'high' ? 'warning' : 'default'}
+                      size="small"
+                      variant="subtle"
                     />
-                  </div>
-                </div>
-                <button className="ocv-cta-btn" onClick={() => navigate(`/command-center/operations-queue?broadcast=${activeBroadcast.broadcastId}`)}>
-                  <Zap size={13} />
-                  View Operation Queue
-                  <ChevronRight size={13} />
-                </button>
-              </div>
-            </div>
-
-            {/* RIGHT: Execution Status */}
-            <div className="ocv-zone ocv-zone-execution">
-              <div className="ocv-zone-label">
-                <CircleCheck size={14} />
-                <span>Execution Status</span>
-              </div>
-              <div className="ocv-execution-card">
-                {(() => {
-                  const storeRow = activeBroadcast.storeBreakdown.find(s => s.storeNumber === store.number);
-                  const isMarkedDone = ocvCompletedActions.has(`${activeBroadcast.broadcastId}-${store.number}`);
-                  const effectiveStatus = isMarkedDone ? 'completed' : storeRow?.status || 'pending';
-                  return (
-                    <div className="ocv-store-status">
-                      <div className="ocv-store-status-header">
-                        <span className="ocv-store-label">Store #{store.number} — {store.name}</span>
-                        <span className={`ocv-status-badge ocv-status--${effectiveStatus}`}>
-                          {effectiveStatus === 'completed' && <CircleCheck size={12} />}
-                          {effectiveStatus === 'in-progress' && <Timer size={12} />}
-                          {effectiveStatus === 'pending' && <Clock size={12} />}
-                          {effectiveStatus === 'overdue' && <CircleAlert size={12} />}
-                          {effectiveStatus.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                        </span>
+                    <span className="ocv-tab-title">
+                      {bc.broadcastTitle.length > 30 ? bc.broadcastTitle.slice(0, 30) + '…' : bc.broadcastTitle}
+                    </span>
+                  </span>
+                ),
+              }))}
+              tabPanels={storeBroadcasts.map(bc => {
+                const storeRow = bc.storeBreakdown.find((s: { storeNumber: string }) => s.storeNumber === store.number);
+                const isMarkedDone = ocvCompletedActions.has(`${bc.broadcastId}-${store.number}`);
+                const effectiveStatus = isMarkedDone ? 'completed' : storeRow?.status || 'pending';
+                return (
+                  <div className="ocv-zones">
+                    {/* LEFT: Broadcast Feed */}
+                    <div className="ocv-zone ocv-zone-broadcast">
+                      <div className="ocv-zone-label">
+                        <CampaignOutlined sx={{ fontSize: 14 }}/>
+                        <span>Broadcast Feed</span>
                       </div>
-                      {(effectiveStatus === 'completed' || isMarkedDone) && (
-                        <div className="ocv-completed-info">
-                          <div className="ocv-completed-row">
-                            <Users size={12} />
-                            <span>Completed by: {isMarkedDone ? 'You (just now)' : storeRow?.completedBy || '—'}</span>
+                      <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div className="ocv-bc-title">{bc.broadcastTitle}</div>
+                        <div className="ocv-bc-meta">
+                          <Badge
+                            label={bc.priority.toUpperCase()}
+                            color={bc.priority === 'critical' ? 'error' : bc.priority === 'high' ? 'warning' : 'default'}
+                            size="small"
+                            variant="subtle"
+                          />
+                          <span className="ocv-bc-time">
+                            <AccessTimeOutlined sx={{ fontSize: 11 }}/>
+                            {bc.sentAt}
+                          </span>
+                        </div>
+                        <div className="ocv-bc-sender">
+                          <SendOutlined sx={{ fontSize: 11 }}/>
+                          <span>{bc.sender}</span>
+                          <span className="ocv-bc-source">· {bc.source}</span>
+                        </div>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          startIcon={<DescriptionOutlined sx={{ fontSize: 13 }}/>}
+                          endIcon={<KeyboardArrowRight sx={{ fontSize: 13 }}/>}
+                          onClick={() => setOcvExpandedRow(ocvExpandedRow === `instructions-${bc.broadcastId}` ? null : `instructions-${bc.broadcastId}`)}
+                        >
+                          View Instructions
+                        </Button>
+                        {ocvExpandedRow === `instructions-${bc.broadcastId}` && (
+                          <div className="ocv-instructions-panel">
+                            <p className="ocv-instr-heading">Broadcast Instructions</p>
+                            <p><strong>Action Required:</strong> {bc.actionTitle}</p>
+                            <p><strong>Priority:</strong> {bc.priority.charAt(0).toUpperCase() + bc.priority.slice(1)}</p>
+                            <p><strong>SLA / Due:</strong> {bc.slaDue}</p>
+                            <p><strong>Issued By:</strong> {bc.sender} — {bc.source}</p>
+                            <p><strong>Scope:</strong> {bc.actionCount} stores assigned</p>
+                            <p><strong>Sent:</strong> {bc.sentAt}</p>
                           </div>
-                          <div className="ocv-completed-row">
-                            <Clock size={12} />
-                            <span>{isMarkedDone ? 'Just now' : storeRow?.completionTs || '—'}</span>
+                        )}
+                      </Card>
+                    </div>
+
+                    {/* CENTER: Action Mapping */}
+                    <div className="ocv-zone ocv-zone-actions">
+                      <div className="ocv-zone-label">
+                        <PlaylistAddCheckOutlined sx={{ fontSize: 14 }}/>
+                        <span>Action Mapping</span>
+                      </div>
+                      <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div className="ocv-action-flow">
+                          <div className="ocv-flow-step">
+                            <CampaignOutlined sx={{ fontSize: 13 }}/>
+                            <span>Broadcast</span>
+                          </div>
+                          <div className="ocv-flow-arrow">→</div>
+                          <div className="ocv-flow-step">
+                            <PlaylistAddCheckOutlined sx={{ fontSize: 13 }}/>
+                            <span>Action Created</span>
+                          </div>
+                          <div className="ocv-flow-arrow">→</div>
+                          <div className="ocv-flow-step">
+                            <CheckCircleOutlined sx={{ fontSize: 13 }}/>
+                            <span>Execution</span>
                           </div>
                         </div>
-                      )}
-                      {effectiveStatus !== 'completed' && !isMarkedDone && (
-                        <button
-                          className="ocv-mark-done-btn"
-                          onClick={() => {
-                            setOcvCompletedActions(prev => {
-                              const next = new Set(prev);
-                              next.add(`${activeBroadcast.broadcastId}-${store.number}`);
-                              return next;
-                            });
-                          }}
+                        <div className="ocv-action-detail">
+                          <div className="ocv-action-title">{bc.actionTitle}</div>
+                          <div className="ocv-action-meta-row">
+                            <div className="ocv-action-meta-item">
+                              <StoreOutlined sx={{ fontSize: 12 }}/>
+                              <span>{bc.actionCount} store actions</span>
+                            </div>
+                            <div className="ocv-action-meta-item">
+                              <TimerOutlined sx={{ fontSize: 12 }}/>
+                              <span>SLA: {bc.slaDue}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="ocv-progress-bar-wrap">
+                          <div className="ocv-progress-label">
+                            <span>Progress</span>
+                            <span className="ocv-progress-pct">{bc.completionPct}%</span>
+                          </div>
+                          <div className="ocv-progress-bar">
+                            <div
+                              className={`ocv-progress-fill ocv-status--${bc.storeStatus}`}
+                              style={{ width: `${bc.completionPct}%` }}
+                            />
+                          </div>
+                        </div>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          startIcon={<BoltOutlined sx={{ fontSize: 13 }}/>}
+                          endIcon={<KeyboardArrowRight sx={{ fontSize: 13 }}/>}
+                          onClick={() => navigate(`/command-center/operations-queue?broadcast=${bc.broadcastId}`)}
                         >
-                          <CheckCircle2 size={14} />
-                          Mark Done
-                        </button>
-                      )}
+                          View Operation Queue
+                        </Button>
+                      </Card>
                     </div>
-                  );
-                })()}
-              </div>
-            </div>
-              </div>
-            </>
+
+                    {/* RIGHT: Execution Status */}
+                    <div className="ocv-zone ocv-zone-execution">
+                      <div className="ocv-zone-label">
+                        <CheckCircleOutlined sx={{ fontSize: 14 }}/>
+                        <span>Execution Status</span>
+                      </div>
+                      <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div className="ocv-store-status">
+                          <div className="ocv-store-status-header">
+                            <span className="ocv-store-label">Store #{store.number} — {store.name}</span>
+                            <Badge
+                              label={effectiveStatus.replace('-', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                              color={effectiveStatus === 'completed' ? 'success' : effectiveStatus === 'in-progress' ? 'warning' : 'error'}
+                              size="small"
+                              variant="subtle"
+                            />
+                          </div>
+                          {(effectiveStatus === 'completed' || isMarkedDone) && (
+                            <div className="ocv-completed-info">
+                              <div className="ocv-completed-row">
+                                <GroupOutlined sx={{ fontSize: 12 }}/>
+                                <span>Completed by: {isMarkedDone ? 'You (just now)' : storeRow?.completedBy || '—'}</span>
+                              </div>
+                              <div className="ocv-completed-row">
+                                <AccessTimeOutlined sx={{ fontSize: 12 }}/>
+                                <span>{isMarkedDone ? 'Just now' : storeRow?.completionTs || '—'}</span>
+                              </div>
+                            </div>
+                          )}
+                          {effectiveStatus !== 'completed' && !isMarkedDone && (
+                            <Button
+                              variant="contained"
+                              color="success"
+                              size="small"
+                              startIcon={<TaskAltOutlined sx={{ fontSize: 14 }}/>}
+                              onClick={() => {
+                                setOcvCompletedActions(prev => {
+                                  const next = new Set(prev);
+                                  next.add(`${bc.broadcastId}-${store.number}`);
+                                  return next;
+                                });
+                              }}
+                            >
+                              Mark Done
+                            </Button>
+                          )}
+                        </div>
+                      </Card>
+                    </div>
+                  </div>
+                );
+              })}
+            />
           ) : (
             <div className="ocv-all-clear">
               <div className="ocv-all-clear-icon">
-                <CheckCircle2 size={24} />
+                <TaskAltOutlined sx={{ fontSize: 24 }}/>
               </div>
               <p className="ocv-all-clear-text">No active compliance actions for <strong>{store.name}</strong>. All broadcasts have been completed.</p>
             </div>
           )}
-        </div>
+        </Card>
 
         {/* ── 8-Week Audit Lens ──────────────────────────── */}
         <div className="sc-audit-section">
-          <div className="sc-section-header">
-            <div className="sc-section-title-row">
-              <ClipboardCheck size={20} />
-              <h3>8-Week Audit Lens</h3>
-              {isDateFilterActive && <Filter size={12} className="filter-active-icon" />}
+          <div className="sc-section-header sc-audit-header-row-top">
+            <div>
+              <div className="sc-section-title-row">
+                <AssignmentTurnedInOutlined sx={{ fontSize: 20 }}/>
+                <h3>8-Week Audit Lens</h3>
+                {isDateFilterActive && <FilterListOutlined sx={{ fontSize: 12 }} className="filter-active-icon"/>}
+              </div>
+              <span className="sc-section-subtitle">Execution consistency across audit categories</span>
             </div>
-            <span className="sc-section-subtitle">Execution consistency across audit categories</span>
+            <div className="heatmap-legend">
+              <span className="heatmap-legend-label">Compliance:</span>
+              <div className="heatmap-legend-scale">
+                <div className="legend-swatch" style={{ background: '#fcc' }}></div>
+                <span className="legend-text">0%</span>
+                <div className="legend-swatch" style={{ background: '#fde2e2' }}></div>
+                <span className="legend-text">25%</span>
+                <div className="legend-swatch" style={{ background: 'var(--ia-color-warning-bg)' }}></div>
+                <span className="legend-text">50%</span>
+                <div className="legend-swatch" style={{ background: '#d9f2e0' }}></div>
+                <span className="legend-text">75%</span>
+                <div className="legend-swatch" style={{ background: '#c6f0d4' }}></div>
+                <span className="legend-text">100%</span>
+              </div>
+            </div>
           </div>
-          <div className="sc-audit-grid">
-            <div className="sc-audit-row sc-audit-header-row">
-              <span className="sc-audit-cat-label">Category</span>
-              {auditData.map(w => (
-                <button key={w.weekLabel} className="sc-audit-week-btn" onClick={() => setAuditWeekDetail(w)}>
-                  <span className="sc-audit-week-label">{w.weekLabel}</span>
-                </button>
-              ))}
-            </div>
-            {['overall', 'safety', 'planogram', 'signage', 'cleanliness', 'availability', 'staffing', 'stockRotation', 'pricing', 'backroom', 'customerArea'].map(cat => (
-              <div key={cat} className={`sc-audit-row ${cat === 'overall' ? 'sc-audit-row--overall' : ''}`}>
-                <span className="sc-audit-cat-label">{cat === 'stockRotation' ? 'Stock Rotation' : cat === 'customerArea' ? 'Customer Area' : cat.charAt(0).toUpperCase() + cat.slice(1)}</span>
-                {auditData.map((w, wi) => {
-                  const val = w[cat as keyof AuditWeek] as number;
+          <div className="heatmap-table-wrapper">
+            <table className="heatmap-table wow-table">
+              <thead>
+                <tr>
+                  <th className="heatmap-th-store">Category</th>
+                  {auditData.map(w => (
+                    <th key={w.weekLabel} className="heatmap-th-cat"
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => setAuditWeekDetail(w)}
+                    >{w.weekLabel}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {['overall', 'safety', 'planogram', 'signage', 'cleanliness', 'availability', 'staffing', 'stockRotation', 'pricing', 'backroom', 'customerArea'].map(cat => {
                   const catLabel = cat === 'stockRotation' ? 'Stock Rotation' : cat === 'customerArea' ? 'Customer Area' : cat.charAt(0).toUpperCase() + cat.slice(1);
-                  // Compare to prior week for trend
-                  const prevVal = wi > 0 ? (auditData[wi - 1][cat as keyof AuditWeek] as number) : val;
-                  const trend: 'improving' | 'declining' | 'stable' = val > prevVal + 1 ? 'improving' : val < prevVal - 1 ? 'declining' : 'stable';
-                  const findings = scAuditFindings[catLabel] || scAuditFindings.Overall;
-                  const skillMap = scCategorySkill[catLabel] || scCategorySkill.Overall;
-                  const isActive = auditCellDetail?.weekLabel === w.weekLabel && auditCellDetail?.category === catLabel;
                   return (
-                    <div
-                      key={w.weekLabel}
-                      className={`sc-audit-cell ${isActive ? 'sc-audit-cell--active' : ''}`}
-                      style={{ background: getComplianceColor(val), color: getComplianceTextColor(val) }}
-                      onClick={() => setAuditCellDetail({
-                        weekLabel: w.weekLabel,
-                        weekDate: w.date,
-                        category: catLabel,
-                        score: val,
-                        findings: findings.slice(0, val >= 90 ? 1 : val >= 75 ? 2 : val >= 50 ? 3 : 4),
-                        skill: skillMap.skill,
-                        skillLogic: skillMap.logic,
-                        trend,
+                    <tr key={cat} className={cat === 'overall' ? 'sc-audit-overall-tr' : ''}>
+                      <td>
+                        <div className="heatmap-store-cell">
+                          <span className="heatmap-store-number">
+                            {catLabel}
+                          </span>
+                        </div>
+                      </td>
+                      {auditData.map((w, wi) => {
+                        const val = w[cat as keyof AuditWeek] as number;
+                        const prevVal = wi > 0 ? (auditData[wi - 1][cat as keyof AuditWeek] as number) : val;
+                        const trend: 'improving' | 'declining' | 'stable' = val > prevVal + 1 ? 'improving' : val < prevVal - 1 ? 'declining' : 'stable';
+                        const findings = scAuditFindings[catLabel] || scAuditFindings.Overall;
+                        const skillMap = scCategorySkill[catLabel] || scCategorySkill.Overall;
+                        const isActive = auditCellDetail?.weekLabel === w.weekLabel && auditCellDetail?.category === catLabel;
+                        return (
+                          <td key={w.weekLabel} className="heatmap-cell">
+                            <div
+                              className={`heatmap-chip${isActive ? ' heatmap-chip--active' : ''}`}
+                              style={{ background: getComplianceColor(val), color: getComplianceTextColor(val) }}
+                              onClick={() => setAuditCellDetail({
+                                weekLabel: w.weekLabel,
+                                weekDate: w.date,
+                                category: catLabel,
+                                score: val,
+                                findings: findings.slice(0, val >= 90 ? 1 : val >= 75 ? 2 : val >= 50 ? 3 : 4),
+                                skill: skillMap.skill,
+                                skillLogic: skillMap.logic,
+                                trend,
+                              })}
+                            >
+                              <span className="heatmap-value">{val}%</span>
+                              <span className={`heatmap-chip-trend heatmap-chip-trend--${trend}`}>
+                                {trend === 'improving' ? '↑' : trend === 'declining' ? '↓' : '—'}
+                              </span>
+                            </div>
+                          </td>
+                        );
                       })}
-                    >
-                      {val}%
-                    </div>
+                    </tr>
                   );
                 })}
-              </div>
-            ))}
+              </tbody>
+            </table>
           </div>
         </div>
 
@@ -1997,27 +2066,21 @@ export const StoreCenter: React.FC = () => {
         <div className="sc-deepdive-section">
           <div className="sc-section-header">
             <div className="sc-section-title-row">
-              <Grid3X3 size={20} />
+              <GridOnOutlined sx={{ fontSize: 20 }}/>
               <h3>Operational Breakdown</h3>
             </div>
             <span className="sc-section-subtitle">Inventory, customer voice and benchmarking</span>
           </div>
-          <div className="sc-deepdive-tabs">
-            {[
-              { id: 'inventory' as const, label: 'Inventory & Inbound', icon: <Package size={14} /> },
-              { id: 'voc' as const, label: 'VoC Analysis', icon: <Heart size={14} /> },
-              { id: 'benchmarking' as const, label: 'Comp Benchmarking', icon: <BarChart3 size={14} /> },
-            ].map(tab => (
-              <button
-                key={tab.id}
-                className={`sc-tab ${activeTab === tab.id ? 'active' : ''}`}
-                onClick={() => setActiveTab(tab.id)}
-              >
-                {tab.icon}
-                <span>{tab.label}</span>
-              </button>
-            ))}
-          </div>
+          <Tabs
+            tabNames={[
+              { value: 'inventory', label: 'Inventory & Inbound', icon: <InventoryOutlined sx={{ fontSize: 14 }}/> },
+              { value: 'voc', label: 'VoC Analysis', icon: <FavoriteOutlined sx={{ fontSize: 14 }}/> },
+              { value: 'benchmarking', label: 'Comp Benchmarking', icon: <BarChartOutlined sx={{ fontSize: 14 }}/> },
+            ]}
+            tabPanels={[]}
+            value={activeTab}
+            onChange={(_, val) => setActiveTab(val as 'inventory' | 'voc' | 'benchmarking')}
+          />
 
           <div className="sc-deepdive-content">
             {/* VoC Tab — decision-oriented view */}
@@ -2049,7 +2112,7 @@ export const StoreCenter: React.FC = () => {
                 <div className="sc-voc-tab">
                   {/* Summary narrative */}
                   <div className="sc-voc-summary">
-                    <div className="sc-voc-summary-icon"><Sparkles size={14} /></div>
+                    <div className="sc-voc-summary-icon"><AutoAwesomeOutlined sx={{ fontSize: 14 }}/></div>
                     <div className="sc-voc-summary-body">
                       <span className="sc-voc-summary-label">Customer Voice Insight</span>
                       <p className="sc-voc-summary-line">{summaryLine}</p>
@@ -2070,74 +2133,126 @@ export const StoreCenter: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Cards */}
+                  {/* Cards — KPI tile style matching Store KPI cards */}
                   <div className="sc-voc-grid">
                     {visible.map(item => {
                       const sharePct = totalMentions > 0 ? Math.round((item.volume / totalMentions) * 100) : 0;
                       const isTopNegative = topNegative && item.theme === topNegative.theme;
                       const isTopRising = topRising && item.theme === topRising.theme && !isTopNegative;
-                      const accent = isTopNegative ? 'top-negative' : isTopRising ? 'top-risk' : '';
                       const trendDir = item.delta > 0 ? 'up' : item.delta < 0 ? 'down' : 'flat';
-                      // Trend semantics depend on sentiment: rising negative = bad, rising positive = good
                       const trendSeverity =
                         item.sentiment === 'negative'
                           ? (item.delta > 0 ? 'bad' : 'good')
                           : item.sentiment === 'positive'
                             ? (item.delta >= 0 ? 'good' : 'bad')
                             : 'neutral';
+                      const status = trendSeverity === 'bad' ? 'negative' : trendSeverity === 'good' ? 'positive' : 'neutral';
+                      const color = status === 'positive' ? '#047857' : status === 'negative' ? '#991b1b' : 'var(--ia-color-primary-pressed)';
+                      // Synthesize 12-pt sparkline from delta trend
+                      const seed = item.theme.length;
+                      const sparkData = Array.from({ length: 12 }, (_, i) => {
+                        const t = i / 11;
+                        const drift = trendDir === 'up' ? item.delta * t * 0.5 : trendDir === 'down' ? -Math.abs(item.delta) * t * 0.5 : 0;
+                        const jitter = ((seed * (i + 1)) % 7) - 3;
+                        return Math.max(5, Math.round(item.volume + drift + jitter));
+                      });
+                      sparkData[sparkData.length - 1] = item.volume;
+                      const sMin = Math.min(...sparkData), sMax = Math.max(...sparkData), sRange = sMax - sMin || 1;
+                      const SW = 120, SH = 44, SP = 3;
+                      const sPoints = sparkData.map((v, i) => ({
+                        x: (i / (sparkData.length - 1)) * SW,
+                        y: SH - SP - ((v - sMin) / sRange) * (SH - SP * 2),
+                      }));
+                      const sPath = sPoints.map((p, i) => i === 0 ? `M ${p.x},${p.y}` : `L ${p.x},${p.y}`).join(' ');
+                      const sArea = `${sPath} L ${SW},${SH} L 0,${SH} Z`;
+                      const sLast = sPoints[sPoints.length - 1];
+                      const gradId = `sc-voc-spark-${item.theme.replace(/\s+/g, '-')}`;
 
                       return (
-                        <div key={item.theme} className={`sc-voc-card sc-voc--${item.sentiment} ${accent ? `sc-voc-card--${accent}` : ''}`}>
-                          {accent && (
-                            <span className={`sc-voc-priority-tag sc-voc-priority-tag--${accent}`}>
-                              {isTopNegative ? <><AlertCircle size={11} /> Top Negative</> : <><AlertTriangle size={11} /> Top Risk</>}
+                        <Card
+                          key={item.theme}
+                          className={`kpi-tile--${status}`}
+                          sx={{
+                            maxWidth: '100%',
+                            minHeight: 'unset',
+                            padding: 0,
+                            width: '100%',
+                            borderRadius: '8px',
+                            border: isTopNegative
+                              ? '1px solid var(--ia-color-error-soft)'
+                              : isTopRising
+                                ? '1px solid var(--ia-color-warning-bg)'
+                                : '1px solid var(--ia-color-border)',
+                            boxShadow: '0 1px 3px rgba(15,23,42,0.04)',
+                            cursor: 'default',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            overflow: 'hidden',
+                            position: 'relative',
+                          }}
+                        >
+                          {(isTopNegative || isTopRising) && (
+                            <span className={`sc-voc-priority-tag sc-voc-priority-tag--${isTopNegative ? 'top-negative' : 'top-risk'}`}>
+                              {isTopNegative ? <><ErrorOutlined sx={{ fontSize: 11 }}/> Top Negative</> : <><WarningAmberOutlined sx={{ fontSize: 11 }}/> Top Risk</>}
                             </span>
                           )}
-                          <div className="sc-voc-card-header">
-                            <span className="sc-voc-theme">{item.theme}</span>
-                            <span className={`sc-voc-sentiment sc-sentiment--${item.sentiment}`}>{item.sentiment}</span>
-                          </div>
-                          <div className="sc-voc-stats">
-                            <span className="sc-voc-volume">{item.volume} mentions</span>
-                            <span className={`sc-voc-delta sc-voc-delta--${trendSeverity}`}>
-                              {trendDir === 'up' && <ArrowUpRight size={11} />}
-                              {trendDir === 'down' && <ArrowDownRight size={11} />}
-                              {trendDir === 'flat' && <Minus size={11} />}
-                              {item.delta >= 0 ? '+' : ''}{item.delta}%
-                            </span>
-                          </div>
-                          <p className="sc-voc-comment">{item.topComment}</p>
-                          <div className="sc-voc-impact">
-                            <span className="sc-voc-impact-label">Impact</span>
-                            <div className="sc-voc-impact-bar">
-                              <div className={`sc-voc-impact-fill sc-voc-impact-fill--${item.sentiment}`} style={{ width: `${Math.min(100, sharePct * 2)}%` }} />
+                          <div style={{ padding: '14px 16px 0', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                            {/* Category tag = sentiment */}
+                            <div className={`kpi-tile-category kpi-tile-category--${item.sentiment === 'positive' ? 'execution' : item.sentiment === 'negative' ? 'operations' : 'customer'}`}>
+                              {item.sentiment === 'positive' ? <NorthEast sx={{ fontSize: 12 }}/> : item.sentiment === 'negative' ? <SouthEast sx={{ fontSize: 12 }}/> : <Remove sx={{ fontSize: 12 }}/>}
+                              <span>{item.sentiment.charAt(0).toUpperCase() + item.sentiment.slice(1)}</span>
                             </div>
-                            <span className="sc-voc-impact-pct">{sharePct}% of feedback</span>
+                            {/* Primary value = volume */}
+                            <div className="kpi-tile-value-row">
+                              <span className="kpi-tile-primary">{item.volume}</span>
+                              <span className="kpi-tile-unit">mentions</span>
+                            </div>
+                            {/* Label = theme */}
+                            <span className="kpi-tile-label">{item.theme}</span>
+                            {/* Micro-insight = top comment */}
+                            <div className="kpi-tile-insight">
+                              <span className="kpi-tile-insight-dot" />
+                              <span style={{ fontStyle: 'italic' }}>"{item.topComment}"</span>
+                            </div>
+                            {/* Delta */}
+                            <div className={`kpi-tile-delta delta-${trendDir}`} style={{ color }}>
+                              {trendDir === 'up' && <NorthEast sx={{ fontSize: 12 }}/>}
+                              {trendDir === 'down' && <SouthEast sx={{ fontSize: 12 }}/>}
+                              {trendDir === 'flat' && <Remove sx={{ fontSize: 12 }}/>}
+                              <span>{item.delta >= 0 ? '+' : ''}{item.delta}%</span>
+                              <span className="kpi-delta-ctx">vs last period</span>
+                            </div>
                           </div>
-                          <div className="sc-voc-card-footer">
-                            <span className="sc-voc-source">{item.source}</span>
+                          {/* Sparkline */}
+                          <div className="kpi-tile-sparkline">
+                            <svg viewBox={`0 0 ${SW} ${SH}`} preserveAspectRatio="none">
+                              <defs>
+                                <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="0%" stopColor={color} stopOpacity="0.06" />
+                                  <stop offset="100%" stopColor={color} stopOpacity="0" />
+                                </linearGradient>
+                              </defs>
+                              <path d={sArea} fill={`url(#${gradId})`} />
+                              <path d={sPath} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                              <circle cx={sLast.x} cy={sLast.y} r="2.5" fill={color} stroke="#fff" strokeWidth="1.2" />
+                            </svg>
+                          </div>
+                          {/* Footer */}
+                          <div className="sc-voc-card-footer" style={{ padding: '8px 16px', borderTop: '1px solid var(--ia-color-bg-muted)' }}>
+                            <span className="sc-voc-source">{item.source} · {sharePct}% of feedback</span>
                             <div className="sc-voc-actions">
-                              <button
-                                className="sc-voc-action-btn sc-voc-action--ghost"
-                                onClick={() => setActiveBroadcast(broadcastActions[0])}
-                                title={`View details for ${item.theme}`}
-                              >
-                                View Details
-                                <ChevronRight size={11} />
-                              </button>
                               {item.sentiment === 'negative' && (
                                 <button
                                   className="sc-voc-action-btn sc-voc-action--primary"
                                   onClick={() => setActiveTab('inventory')}
-                                  title={`Take action on ${item.theme}`}
                                 >
-                                  <Zap size={11} />
+                                  <BoltOutlined sx={{ fontSize: 11 }}/>
                                   Take Action
                                 </button>
                               )}
                             </div>
                           </div>
-                        </div>
+                        </Card>
                       );
                     })}
                   </div>
@@ -2146,9 +2261,9 @@ export const StoreCenter: React.FC = () => {
                   {sorted.length > 3 && (
                     <button className="sc-voc-expand-btn" onClick={() => setVocExpanded(!vocExpanded)}>
                       {vocExpanded ? (
-                        <>Show top 3 only <ChevronDown size={14} style={{ transform: 'rotate(180deg)' }} /></>
+                        <>Show top 3 only <KeyboardArrowDown sx={{ fontSize: 14 }} style={{ transform: 'rotate(180deg)' }}/></>
                       ) : (
-                        <>Show {sorted.length - 3} more theme{sorted.length - 3 === 1 ? '' : 's'} <ChevronDown size={14} /></>
+                        <>Show {sorted.length - 3} more theme{sorted.length - 3 === 1 ? '' : 's'} <KeyboardArrowDown sx={{ fontSize: 14 }}/></>
                       )}
                     </button>
                   )}
@@ -2207,7 +2322,7 @@ export const StoreCenter: React.FC = () => {
 
                   {/* AI Insight banner */}
                   <div className="sc-inv-insight">
-                    <div className="sc-inv-insight-icon"><Sparkles size={14} /></div>
+                    <div className="sc-inv-insight-icon"><AutoAwesomeOutlined sx={{ fontSize: 14 }}/></div>
                     <div className="sc-inv-insight-body">
                       <p className="sc-inv-insight-line">{insightLine}</p>
                       <p className="sc-inv-insight-rec"><strong>Recommended:</strong> {recommendation}</p>
@@ -2217,7 +2332,7 @@ export const StoreCenter: React.FC = () => {
                   {/* Toolbar with toggle */}
                   <div className="sc-inv-toolbar">
                     <div className="sc-inv-toolbar-title">
-                      <Package size={14} />
+                      <InventoryOutlined sx={{ fontSize: 14 }}/>
                       <span>{inventoryView === 'at-risk' ? 'SKUs Needing Attention' : 'All SKUs'}</span>
                       <span className="sc-inv-count-badge">{filteredInventory.length}</span>
                     </div>
@@ -2226,20 +2341,20 @@ export const StoreCenter: React.FC = () => {
                         className={`sc-inv-toggle-btn ${inventoryView === 'at-risk' ? 'active' : ''}`}
                         onClick={() => setInventoryView('at-risk')}
                       >
-                        <AlertTriangle size={12} /> At Risk
+                        <WarningAmberOutlined sx={{ fontSize: 12 }}/> At Risk
                       </button>
                       <button
                         className={`sc-inv-toggle-btn ${inventoryView === 'all' ? 'active' : ''}`}
                         onClick={() => setInventoryView('all')}
                       >
-                        <ListChecks size={12} /> All SKUs
+                        <PlaylistAddCheckOutlined sx={{ fontSize: 12 }}/> All SKUs
                       </button>
                     </div>
                   </div>
 
                   {filteredInventory.length === 0 ? (
                     <div className="sc-inv-empty">
-                      <CheckCircle2 size={20} />
+                      <TaskAltOutlined sx={{ fontSize: 20 }}/>
                       <p>All SKUs are healthy — no action required.</p>
                     </div>
                   ) : (
@@ -2262,10 +2377,10 @@ export const StoreCenter: React.FC = () => {
                             <td>{item.name}</td>
                             <td>
                               <span className={`sc-inv-risk sc-inv-risk--${item.risk}`}>
-                                {item.risk === 'critical' && <AlertCircle size={11} />}
-                                {item.risk === 'at-risk' && <AlertTriangle size={11} />}
-                                {item.risk === 'watch' && <Clock size={11} />}
-                                {item.risk === 'healthy' && <CheckCircle2 size={11} />}
+                                {item.risk === 'critical' && <ErrorOutlined sx={{ fontSize: 11 }}/>}
+                                {item.risk === 'at-risk' && <WarningAmberOutlined sx={{ fontSize: 11 }}/>}
+                                {item.risk === 'watch' && <AccessTimeOutlined sx={{ fontSize: 11 }}/>}
+                                {item.risk === 'healthy' && <TaskAltOutlined sx={{ fontSize: 11 }}/>}
                                 {RISK_LABELS[item.risk]}
                               </span>
                             </td>
@@ -2301,62 +2416,78 @@ export const StoreCenter: React.FC = () => {
 
               return (
                 <div className="sc-bench-tab">
-                  {/* Overall Summary */}
-                  <div className="sc-bench-summary">
-                    <div className="sc-bench-summary-rank">
-                      <span className="sc-bench-summary-label">Overall Cluster Rank</span>
-                      <div className="sc-bench-rank-hero">
-                        <span className="sc-bench-rank-num">#{avgRank}</span>
-                        <span className="sc-bench-rank-of">of {CLUSTER_SIZE}</span>
-                      </div>
-                      <div className="sc-bench-summary-meta">
-                        <span className={`sc-bench-quartile sc-bench-quartile--q${overallQuartile}`}>
-                          {overallQuartile === 1 && <Award size={11} />}
-                          {quartileLabel(overallQuartile)}
-                        </span>
-                        <span className={`sc-bench-rank-delta sc-bench-rank-delta--${avgRankDelta > 0 ? 'up' : avgRankDelta < 0 ? 'down' : 'flat'}`}>
-                          {avgRankDelta > 0 && <ArrowUpRight size={11} />}
-                          {avgRankDelta < 0 && <ArrowDownRight size={11} />}
-                          {avgRankDelta === 0 && <Minus size={11} />}
-                          {avgRankDelta > 0 ? `↑ ${avgRankDelta}` : avgRankDelta < 0 ? `↓ ${Math.abs(avgRankDelta)}` : 'No change'} vs last period
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="sc-bench-summary-pillars">
-                      <div className="sc-bench-pillar sc-bench-pillar--strengths">
-                        <div className="sc-bench-pillar-header">
-                          <Award size={13} />
-                          <span>Top Strengths</span>
+                  {/* Overall Summary — Impact UI Card */}
+                  <Card sx={{ padding: 0, maxWidth: '100%', minHeight: 0, borderRadius: '14px', overflow: 'hidden' }}>
+                    <div className="sc-bench-summary">
+                      <div className="sc-bench-summary-rank">
+                        <span className="sc-bench-summary-label">Overall Cluster Rank</span>
+                        <div className="sc-bench-rank-hero">
+                          <span className="sc-bench-rank-num">#{avgRank}</span>
+                          <span className="sc-bench-rank-of">of {CLUSTER_SIZE}</span>
                         </div>
-                        <div className="sc-bench-pillar-list">
-                          {topStrengths.map(s => (
-                            <div key={s.metric} className="sc-bench-pillar-item">
-                              <span className="sc-bench-pillar-rank">#{s.rank}</span>
-                              <span className="sc-bench-pillar-metric">{s.metric}</span>
-                              <span className="sc-bench-pillar-q">{quartileLabel(s.quartile)}</span>
-                            </div>
-                          ))}
+                        <div className="sc-bench-summary-meta">
+                          <Badge
+                            label={`${overallQuartile === 1 ? '🏆 ' : ''}${quartileLabel(overallQuartile)}`}
+                            color={overallQuartile === 1 ? 'success' : overallQuartile === 2 ? 'primary' : overallQuartile === 3 ? 'warning' : 'error'}
+                            variant="subtle"
+                            size="small"
+                          />
+                          <Badge
+                            label={`${avgRankDelta > 0 ? `↑ ${avgRankDelta}` : avgRankDelta < 0 ? `↓ ${Math.abs(avgRankDelta)}` : 'No change'} vs last period`}
+                            color={avgRankDelta > 0 ? 'success' : avgRankDelta < 0 ? 'error' : 'default'}
+                            variant="subtle"
+                            size="small"
+                          />
                         </div>
                       </div>
 
-                      <div className="sc-bench-pillar sc-bench-pillar--gaps">
-                        <div className="sc-bench-pillar-header">
-                          <AlertTriangle size={13} />
-                          <span>Biggest Gaps</span>
-                        </div>
-                        <div className="sc-bench-pillar-list">
-                          {biggestGaps.map(g => (
-                            <div key={g.metric} className="sc-bench-pillar-item">
-                              <span className="sc-bench-pillar-rank">#{g.rank}</span>
-                              <span className="sc-bench-pillar-metric">{g.metric}</span>
-                              <span className="sc-bench-pillar-q">{quartileLabel(g.quartile)}</span>
-                            </div>
-                          ))}
-                        </div>
+                      <div className="sc-bench-summary-pillars">
+                        {/* Top Strengths pillar — Impact UI Card */}
+                        <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '12px 14px', borderLeft: '3px solid var(--ia-color-success)' }}>
+                          <div className="sc-bench-pillar-header" style={{ color: 'var(--ia-color-success)' }}>
+                            <EmojiEventsOutlined sx={{ fontSize: 13 }}/>
+                            <span>Top Strengths</span>
+                          </div>
+                          <div className="sc-bench-pillar-list">
+                            {topStrengths.map(s => (
+                              <div key={s.metric} className="sc-bench-pillar-item">
+                                <span className="sc-bench-pillar-rank">#{s.rank}</span>
+                                <span className="sc-bench-pillar-metric">{s.metric}</span>
+                                <Badge
+                                  label={quartileLabel(s.quartile)}
+                                  color={s.quartile === 1 ? 'success' : s.quartile === 2 ? 'primary' : 'warning'}
+                                  variant="subtle"
+                                  size="small"
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        </Card>
+
+                        {/* Biggest Gaps pillar — Impact UI Card */}
+                        <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '12px 14px', borderLeft: '3px solid var(--ia-color-warning)' }}>
+                          <div className="sc-bench-pillar-header" style={{ color: 'var(--ia-color-warning-text)' }}>
+                            <WarningAmberOutlined sx={{ fontSize: 13 }}/>
+                            <span>Biggest Gaps</span>
+                          </div>
+                          <div className="sc-bench-pillar-list">
+                            {biggestGaps.map(g => (
+                              <div key={g.metric} className="sc-bench-pillar-item">
+                                <span className="sc-bench-pillar-rank">#{g.rank}</span>
+                                <span className="sc-bench-pillar-metric">{g.metric}</span>
+                                <Badge
+                                  label={quartileLabel(g.quartile)}
+                                  color={g.quartile === 3 ? 'warning' : 'error'}
+                                  variant="subtle"
+                                  size="small"
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        </Card>
                       </div>
                     </div>
-                  </div>
+                  </Card>
 
                   {/* Distribution legend */}
                   <div className="sc-bench-legend">
@@ -2366,25 +2497,44 @@ export const StoreCenter: React.FC = () => {
                     <span className="sc-bench-legend-item"><span className="sc-legend-range" />Cluster Range</span>
                   </div>
 
-                  {/* Benchmark cards — rank-focused */}
+                  {/* Benchmark cards — Impact UI Card per metric */}
                   <div className="sc-bench-cards">
                     {benchmarks.map(b => {
-                      // Distribution bar positions (0..100%)
                       const range = Math.max(0.0001, b.clusterMax - b.clusterMin);
                       const storePct = Math.max(0, Math.min(100, ((b.storeVal - b.clusterMin) / range) * 100));
                       const clusterMedPct = Math.max(0, Math.min(100, ((b.clusterMedian - b.clusterMin) / range) * 100));
                       const chainPct = Math.max(0, Math.min(100, ((b.chainAvg - b.clusterMin) / range) * 100));
                       const ahead = b.vsCluster >= 0;
                       const rankMoveDir = b.rankDelta > 0 ? 'up' : b.rankDelta < 0 ? 'down' : 'flat';
+                      const quartileAccent =
+                        b.quartile === 1 ? 'var(--ia-color-success)' :
+                        b.quartile === 2 ? 'var(--ia-color-primary)' :
+                        b.quartile === 3 ? 'var(--ia-color-warning)' :
+                        'var(--ia-color-error-strong)';
 
                       return (
-                        <div key={b.metric} className={`sc-bench-card sc-bench-card--q${b.quartile}`}>
+                        <Card
+                          key={b.metric}
+                          size="extraSmall"
+                          sx={{
+                            maxWidth: '100%',
+                            minHeight: 0,
+                            padding: '14px 16px',
+                            borderTop: `3px solid ${quartileAccent}`,
+                            borderRadius: '10px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '0',
+                          }}
+                        >
                           <div className="sc-bench-card-header">
                             <span className="sc-bench-metric">{b.metric}</span>
-                            <span className={`sc-bench-quartile sc-bench-quartile--q${b.quartile}`}>
-                              {b.quartile === 1 && <Award size={10} />}
-                              {quartileLabel(b.quartile)}
-                            </span>
+                            <Badge
+                              label={`${b.quartile === 1 ? '🏆 ' : ''}${quartileLabel(b.quartile)}`}
+                              color={b.quartile === 1 ? 'success' : b.quartile === 2 ? 'primary' : b.quartile === 3 ? 'warning' : 'error'}
+                              variant="subtle"
+                              size="small"
+                            />
                           </div>
 
                           {/* Rank hero */}
@@ -2393,33 +2543,37 @@ export const StoreCenter: React.FC = () => {
                               <span className="sc-bench-rank-num-md">#{b.rank}</span>
                               <span className="sc-bench-rank-of">of {b.rankTotal}</span>
                             </div>
-                            <span className={`sc-bench-rank-delta sc-bench-rank-delta--${rankMoveDir}`}>
-                              {rankMoveDir === 'up' && <ArrowUpRight size={11} />}
-                              {rankMoveDir === 'down' && <ArrowDownRight size={11} />}
-                              {rankMoveDir === 'flat' && <Minus size={11} />}
-                              {b.rankDelta > 0 ? `↑ ${b.rankDelta}` : b.rankDelta < 0 ? `↓ ${Math.abs(b.rankDelta)}` : '—'}
-                            </span>
+                            <Badge
+                              label={b.rankDelta > 0 ? `↑ ${b.rankDelta}` : b.rankDelta < 0 ? `↓ ${Math.abs(b.rankDelta)}` : '—'}
+                              color={rankMoveDir === 'up' ? 'success' : rankMoveDir === 'down' ? 'error' : 'default'}
+                              variant="subtle"
+                              size="small"
+                            />
                           </div>
 
-                          {/* Gap deltas (no absolute KPI duplication) */}
+                          {/* Gap deltas */}
                           <div className="sc-bench-gaps">
                             <div className="sc-bench-gap-row">
                               <span className="sc-bench-gap-label">Gap vs Cluster</span>
-                              <span className={`sc-bench-gap-pill ${ahead ? 'sc-comp-positive' : 'sc-comp-negative'}`}>
-                                {ahead ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />}
-                                {fmtDelta(b.vsCluster, b.unit)}
-                              </span>
+                              <Badge
+                                label={`${ahead ? '↑' : '↓'} ${fmtDelta(b.vsCluster, b.unit)}`}
+                                color={ahead ? 'success' : 'error'}
+                                variant="subtle"
+                                size="small"
+                              />
                             </div>
                             <div className="sc-bench-gap-row">
                               <span className="sc-bench-gap-label">Gap vs Chain</span>
-                              <span className={`sc-bench-gap-pill ${b.vsChain >= 0 ? 'sc-comp-positive' : 'sc-comp-negative'}`}>
-                                {b.vsChain >= 0 ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />}
-                                {fmtDelta(b.vsChain, b.unit)}
-                              </span>
+                              <Badge
+                                label={`${b.vsChain >= 0 ? '↑' : '↓'} ${fmtDelta(b.vsChain, b.unit)}`}
+                                color={b.vsChain >= 0 ? 'success' : 'error'}
+                                variant="subtle"
+                                size="small"
+                              />
                             </div>
                           </div>
 
-                          {/* Distribution bar */}
+                          {/* Distribution bar — kept custom (no Impact UI equivalent) */}
                           <div className="sc-bench-dist">
                             <div className="sc-bench-dist-track">
                               <div className="sc-bench-dist-range" />
@@ -2432,7 +2586,7 @@ export const StoreCenter: React.FC = () => {
                               <span>{b.clusterMax}{b.unit}</span>
                             </div>
                           </div>
-                        </div>
+                        </Card>
                       );
                     })}
                   </div>
@@ -2456,7 +2610,7 @@ export const StoreCenter: React.FC = () => {
             <div className="detail-panel">
               <div className="detail-panel-header">
                 <button className="detail-panel-close" onClick={() => setSmBroadcastPanel(null)}>
-                  <X size={18} />
+                  <CloseOutlined sx={{ fontSize: 18 }}/>
                 </button>
               </div>
               <div className="detail-panel-body">
@@ -2472,14 +2626,14 @@ export const StoreCenter: React.FC = () => {
                 </div>
                 {scope && (
                   <div className="dp-scope-row">
-                    <Users size={13} />
+                    <GroupOutlined sx={{ fontSize: 13 }}/>
                     <span>{scope}</span>
                   </div>
                 )}
                 {keyDates.length > 0 && (
                   <div className="dp-section">
                     <h3 className="dp-section-title">
-                      <Calendar size={14} />
+                      <CalendarTodayOutlined sx={{ fontSize: 14 }}/>
                       Key Dates
                     </h3>
                     <div className="dp-key-dates">
@@ -2495,14 +2649,14 @@ export const StoreCenter: React.FC = () => {
                 {actionItems.length > 0 && (
                   <div className="dp-section">
                     <h3 className="dp-section-title">
-                      <CheckCircle2 size={14} />
+                      <TaskAltOutlined sx={{ fontSize: 14 }}/>
                       Required Actions ({actionItems.length})
                     </h3>
                     <div className="dp-action-checklist">
                       {actionItems.map((ai, i) => (
                         <div key={i} className={`dp-checklist-item ${ai.done ? 'done' : ''}`}>
                           <div className="dp-checklist-check">
-                            {ai.done ? <CheckCircle2 size={14} /> : <div className="dp-checklist-empty" />}
+                            {ai.done ? <TaskAltOutlined sx={{ fontSize: 14 }}/> : <div className="dp-checklist-empty" />}
                           </div>
                           <span>{ai.text}</span>
                         </div>
@@ -2513,14 +2667,14 @@ export const StoreCenter: React.FC = () => {
                 {attachments.length > 0 && (
                   <div className="dp-section">
                     <h3 className="dp-section-title">
-                      <FileText size={14} />
+                      <DescriptionOutlined sx={{ fontSize: 14 }}/>
                       Attachments ({attachments.length})
                     </h3>
                     <div className="dp-attachments">
                       {attachments.map((att, i) => (
                         <div key={i} className="dp-attachment-item">
                           <div className={`dp-attachment-icon ${att.type}`}>
-                            <FileText size={14} />
+                            <DescriptionOutlined sx={{ fontSize: 14 }}/>
                           </div>
                           <span className="dp-attachment-name">{att.name}</span>
                         </div>
@@ -2537,7 +2691,7 @@ export const StoreCenter: React.FC = () => {
                       <span className="dp-source-role">{senderRole}</span>
                     </div>
                     <span className="dp-source-time">
-                      <Clock size={11} />
+                      <AccessTimeOutlined sx={{ fontSize: 11 }}/>
                       {formatSMBroadcastTime(b.timestamp)}
                     </span>
                   </div>
@@ -2557,7 +2711,7 @@ export const StoreCenter: React.FC = () => {
                 {trendModal.icon}
                 <h3>{trendModal.label} — {calendarMode === 'week' ? '12-Week' : calendarMode === 'month' ? '7-Month' : '4-Quarter'} Trend</h3>
               </div>
-              <button className="sc-modal-close" onClick={() => setTrendModal(null)}><X size={18} /></button>
+              <button className="sc-modal-close" onClick={() => setTrendModal(null)}><CloseOutlined sx={{ fontSize: 18 }}/></button>
             </div>
             <div className="sc-modal-body">
               <div className="sc-trend-chart">
@@ -2566,7 +2720,7 @@ export const StoreCenter: React.FC = () => {
                   const padL = 50, padR = 30;
                   const spacing = 60;
                   const chartW = padL + (n - 1) * spacing + padR;
-                  const color = trendModal.status === 'positive' ? '#10b981' : trendModal.status === 'negative' ? '#ef4444' : '#6366f1';
+                  const color = trendModal.status === 'positive' ? 'var(--ia-color-success)' : trendModal.status === 'negative' ? 'var(--ia-color-error)' : 'var(--ia-color-primary)';
                   const min = Math.min(...trendModal.trendData) * 0.95;
                   const max = Math.max(...trendModal.trendData) * 1.05;
                   const range = max - min || 1;
@@ -2602,7 +2756,7 @@ export const StoreCenter: React.FC = () => {
                 })()}
               </div>
               <div className="sc-trend-insight">
-                <Sparkles size={14} />
+                <AutoAwesomeOutlined sx={{ fontSize: 14 }}/>
                 <span>{trendModal.insight}</span>
               </div>
             </div>
@@ -2616,10 +2770,10 @@ export const StoreCenter: React.FC = () => {
           <div className="sc-modal sc-modal--audit" onClick={e => e.stopPropagation()}>
             <div className="sc-modal-header">
               <div className="sc-modal-title-row">
-                <ClipboardCheck size={18} />
+                <AssignmentTurnedInOutlined sx={{ fontSize: 18 }}/>
                 <h3>Audit Detail — {auditWeekDetail.weekLabel} ({auditWeekDetail.date})</h3>
               </div>
-              <button className="sc-modal-close" onClick={() => setAuditWeekDetail(null)}><X size={18} /></button>
+              <button className="sc-modal-close" onClick={() => setAuditWeekDetail(null)}><CloseOutlined sx={{ fontSize: 18 }}/></button>
             </div>
             <div className="sc-modal-body">
               <div className="sc-audit-detail-grid">
@@ -2649,14 +2803,14 @@ export const StoreCenter: React.FC = () => {
       {/* ── KPI Right-Side Detail Panel (mirrors District Intelligence) ── */}
       {activeKPIPanel && (() => {
         const td = activeKPIPanel.trendData || [];
-        const accent = activeKPIPanel.status === 'positive' ? '#047857' : activeKPIPanel.status === 'negative' ? '#991b1b' : activeKPIPanel.status === 'warning' ? '#b45309' : '#4338ca';
+        const accent = activeKPIPanel.status === 'positive' ? '#047857' : activeKPIPanel.status === 'negative' ? '#991b1b' : activeKPIPanel.status === 'warning' ? '#b45309' : 'var(--ia-color-primary-pressed)';
         return (
           <>
             <div className="detail-panel-overlay" onClick={() => setActiveKPIPanel(null)} />
             <div className="detail-panel">
               <div className="detail-panel-header">
                 <button className="detail-panel-close" onClick={() => setActiveKPIPanel(null)}>
-                  <X size={18} />
+                  <CloseOutlined sx={{ fontSize: 18 }}/>
                 </button>
               </div>
               <div className="detail-panel-body">
@@ -2665,7 +2819,7 @@ export const StoreCenter: React.FC = () => {
                     {activeKPIPanel.category.toUpperCase()}
                   </span>
                   <span className="dp-source">
-                    <BarChart3 size={11} />
+                    <BarChartOutlined sx={{ fontSize: 11 }}/>
                     52-Week Trend
                   </span>
                 </div>
@@ -2679,15 +2833,15 @@ export const StoreCenter: React.FC = () => {
                 {/* Period vs YoY */}
                 <div className="dp-section">
                   <h3 className="dp-section-title">
-                    <BarChart3 size={14} />
+                    <BarChartOutlined sx={{ fontSize: 14 }}/>
                     Period Comparison
                   </h3>
                   <div className="kpi-period-metrics">
                     <div className="kpi-period-metric">
                       <span className="kpi-period-label">YoY</span>
                       <span className={`kpi-period-val delta-${activeKPIPanel.deltaDirection || 'flat'}`}>
-                        {activeKPIPanel.deltaDirection === 'up' && <ArrowUpRight size={14} />}
-                        {activeKPIPanel.deltaDirection === 'down' && <ArrowDownRight size={14} />}
+                        {activeKPIPanel.deltaDirection === 'up' && <NorthEast sx={{ fontSize: 14 }}/>}
+                        {activeKPIPanel.deltaDirection === 'down' && <SouthEast sx={{ fontSize: 14 }}/>}
                         {activeKPIPanel.delta}
                       </span>
                       <span className="kpi-period-sub">{activeKPIPanel.deltaContext || 'Year over Year'}</span>
@@ -2701,8 +2855,8 @@ export const StoreCenter: React.FC = () => {
                         <div className="kpi-period-metric">
                           <span className="kpi-period-label">WoW</span>
                           <span className={`kpi-period-val delta-${dir}`}>
-                            {dir === 'up' && <ArrowUpRight size={14} />}
-                            {dir === 'down' && <ArrowDownRight size={14} />}
+                            {dir === 'up' && <NorthEast sx={{ fontSize: 14 }}/>}
+                            {dir === 'down' && <SouthEast sx={{ fontSize: 14 }}/>}
                             {diff >= 0 ? '+' : ''}{diff.toFixed(1)}
                           </span>
                           <span className="kpi-period-sub">vs prior week</span>
@@ -2716,7 +2870,7 @@ export const StoreCenter: React.FC = () => {
                 {td.length > 0 && (
                   <div className="dp-section">
                     <h3 className="dp-section-title">
-                      <BarChart3 size={14} />
+                      <BarChartOutlined sx={{ fontSize: 14 }}/>
                       Trend
                     </h3>
                     <div className="kpi-panel-chart">
@@ -2756,11 +2910,11 @@ export const StoreCenter: React.FC = () => {
                 {activeKPIPanel.trendInsight && (
                   <div className="dp-section">
                     <h3 className="dp-section-title">
-                      <Sparkles size={14} />
+                      <AutoAwesomeOutlined sx={{ fontSize: 14 }}/>
                       AI Insight
                     </h3>
                     <div className="kpi-ai-insight">
-                      <Sparkles size={14} className="kpi-ai-insight-icon" />
+                      <AutoAwesomeOutlined sx={{ fontSize: 14 }} className="kpi-ai-insight-icon"/>
                       <p>{activeKPIPanel.trendInsight}</p>
                     </div>
                   </div>
@@ -2770,7 +2924,7 @@ export const StoreCenter: React.FC = () => {
                 {activeKPIPanel.panelDetails && activeKPIPanel.panelDetails.length > 0 && (
                   <div className="dp-section">
                     <h3 className="dp-section-title">
-                      <ClipboardCheck size={14} />
+                      <AssignmentTurnedInOutlined sx={{ fontSize: 14 }}/>
                       Key Details
                     </h3>
                     <div className="kpi-panel-details">
@@ -2785,7 +2939,7 @@ export const StoreCenter: React.FC = () => {
                 )}
 
                 <div className="dp-timestamp">
-                  <Clock size={11} />
+                  <AccessTimeOutlined sx={{ fontSize: 11 }}/>
                   <span>Updated just now · Showing weekly comparison</span>
                 </div>
               </div>
@@ -2797,9 +2951,10 @@ export const StoreCenter: React.FC = () => {
       {/* ── Audit Cell Right-Side Detail Panel (mirrors DI heatmap detail) ── */}
       {auditCellDetail && (() => {
         const d = auditCellDetail;
-        const accent = d.score >= 90 ? '#16a34a' : d.score >= 75 ? '#d97706' : '#dc2626';
-        // Synthesize 12-week score history biased by trend
+        const accent = d.score >= 90 ? 'var(--ia-color-success)' : d.score >= 75 ? 'var(--ia-color-warning-text)' : 'var(--ia-color-error-strong)';
+        const panelAuditors = ['Sarah Chen', 'John Martinez', 'Emily Davis', 'James Wilson', 'Maria Lopez'];
         const seed = (d.category.length * 7 + d.weekLabel.length * 3) || 1;
+        // 12-week score history
         const history: number[] = [];
         for (let i = 0; i < 12; i++) {
           const t = i / 11;
@@ -2824,13 +2979,24 @@ export const StoreCenter: React.FC = () => {
           : d.score >= 75
             ? `${d.category} at ${d.score}% — ${d.findings.length} findings. Address top 2 in the next audit cycle to lift score above 90%.`
             : `${d.category} is critical at ${d.score}%. Trigger immediate corrective actions on all ${d.findings.length} findings; assign owner and SLA today.`;
+        // Prior audits — synthesize 4 historical entries
+        const priorAuditDates = ['1 week ago', '2 weeks ago', '4 weeks ago', '8 weeks ago'];
+        const priors = priorAuditDates.map((date, i) => {
+          const drift = d.trend === 'improving' ? -(i + 1) * 2 : d.trend === 'declining' ? (i + 1) * 2 : 0;
+          const jitter2 = ((seed * (i + 3)) % 5) - 2;
+          return {
+            date,
+            score: Math.max(40, Math.min(100, d.score + drift + jitter2)),
+            auditor: panelAuditors[(seed + i) % panelAuditors.length],
+          };
+        });
         return (
           <>
             <div className="detail-panel-overlay" onClick={() => setAuditCellDetail(null)} />
             <div className="detail-panel">
               <div className="detail-panel-header">
                 <button className="detail-panel-close" onClick={() => setAuditCellDetail(null)}>
-                  <X size={18} />
+                  <CloseOutlined sx={{ fontSize: 18 }}/>
                 </button>
               </div>
               <div className="detail-panel-body">
@@ -2842,42 +3008,44 @@ export const StoreCenter: React.FC = () => {
                     {d.score}% COMPLIANCE
                   </span>
                   <span className="dp-source">
-                    <ClipboardCheck size={11} />
+                    <AssignmentTurnedInOutlined sx={{ fontSize: 11 }}/>
                     8-Week Audit Lens
                   </span>
                 </div>
 
                 <h2 className="dp-title">{d.category} Audit</h2>
                 <p className="dp-description">
-                  {store.name} #{store.number} · Week of {d.weekDate} ({d.weekLabel})
+                  #{store.number} — {store.name} · Week of {d.weekDate} ({d.weekLabel}) · Auditor: {priors[0].auditor}
                 </p>
 
                 <div className="dp-impact-summary">
-                  {d.trend === 'improving' && <TrendingUp size={14} />}
-                  {d.trend === 'declining' && <TrendingDown size={14} />}
-                  {d.trend === 'stable' && <Minus size={14} />}
+                  {d.trend === 'improving' && <TrendingUpOutlined sx={{ fontSize: 14 }}/>}
+                  {d.trend === 'declining' && <TrendingDownOutlined sx={{ fontSize: 14 }}/>}
+                  {d.trend === 'stable' && <Remove sx={{ fontSize: 14 }}/>}
                   <span>Trend: {d.trend.charAt(0).toUpperCase() + d.trend.slice(1)}</span>
                 </div>
 
                 {/* Performance Comparison */}
                 <div className="dp-section">
                   <h3 className="dp-section-title">
-                    <BarChart3 size={14} />
+                    <BarChartOutlined sx={{ fontSize: 14 }}/>
                     Performance Comparison
                   </h3>
                   <div className="kpi-period-metrics">
                     <div className="kpi-period-metric">
-                      <span className="kpi-period-label">This Week</span>
+                      <span className="kpi-period-label">This Store</span>
                       <span className="kpi-period-val">{d.score}%</span>
                       <span className="kpi-period-sub">current score</span>
                     </div>
                     <div className="kpi-period-metric">
-                      <span className="kpi-period-label">8W Avg</span>
+                      <span className="kpi-period-label">District Avg</span>
                       <span className="kpi-period-val">{Math.round(history.slice(-8).reduce((a, b) => a + b, 0) / 8)}%</span>
-                      <span className="kpi-period-sub">rolling 8-week</span>
+                      <span className={`kpi-period-sub delta-${d.score >= Math.round(history.slice(-8).reduce((a, b) => a + b, 0) / 8) ? 'up' : 'down'}`}>
+                        {d.score - Math.round(history.slice(-8).reduce((a, b) => a + b, 0) / 8) > 0 ? '+' : ''}{d.score - Math.round(history.slice(-8).reduce((a, b) => a + b, 0) / 8)} pts vs district
+                      </span>
                     </div>
                     <div className="kpi-period-metric">
-                      <span className="kpi-period-label">Best Week</span>
+                      <span className="kpi-period-label">Top Performer</span>
                       <span className="kpi-period-val">{max}%</span>
                       <span className="kpi-period-sub">{max - d.score} pts to close gap</span>
                     </div>
@@ -2894,18 +3062,18 @@ export const StoreCenter: React.FC = () => {
                 {/* Score History */}
                 <div className="dp-section">
                   <h3 className="dp-section-title">
-                    <BarChart3 size={14} />
+                    <ShowChartOutlined sx={{ fontSize: 14 }}/>
                     Score History (12 weeks)
                   </h3>
                   <div className="kpi-panel-chart">
                     <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ width: '100%', height: 100, display: 'block' }}>
                       <defs>
-                        <linearGradient id={`sc-hm-grad-${d.weekLabel}-${d.category}`} x1="0" y1="0" x2="0" y2="1">
+                        <linearGradient id={`sc-hm-grad-${d.weekLabel.replace(/\s+/g, '-')}-${d.category.replace(/\s+/g, '-')}`} x1="0" y1="0" x2="0" y2="1">
                           <stop offset="0%" stopColor={accent} stopOpacity="0.18" />
                           <stop offset="100%" stopColor={accent} stopOpacity="0" />
                         </linearGradient>
                       </defs>
-                      <path d={areaPath} fill={`url(#sc-hm-grad-${d.weekLabel}-${d.category})`} />
+                      <path d={areaPath} fill={`url(#sc-hm-grad-${d.weekLabel.replace(/\s+/g, '-')}-${d.category.replace(/\s+/g, '-')})`} />
                       <path d={linePath} fill="none" stroke={accent} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                       <circle cx={last.x} cy={last.y} r="3" fill={accent} stroke="#ffffff" strokeWidth="1.5" />
                     </svg>
@@ -2922,10 +3090,28 @@ export const StoreCenter: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Prior Audits */}
+                <div className="dp-section">
+                  <h3 className="dp-section-title">
+                    <AccessTimeOutlined sx={{ fontSize: 14 }}/>
+                    Prior Audits
+                  </h3>
+                  <div className="kpi-panel-details">
+                    {priors.map((p, i) => (
+                      <div key={i} className={`kpi-panel-detail-row status-${p.score >= 90 ? 'positive' : p.score >= 75 ? 'warning' : 'negative'}`}>
+                        <span className="kpi-panel-detail-label">{p.date} · {p.auditor}</span>
+                        <span className="kpi-panel-detail-value" style={{ color: p.score >= 90 ? '#047857' : p.score >= 75 ? '#b45309' : '#b91c1c' }}>
+                          {p.score}%
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Findings */}
                 <div className="dp-section">
                   <h3 className="dp-section-title">
-                    <AlertCircle size={14} />
+                    <ErrorOutlined sx={{ fontSize: 14 }}/>
                     Findings ({d.findings.length})
                   </h3>
                   <div className="dp-stores-list">
@@ -2943,11 +3129,11 @@ export const StoreCenter: React.FC = () => {
                 {/* AI Recommendation */}
                 <div className="dp-section">
                   <h3 className="dp-section-title">
-                    <Sparkles size={14} />
+                    <AutoAwesomeOutlined sx={{ fontSize: 14 }}/>
                     AI Recommendation
                   </h3>
                   <div className="kpi-ai-insight">
-                    <Sparkles size={14} className="kpi-ai-insight-icon" />
+                    <AutoAwesomeOutlined sx={{ fontSize: 14 }} className="kpi-ai-insight-icon"/>
                     <p>{recommendation}</p>
                   </div>
                 </div>
@@ -2956,7 +3142,7 @@ export const StoreCenter: React.FC = () => {
                 {d.findings.length > 0 && (
                   <div className="dp-section">
                     <h3 className="dp-section-title">
-                      <CheckCircle2 size={14} />
+                      <TaskAltOutlined sx={{ fontSize: 14 }}/>
                       Action Plan
                     </h3>
                     <div className="hm-action-plan">
@@ -2971,9 +3157,9 @@ export const StoreCenter: React.FC = () => {
                             <div className="hm-action-content">
                               <span className="hm-action-title">{finding}</span>
                               <div className="hm-action-meta">
-                                <span className="hm-action-owner"><Users size={11} /> {owner}</span>
+                                <span className="hm-action-owner"><GroupOutlined sx={{ fontSize: 11 }}/> {owner}</span>
                                 <span className={`hm-action-due ${due <= 2 ? 'urgent' : ''}`}>
-                                  <Clock size={11} /> Due in {due} day{due > 1 ? 's' : ''}
+                                  <AccessTimeOutlined sx={{ fontSize: 11 }}/> Due in {due} day{due > 1 ? 's' : ''}
                                 </span>
                               </div>
                             </div>
@@ -2987,14 +3173,17 @@ export const StoreCenter: React.FC = () => {
                 {/* AI Copilot Skill */}
                 <div className="dp-section">
                   <h3 className="dp-section-title">
-                    <BarChart3 size={14} />
+                    <ShowChartOutlined sx={{ fontSize: 14 }}/>
                     AI Copilot Skill
                   </h3>
                   <div className="kpi-panel-detail-row status-neutral">
                     <span className="kpi-panel-detail-label">
                       {d.skill === 'pog' ? 'POG' : d.skill === 'knowledge' ? 'Knowledge' : d.skill === 'actions' ? 'Action' : 'Analytics'}
                     </span>
-                    <span className="kpi-panel-detail-value" style={{ fontWeight: 500, fontSize: 11, color: '#475569' }}>
+                    <span
+                      className="kpi-panel-detail-value"
+                      style={{ fontWeight: 'var(--ia-font-weight-medium)', fontSize: 'var(--ia-text-2xs)', color: 'var(--ia-color-text-secondary)' }}
+                    >
                       {d.skillLogic}
                     </span>
                   </div>
@@ -3003,18 +3192,24 @@ export const StoreCenter: React.FC = () => {
                 {/* Action CTAs */}
                 <div className="dp-actions">
                   <button className="dp-action-btn outlined" onClick={() => {
-                    const cat = d.category;
                     setAuditCellDetail(null);
-                    navigate(`/command-center/ai-copilot?mode=${d.skill}&context=audit-${cat.toLowerCase().replace(/ /g, '-')}&store=${store.number}&storeName=${encodeURIComponent(store.name)}&score=${d.score}`);
+                    navigate(`/command-center/ai-copilot?mode=${d.skill}&context=audit-${d.category.toLowerCase().replace(/ /g, '-')}&store=${store.number}&storeName=${encodeURIComponent(store.name)}&score=${d.score}`);
                   }}>
-                    <Sparkles size={14} />
+                    <AutoAwesomeOutlined sx={{ fontSize: 14 }}/>
                     <span>Investigate in AI Copilot</span>
+                  </button>
+                  <button className="dp-action-btn outlined navigate" onClick={() => {
+                    setAuditCellDetail(null);
+                    navigate(`/store-operations/store-deep-dive?store=${store.number}&name=${encodeURIComponent(store.name)}`);
+                  }}>
+                    <span>View Store Deep Dive</span>
+                    <OpenInNewOutlined sx={{ fontSize: 14 }}/>
                   </button>
                 </div>
 
                 <div className="dp-timestamp">
-                  <Clock size={11} />
-                  <span>Audit week of {d.weekDate}</span>
+                  <AccessTimeOutlined sx={{ fontSize: 11 }}/>
+                  <span>Last audit: {d.weekDate}</span>
                 </div>
               </div>
             </div>

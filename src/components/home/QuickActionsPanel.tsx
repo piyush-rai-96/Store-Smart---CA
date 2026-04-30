@@ -1,33 +1,32 @@
 import React from 'react';
-import { 
-  Home, 
-  TrendingDown, 
-  Users, 
-  ClipboardCheck, 
-  Bot,
-  ArrowRight,
-  LucideIcon
-} from 'lucide-react';
+import HomeOutlined from '@mui/icons-material/HomeOutlined';
+import TrendingDownOutlined from '@mui/icons-material/TrendingDownOutlined';
+import GroupOutlined from '@mui/icons-material/GroupOutlined';
+import AssignmentTurnedInOutlined from '@mui/icons-material/AssignmentTurnedInOutlined';
+import SmartToyOutlined from '@mui/icons-material/SmartToyOutlined';
+import ArrowForwardOutlined from '@mui/icons-material/ArrowForwardOutlined';
 import { Badge } from 'impact-ui';
 import { QuickAccessItem } from '../../types/home';
 import './QuickActionsPanel.css';
+
+type MuiIconComponent = React.ComponentType<{ className?: string; sx?: Record<string, unknown> }>;
 
 interface QuickActionsPanelProps {
   items: QuickAccessItem[];
 }
 
-const iconMap: Record<string, LucideIcon> = {
-  Home,
-  TrendingUp: TrendingDown,
-  Users,
-  ClipboardCheck,
-  Bot,
+const iconMap: Record<string, MuiIconComponent> = {
+  Home: HomeOutlined,
+  TrendingUp: TrendingDownOutlined,
+  Users: GroupOutlined,
+  ClipboardCheck: AssignmentTurnedInOutlined,
+  Bot: SmartToyOutlined,
 };
 
 export const QuickActionsPanel: React.FC<QuickActionsPanelProps> = ({ items }) => {
   const getIcon = (iconName: string) => {
-    const IconComponent = iconMap[iconName] || Home;
-    return <IconComponent size={20} />;
+    const IconComponent = iconMap[iconName] || HomeOutlined;
+    return <IconComponent sx={{ fontSize: 20 }} />;
   };
 
   return (
@@ -53,7 +52,7 @@ export const QuickActionsPanel: React.FC<QuickActionsPanelProps> = ({ items }) =
               />
             )}
             
-            <ArrowRight size={16} className="quick-action-arrow" />
+            <ArrowForwardOutlined sx={{ fontSize: 16 }} className="quick-action-arrow" />
           </button>
         ))}
       </div>

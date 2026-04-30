@@ -20,32 +20,32 @@
 }
 
 .welcome-title {
-  font-size: 32px;
-  font-weight: 600;
+  font-size: var(--ia-text-5xl);
+  font-weight: var(--ia-font-weight-semibold);
   color: #1a1a1a;
   margin: 0 0 16px 0;
 }
 
 .welcome-subtitle {
-  font-size: 16px;
+  font-size: var(--ia-text-md);
   color: #666;
   margin: 0 0 40px 0;
 }
 
 .welcome-subtitle strong {
   color: #667eea;
-  font-weight: 600;
+  font-weight: var(--ia-font-weight-semibold);
 }
 
 .content-placeholder {
   padding: 40px 20px;
-  background: #f9fafb;
+  background: var(--ia-color-bg-subtle);
   border-radius: 8px;
   border: 2px dashed #ddd;
 }
 
 .content-placeholder p {
-  font-size: 14px;
+  font-size: var(--ia-text-sm);
   color: #999;
   margin: 8px 0;
 }
@@ -61,10 +61,10 @@
   }
 
   .welcome-title {
-    font-size: 24px;
+    font-size: var(--ia-text-3xl);
   }
 
   .welcome-subtitle {
-    font-size: 14px;
+    font-size: var(--ia-text-sm);
   }
 }

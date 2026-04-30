@@ -1,5 +1,6 @@
 import React from 'react';
-import { AlertTriangle, X } from 'lucide-react';
+import WarningAmberOutlined from '@mui/icons-material/WarningAmberOutlined';
+import CloseOutlined from '@mui/icons-material/CloseOutlined';
 import { CriticalAlert } from '../../../types/home';
 import './CriticalAlertBanner.css';
 
@@ -15,7 +16,7 @@ export const CriticalAlertBanner: React.FC<CriticalAlertBannerProps> = ({
   return (
     <div className={`critical-alert-banner critical-alert-${alert.severity}`}>
       <div className="critical-alert-icon">
-        <AlertTriangle size={20} />
+        <WarningAmberOutlined sx={{ fontSize: 20 }} />
       </div>
       <div className="critical-alert-content">
         <div className="critical-alert-title">{alert.title}</div>
@@ -38,7 +39,7 @@ export const CriticalAlertBanner: React.FC<CriticalAlertBannerProps> = ({
           onClick={onDismiss}
           aria-label="Dismiss alert"
         >
-          <X size={18} />
+          <CloseOutlined sx={{ fontSize: 18 }} />
         </button>
       )}
     </div>

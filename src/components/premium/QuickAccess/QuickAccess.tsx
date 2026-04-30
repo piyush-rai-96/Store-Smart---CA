@@ -1,5 +1,12 @@
 import React from 'react';
-import { Home, TrendingUp, Users, Package, Calendar, GraduationCap, ArrowRight } from 'lucide-react';
+import HomeOutlined from '@mui/icons-material/HomeOutlined';
+import TrendingUpOutlined from '@mui/icons-material/TrendingUpOutlined';
+import GroupOutlined from '@mui/icons-material/GroupOutlined';
+import InventoryOutlined from '@mui/icons-material/InventoryOutlined';
+import CalendarTodayOutlined from '@mui/icons-material/CalendarTodayOutlined';
+import SchoolOutlined from '@mui/icons-material/SchoolOutlined';
+import ArrowForwardOutlined from '@mui/icons-material/ArrowForwardOutlined';
+import { Badge } from 'impact-ui';
 import { QuickAccessItem } from '../../../types/home';
 import './QuickAccess.css';
 
@@ -9,11 +16,16 @@ interface QuickAccessProps {
 
 export const QuickAccess: React.FC<QuickAccessProps> = ({ items }) => {
   const getIcon = (iconName: string) => {
-    const icons: Record<string, any> = {
-      Home, TrendingUp, Users, Package, Calendar, GraduationCap
+    const icons: Record<string, React.ComponentType<{ sx?: Record<string, unknown> }>> = {
+      Home: HomeOutlined,
+      TrendingUp: TrendingUpOutlined,
+      Users: GroupOutlined,
+      Package: InventoryOutlined,
+      Calendar: CalendarTodayOutlined,
+      GraduationCap: SchoolOutlined,
     };
     const IconComponent = icons[iconName];
-    return IconComponent ? <IconComponent size={20} /> : null;
+    return IconComponent ? <IconComponent sx={{ fontSize: 20 }} /> : null;
   };
 
   return (
@@ -31,11 +43,16 @@ export const QuickAccess: React.FC<QuickAccessProps> = ({ items }) => {
             </div>
             <div className="quick-access-content">
               <div className="quick-access-label">{item.label}</div>
-              {item.badge && (
-                <div className="quick-access-badge">{item.badge}</div>
+              {item.badge !== undefined && item.badge !== null && item.badge !== '' && (
+                <Badge
+                  className="quick-access-badge"
+                  label={String(item.badge)}
+                  color={typeof item.badge === 'number' && item.badge > 0 ? 'error' : 'info'}
+                  size="small"
+                />
               )}
             </div>
-            <ArrowRight size={16} className="quick-access-arrow" />
+            <ArrowForwardOutlined sx={{ fontSize: 16 }} className="quick-access-arrow" />
           </button>
         ))}
       </div>

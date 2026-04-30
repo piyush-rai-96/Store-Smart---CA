@@ -36,7 +36,8 @@ export const QuickAccessCard: React.FC<QuickAccessCardProps> = ({ card }) => {
   };
 
   return (
-    <Card size="small" className="quick-access-card">
+    <Card size="small" sx={{ maxWidth: '100%', minHeight: 0, padding: 0 }}>
+      <div className="quick-access-card">
       <div className="quick-access-card-content" onClick={handleClick}>
         <div className="quick-access-icon">{card.icon}</div>
         
@@ -59,6 +60,7 @@ export const QuickAccessCard: React.FC<QuickAccessCardProps> = ({ card }) => {
         {card.isComingSoon && (
           <div className="quick-access-coming-soon">Coming Soon</div>
         )}
+      </div>
       </div>
     </Card>
   );

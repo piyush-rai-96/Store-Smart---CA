@@ -12,7 +12,7 @@
   display: flex;
   align-items: flex-start;
   min-height: 100vh;
-  background: #f8fafc;
+  background: var(--ia-color-bg-subtle);
 }
 
 /* Right-side column: header + body stacked vertically */

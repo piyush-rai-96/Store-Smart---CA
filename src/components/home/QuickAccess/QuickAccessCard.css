@@ -30,15 +30,15 @@
 }
 
 .quick-access-title {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: var(--ia-text-md);
+  font-weight: var(--ia-font-weight-semibold);
   color: #1a1a1a;
   margin: 0 0 8px 0;
   line-height: 1.3;
 }
 
 .quick-access-subtitle {
-  font-size: 14px;
+  font-size: var(--ia-text-sm);
   color: #666;
   margin: 0 0 12px 0;
 }
@@ -46,8 +46,8 @@
 .quick-access-badge {
   padding: 4px 12px;
   border-radius: 12px;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--ia-text-xs);
+  font-weight: var(--ia-font-weight-semibold);
   margin-top: auto;
 }
 
@@ -59,8 +59,8 @@
   color: white;
   padding: 2px 8px;
   border-radius: 4px;
-  font-size: 10px;
-  font-weight: 600;
+  font-size: var(--ia-text-3xs);
+  font-weight: var(--ia-font-weight-semibold);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -73,10 +73,10 @@
   }
 
   .quick-access-title {
-    font-size: 15px;
+    font-size: var(--ia-text-15);
   }
 
   .quick-access-subtitle {
-    font-size: 13px;
+    font-size: var(--ia-text-13);
   }
 }

@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
-import {
-  Sparkles,
-  ChevronDown,
-  ChevronRight,
-  AlertTriangle,
-  TrendingUp,
-  CheckCircle2,
-  Star,
-  X,
-} from 'lucide-react';
+import AutoAwesomeOutlined from '@mui/icons-material/AutoAwesomeOutlined';
+import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
+import WarningAmberOutlined from '@mui/icons-material/WarningAmberOutlined';
+import TrendingUpOutlined from '@mui/icons-material/TrendingUpOutlined';
+import TaskAltOutlined from '@mui/icons-material/TaskAltOutlined';
+import StarBorderOutlined from '@mui/icons-material/StarBorderOutlined';
+import CloseOutlined from '@mui/icons-material/CloseOutlined';
 
 export type BriefSectionIcon = 'triage' | 'performance' | 'ops' | 'customer' | 'recommendations';
 
@@ -35,15 +33,15 @@ interface AIDailyBriefProps {
 const renderIcon = (icon: BriefSectionIcon) => {
   switch (icon) {
     case 'triage':
-      return <AlertTriangle size={14} />;
+      return <WarningAmberOutlined sx={{ fontSize: 14 }} />;
     case 'performance':
-      return <TrendingUp size={14} />;
+      return <TrendingUpOutlined sx={{ fontSize: 14 }} />;
     case 'ops':
-      return <CheckCircle2 size={14} />;
+      return <TaskAltOutlined sx={{ fontSize: 14 }} />;
     case 'customer':
-      return <Star size={14} />;
+      return <StarBorderOutlined sx={{ fontSize: 14 }} />;
     case 'recommendations':
-      return <Sparkles size={14} />;
+      return <AutoAwesomeOutlined sx={{ fontSize: 14 }} />;
     default:
       return null;
   }
@@ -60,7 +58,7 @@ const BriefSummary: React.FC<{ brief: AIDailyBriefData; userName?: string }> = (
       Good {greetingPrefix()}, {userName || 'Manager'}. {brief.greeting}
     </p>
     {brief.sections.map((section, idx) => (
-      <div key={idx} className="di-brief-section">
+      <div key={idx} className={`di-brief-section${section.icon === 'recommendations' ? ' di-brief-section--suggestions' : ''}`}>
         <h3 className="di-brief-section-title">
           {renderIcon(section.icon)}
           {section.title}
@@ -92,11 +90,11 @@ export const AIDailyBrief: React.FC<AIDailyBriefProps> = ({
         <div className="di-brief-header-bar" onClick={() => setIsCollapsed(!isCollapsed)}>
           <div className="di-brief-header-left">
             <div className={`di-brief-toggle ${isCollapsed ? 'collapsed' : ''}`}>
-              <ChevronDown size={14} />
+              <KeyboardArrowDown sx={{ fontSize: 14 }} />
             </div>
             <div className="di-brief-header">
               <div className="di-brief-badge">
-                <Sparkles size={16} />
+                <AutoAwesomeOutlined sx={{ fontSize: 16 }} />
                 <span>AI Daily Brief</span>
               </div>
             </div>
@@ -115,7 +113,7 @@ export const AIDailyBrief: React.FC<AIDailyBriefProps> = ({
           {!isCollapsed && (
             <button className="di-brief-read-more" onClick={() => setShowModal(true)}>
               <span>Read Full Brief</span>
-              <ChevronRight size={14} />
+              <KeyboardArrowRight sx={{ fontSize: 14 }} />
             </button>
           )}
         </div>
@@ -126,11 +124,11 @@ export const AIDailyBrief: React.FC<AIDailyBriefProps> = ({
           <div className="di-brief-modal" onClick={(e) => e.stopPropagation()}>
             <div className="di-brief-modal-header">
               <div className="di-brief-modal-title">
-                <Sparkles size={18} />
+                <AutoAwesomeOutlined sx={{ fontSize: 18 }} />
                 <h2>AI Daily Brief</h2>
               </div>
               <button className="di-brief-modal-close" onClick={() => setShowModal(false)}>
-                <X size={20} />
+                <CloseOutlined sx={{ fontSize: 20 }} />
               </button>
             </div>
             <div className="di-brief-modal-content">

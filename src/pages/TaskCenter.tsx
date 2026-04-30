@@ -1,28 +1,27 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useLocation } from 'react-router-dom';
-import {
-  Plus,
-  Search,
-  LayoutGrid,
-  List,
-  ClipboardList,
-  CheckCircle2,
-  X,
-  Calendar,
-  User,
-  Sparkles,
-  ExternalLink,
-  Clock,
-  Store,
-  AlertTriangle,
-  Image,
-  Shield,
-  FileText,
-  ChevronDown,
-  Check,
-  Wrench,
-} from 'lucide-react';
+import Add from '@mui/icons-material/Add';
+import SearchOutlined from '@mui/icons-material/SearchOutlined';
+import DashboardOutlined from '@mui/icons-material/DashboardOutlined';
+import ListOutlined from '@mui/icons-material/ListOutlined';
+import AssignmentOutlined from '@mui/icons-material/AssignmentOutlined';
+import TaskAltOutlined from '@mui/icons-material/TaskAltOutlined';
+import CloseOutlined from '@mui/icons-material/CloseOutlined';
+import CalendarTodayOutlined from '@mui/icons-material/CalendarTodayOutlined';
+import PersonOutlined from '@mui/icons-material/PersonOutlined';
+import AutoAwesomeOutlined from '@mui/icons-material/AutoAwesomeOutlined';
+import OpenInNewOutlined from '@mui/icons-material/OpenInNewOutlined';
+import AccessTimeOutlined from '@mui/icons-material/AccessTimeOutlined';
+import StoreOutlined from '@mui/icons-material/StoreOutlined';
+import WarningAmberOutlined from '@mui/icons-material/WarningAmberOutlined';
+import ImageOutlined from '@mui/icons-material/ImageOutlined';
+import SecurityOutlined from '@mui/icons-material/SecurityOutlined';
+import DescriptionOutlined from '@mui/icons-material/DescriptionOutlined';
+import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
+import Check from '@mui/icons-material/Check';
+import BuildOutlined from '@mui/icons-material/BuildOutlined';
 import { useNavigate } from 'react-router-dom';
+import { Button, Badge, Card, Tabs } from 'impact-ui';
 import { useExecutionTasks, ExecutionTask, TaskStatus, Priority } from '../context/ExecutionTasksContext';
 import './TaskCenter.css';
 
@@ -481,9 +480,9 @@ export const TaskCenter: React.FC = () => {
 
   // ── Source badge helper ──
   const getSourceIcon = (source?: string) => {
-    if (source === 'AI POG Audit') return <Sparkles size={10} />;
-    if (source === 'Localization Engine') return <Sparkles size={10} />;
-    if (source === 'Broadcast') return <AlertTriangle size={10} />;
+    if (source === 'AI POG Audit') return <AutoAwesomeOutlined sx={{ fontSize: 10 }} />;
+    if (source === 'Localization Engine') return <AutoAwesomeOutlined sx={{ fontSize: 10 }} />;
+    if (source === 'Broadcast') return <WarningAmberOutlined sx={{ fontSize: 10 }} />;
     return null;
   };
 
@@ -508,7 +507,7 @@ export const TaskCenter: React.FC = () => {
 
   // ── Task Card ──
   const renderCard = (task: ExecutionTask) => (
-    <div key={task.id} className="tc-card" onClick={() => setSelectedTask(task)}>
+    <Card key={task.id} size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '12px 14px', cursor: 'pointer' }} onClick={() => setSelectedTask(task)}>
       <div className="tc-card-top">
         <span className="tc-card-title">{task.title}</span>
         <span className={`tc-card-priority tc-pri--${task.priority.toLowerCase()}`}>{task.priority}</span>
@@ -526,7 +525,7 @@ export const TaskCenter: React.FC = () => {
           <span className="tc-card-type">{task.type}</span>
           {task.dueDate && (
             <span className={`tc-card-due ${isOverdue(task.dueDate, task.status) ? 'tc-due--overdue' : ''}`}>
-              <Calendar size={10} />
+              <CalendarTodayOutlined sx={{ fontSize: 10 }} />
               {formatDate(task.dueDate)}
             </span>
           )}
@@ -537,11 +536,11 @@ export const TaskCenter: React.FC = () => {
           </span>
         ) : (
           <span className="tc-card-assignee tc-unassigned">
-            <User size={12} />
+            <PersonOutlined sx={{ fontSize: 12 }} />
           </span>
         )}
       </div>
-    </div>
+    </Card>
   );
 
   // ── Board View ──
@@ -558,7 +557,7 @@ export const TaskCenter: React.FC = () => {
             </div>
             <div className="tc-board-col-body">
               {tasks.length === 0 ? (
-                <div style={{ padding: '20px', textAlign: 'center', color: '#94a3b8', fontSize: '12px' }}>No tasks</div>
+                <div style={{ padding: '20px', textAlign: 'center', color: 'var(--ia-color-text-tertiary)', fontSize: 'var(--ia-text-xs)' }}>No tasks</div>
               ) : (
                 tasks.map(renderCard)
               )}
@@ -571,7 +570,7 @@ export const TaskCenter: React.FC = () => {
 
   // ── List View (UAM-style table) ──
   const renderList = () => (
-    <div className="tc-table-card">
+    <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: 0, overflow: 'hidden' }}>
       <table className="tc-table wow-table">
         <thead>
           <tr>
@@ -587,7 +586,7 @@ export const TaskCenter: React.FC = () => {
           {filteredTasks.length === 0 ? (
             <tr>
               <td colSpan={6} className="tc-table-empty">
-                <Search size={20} />
+                <SearchOutlined sx={{ fontSize: 20 }} />
                 <span>No tasks match your search or filters</span>
               </td>
             </tr>
@@ -636,31 +635,37 @@ export const TaskCenter: React.FC = () => {
           )}
         </tbody>
       </table>
-    </div>
+    </Card>
   );
 
   return (
     <div className="tc-container">
       {prefillLoading && (
         <div className="tc-prefill-overlay">
-          <div className="tc-prefill-card">
+          <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '28px 32px' }}>
             <div className="tc-prefill-spinner" />
             <div className="tc-prefill-title">Creating tasks in Operations Queue…</div>
             <div className="tc-prefill-sub">Generating one task per impacted store and assigning to the respective Store Manager.</div>
-          </div>
+          </Card>
         </div>
       )}
 
       {prefillBanner && !prefillLoading && (
         <div className="tc-prefill-banner">
-          <div className="tc-prefill-banner-icon"><CheckCircle2 size={16} /></div>
+          <div className="tc-prefill-banner-icon"><TaskAltOutlined sx={{ fontSize: 16 }} /></div>
           <div className="tc-prefill-banner-body">
             <div className="tc-prefill-banner-title">{prefillBanner.count} tasks created from "{prefillBanner.title}"</div>
             <div className="tc-prefill-banner-sub">Auto-assigned to {prefillBanner.managers.join(', ')}</div>
           </div>
-          <button className="tc-prefill-banner-close" onClick={() => setPrefillBanner(null)} aria-label="Dismiss">
-            <X size={14} />
-          </button>
+          <Button
+            variant="text"
+            size="small"
+            className="tc-prefill-banner-close"
+            onClick={() => setPrefillBanner(null)}
+            aria-label="Dismiss"
+          >
+            <CloseOutlined sx={{ fontSize: 14 }} />
+          </Button>
         </div>
       )}
 
@@ -668,26 +673,32 @@ export const TaskCenter: React.FC = () => {
       <div className="district-intel-header tc-di-header">
         <div className="header-left">
           <div className="header-title">
-            <ClipboardList size={22} />
+            <AssignmentOutlined sx={{ fontSize: 22 }} />
             <h1>Operations Queue</h1>
           </div>
           <div className="header-meta">
             <span className="district-badge">
-              <ClipboardList size={13} />
+              <AssignmentOutlined sx={{ fontSize: 13 }} />
               Task Center
             </span>
             <span className="district-badge tc-meta-pill">
-              <CheckCircle2 size={13} />
+              <TaskAltOutlined sx={{ fontSize: 13 }} />
               {counts.all} tasks
             </span>
             <span className="tc-meta-updated">Manage, assign &amp; track tasks across your stores</span>
           </div>
         </div>
         <div className="tc-header-right">
-          <button className="tc-create-btn" onClick={() => setShowCreateModal(true)}>
-            <Plus size={15} />
-            <span>Create Task</span>
-          </button>
+          <Button
+            variant="contained"
+            color="primary"
+            size="medium"
+            className="tc-create-btn"
+            startIcon={<Add sx={{ fontSize: 15 }} />}
+            onClick={() => setShowCreateModal(true)}
+          >
+            Create Task
+          </Button>
         </div>
       </div>
 
@@ -714,33 +725,59 @@ export const TaskCenter: React.FC = () => {
       {/* ── Toolbar (Store Leaderboard style — search left, filter pills right) ── */}
       <div className="tc-toolbar tc-toolbar--leaderboard">
         <div className="tc-search-bar">
-          <Search size={15} />
+          <SearchOutlined sx={{ fontSize: 15 }} />
           <input
             placeholder="Search tasks, assignees, stores..."
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
           {search && (
-            <button className="tc-search-clear" onClick={() => setSearch('')} aria-label="Clear search">
-              <X size={13} />
-            </button>
+            <Button
+              variant="text"
+              size="small"
+              className="tc-search-clear"
+              onClick={() => setSearch('')}
+              aria-label="Clear search"
+            >
+              <CloseOutlined sx={{ fontSize: 13 }} />
+            </Button>
           )}
         </div>
         <div className="tc-toolbar-right">
-          <div className="tc-filter-tabs">
-            {([['all', 'All Tasks'], ['Pending', 'To Do'], ['In Progress', 'In Progress'], ['Completed', 'Done']] as [FilterStatus, string][]).map(([key, label]) => (
-              <button
-                key={key}
-                className={`tc-filter-tab ${filter === key ? 'tc-filter-tab--active' : ''}`}
-                onClick={() => setFilter(key)}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+          <Tabs
+            tabNames={[
+              { value: 'all', label: 'All Tasks' },
+              { value: 'Pending', label: 'To Do' },
+              { value: 'In Progress', label: 'In Progress' },
+              { value: 'Completed', label: 'Done' },
+            ]}
+            tabPanels={[]}
+            value={filter}
+            onChange={(_, val) => setFilter(val as FilterStatus)}
+          />
           <div className="tc-view-toggle">
-            <button className={`tc-view-btn ${view === 'board' ? 'tc-view-btn--active' : ''}`} onClick={() => setView('board')} title="Board"><LayoutGrid size={15} /></button>
-            <button className={`tc-view-btn ${view === 'list' ? 'tc-view-btn--active' : ''}`} onClick={() => setView('list')} title="List"><List size={15} /></button>
+            <Button
+              variant={view === 'board' ? 'contained' : 'outlined'}
+              color="primary"
+              size="small"
+              className="tc-view-btn"
+              onClick={() => setView('board')}
+              aria-label="Board view"
+              title="Board"
+            >
+              <DashboardOutlined sx={{ fontSize: 15 }} />
+            </Button>
+            <Button
+              variant={view === 'list' ? 'contained' : 'outlined'}
+              color="primary"
+              size="small"
+              className="tc-view-btn"
+              onClick={() => setView('list')}
+              aria-label="List view"
+              title="List"
+            >
+              <ListOutlined sx={{ fontSize: 15 }} />
+            </Button>
           </div>
         </div>
       </div>
@@ -749,12 +786,19 @@ export const TaskCenter: React.FC = () => {
       <div className="tc-content">
         {allTasks.length === 0 ? (
           <div className="tc-empty">
-            <div className="tc-empty-icon"><ClipboardList size={28} /></div>
+            <div className="tc-empty-icon"><AssignmentOutlined sx={{ fontSize: 28 }} /></div>
             <h3>No Tasks Yet</h3>
             <p>Create a task or use AI Copilot to generate tasks from shelf audits.</p>
-            <button className="tc-create-btn" onClick={() => setShowCreateModal(true)}>
-              <Plus size={15} /> Create First Task
-            </button>
+            <Button
+              variant="contained"
+              color="primary"
+              size="medium"
+              className="tc-create-btn"
+              startIcon={<Add sx={{ fontSize: 15 }} />}
+              onClick={() => setShowCreateModal(true)}
+            >
+              Create First Task
+            </Button>
           </div>
         ) : view === 'board' ? renderBoard() : renderList()}
       </div>
@@ -766,15 +810,15 @@ export const TaskCenter: React.FC = () => {
             {/* Header with icon block + title + subtitle + close */}
             <div className="tc-m-header">
               <div className="tc-m-header-icon">
-                <ClipboardList size={18} />
+                <AssignmentOutlined sx={{ fontSize: 18 }} />
               </div>
               <div className="tc-m-header-text">
                 <h3>Create New Task</h3>
                 <p>Add a task and assign it to your team</p>
               </div>
-              <button className="tc-m-close" onClick={() => setShowCreateModal(false)}>
-                <X size={16} />
-              </button>
+              <Button variant="text" size="small" className="tc-m-close" onClick={() => setShowCreateModal(false)} aria-label="Close">
+                <CloseOutlined sx={{ fontSize: 16 }} />
+              </Button>
             </div>
 
             {/* Body */}
@@ -782,7 +826,7 @@ export const TaskCenter: React.FC = () => {
               {/* Section: Task Details */}
               <div className="tc-m-section">
                 <div className="tc-m-section-label">
-                  <FileText size={13} />
+                  <DescriptionOutlined sx={{ fontSize: 13 }} />
                   <span>Task Details</span>
                 </div>
                 <div className="tc-m-field" style={{ marginBottom: 14 }}>
@@ -807,7 +851,7 @@ export const TaskCenter: React.FC = () => {
               {/* Section: Classification */}
               <div className="tc-m-section">
                 <div className="tc-m-section-label">
-                  <Shield size={13} />
+                  <SecurityOutlined sx={{ fontSize: 13 }} />
                   <span>Classification</span>
                 </div>
                 <div className="tc-m-fields-row">
@@ -822,7 +866,7 @@ export const TaskCenter: React.FC = () => {
                       >
                         <span className={`tc-dd-pri-dot tc-dd-pri-dot--${newTask.priority.toLowerCase()}`} />
                         <span className="tc-dd-trigger-text">{newTask.priority}</span>
-                        <ChevronDown size={14} className={`tc-dd-chevron ${openDropdown === 'priority' ? 'tc-dd-chevron--open' : ''}`} />
+                        <KeyboardArrowDown sx={{ fontSize: 14 }} className={`tc-dd-chevron ${openDropdown === 'priority' ? 'tc-dd-chevron--open' : ''}`} />
                       </button>
                       {openDropdown === 'priority' && (
                         <div className="tc-dd-menu">
@@ -837,7 +881,7 @@ export const TaskCenter: React.FC = () => {
                                 <span className={`tc-dd-pri-dot tc-dd-pri-dot--${p.toLowerCase()}`} />
                                 <span className="tc-dd-item-name">{p}</span>
                               </span>
-                              {p === newTask.priority && <Check size={14} />}
+                              {p === newTask.priority && <Check sx={{ fontSize: 14 }} />}
                             </button>
                           ))}
                         </div>
@@ -854,9 +898,9 @@ export const TaskCenter: React.FC = () => {
                         className="tc-dd-trigger"
                         onClick={() => setOpenDropdown(openDropdown === 'type' ? null : 'type')}
                       >
-                        <Wrench size={14} className="tc-dd-icon-muted" />
+                        <BuildOutlined sx={{ fontSize: 14 }} className="tc-dd-icon-muted" />
                         <span className="tc-dd-trigger-text">{newTask.type}</span>
-                        <ChevronDown size={14} className={`tc-dd-chevron ${openDropdown === 'type' ? 'tc-dd-chevron--open' : ''}`} />
+                        <KeyboardArrowDown sx={{ fontSize: 14 }} className={`tc-dd-chevron ${openDropdown === 'type' ? 'tc-dd-chevron--open' : ''}`} />
                       </button>
                       {openDropdown === 'type' && (
                         <div className="tc-dd-menu">
@@ -872,7 +916,7 @@ export const TaskCenter: React.FC = () => {
                                   {t === 'Add' ? 'Add / Replenish' : t === 'Move' ? 'Move / Reposition' : t}
                                 </span>
                               </span>
-                              {t === newTask.type && <Check size={14} />}
+                              {t === newTask.type && <Check sx={{ fontSize: 14 }} />}
                             </button>
                           ))}
                         </div>
@@ -885,7 +929,7 @@ export const TaskCenter: React.FC = () => {
               {/* Section: Assignment & Schedule */}
               <div className="tc-m-section tc-m-section--last">
                 <div className="tc-m-section-label">
-                  <User size={13} />
+                  <PersonOutlined sx={{ fontSize: 13 }} />
                   <span>Assignment & Schedule</span>
                 </div>
                 <div className="tc-m-fields-row">
@@ -910,11 +954,11 @@ export const TaskCenter: React.FC = () => {
                           </>
                         ) : (
                           <>
-                            <User size={14} className="tc-dd-icon-muted" />
+                            <PersonOutlined sx={{ fontSize: 14 }} className="tc-dd-icon-muted" />
                             <span className="tc-dd-trigger-text tc-dd-trigger-text--placeholder">Select assignee...</span>
                           </>
                         )}
-                        <ChevronDown size={14} className={`tc-dd-chevron ${openDropdown === 'assignee' ? 'tc-dd-chevron--open' : ''}`} />
+                        <KeyboardArrowDown sx={{ fontSize: 14 }} className={`tc-dd-chevron ${openDropdown === 'assignee' ? 'tc-dd-chevron--open' : ''}`} />
                       </button>
                       {openDropdown === 'assignee' && (
                         <div className="tc-dd-menu tc-dd-menu--scroll">
@@ -924,10 +968,10 @@ export const TaskCenter: React.FC = () => {
                             onClick={() => { setNewTask(prev => ({ ...prev, assignedTo: '' })); setOpenDropdown(null); }}
                           >
                             <span className="tc-dd-item-left">
-                              <span className="tc-dd-avatar tc-dd-avatar--unassigned"><User size={11} /></span>
+                              <span className="tc-dd-avatar tc-dd-avatar--unassigned"><PersonOutlined sx={{ fontSize: 11 }} /></span>
                               <span className="tc-dd-item-name">Unassigned</span>
                             </span>
-                            {!newTask.assignedTo && <Check size={14} />}
+                            {!newTask.assignedTo && <Check sx={{ fontSize: 14 }} />}
                           </button>
                           {teamMembers.map(m => (
                             <button
@@ -943,7 +987,7 @@ export const TaskCenter: React.FC = () => {
                                   <span className="tc-dd-item-desc">{m.role}</span>
                                 </span>
                               </span>
-                              {m.id === newTask.assignedTo && <Check size={14} />}
+                              {m.id === newTask.assignedTo && <Check sx={{ fontSize: 14 }} />}
                             </button>
                           ))}
                         </div>
@@ -966,10 +1010,19 @@ export const TaskCenter: React.FC = () => {
 
             {/* Footer */}
             <div className="tc-m-footer">
-              <button className="tc-m-cancel" onClick={() => setShowCreateModal(false)}>Cancel</button>
-              <button className="tc-m-submit" onClick={handleCreate} disabled={!newTask.title.trim()}>
-                <Plus size={14} /> Create Task
-              </button>
+              <Button variant="outlined" color="primary" className="tc-m-cancel" onClick={() => setShowCreateModal(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                className="tc-m-submit"
+                onClick={handleCreate}
+                disabled={!newTask.title.trim()}
+                startIcon={<Add sx={{ fontSize: 14 }} />}
+              >
+                Create Task
+              </Button>
             </div>
           </div>
         </div>
@@ -986,24 +1039,33 @@ export const TaskCenter: React.FC = () => {
               <div className="tc-detail-hero">
                 <div className="tc-detail-hero-top">
                   <div className="tc-detail-hero-id">
-                    <ClipboardList size={13} />
+                    <AssignmentOutlined sx={{ fontSize: 13 }} />
                     <span>{selectedTask.id.toUpperCase()}</span>
                   </div>
-                  <button className="tc-detail-close" onClick={() => setSelectedTask(null)}><X size={16} /></button>
+                  <Button variant="text" size="small" className="tc-detail-close" onClick={() => setSelectedTask(null)} aria-label="Close">
+                    <CloseOutlined sx={{ fontSize: 16 }} />
+                  </Button>
                 </div>
                 <h2 className="tc-detail-hero-title">{selectedTask.title}</h2>
                 <div className="tc-detail-hero-pills">
-                  <div className={`tc-status-pill tc-status-pill--${statusKey} tc-status-pill--lg`}>
-                    <span className="tc-status-pill-dot" />
-                    <span>{selectedTask.status}</span>
-                  </div>
-                  <span className={`tc-priority-tag tc-pri--${selectedTask.priority.toLowerCase()} tc-priority-tag--lg`}>
-                    {selectedTask.priority} priority
-                  </span>
-                  <span className="tc-type-tag tc-type-tag--lg">{selectedTask.type}</span>
+                  <Badge
+                    label={selectedTask.status}
+                    size="medium"
+                    color={
+                      statusKey === 'completed' ? 'success' : statusKey === 'inprogress' ? 'warning' : 'default'
+                    }
+                  />
+                  <Badge
+                    label={`${selectedTask.priority} priority`}
+                    size="medium"
+                    color={
+                      selectedTask.priority === 'High' ? 'error' : selectedTask.priority === 'Medium' ? 'warning' : 'info'
+                    }
+                  />
+                  <Badge label={selectedTask.type} size="medium" color="info" />
                   {sla && (
                     <span className={`tc-detail-sla-pill ${sla.className}`}>
-                      <Clock size={11} /> {sla.label}
+                      <AccessTimeOutlined sx={{ fontSize: 11 }} /> {sla.label}
                     </span>
                   )}
                 </div>
@@ -1013,7 +1075,7 @@ export const TaskCenter: React.FC = () => {
                 {/* Description */}
                 {selectedTask.description && (
                   <div className="tc-detail-block">
-                    <div className="tc-detail-block-label"><FileText size={12} /> Description</div>
+                    <div className="tc-detail-block-label"><DescriptionOutlined sx={{ fontSize: 12 }} /> Description</div>
                     <p className="tc-detail-desc">{selectedTask.description}</p>
                   </div>
                 )}
@@ -1032,17 +1094,17 @@ export const TaskCenter: React.FC = () => {
                     <div className="tc-detail-source-right">
                       {selectedTask.confidenceScore && (
                         <span className="tc-detail-source-conf">
-                          <Sparkles size={10} /> {selectedTask.confidenceScore}% confidence
+                          <AutoAwesomeOutlined sx={{ fontSize: 10 }} /> {selectedTask.confidenceScore}% confidence
                         </span>
                       )}
-                      {selectedTask.sourceLink && <ExternalLink size={12} />}
+                      {selectedTask.sourceLink && <OpenInNewOutlined sx={{ fontSize: 12 }} />}
                     </div>
                   </div>
                 )}
 
                 {/* Assignment & Schedule (editable controls) */}
                 <div className="tc-detail-block">
-                  <div className="tc-detail-block-label"><User size={12} /> Assignment & Schedule</div>
+                  <div className="tc-detail-block-label"><PersonOutlined sx={{ fontSize: 12 }} /> Assignment & Schedule</div>
                   <div className="tc-detail-grid">
                     <div className="tc-detail-cell">
                       <span className="tc-detail-cell-label">Status</span>
@@ -1081,13 +1143,13 @@ export const TaskCenter: React.FC = () => {
                     <div className="tc-detail-cell">
                       <span className="tc-detail-cell-label">Due Date</span>
                       <span className={`tc-detail-cell-value ${isOverdue(selectedTask.dueDate, selectedTask.status) ? 'tc-due--overdue' : ''}`}>
-                        <Calendar size={12} /> {formatDate(selectedTask.dueDate)}
+                        <CalendarTodayOutlined sx={{ fontSize: 12 }} /> {formatDate(selectedTask.dueDate)}
                       </span>
                     </div>
                     <div className="tc-detail-cell">
                       <span className="tc-detail-cell-label">Created</span>
                       <span className="tc-detail-cell-value">
-                        <Clock size={12} /> {formatDate(selectedTask.createdAt)}
+                        <AccessTimeOutlined sx={{ fontSize: 12 }} /> {formatDate(selectedTask.createdAt)}
                       </span>
                     </div>
                   </div>
@@ -1096,7 +1158,7 @@ export const TaskCenter: React.FC = () => {
                 {/* Store & Context */}
                 {(selectedTask.storeName || selectedTask.pogName) && (
                   <div className="tc-detail-block">
-                    <div className="tc-detail-block-label"><Store size={12} /> Store & Context</div>
+                    <div className="tc-detail-block-label"><StoreOutlined sx={{ fontSize: 12 }} /> Store & Context</div>
                     <div className="tc-detail-grid">
                       {selectedTask.storeName && (
                         <div className="tc-detail-cell">
@@ -1129,8 +1191,8 @@ export const TaskCenter: React.FC = () => {
                 {/* SLA breakdown (only if SLA exists) */}
                 {selectedTask.slaHours && sla && (
                   <div className="tc-detail-block">
-                    <div className="tc-detail-block-label"><Clock size={12} /> SLA Tracking</div>
-                    <div className="tc-detail-sla-card">
+                    <div className="tc-detail-block-label"><AccessTimeOutlined sx={{ fontSize: 12 }} /> SLA Tracking</div>
+                    <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '12px 14px' }}>
                       <div className="tc-detail-sla-card-row">
                         <span className="tc-detail-sla-card-label">Target window</span>
                         <span className="tc-detail-sla-card-value">{selectedTask.slaHours} hours from creation</span>
@@ -1139,14 +1201,14 @@ export const TaskCenter: React.FC = () => {
                         <span className="tc-detail-sla-card-label">Status</span>
                         <span className={`tc-detail-sla-pill ${sla.className}`}>{sla.label}</span>
                       </div>
-                    </div>
+                    </Card>
                   </div>
                 )}
 
                 {/* Severity Rationale */}
                 {selectedTask.severityRationale && (
                   <div className="tc-detail-block">
-                    <div className="tc-detail-block-label"><Shield size={12} /> Severity Rationale</div>
+                    <div className="tc-detail-block-label"><SecurityOutlined sx={{ fontSize: 12 }} /> Severity Rationale</div>
                     <div className="tc-detail-rationale">
                       {selectedTask.severityRationale}
                     </div>
@@ -1162,27 +1224,27 @@ export const TaskCenter: React.FC = () => {
                 {/* Before / After Proof */}
                 {(selectedTask.beforeImage || selectedTask.afterImage) && (
                   <div className="tc-detail-block">
-                    <div className="tc-detail-block-label"><Image size={12} /> Audit Evidence</div>
+                    <div className="tc-detail-block-label"><ImageOutlined sx={{ fontSize: 12 }} /> Audit Evidence</div>
                     <div className="tc-detail-proof-grid">
                       {selectedTask.beforeImage && (
-                        <div className="tc-detail-proof-card">
+                        <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: 0, overflow: 'hidden' }}>
                           <div className="tc-detail-proof-label">Before</div>
                           <div className="tc-detail-proof-placeholder">
-                            <Image size={22} />
+                            <ImageOutlined sx={{ fontSize: 22 }} />
                             <span>Shelf photo captured</span>
                             <span className="tc-detail-proof-file">{selectedTask.beforeImage.split('/').pop()}</span>
                           </div>
-                        </div>
+                        </Card>
                       )}
                       {selectedTask.afterImage && (
-                        <div className="tc-detail-proof-card">
+                        <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: 0, overflow: 'hidden' }}>
                           <div className="tc-detail-proof-label after">After</div>
                           <div className="tc-detail-proof-placeholder">
-                            <Image size={22} />
+                            <ImageOutlined sx={{ fontSize: 22 }} />
                             <span>Expected layout</span>
                             <span className="tc-detail-proof-file">{selectedTask.afterImage.split('/').pop()}</span>
                           </div>
-                        </div>
+                        </Card>
                       )}
                     </div>
                   </div>

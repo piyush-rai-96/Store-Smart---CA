@@ -6,24 +6,24 @@
 
 :root {
   /* Mirror District Intelligence tokens so all Planogram screens pull from one source. */
-  --pi-primary: #6366f1;
-  --pi-primary-dark: #4f46e5;
-  --pi-primary-light: #818cf8;
-  --pi-primary-pale: #eef2ff;
-  --pi-text-primary: #0f172a;
-  --pi-text-body: #334155;
-  --pi-text-secondary: #64748b;
-  --pi-text-muted: #94a3b8;
-  --pi-border: #e2e8f0;
-  --pi-border-light: #f1f5f9;
-  --pi-bg-white: #ffffff;
-  --pi-bg-subtle: #f8fafc;
-  --pi-success: #059669;
-  --pi-success-pale: #ecfdf5;
-  --pi-warning: #d97706;
-  --pi-warning-pale: #fffbeb;
-  --pi-danger: #dc2626;
-  --pi-danger-pale: #fef2f2;
+  --pi-primary: var(--ia-color-primary);
+  --pi-primary-dark: var(--ia-color-primary-hover);
+  --pi-primary-light: var(--ia-color-primary-hover);
+  --pi-primary-pale: var(--ia-color-primary-soft);
+  --pi-text-primary: var(--ia-color-text-primary);
+  --pi-text-body: var(--ia-color-text-primary);
+  --pi-text-secondary: var(--ia-color-text-secondary);
+  --pi-text-muted: var(--ia-color-text-tertiary);
+  --pi-border: var(--ia-color-border);
+  --pi-border-light: var(--ia-color-bg-muted);
+  --pi-bg-white: var(--ia-color-surface);
+  --pi-bg-subtle: var(--ia-color-bg-subtle);
+  --pi-success: var(--ia-color-success);
+  --pi-success-pale: var(--ia-color-success-bg);
+  --pi-warning: var(--ia-color-warning-text);
+  --pi-warning-pale: var(--ia-color-warning-bg);
+  --pi-danger: var(--ia-color-error-strong);
+  --pi-danger-pale: var(--ia-color-error-bg);
 }
 
 /* --------------------------------------------------------------------------
@@ -45,8 +45,8 @@
   background: var(--pi-primary-pale);
   color: var(--pi-primary-dark);
   border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: var(--ia-text-xs);
+  font-weight: var(--ia-font-weight-medium);
 }
 
 .pi-meta-pill--neutral {
@@ -56,16 +56,16 @@
 
 .pi-meta-pill--warning {
   background: var(--pi-warning-pale);
-  color: #b45309;
+  color: var(--ia-color-warning-text);
 }
 
 .pi-meta-pill--success {
   background: var(--pi-success-pale);
-  color: #047857;
+  color: var(--ia-color-success);
 }
 
 .pi-meta-updated {
-  font-size: 12px;
+  font-size: var(--ia-text-xs);
   color: var(--pi-text-muted);
 }
 
@@ -97,8 +97,8 @@
   gap: 7px;
   padding: 8px 16px;
   border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--ia-text-13);
+  font-weight: var(--ia-font-weight-semibold);
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: inherit;
@@ -110,7 +110,7 @@
 .pi-btn-primary {
   background: linear-gradient(135deg, var(--pi-primary-dark) 0%, var(--pi-primary) 100%);
   border: none;
-  color: #ffffff;
+  color: var(--ia-color-surface);
   box-shadow: 0 1px 4px rgba(67, 56, 202, 0.25);
 }
 
@@ -136,7 +136,7 @@
 
 .pi-btn-secondary:hover:not(:disabled) {
   background: var(--pi-bg-subtle);
-  border-color: #cbd5e1;
+  border-color: var(--ia-color-border-strong);
 }
 
 /* --------------------------------------------------------------------------
@@ -169,7 +169,7 @@
 }
 
 .pi-toolbar-search:focus-within {
-  border-color: #a5b4fc;
+  border-color: var(--ia-color-primary-border);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.08);
 }
 
@@ -182,7 +182,7 @@
   flex: 1;
   border: none;
   outline: none;
-  font-size: 13px;
+  font-size: var(--ia-text-13);
   color: var(--pi-text-primary);
   background: transparent;
   font-family: inherit;
@@ -211,8 +211,8 @@
   background: transparent;
   border: 1px solid transparent;
   color: var(--pi-text-secondary);
-  font-size: 12.5px;
-  font-weight: 500;
+  font-size: var(--ia-text-12-5);
+  font-weight: var(--ia-font-weight-medium);
   padding: 6px 10px;
   border-radius: 6px;
   cursor: pointer;
@@ -245,14 +245,14 @@
 }
 
 .pi-empty-title {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--ia-text-sm);
+  font-weight: var(--ia-font-weight-semibold);
   color: var(--pi-text-body);
   margin: 0;
 }
 
 .pi-empty-desc {
-  font-size: 12.5px;
+  font-size: var(--ia-text-12-5);
   color: var(--pi-text-secondary);
   margin: 0;
 }
@@ -266,8 +266,8 @@
   gap: 10px;
   padding: 10px 14px;
   border-radius: 10px;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--ia-text-13);
+  font-weight: var(--ia-font-weight-medium);
   border: 1px solid transparent;
 }
 
@@ -275,14 +275,14 @@
 
 .pi-banner--warning {
   background: var(--pi-warning-pale);
-  border-color: #fde68a;
-  color: #92400e;
+  border-color: var(--ia-color-warning-bg);
+  color: var(--ia-color-warning-text);
 }
 .pi-banner--warning svg { color: var(--pi-warning); }
 
 .pi-banner--info {
   background: var(--pi-primary-pale);
-  border-color: #c7d2fe;
+  border-color: var(--ia-color-primary-border);
   color: var(--pi-primary-dark);
 }
 .pi-banner--info svg { color: var(--pi-primary); }
@@ -326,8 +326,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: var(--ia-text-xs);
+  font-weight: var(--ia-font-weight-bold);
   flex-shrink: 0;
   transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }
@@ -336,14 +336,14 @@
   display: inline-flex;
   flex-direction: column;
   gap: 1px;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--ia-text-13);
+  font-weight: var(--ia-font-weight-semibold);
   color: inherit;
 }
 
 .pi-step-desc {
-  font-size: 11.5px;
-  font-weight: 500;
+  font-size: var(--ia-text-11-5);
+  font-weight: var(--ia-font-weight-medium);
   color: var(--pi-text-muted);
 }
 
@@ -354,10 +354,10 @@
   box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.12);
 }
 
-.pi-step--done { color: #15803d; }
+.pi-step--done { color: var(--ia-color-success); }
 .pi-step--done .pi-step-num {
-  background: #dcfce7;
-  color: #15803d;
+  background: var(--ia-color-success-bg);
+  color: var(--ia-color-success);
 }
 
 .pi-step-divider {
@@ -382,8 +382,8 @@
 .wow-table thead th {
   padding: 12px 16px;
   text-align: left;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--ia-text-2xs);
+  font-weight: var(--ia-font-weight-semibold);
   color: var(--pi-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -394,7 +394,7 @@
 
 .wow-table tbody td {
   padding: 14px 16px;
-  font-size: 13px;
+  font-size: var(--ia-text-13);
   color: var(--pi-text-body);
   border-bottom: 1px solid var(--pi-border-light);
   vertical-align: middle;

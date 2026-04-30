@@ -1,22 +1,20 @@
 import React, { useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Sidebar as ImpactSidebar } from 'impact-ui';
-import {
-  Building2,
-  Layers,
-  Radio,
-  Settings,
-  Home,
-  MapPin,
-  Store,
-  Bot,
-  ListChecks,
-  MessagesSquare,
-  Users,
-  ClipboardList,
-  Boxes,
-  Sparkles,
-} from 'lucide-react';
+import ApartmentOutlined from '@mui/icons-material/ApartmentOutlined';
+import LayersOutlined from '@mui/icons-material/LayersOutlined';
+import RouterOutlined from '@mui/icons-material/RouterOutlined';
+import SettingsOutlined from '@mui/icons-material/SettingsOutlined';
+import HomeOutlined from '@mui/icons-material/HomeOutlined';
+import PlaceOutlined from '@mui/icons-material/PlaceOutlined';
+import StoreOutlined from '@mui/icons-material/StoreOutlined';
+import SmartToyOutlined from '@mui/icons-material/SmartToyOutlined';
+import PlaylistAddCheckOutlined from '@mui/icons-material/PlaylistAddCheckOutlined';
+import ForumOutlined from '@mui/icons-material/ForumOutlined';
+import GroupOutlined from '@mui/icons-material/GroupOutlined';
+import AssignmentOutlined from '@mui/icons-material/AssignmentOutlined';
+import WarehouseOutlined from '@mui/icons-material/WarehouseOutlined';
+import AutoAwesomeOutlined from '@mui/icons-material/AutoAwesomeOutlined';
 import { User, ScreenAccess } from '../../../types';
 import './AppSidebar.css';
 
@@ -52,39 +50,39 @@ const ALL_MODULES: SidebarRoute[] = [
   {
     value: 'store-operations',
     label: 'Store Operations Hub',
-    icon: <Building2 size={20} />,
+    icon: <ApartmentOutlined sx={{ fontSize: 20 }} />,
     children: [
-      { value: 'store-ops-home', label: 'Home', icon: <Home size={18} />, link: '/store-operations/home' },
-      { value: 'district-intelligence', label: 'District Intelligence', icon: <MapPin size={18} />, link: '/store-operations/district-intelligence' },
-      { value: 'store-deep-dive', label: 'Store Deep Dive', icon: <Store size={18} />, link: '/store-operations/store-deep-dive' },
+      { value: 'store-ops-home', label: 'Home', icon: <HomeOutlined sx={{ fontSize: 18 }} />, link: '/store-operations/home' },
+      { value: 'district-intelligence', label: 'District Intelligence', icon: <PlaceOutlined sx={{ fontSize: 18 }} />, link: '/store-operations/district-intelligence' },
+      { value: 'store-deep-dive', label: 'Store Deep Dive', icon: <StoreOutlined sx={{ fontSize: 18 }} />, link: '/store-operations/store-deep-dive' },
     ],
   },
   {
     value: 'planogram',
     label: 'Planogram Intelligence',
-    icon: <Layers size={20} />,
+    icon: <LayersOutlined sx={{ fontSize: 20 }} />,
     children: [
-      { value: 'master-pog', label: 'Master POG Management', icon: <Boxes size={18} />, link: '/planogram/master-pog' },
-      { value: 'rule-management', label: 'POG Rule Management', icon: <ClipboardList size={18} />, link: '/planogram/rule-management' },
-      { value: 'localization-engine', label: 'POG Localization Engine', icon: <Sparkles size={18} />, link: '/planogram/localization-engine' },
+      { value: 'master-pog', label: 'Master POG Management', icon: <WarehouseOutlined sx={{ fontSize: 18 }} />, link: '/planogram/master-pog' },
+      { value: 'rule-management', label: 'POG Rule Management', icon: <AssignmentOutlined sx={{ fontSize: 18 }} />, link: '/planogram/rule-management' },
+      { value: 'localization-engine', label: 'POG Localization Engine', icon: <AutoAwesomeOutlined sx={{ fontSize: 18 }} />, link: '/planogram/localization-engine' },
     ],
   },
   {
     value: 'command-center',
     label: 'Command Center',
-    icon: <Radio size={20} />,
+    icon: <RouterOutlined sx={{ fontSize: 20 }} />,
     children: [
-      { value: 'ai-copilot', label: 'AI Copilot', icon: <Bot size={18} />, link: '/command-center/ai-copilot' },
-      { value: 'operations-queue', label: 'Operations Queue', icon: <ListChecks size={18} />, link: '/command-center/operations-queue' },
-      { value: 'communications', label: 'Communications', icon: <MessagesSquare size={18} />, link: '/command-center/communications' },
+      { value: 'ai-copilot', label: 'AI Copilot', icon: <SmartToyOutlined sx={{ fontSize: 18 }} />, link: '/command-center/ai-copilot' },
+      { value: 'operations-queue', label: 'Operations Queue', icon: <PlaylistAddCheckOutlined sx={{ fontSize: 18 }} />, link: '/command-center/operations-queue' },
+      { value: 'communications', label: 'Communications', icon: <ForumOutlined sx={{ fontSize: 18 }} />, link: '/command-center/communications' },
     ],
   },
   {
     value: 'app-config',
     label: 'Application Configuration',
-    icon: <Settings size={20} />,
+    icon: <SettingsOutlined sx={{ fontSize: 20 }} />,
     children: [
-      { value: 'user-access', label: 'User Access Management', icon: <Users size={18} />, link: '/app-config/user-access' },
+      { value: 'user-access', label: 'User Access Management', icon: <GroupOutlined sx={{ fontSize: 18 }} />, link: '/app-config/user-access' },
     ],
   },
 ];

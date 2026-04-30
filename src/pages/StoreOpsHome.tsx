@@ -1,44 +1,43 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import {
-  Sun,
-  Moon,
-  CloudSun,
-  RefreshCw,
-  Sparkles,
-  TrendingUp,
-  TrendingDown,
-  AlertTriangle,
-  Users,
-  ChevronRight,
-  ChevronDown,
-  Clock,
-  CheckCircle2,
-  AlertCircle,
-  Zap,
-  Package,
-  Store,
-  Bell,
-  Check,
-  BarChart3,
-  ArrowRight,
-  Minus,
-  Calendar,
-  X,
-  MapPin,
-  Phone,
-  Search,
-  Download,
-  ExternalLink,
-  ClipboardCheck,
-  UserPlus,
-  Send,
-  ShoppingCart,
-  Truck,
-  MessageCircle,
-  Star,
-  FileText,
-  Eye
-} from 'lucide-react';
+import WbSunnyOutlined from '@mui/icons-material/WbSunnyOutlined';
+import DarkModeOutlined from '@mui/icons-material/DarkModeOutlined';
+import WbCloudyOutlined from '@mui/icons-material/WbCloudyOutlined';
+import RefreshOutlined from '@mui/icons-material/RefreshOutlined';
+import AutoAwesomeOutlined from '@mui/icons-material/AutoAwesomeOutlined';
+import TrendingUpOutlined from '@mui/icons-material/TrendingUpOutlined';
+import TrendingDownOutlined from '@mui/icons-material/TrendingDownOutlined';
+import WarningAmberOutlined from '@mui/icons-material/WarningAmberOutlined';
+import GroupOutlined from '@mui/icons-material/GroupOutlined';
+import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
+import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
+import AccessTimeOutlined from '@mui/icons-material/AccessTimeOutlined';
+import TaskAltOutlined from '@mui/icons-material/TaskAltOutlined';
+import ErrorOutlined from '@mui/icons-material/ErrorOutlined';
+import BoltOutlined from '@mui/icons-material/BoltOutlined';
+import InventoryOutlined from '@mui/icons-material/InventoryOutlined';
+import StoreOutlined from '@mui/icons-material/StoreOutlined';
+import NotificationsOutlined from '@mui/icons-material/NotificationsOutlined';
+import Check from '@mui/icons-material/Check';
+import BarChartOutlined from '@mui/icons-material/BarChartOutlined';
+import ArrowForwardOutlined from '@mui/icons-material/ArrowForwardOutlined';
+import Remove from '@mui/icons-material/Remove';
+import CalendarTodayOutlined from '@mui/icons-material/CalendarTodayOutlined';
+import CloseOutlined from '@mui/icons-material/CloseOutlined';
+import PlaceOutlined from '@mui/icons-material/PlaceOutlined';
+import PhoneOutlined from '@mui/icons-material/PhoneOutlined';
+import SearchOutlined from '@mui/icons-material/SearchOutlined';
+import FileDownloadOutlined from '@mui/icons-material/FileDownloadOutlined';
+import OpenInNewOutlined from '@mui/icons-material/OpenInNewOutlined';
+import AssignmentTurnedInOutlined from '@mui/icons-material/AssignmentTurnedInOutlined';
+import PersonAddAlt1Outlined from '@mui/icons-material/PersonAddAlt1Outlined';
+import SendOutlined from '@mui/icons-material/SendOutlined';
+import ShoppingCartOutlined from '@mui/icons-material/ShoppingCartOutlined';
+import LocalShippingOutlined from '@mui/icons-material/LocalShippingOutlined';
+import ChatBubbleOutlineOutlined from '@mui/icons-material/ChatBubbleOutlineOutlined';
+import StarBorderOutlined from '@mui/icons-material/StarBorderOutlined';
+import DescriptionOutlined from '@mui/icons-material/DescriptionOutlined';
+import VisibilityOutlined from '@mui/icons-material/VisibilityOutlined';
+import { Button, Card } from 'impact-ui';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -438,9 +437,9 @@ const generateMockBroadcasts = (): BroadcastMessage[] => [
 
 const getGreeting = (): { text: string; icon: React.ReactNode } => {
   const hour = new Date().getHours();
-  if (hour < 12) return { text: 'Good morning', icon: <Sun size={20} /> };
-  if (hour < 17) return { text: 'Good afternoon', icon: <CloudSun size={20} /> };
-  return { text: 'Good evening', icon: <Moon size={20} /> };
+  if (hour < 12) return { text: 'Good morning', icon: <WbSunnyOutlined sx={{ fontSize: 20 }}/> };
+  if (hour < 17) return { text: 'Good afternoon', icon: <WbCloudyOutlined sx={{ fontSize: 20 }}/> };
+  return { text: 'Good evening', icon: <DarkModeOutlined sx={{ fontSize: 20 }}/> };
 };
 
 const getPriorityColor = (priority: Priority | 'HIGH' | 'MEDIUM' | 'LOW') => {
@@ -533,7 +532,7 @@ const AssigneeDropdown: React.FC<AssigneeDropdownProps> = ({ value, options, onC
         ) : (
           <span className="assignee-dropdown-placeholder">{placeholder}</span>
         )}
-        <ChevronDown size={16} className={`assignee-dropdown-chevron ${isOpen ? 'open' : ''}`} />
+        <KeyboardArrowDown sx={{ fontSize: 16 }} className={`assignee-dropdown-chevron ${isOpen ? 'open' : ''}`}/>
       </button>
       {isOpen && (
         <div className="assignee-dropdown-menu">
@@ -549,7 +548,7 @@ const AssigneeDropdown: React.FC<AssigneeDropdownProps> = ({ value, options, onC
                 <span className="assignee-dropdown-name">{opt.label}</span>
                 {opt.sublabel && <span className="assignee-dropdown-role">{opt.sublabel}</span>}
               </div>
-              {value === opt.value && <Check size={16} className="assignee-dropdown-check" />}
+              {value === opt.value && <Check sx={{ fontSize: 16 }} className="assignee-dropdown-check"/>}
             </button>
           ))}
         </div>
@@ -1119,11 +1118,11 @@ export const StoreOpsHome: React.FC = () => {
           <div className="welcome-meta">
             <span className="role-badge">{user?.role || 'DM'}</span>
             <span className="scope-info">
-              <Store size={14} />
+              <StoreOutlined sx={{ fontSize: 14 }}/>
               {user?.store || user?.district || 'District 14'}
             </span>
             <span className="last-refresh-date">
-              <Calendar size={14} />
+              <CalendarTodayOutlined sx={{ fontSize: 14 }}/>
               Last refreshed: Apr 27, 2026 at 11:31 AM
             </span>
             <button
@@ -1131,7 +1130,7 @@ export const StoreOpsHome: React.FC = () => {
               onClick={handleRefresh}
               disabled={isRefreshing}
             >
-              <RefreshCw size={14} />
+              <RefreshOutlined sx={{ fontSize: 14 }}/>
             </button>
           </div>
         </div>
@@ -1142,11 +1141,11 @@ export const StoreOpsHome: React.FC = () => {
         <div className="ai-brief-header-bar" onClick={() => setIsBriefCollapsed(!isBriefCollapsed)}>
           <div className="ai-brief-header-left">
             <div className={`ai-brief-toggle ${isBriefCollapsed ? 'collapsed' : ''}`}>
-              <ChevronDown size={14} />
+              <KeyboardArrowDown sx={{ fontSize: 14 }}/>
             </div>
             <div className="ai-brief-header">
               <div className="ai-brief-badge-clean">
-                <Sparkles size={18} />
+                <AutoAwesomeOutlined sx={{ fontSize: 18 }}/>
                 <span>AI Daily Brief</span>
               </div>
             </div>
@@ -1160,7 +1159,7 @@ export const StoreOpsHome: React.FC = () => {
               </p>
 
               <div className="ai-brief-section">
-                <h3 className="ai-brief-section-title"><TrendingUp size={14} /> Sales &amp; Margin</h3>
+                <h3 className="ai-brief-section-title"><TrendingUpOutlined sx={{ fontSize: 14 }}/> Sales &amp; Margin</h3>
                 <ul className="ai-brief-bullets">
                   <li>District weekly revenue came in at <strong>$2.4M</strong>, <strong>+8% vs target</strong> and +5% WoW. 6 of 8 stores exceeded plan — Nashville Flagship and Memphis Central are leading contributors.</li>
                   <li>Gross margin held steady at <strong>34.2%</strong> (+0.3pp vs last week). Markdown optimization on seasonal clearance items contributed an estimated <strong>$18K margin recovery</strong> this period.</li>
@@ -1169,7 +1168,7 @@ export const StoreOpsHome: React.FC = () => {
               </div>
 
               <div className="ai-brief-section">
-                <h3 className="ai-brief-section-title"><BarChart3 size={14} /> District Performance Index</h3>
+                <h3 className="ai-brief-section-title"><BarChartOutlined sx={{ fontSize: 14 }}/> District Performance Index</h3>
                 <ul className="ai-brief-bullets">
                   <li>DPI moved from <strong>80 → 82</strong> (+2pts MoM), placing the district in the <strong>top 10% — Excellence Tier</strong>. This is the highest score in 6 months.</li>
                   <li>The uplift is causally linked to improved SEA compliance scores (+6pts avg across stores) and a reduction in overdue task backlog (down 40% from last month).</li>
@@ -1178,7 +1177,7 @@ export const StoreOpsHome: React.FC = () => {
               </div>
 
               <div className="ai-brief-section">
-                <h3 className="ai-brief-section-title"><CheckCircle2 size={14} /> Operational Highlights</h3>
+                <h3 className="ai-brief-section-title"><TaskAltOutlined sx={{ fontSize: 14 }}/> Operational Highlights</h3>
                 <ul className="ai-brief-bullets">
                   <li><strong>Compliance:</strong> All audits completed — district-wide POG adherence at <strong>97%</strong> (up from 94%). Franklin Town Center hit 100% Camera Shelf Audit compliance for the 3rd straight week.</li>
                   <li><strong>Task Execution:</strong> 87% on-time completion rate. 2 critical overdue items remain and are escalated in your Action Queue.</li>
@@ -1187,7 +1186,7 @@ export const StoreOpsHome: React.FC = () => {
               </div>
 
               <div className="ai-brief-section">
-                <h3 className="ai-brief-section-title"><Star size={14} /> Customer Experience</h3>
+                <h3 className="ai-brief-section-title"><StarBorderOutlined sx={{ fontSize: 14 }}/> Customer Experience</h3>
                 <ul className="ai-brief-bullets">
                   <li>NPS improved to <strong>72 (+12 points)</strong>. North region stores leading, with "helpful staff" as the top positive VoC theme. Store #2156 top rated at 84.</li>
                   <li>Negative VoC theme <strong>"Messy Aisles"</strong> is trending up +34% — this is flagged as a Rising Risk in your Alerts section with a detailed breakdown.</li>
@@ -1195,7 +1194,7 @@ export const StoreOpsHome: React.FC = () => {
               </div>
 
               <div className="ai-brief-section ai-brief-suggestions">
-                <h3 className="ai-brief-section-title"><Sparkles size={14} /> Suggestions</h3>
+                <h3 className="ai-brief-section-title"><AutoAwesomeOutlined sx={{ fontSize: 14 }}/> Suggestions</h3>
                 <ul className="ai-brief-bullets">
                   <li>Nashville Flagship's execution playbook could be a template for underperforming stores — consider scheduling a best-practices share session.</li>
                   <li>Cross-sell POG in personal care is showing strong lift. <em>Recommend rolling it out to Franklin Town Center and Murfreesboro Plaza next week.</em></li>
@@ -1212,7 +1211,7 @@ export const StoreOpsHome: React.FC = () => {
           {!isBriefCollapsed && (
             <button className="ai-brief-read-more" onClick={() => setShowBriefModal(true)}>
               <span>Read Full Brief</span>
-              <ChevronRight size={14} />
+              <KeyboardArrowRight sx={{ fontSize: 14 }}/>
             </button>
           )}
         </div>
@@ -1228,12 +1227,12 @@ export const StoreOpsHome: React.FC = () => {
               <div className="section-title-v3">
                 {insights.some(i => i.type === 'risk') ? (
                   <>
-                    <AlertTriangle size={16} className="header-icon-risk" />
+                    <WarningAmberOutlined sx={{ fontSize: 16 }} className="header-icon-risk"/>
                     <h2>Alerts</h2>
                   </>
                 ) : (
                   <>
-                    <Sparkles size={18} className="header-icon-positive" />
+                    <AutoAwesomeOutlined sx={{ fontSize: 18 }} className="header-icon-positive"/>
                     <h2>Alerts</h2>
                   </>
                 )}
@@ -1246,77 +1245,75 @@ export const StoreOpsHome: React.FC = () => {
             </div>
             <div className="insights-content-v3">
               {/* Product Recall — Critical */}
-              <div className="insight-hero-card">
+              <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: 0, overflow: 'hidden', marginBottom: 'var(--space-lg)' }}>
                 <div className="hero-card-content">
                   <div className="hero-card-header">
                     <div className="hero-signal critical">
-                      <AlertTriangle size={14} />
+                      <WarningAmberOutlined sx={{ fontSize: 14 }}/>
                       <span>CRITICAL</span>
                     </div>
                   </div>
                   <h2 className="hero-headline">Product Recall — Organic Baby Lotion Batch #7742</h2>
                   <p className="hero-context">Organic Baby Lotion Batch #7742 must be removed immediately. FDA safety alert issued 2 hours ago. 3 stores impacted.</p>
                   <div className="hero-impact">
-                    <AlertCircle size={14} />
+                    <ErrorOutlined sx={{ fontSize: 14 }}/>
                     <span>Immediate removal required across all impacted locations</span>
                   </div>
                   <div className="hero-top-store">
-                    <Store size={12} />
+                    <StoreOutlined sx={{ fontSize: 12 }}/>
                     <span>Store #1234 most critical</span>
                   </div>
                   <div className="hero-actions">
-                    <button className="hero-action-primary" onClick={() => openAlertPanel('product-recall')}>
-                      <span>View impacted stores</span>
-                      <ChevronRight size={16} />
-                    </button>
+                    <Button variant="contained" color="primary" className="hero-action-primary" onClick={() => openAlertPanel('product-recall')} endIcon={<KeyboardArrowRight sx={{ fontSize: 16 }}/>}>
+                      View impacted stores
+                    </Button>
                   </div>
                 </div>
-              </div>
+              </Card>
 
               {/* VoC Trending — Rising Risk */}
-              <div className="insight-hero-card">
+              <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: 0, overflow: 'hidden', marginBottom: 'var(--space-lg)' }}>
                 <div className="hero-card-content">
                   <div className="hero-card-header">
                     <div className="hero-signal warning">
-                      <TrendingUp size={14} />
+                      <TrendingUpOutlined sx={{ fontSize: 14 }}/>
                       <span>VOC TRENDING</span>
                     </div>
                     <div className="hero-overdue">
-                      <AlertTriangle size={12} />
+                      <WarningAmberOutlined sx={{ fontSize: 12 }}/>
                       <span>Rising Risk</span>
                     </div>
                   </div>
                   <h2 className="hero-headline">"Messy Aisles" — Top Rising Theme</h2>
                   <p className="hero-context">Mentions up +34% over last 2 weeks across 3 stores. Correlates with declining SEA Cleanliness scores and negative sales trajectory.</p>
                   <div className="hero-impact">
-                    <Store size={14} />
+                    <StoreOutlined sx={{ fontSize: 14 }}/>
                     <span>Murfreesboro Plaza #4532 (+22%) · Chattanooga Riverside #2198 (+18%) · Knoxville East #3421 (+12%)</span>
                   </div>
                   <div className="hero-top-store">
-                    <Sparkles size={12} />
+                    <AutoAwesomeOutlined sx={{ fontSize: 12 }}/>
                     <span>AI Copilot has prepared an action plan for this theme</span>
                   </div>
                   <div className="hero-actions">
-                    <button className="hero-action-primary" onClick={() => openAlertPanel('voc-trending')}>
-                      <span>View impacted stores</span>
-                      <ChevronRight size={16} />
-                    </button>
+                    <Button variant="contained" color="primary" className="hero-action-primary" onClick={() => openAlertPanel('voc-trending')} endIcon={<KeyboardArrowRight sx={{ fontSize: 16 }}/>}>
+                      View impacted stores
+                    </Button>
                   </div>
                 </div>
-              </div>
+              </Card>
 
               {/* Inventory Risk */}
               {insights.filter(i => i.isHero || i.type === 'risk').slice(0, 1).map((item) => (
-                <div key={item.id} className="insight-hero-card">
+                <Card key={item.id} size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: 0, overflow: 'hidden', marginBottom: 'var(--space-lg)' }}>
                   <div className="hero-card-content">
                     <div className="hero-card-header">
                       <div className="hero-signal">
-                        <TrendingDown size={14} />
+                        <TrendingDownOutlined sx={{ fontSize: 14 }}/>
                         <span>{item.signal}</span>
                       </div>
                       {item.overdueCount && (
                         <div className="hero-overdue">
-                          <Clock size={12} />
+                          <AccessTimeOutlined sx={{ fontSize: 12 }}/>
                           <span>{item.overdueCount} overdue actions</span>
                         </div>
                       )}
@@ -1325,24 +1322,23 @@ export const StoreOpsHome: React.FC = () => {
                     <p className="hero-context">{item.context}</p>
                     {item.impactDetail && (
                       <div className="hero-impact">
-                        <AlertCircle size={14} />
+                        <ErrorOutlined sx={{ fontSize: 14 }}/>
                         <span>{item.impactDetail}</span>
                       </div>
                     )}
                     {item.topStore && (
                       <div className="hero-top-store">
-                        <Store size={12} />
+                        <StoreOutlined sx={{ fontSize: 12 }}/>
                         <span>{item.topStore}</span>
                       </div>
                     )}
                     <div className="hero-actions">
-                      <button className="hero-action-primary" onClick={() => openAlertPanel('inventory-risk')}>
-                        <span>View impacted stores</span>
-                        <ChevronRight size={16} />
-                      </button>
+                      <Button variant="contained" color="primary" className="hero-action-primary" onClick={() => openAlertPanel('inventory-risk')} endIcon={<KeyboardArrowRight sx={{ fontSize: 16 }}/>}>
+                        View impacted stores
+                      </Button>
                     </div>
                   </div>
-                </div>
+                </Card>
               ))}
             </div>
           </div>
@@ -1351,7 +1347,7 @@ export const StoreOpsHome: React.FC = () => {
           <div className="store-ops-section action-queue-v2">
             <div className="action-queue-header">
               <div className="queue-title-row">
-                <Zap size={18} className="queue-icon" />
+                <BoltOutlined sx={{ fontSize: 18 }} className="queue-icon"/>
                 <h2>Action Queue</h2>
               </div>
               <span className="queue-subtitle">{displayedActions.length} tasks requiring attention</span>
@@ -1360,15 +1356,24 @@ export const StoreOpsHome: React.FC = () => {
               {displayedActions.length > 0 ? (
                 <div className="action-cards-v2">
                   {displayedActions.map((item, index) => (
-                    <div
+                    <Card
                       key={item.id}
-                      className={`action-card-v2 severity-${item.severity} ${index === 0 ? 'hero-task' : ''}`}
+                      size="extraSmall"
+                      sx={{
+                        maxWidth: '100%',
+                        minHeight: 0,
+                        padding: '12px 16px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '14px',
+                        transition: 'box-shadow 0.2s ease',
+                      }}
                     >
-                      {/* Integrated Rank */}
+                      {/* Rank Badge */}
                       <div className="action-rank-v2">
                         <span>{index + 1}</span>
                       </div>
-                      
+
                       {/* Main Content */}
                       <div className="action-main">
                         {/* Title Row */}
@@ -1378,12 +1383,12 @@ export const StoreOpsHome: React.FC = () => {
                             <span className="severity-badge critical">BLOCKING</span>
                           )}
                         </div>
-                        
-                        {/* Impact - Most Prominent */}
+
+                        {/* Impact */}
                         {item.impact && (
                           <p className="action-impact-v2">{item.impact}</p>
                         )}
-                        
+
                         {/* Context Row */}
                         <div className="action-meta-row">
                           <span className="action-context-v2">{item.context}</span>
@@ -1396,30 +1401,30 @@ export const StoreOpsHome: React.FC = () => {
                           </span>
                         </div>
                       </div>
-                      
+
                       {/* CTA Button */}
-                      <button 
+                      <button
                         className={`action-cta severity-${item.severity}`}
                         onClick={() => handleActionClick(item)}
                       >
                         {item.cta}
-                        <ChevronRight size={14} />
+                        <KeyboardArrowRight sx={{ fontSize: 14 }}/>
                       </button>
-                    </div>
+                    </Card>
                   ))}
                 </div>
               ) : (
                 <div className="action-queue-empty all-clear">
-                  <CheckCircle2 size={32} />
+                  <TaskAltOutlined sx={{ fontSize: 32 }}/>
                   <h3>You're all caught up!</h3>
                   <p>No pending tasks. Here are some suggestions:</p>
                   <div className="empty-suggestions">
                     <button className="suggestion-btn">
-                      <BarChart3 size={16} />
+                      <BarChartOutlined sx={{ fontSize: 16 }}/>
                       Review trends
                     </button>
                     <button className="suggestion-btn">
-                      <Users size={16} />
+                      <GroupOutlined sx={{ fontSize: 16 }}/>
                       Check VoC
                     </button>
                   </div>
@@ -1433,21 +1438,21 @@ export const StoreOpsHome: React.FC = () => {
             <div className="store-ops-section action-queue-v2 completed-actions-section">
               <div className="action-queue-header">
                 <div className="queue-title-row">
-                  <CheckCircle2 size={18} className="queue-icon" style={{ color: '#16a34a' }} />
+                  <TaskAltOutlined sx={{ fontSize: 18 }} className="queue-icon" style={{ color: 'var(--ia-color-success)' }}/>
                   <h2>Completed Actions</h2>
                 </div>
-                <span className="queue-subtitle" style={{ color: '#16a34a' }}>{archivedActions.length} done</span>
+                <span className="queue-subtitle" style={{ color: 'var(--ia-color-success)' }}>{archivedActions.length} done</span>
               </div>
               <div className="action-queue-content-v2 completed-actions-scroll">
                 <div className="action-cards-v2">
                   {[...archivedActions].reverse().map((action) => (
-                    <div key={action.id} className="action-card-v2">
+                    <Card key={action.id} size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '14px' }}>
                       <div className={`action-rank-v2 completed-rank type-${action.type}`}>
                         <span>
-                          {action.type === 'approved' && <Check size={12} />}
-                          {action.type === 'rejected' && <X size={12} />}
-                          {action.type === 'assigned' && <Users size={12} />}
-                          {action.type === 'reorder' && <Package size={12} />}
+                          {action.type === 'approved' && <Check sx={{ fontSize: 12 }}/>}
+                          {action.type === 'rejected' && <CloseOutlined sx={{ fontSize: 12 }}/>}
+                          {action.type === 'assigned' && <GroupOutlined sx={{ fontSize: 12 }}/>}
+                          {action.type === 'reorder' && <InventoryOutlined sx={{ fontSize: 12 }}/>}
                         </span>
                       </div>
                       <div className="action-main">
@@ -1466,7 +1471,7 @@ export const StoreOpsHome: React.FC = () => {
                       <span className={`completed-status-badge type-${action.type}`}>
                         {action.type === 'approved' ? 'Done' : action.type === 'rejected' ? 'Sent Back' : action.type === 'assigned' ? 'Assigned' : 'Reordered'}
                       </span>
-                    </div>
+                    </Card>
                   ))}
                 </div>
               </div>
@@ -1477,19 +1482,19 @@ export const StoreOpsHome: React.FC = () => {
         {/* RIGHT COLUMN: HQ Broadcasts → KPI Snapshot */}
         <div className="home-col-right">
           {/* HQ Broadcasts */}
-          <div className="hq-broadcasts-card">
+          <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: 0, overflow: 'hidden' }}>
             <div 
               className="hq-broadcasts-header"
               onClick={() => setBroadcastsExpanded(!broadcastsExpanded)}
             >
               <div className="hq-broadcasts-title">
-                <Bell size={15} />
+                <NotificationsOutlined sx={{ fontSize: 15 }}/>
                 <span>HQ Broadcasts</span>
                 {unreadBroadcastCount > 0 && (
                   <span className="hq-broadcast-count">{unreadBroadcastCount}</span>
                 )}
               </div>
-              <ChevronDown size={14} className={`expand-icon ${broadcastsExpanded ? 'expanded' : ''}`} />
+              <KeyboardArrowDown sx={{ fontSize: 14 }} className={`expand-icon ${broadcastsExpanded ? 'expanded' : ''}`}/>
             </div>
             {broadcastsExpanded && (
               <div className="hq-broadcasts-body">
@@ -1504,7 +1509,7 @@ export const StoreOpsHome: React.FC = () => {
                         <div className="hq-broadcast-title-row">
                           {broadcast.priority === 'CRITICAL' && (
                             <span className="hq-broadcast-priority-badge critical">
-                              <AlertTriangle size={10} />
+                              <WarningAmberOutlined sx={{ fontSize: 10 }}/>
                               CRITICAL
                             </span>
                           )}
@@ -1527,9 +1532,9 @@ export const StoreOpsHome: React.FC = () => {
                               handleViewStores();
                             }}
                           >
-                            <Store size={13} />
+                            <StoreOutlined sx={{ fontSize: 13 }}/>
                             View Impacted Stores
-                            <ChevronRight size={13} />
+                            <KeyboardArrowRight sx={{ fontSize: 13 }}/>
                           </button>
                         )}
                       </div>
@@ -1538,26 +1543,26 @@ export const StoreOpsHome: React.FC = () => {
                 </div>
               </div>
             )}
-          </div>
+          </Card>
 
           {/* KPI Snapshot */}
-          <div className="store-ops-section kpi-snapshot-card">
+          <Card sx={{ maxWidth: '100%', minHeight: 'unset', padding: 0, width: '100%', borderRadius: '12px', border: '1px solid var(--ia-color-border)', boxShadow: '0 1px 3px rgba(15,23,42,0.04)', overflow: 'hidden' }}>
             <div className="kpi-snapshot-header">
               <div className="kpi-snapshot-title-row">
-                <BarChart3 size={16} className="kpi-snapshot-icon" />
+                <BarChartOutlined sx={{ fontSize: 16 }} className="kpi-snapshot-icon"/>
                 <h2>Operational Pulse</h2>
               </div>
             </div>
             <div className="kpi-snapshot-grid">
               <div className="kpi-snapshot-item">
-                <div className="kpi-snapshot-item-icon stores"><Store size={16} /></div>
+                <div className="kpi-snapshot-item-icon stores"><StoreOutlined sx={{ fontSize: 16 }}/></div>
                 <div className="kpi-snapshot-item-data">
                   <span className="kpi-snapshot-value">8</span>
                   <span className="kpi-snapshot-label">Stores Managed</span>
                 </div>
               </div>
               <div className="kpi-snapshot-item">
-                <div className="kpi-snapshot-item-icon tasks"><Zap size={16} /></div>
+                <div className="kpi-snapshot-item-icon tasks"><BoltOutlined sx={{ fontSize: 16 }}/></div>
                 <div className="kpi-snapshot-item-data">
                   <span className="kpi-snapshot-value">{pendingCount + overdueCount}</span>
                   <span className="kpi-snapshot-label">Tasks Today</span>
@@ -1565,7 +1570,7 @@ export const StoreOpsHome: React.FC = () => {
                 {overdueCount > 0 && <span className="kpi-snapshot-badge warning">{overdueCount} overdue</span>}
               </div>
               <div className="kpi-snapshot-item">
-                <div className="kpi-snapshot-item-icon compliance"><CheckCircle2 size={16} /></div>
+                <div className="kpi-snapshot-item-icon compliance"><TaskAltOutlined sx={{ fontSize: 16 }}/></div>
                 <div className="kpi-snapshot-item-data">
                   <span className="kpi-snapshot-value">87%</span>
                   <span className="kpi-snapshot-label">Compliance</span>
@@ -1573,7 +1578,7 @@ export const StoreOpsHome: React.FC = () => {
                 <span className="kpi-snapshot-badge positive">+3%</span>
               </div>
               <div className="kpi-snapshot-item">
-                <div className="kpi-snapshot-item-icon nps"><Star size={16} /></div>
+                <div className="kpi-snapshot-item-icon nps"><StarBorderOutlined sx={{ fontSize: 16 }}/></div>
                 <div className="kpi-snapshot-item-data">
                   <span className="kpi-snapshot-value">72</span>
                   <span className="kpi-snapshot-label">NPS Score</span>
@@ -1581,7 +1586,7 @@ export const StoreOpsHome: React.FC = () => {
                 <span className="kpi-snapshot-badge positive">+12</span>
               </div>
             </div>
-          </div>
+          </Card>
         </div>
       </div>
 
@@ -1591,11 +1596,11 @@ export const StoreOpsHome: React.FC = () => {
           <div className="brief-modal" onClick={(e) => e.stopPropagation()}>
             <div className="brief-modal-header">
               <div className="brief-modal-title">
-                <Sparkles size={18} />
+                <AutoAwesomeOutlined sx={{ fontSize: 18 }}/>
                 <h2>AI Daily Brief</h2>
               </div>
               <button className="brief-modal-close" onClick={() => setShowBriefModal(false)}>
-                <X size={20} />
+                <CloseOutlined sx={{ fontSize: 20 }}/>
               </button>
             </div>
             <div className="brief-modal-content">
@@ -1605,7 +1610,7 @@ export const StoreOpsHome: React.FC = () => {
                 </p>
 
                 <div className="ai-brief-section">
-                  <h3 className="ai-brief-section-title"><TrendingUp size={14} /> Sales &amp; Margin</h3>
+                  <h3 className="ai-brief-section-title"><TrendingUpOutlined sx={{ fontSize: 14 }}/> Sales &amp; Margin</h3>
                   <ul className="ai-brief-bullets">
                     <li>District weekly revenue came in at <strong>$2.4M</strong>, <strong>+8% vs target</strong> and +5% WoW. 6 of 8 stores exceeded plan — Nashville Flagship and Memphis Central are leading contributors.</li>
                     <li>Gross margin held steady at <strong>34.2%</strong> (+0.3pp vs last week). Markdown optimization on seasonal clearance items contributed an estimated <strong>$18K margin recovery</strong> this period.</li>
@@ -1614,7 +1619,7 @@ export const StoreOpsHome: React.FC = () => {
                 </div>
 
                 <div className="ai-brief-section">
-                  <h3 className="ai-brief-section-title"><BarChart3 size={14} /> District Performance Index</h3>
+                  <h3 className="ai-brief-section-title"><BarChartOutlined sx={{ fontSize: 14 }}/> District Performance Index</h3>
                   <ul className="ai-brief-bullets">
                     <li>DPI moved from <strong>80 → 82</strong> (+2pts MoM), placing the district in the <strong>top 10% — Excellence Tier</strong>. This is the highest score in 6 months.</li>
                     <li>The uplift is causally linked to improved SEA compliance scores (+6pts avg across stores) and a reduction in overdue task backlog (down 40% from last month).</li>
@@ -1623,7 +1628,7 @@ export const StoreOpsHome: React.FC = () => {
                 </div>
 
                 <div className="ai-brief-section">
-                  <h3 className="ai-brief-section-title"><CheckCircle2 size={14} /> Operational Highlights</h3>
+                  <h3 className="ai-brief-section-title"><TaskAltOutlined sx={{ fontSize: 14 }}/> Operational Highlights</h3>
                   <ul className="ai-brief-bullets">
                     <li><strong>Compliance:</strong> All audits completed — district-wide POG adherence at <strong>97%</strong> (up from 94%). Franklin Town Center hit 100% Camera Shelf Audit compliance for the 3rd straight week.</li>
                     <li><strong>Task Execution:</strong> 87% on-time completion rate. 2 critical overdue items remain and are escalated in your Action Queue.</li>
@@ -1632,7 +1637,7 @@ export const StoreOpsHome: React.FC = () => {
                 </div>
 
                 <div className="ai-brief-section">
-                  <h3 className="ai-brief-section-title"><Star size={14} /> Customer Experience</h3>
+                  <h3 className="ai-brief-section-title"><StarBorderOutlined sx={{ fontSize: 14 }}/> Customer Experience</h3>
                   <ul className="ai-brief-bullets">
                     <li>NPS improved to <strong>72 (+12 points)</strong>. North region stores leading, with "helpful staff" as the top positive VoC theme. Store #2156 top rated at 84.</li>
                     <li>Negative VoC theme <strong>"Messy Aisles"</strong> is trending up +34% — this is flagged as a Rising Risk in your Alerts section with a detailed breakdown.</li>
@@ -1640,7 +1645,7 @@ export const StoreOpsHome: React.FC = () => {
                 </div>
 
                 <div className="ai-brief-section ai-brief-suggestions">
-                  <h3 className="ai-brief-section-title"><Sparkles size={14} /> Suggestions</h3>
+                  <h3 className="ai-brief-section-title"><AutoAwesomeOutlined sx={{ fontSize: 14 }}/> Suggestions</h3>
                   <ul className="ai-brief-bullets">
                     <li>Nashville Flagship's execution playbook could be a template for underperforming stores — consider scheduling a best-practices share session.</li>
                     <li>Cross-sell POG in personal care is showing strong lift. <em>Recommend rolling it out to Franklin Town Center and Murfreesboro Plaza next week.</em></li>
@@ -1665,7 +1670,7 @@ export const StoreOpsHome: React.FC = () => {
             <div className="action-modal-header">
               <div className="action-modal-title-row">
                 <div className="recall-header-icon">
-                  <AlertTriangle size={18} />
+                  <WarningAmberOutlined sx={{ fontSize: 18 }}/>
                 </div>
                 <div>
                   <h2>Product Recall — Impacted Stores</h2>
@@ -1673,14 +1678,14 @@ export const StoreOpsHome: React.FC = () => {
                 </div>
               </div>
               <button className="action-modal-close" onClick={() => setShowViewStoresModal(false)}>
-                <X size={20} />
+                <CloseOutlined sx={{ fontSize: 20 }}/>
               </button>
             </div>
 
             {/* Summary bar */}
             <div className="recall-select-bar">
               <div className="recall-select-meta">
-                <span className="recall-stores-count"><Store size={13} /> {impactedStores.length} stores impacted</span>
+                <span className="recall-stores-count"><StoreOutlined sx={{ fontSize: 13 }}/> {impactedStores.length} stores impacted</span>
                 <span className="recall-sku-total">{impactedStores.reduce((sum, s) => sum + s.unitCount, 0)} units to pull</span>
               </div>
             </div>
@@ -1709,8 +1714,8 @@ export const StoreOpsHome: React.FC = () => {
                         <div className="recall-card-identity">
                           <h4>{store.name}</h4>
                           <span className={`recall-status-pill ${store.status}`}>
-                            {store.status === 'critical' && <AlertTriangle size={10} />}
-                            {store.status === 'warning' && <AlertCircle size={10} />}
+                            {store.status === 'critical' && <WarningAmberOutlined sx={{ fontSize: 10 }}/>}
+                            {store.status === 'warning' && <ErrorOutlined sx={{ fontSize: 10 }}/>}
                             {store.status === 'critical' ? 'Critical' : 'Warning'}
                           </span>
                         </div>
@@ -1719,7 +1724,7 @@ export const StoreOpsHome: React.FC = () => {
 
                       <div className="recall-card-grid">
                         <div className="recall-card-detail">
-                          <MapPin size={13} />
+                          <PlaceOutlined sx={{ fontSize: 13 }}/>
                           <span>{store.address}</span>
                         </div>
                         <div className="recall-card-detail">
@@ -1727,7 +1732,7 @@ export const StoreOpsHome: React.FC = () => {
                           <span>{store.manager}</span>
                         </div>
                         <div className="recall-card-detail">
-                          <Phone size={13} />
+                          <PhoneOutlined sx={{ fontSize: 13 }}/>
                           <span>{store.phone}</span>
                         </div>
                       </div>
@@ -1749,7 +1754,7 @@ export const StoreOpsHome: React.FC = () => {
                   navigate('/command-center/operations-queue?broadcast=bc-001');
                 }}
               >
-                <ExternalLink size={16} />
+                <OpenInNewOutlined sx={{ fontSize: 16 }}/>
                 Open in Operations Queue
               </button>
             </div>
@@ -1763,11 +1768,11 @@ export const StoreOpsHome: React.FC = () => {
           <div className="action-modal" onClick={(e) => e.stopPropagation()}>
             <div className="action-modal-header">
               <div className="action-modal-title-row">
-                <UserPlus size={20} />
+                <PersonAddAlt1Outlined sx={{ fontSize: 20 }}/>
                 <h2>Assign Task</h2>
               </div>
               <button className="action-modal-close" onClick={() => setShowAssignModal(false)}>
-                <X size={20} />
+                <CloseOutlined sx={{ fontSize: 20 }}/>
               </button>
             </div>
             <div className="action-modal-subtitle">
@@ -1775,7 +1780,7 @@ export const StoreOpsHome: React.FC = () => {
             </div>
             <div className="action-modal-content">
               <div className="assign-search">
-                <Search size={16} />
+                <SearchOutlined sx={{ fontSize: 16 }}/>
                 <input 
                   type="text" 
                   placeholder="Search team members..."
@@ -1801,7 +1806,7 @@ export const StoreOpsHome: React.FC = () => {
                     </div>
                     {selectedAssignee === member.id && (
                       <div className="member-selected">
-                        <Check size={16} />
+                        <Check sx={{ fontSize: 16 }}/>
                       </div>
                     )}
                   </div>
@@ -1821,7 +1826,7 @@ export const StoreOpsHome: React.FC = () => {
                 disabled={!selectedAssignee}
                 onClick={handleAssignSubmit}
               >
-                <Send size={16} />
+                <SendOutlined sx={{ fontSize: 16 }}/>
                 Assign Task
               </button>
             </div>
@@ -1838,14 +1843,14 @@ export const StoreOpsHome: React.FC = () => {
           <div className="action-modal wide" onClick={(e) => e.stopPropagation()}>
             <div className="action-modal-header">
               <div className="action-modal-title-row">
-                <Package size={20} />
+                <InventoryOutlined sx={{ fontSize: 20 }}/>
                 <h2>SKUs at Risk</h2>
               </div>
               <button className="action-modal-close" onClick={() => {
                 setShowSkuReviewModal(false);
                 setSelectedSkus([]);
               }}>
-                <X size={20} />
+                <CloseOutlined sx={{ fontSize: 20 }}/>
               </button>
             </div>
             <div className="action-modal-subtitle">
@@ -1891,7 +1896,7 @@ export const StoreOpsHome: React.FC = () => {
                   >
                     <div className="sku-checkbox">
                       <div className={`checkbox ${selectedSkus.includes(sku.sku) ? 'checked' : ''}`}>
-                        {selectedSkus.includes(sku.sku) && <Check size={12} />}
+                        {selectedSkus.includes(sku.sku) && <Check sx={{ fontSize: 12 }}/>}
                       </div>
                     </div>
                     <span className="sku-id">{sku.sku}</span>
@@ -1911,7 +1916,7 @@ export const StoreOpsHome: React.FC = () => {
               <button className="modal-btn secondary" onClick={() => {
                 showToast('Report downloaded');
               }}>
-                <Download size={16} />
+                <FileDownloadOutlined sx={{ fontSize: 16 }}/>
                 Export Report
               </button>
               <button 
@@ -1919,7 +1924,7 @@ export const StoreOpsHome: React.FC = () => {
                 disabled={selectedSkus.length === 0}
                 onClick={selectedSkus.length === atRiskSkus.length ? handleReorderAll : handleSendReorderAction}
               >
-                <Send size={16} />
+                <SendOutlined sx={{ fontSize: 16 }}/>
                 {selectedSkus.length === 0 
                   ? 'Select SKUs to Reorder' 
                   : selectedSkus.length === atRiskSkus.length 
@@ -1942,7 +1947,7 @@ export const StoreOpsHome: React.FC = () => {
           <div className="action-modal notification-sent" onClick={(e) => e.stopPropagation()}>
             <div className="notification-sent-content">
               <div className="notification-sent-icon">
-                <CheckCircle2 size={48} />
+                <TaskAltOutlined sx={{ fontSize: 48 }}/>
               </div>
               <h2>Reorder Action Sent!</h2>
               <p>Reorder requests have been sent to store owners for the following SKUs:</p>
@@ -1951,14 +1956,14 @@ export const StoreOpsHome: React.FC = () => {
                 {reorderedSkus.map((sku) => (
                   <div key={sku.sku} className="reordered-sku-item">
                     <div className="reordered-sku-icon">
-                      <Package size={16} />
+                      <InventoryOutlined sx={{ fontSize: 16 }}/>
                     </div>
                     <div className="reordered-sku-info">
                       <span className="reordered-sku-name">{sku.name}</span>
                       <span className="reordered-sku-details">{sku.sku} • Qty: {sku.reorderQty} • {sku.supplier}</span>
                     </div>
                     <div className="reordered-sku-status">
-                      <Check size={14} />
+                      <Check sx={{ fontSize: 14 }}/>
                       <span>Sent</span>
                     </div>
                   </div>
@@ -1967,7 +1972,7 @@ export const StoreOpsHome: React.FC = () => {
 
               <div className="notification-message-preview">
                 <div className="message-preview-header">
-                  <Bell size={14} />
+                  <NotificationsOutlined sx={{ fontSize: 14 }}/>
                   <span>Action Sent to Store Owners</span>
                 </div>
                 <div className="message-preview-content">
@@ -1993,7 +1998,7 @@ export const StoreOpsHome: React.FC = () => {
                   showToast('✓ Reorder actions delivered to store owners');
                 }}
               >
-                <Check size={16} />
+                <Check sx={{ fontSize: 16 }}/>
                 Done
               </button>
             </div>
@@ -2007,11 +2012,11 @@ export const StoreOpsHome: React.FC = () => {
           <div className="action-modal" onClick={(e) => e.stopPropagation()}>
             <div className="action-modal-header">
               <div className="action-modal-title-row">
-                <ClipboardCheck size={20} />
+                <AssignmentTurnedInOutlined sx={{ fontSize: 20 }}/>
                 <h2>{selectedActionItem.cta}</h2>
               </div>
               <button className="action-modal-close" onClick={() => setShowActionApprovalModal(false)}>
-                <X size={20} />
+                <CloseOutlined sx={{ fontSize: 20 }}/>
               </button>
             </div>
             <div className="action-modal-content">
@@ -2024,7 +2029,7 @@ export const StoreOpsHome: React.FC = () => {
                 </div>
                 {selectedActionItem.impact && (
                   <div className="approval-impact">
-                    <AlertCircle size={16} />
+                    <ErrorOutlined sx={{ fontSize: 16 }}/>
                     <span>{selectedActionItem.impact}</span>
                   </div>
                 )}
@@ -2052,11 +2057,11 @@ export const StoreOpsHome: React.FC = () => {
             </div>
             <div className="action-modal-footer">
               <button className="modal-btn reject" onClick={handleRejectAction}>
-                <X size={16} />
+                <CloseOutlined sx={{ fontSize: 16 }}/>
                 Send Back
               </button>
               <button className="modal-btn primary" onClick={handleApproveAction}>
-                <Check size={16} />
+                <Check sx={{ fontSize: 16 }}/>
                 {selectedActionItem.cta}
               </button>
             </div>
@@ -2070,11 +2075,11 @@ export const StoreOpsHome: React.FC = () => {
           <div className="action-modal" onClick={(e) => e.stopPropagation()}>
             <div className="action-modal-header">
               <div className="action-modal-title-row">
-                <TrendingUp size={20} />
+                <TrendingUpOutlined sx={{ fontSize: 20 }}/>
                 <h2>Top Performers</h2>
               </div>
               <button className="action-modal-close" onClick={() => setShowTopPerformersModal(false)}>
-                <X size={20} />
+                <CloseOutlined sx={{ fontSize: 20 }}/>
               </button>
             </div>
             <div className="action-modal-subtitle">
@@ -2102,7 +2107,7 @@ export const StoreOpsHome: React.FC = () => {
                       </div>
                     </div>
                     <div className={`performer-trend ${performer.trend}`}>
-                      {performer.trend === 'up' ? <TrendingUp size={16} /> : <Minus size={16} />}
+                      {performer.trend === 'up' ? <TrendingUpOutlined sx={{ fontSize: 16 }}/> : <Remove sx={{ fontSize: 16 }}/>}
                     </div>
                   </div>
                 ))}
@@ -2116,7 +2121,7 @@ export const StoreOpsHome: React.FC = () => {
                 showToast('✓ Performance report exported successfully');
                 setShowTopPerformersModal(false);
               }}>
-                <Download size={16} />
+                <FileDownloadOutlined sx={{ fontSize: 16 }}/>
                 Export Full Report
               </button>
             </div>
@@ -2130,11 +2135,11 @@ export const StoreOpsHome: React.FC = () => {
           <div className="action-modal" onClick={(e) => e.stopPropagation()}>
             <div className="action-modal-header">
               <div className="action-modal-title-row">
-                <MapPin size={20} />
+                <PlaceOutlined sx={{ fontSize: 20 }}/>
                 <h2>Regional Breakdown</h2>
               </div>
               <button className="action-modal-close" onClick={() => setShowRegionalModal(false)}>
-                <X size={20} />
+                <CloseOutlined sx={{ fontSize: 20 }}/>
               </button>
             </div>
             <div className="action-modal-subtitle">
@@ -2154,7 +2159,7 @@ export const StoreOpsHome: React.FC = () => {
                         <span className="nps-label">NPS Score</span>
                       </div>
                       <div className={`regional-change ${region.change >= 0 ? 'positive' : 'negative'}`}>
-                        {region.change >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+                        {region.change >= 0 ? <TrendingUpOutlined sx={{ fontSize: 14 }}/> : <TrendingDownOutlined sx={{ fontSize: 14 }}/>}
                         <span>{region.change >= 0 ? '+' : ''}{region.change} pts</span>
                       </div>
                     </div>
@@ -2164,7 +2169,7 @@ export const StoreOpsHome: React.FC = () => {
                       </div>
                     </div>
                     <div className="regional-top">
-                      <Store size={12} />
+                      <StoreOutlined sx={{ fontSize: 12 }}/>
                       <span>Top: {region.topStore}</span>
                     </div>
                   </div>
@@ -2179,7 +2184,7 @@ export const StoreOpsHome: React.FC = () => {
                 showToast('Opening regional analytics...');
                 setShowRegionalModal(false);
               }}>
-                <BarChart3 size={16} />
+                <BarChartOutlined sx={{ fontSize: 16 }}/>
                 View Analytics
               </button>
             </div>
@@ -2193,11 +2198,11 @@ export const StoreOpsHome: React.FC = () => {
           <div className="planogram-modal" onClick={(e) => e.stopPropagation()}>
             <div className="action-modal-header">
               <div className="action-modal-title-row">
-                <Package size={20} />
+                <InventoryOutlined sx={{ fontSize: 20 }}/>
                 <h2>{selectedPlanogramItem.title}</h2>
               </div>
               <button className="action-modal-close" onClick={() => setShowPlanogramModal(false)}>
-                <X size={20} />
+                <CloseOutlined sx={{ fontSize: 20 }}/>
               </button>
             </div>
             <div className="action-modal-subtitle">
@@ -2267,7 +2272,7 @@ export const StoreOpsHome: React.FC = () => {
                 disabled={Object.keys(planogramActionAssignments).length === 0}
                 onClick={handleCreateActionItems}
               >
-                <Check size={16} />
+                <Check sx={{ fontSize: 16 }}/>
                 Create {Object.keys(planogramActionAssignments).length} Action Items
               </button>
             </div>
@@ -2281,11 +2286,11 @@ export const StoreOpsHome: React.FC = () => {
           <div className="context-modal inventory-modal" onClick={(e) => e.stopPropagation()}>
             <div className="action-modal-header">
               <div className="action-modal-title-row">
-                <Package size={20} />
+                <InventoryOutlined sx={{ fontSize: 20 }}/>
                 <h2>{selectedInventoryItem.title}</h2>
               </div>
               <button className="action-modal-close" onClick={() => setShowInventoryModal(false)}>
-                <X size={20} />
+                <CloseOutlined sx={{ fontSize: 20 }}/>
               </button>
             </div>
             <div className="context-modal-subtitle">
@@ -2358,7 +2363,7 @@ export const StoreOpsHome: React.FC = () => {
                   setShowInventoryModal(false);
                 }}
               >
-                <ShoppingCart size={16} />
+                <ShoppingCartOutlined sx={{ fontSize: 16 }}/>
                 Reorder {selectedSkusForReorder.length} SKUs
               </button>
             </div>
@@ -2372,11 +2377,11 @@ export const StoreOpsHome: React.FC = () => {
           <div className="context-modal checklist-modal" onClick={(e) => e.stopPropagation()}>
             <div className="action-modal-header">
               <div className="action-modal-title-row">
-                <ClipboardCheck size={20} />
+                <AssignmentTurnedInOutlined sx={{ fontSize: 20 }}/>
                 <h2>{selectedChecklistItem.title}</h2>
               </div>
               <button className="action-modal-close" onClick={() => setShowChecklistModal(false)}>
-                <X size={20} />
+                <CloseOutlined sx={{ fontSize: 20 }}/>
               </button>
             </div>
             <div className="action-modal-subtitle">
@@ -2408,13 +2413,13 @@ export const StoreOpsHome: React.FC = () => {
                               className={`check-btn pass ${checklistProgress[item.id] === 'completed' ? 'active' : ''}`}
                               onClick={() => setChecklistProgress(prev => ({ ...prev, [item.id]: 'completed' }))}
                             >
-                              <Check size={14} />
+                              <Check sx={{ fontSize: 14 }}/>
                             </button>
                             <button 
                               className={`check-btn fail ${checklistProgress[item.id] === 'failed' ? 'active' : ''}`}
                               onClick={() => setChecklistProgress(prev => ({ ...prev, [item.id]: 'failed' }))}
                             >
-                              <X size={14} />
+                              <CloseOutlined sx={{ fontSize: 14 }}/>
                             </button>
                           </div>
                         </div>
@@ -2442,7 +2447,7 @@ export const StoreOpsHome: React.FC = () => {
                   setShowChecklistModal(false);
                 }}
               >
-                <ClipboardCheck size={16} />
+                <AssignmentTurnedInOutlined sx={{ fontSize: 16 }}/>
                 Submit Checklist
               </button>
             </div>
@@ -2456,11 +2461,11 @@ export const StoreOpsHome: React.FC = () => {
           <div className="context-modal shipment-modal" onClick={(e) => e.stopPropagation()}>
             <div className="action-modal-header">
               <div className="action-modal-title-row">
-                <Truck size={20} />
+                <LocalShippingOutlined sx={{ fontSize: 20 }}/>
                 <h2>{selectedShipmentItem.title}</h2>
               </div>
               <button className="action-modal-close" onClick={() => setShowShipmentModal(false)}>
-                <X size={20} />
+                <CloseOutlined sx={{ fontSize: 20 }}/>
               </button>
             </div>
             <div className="action-modal-subtitle">
@@ -2539,7 +2544,7 @@ export const StoreOpsHome: React.FC = () => {
                   setShowShipmentModal(false);
                 }}
               >
-                <Check size={16} />
+                <Check sx={{ fontSize: 16 }}/>
                 Validate Shipment
               </button>
             </div>
@@ -2553,11 +2558,11 @@ export const StoreOpsHome: React.FC = () => {
           <div className="context-modal voc-modal" onClick={(e) => e.stopPropagation()}>
             <div className="action-modal-header">
               <div className="action-modal-title-row">
-                <MessageCircle size={20} />
+                <ChatBubbleOutlineOutlined sx={{ fontSize: 20 }}/>
                 <h2>{selectedVoCItem.title}</h2>
               </div>
               <button className="action-modal-close" onClick={() => setShowVoCModal(false)}>
-                <X size={20} />
+                <CloseOutlined sx={{ fontSize: 20 }}/>
               </button>
             </div>
             <div className="action-modal-subtitle">
@@ -2577,7 +2582,7 @@ export const StoreOpsHome: React.FC = () => {
                       <span className="customer-name">{esc.customerName}</span>
                       <div className="rating-stars">
                         {[1, 2, 3, 4, 5].map(star => (
-                          <Star key={star} size={12} className={star <= esc.rating ? 'filled' : ''} />
+                          <StarBorderOutlined key={star} sx={{ fontSize: 12 }} className={star <= esc.rating ? 'filled' : ''} />
                         ))}
                       </div>
                     </div>
@@ -2623,7 +2628,7 @@ export const StoreOpsHome: React.FC = () => {
                             setEscalationResponse('');
                           }}
                         >
-                          <Send size={14} />
+                          <SendOutlined sx={{ fontSize: 14 }}/>
                           Send Response
                         </button>
                       </div>
@@ -2631,7 +2636,7 @@ export const StoreOpsHome: React.FC = () => {
                   </>
                 ) : (
                   <div className="no-selection">
-                    <MessageCircle size={32} />
+                    <ChatBubbleOutlineOutlined sx={{ fontSize: 32 }}/>
                     <p>Select an escalation to view details and respond</p>
                   </div>
                 )}
@@ -2649,7 +2654,7 @@ export const StoreOpsHome: React.FC = () => {
                   setShowVoCModal(false);
                 }}
               >
-                <Check size={16} />
+                <Check sx={{ fontSize: 16 }}/>
                 Mark All Reviewed
               </button>
             </div>
@@ -2672,7 +2677,7 @@ export const StoreOpsHome: React.FC = () => {
                 <div className="drawer-badge-row">
                   <span className="drawer-badge severity">BLOCKING</span>
                   <span className="drawer-badge overdue">
-                    <Clock size={11} />
+                    <AccessTimeOutlined sx={{ fontSize: 11 }}/>
                     {formatDueTime(approvalDrawerItem.due_time)}
                   </span>
                 </div>
@@ -2681,7 +2686,7 @@ export const StoreOpsHome: React.FC = () => {
                   setApprovalDrawerItem(null);
                   setApprovalNote('');
                 }}>
-                  <X size={18} />
+                  <CloseOutlined sx={{ fontSize: 18 }}/>
                 </button>
               </div>
               <h2 className="drawer-title">{approvalDrawerItem.title}</h2>
@@ -2702,7 +2707,7 @@ export const StoreOpsHome: React.FC = () => {
               {/* Impacted Stores */}
               <div className="drawer-section">
                 <h3 className="drawer-section-title">
-                  <Store size={14} />
+                  <StoreOutlined sx={{ fontSize: 14 }}/>
                   Impacted Stores
                   <span className="drawer-section-count">3</span>
                 </h3>
@@ -2719,7 +2724,7 @@ export const StoreOpsHome: React.FC = () => {
                         <span className="drawer-store-manager">{store.manager} · waiting {store.waitTime}</span>
                       </div>
                       <div className="drawer-store-status waiting">
-                        <Clock size={11} />
+                        <AccessTimeOutlined sx={{ fontSize: 11 }}/>
                       </div>
                     </div>
                   ))}
@@ -2730,7 +2735,7 @@ export const StoreOpsHome: React.FC = () => {
               {approvalDrawerItem.planogramActions && (
                 <div className="drawer-section">
                   <h3 className="drawer-section-title">
-                    <ClipboardCheck size={14} />
+                    <AssignmentTurnedInOutlined sx={{ fontSize: 14 }}/>
                     Reset Actions
                     <span className="drawer-section-count">{approvalDrawerItem.planogramActions.length}</span>
                   </h3>
@@ -2754,7 +2759,7 @@ export const StoreOpsHome: React.FC = () => {
               {/* Audit Trail */}
               <div className="drawer-section">
                 <h3 className="drawer-section-title">
-                  <Clock size={14} />
+                  <AccessTimeOutlined sx={{ fontSize: 14 }}/>
                   Audit Trail
                 </h3>
                 <div className="drawer-audit-trail">
@@ -2803,11 +2808,11 @@ export const StoreOpsHome: React.FC = () => {
 
             <div className="drawer-footer">
               <button className="drawer-btn reject" onClick={handleDrawerReject}>
-                <X size={15} />
+                <CloseOutlined sx={{ fontSize: 15 }}/>
                 Send Back
               </button>
               <button className="drawer-btn approve" onClick={handleDrawerApprove}>
-                <Check size={15} />
+                <Check sx={{ fontSize: 15 }}/>
                 Approve &amp; Notify Stores
               </button>
             </div>
@@ -2823,12 +2828,12 @@ export const StoreOpsHome: React.FC = () => {
             <div className="detail-panel-header">
               {panelSubView && (
                 <button className="detail-panel-back" onClick={goBackToPanel}>
-                  <ArrowRight size={16} style={{ transform: 'rotate(180deg)' }} />
+                  <ArrowForwardOutlined sx={{ fontSize: 16 }} style={{ transform: 'rotate(180deg)' }}/>
                   <span>Back</span>
                 </button>
               )}
               <button className="detail-panel-close" onClick={closeDetailPanel}>
-                <X size={18} />
+                <CloseOutlined sx={{ fontSize: 18 }}/>
               </button>
             </div>
 
@@ -2836,7 +2841,7 @@ export const StoreOpsHome: React.FC = () => {
             {panelSubView?.view === 'assign-task' && (
               <div className="detail-panel-body">
                 <div className="dp-subview-header">
-                  <UserPlus size={20} className="dp-subview-icon" />
+                  <PersonAddAlt1Outlined sx={{ fontSize: 20 }} className="dp-subview-icon"/>
                   <div>
                     <h2 className="dp-title">Assign to Store Manager</h2>
                     <p className="dp-description">Select a store manager to handle this task</p>
@@ -2845,14 +2850,14 @@ export const StoreOpsHome: React.FC = () => {
 
                 {panelSubView.parentTitle && (
                   <div className="dp-subview-context">
-                    <AlertTriangle size={12} />
+                    <WarningAmberOutlined sx={{ fontSize: 12 }}/>
                     <span>{panelSubView.parentTitle}</span>
                   </div>
                 )}
 
                 <div className="dp-section">
                   <div className="dp-assign-search">
-                    <Search size={15} />
+                    <SearchOutlined sx={{ fontSize: 15 }}/>
                     <input
                       type="text"
                       placeholder="Search team members..."
@@ -2876,7 +2881,7 @@ export const StoreOpsHome: React.FC = () => {
                           <span className="dp-team-role">{member.role} · {member.store}</span>
                         </div>
                         {selectedAssignee === member.id && (
-                          <div className="dp-team-check"><Check size={14} /></div>
+                          <div className="dp-team-check"><Check sx={{ fontSize: 14 }}/></div>
                         )}
                       </div>
                     ))}
@@ -2895,7 +2900,7 @@ export const StoreOpsHome: React.FC = () => {
                       goBackToPanel();
                     }}
                   >
-                    <Send size={15} />
+                    <SendOutlined sx={{ fontSize: 15 }}/>
                     <span>Assign to Manager</span>
                   </button>
                 </div>
@@ -2911,7 +2916,7 @@ export const StoreOpsHome: React.FC = () => {
               return (
               <div className="detail-panel-body">
                 <div className="dp-subview-header">
-                  <Package size={20} className="dp-subview-icon" />
+                  <InventoryOutlined sx={{ fontSize: 20 }} className="dp-subview-icon"/>
                   <div>
                     <h2 className="dp-title">
                       {panelSubView.storeFilter ? `SKUs at Risk — ${panelSubView.storeFilter}` : 'SKUs at Risk'}
@@ -2922,7 +2927,7 @@ export const StoreOpsHome: React.FC = () => {
 
                 {panelSubView.parentTitle && (
                   <div className="dp-subview-context">
-                    <AlertTriangle size={12} />
+                    <WarningAmberOutlined sx={{ fontSize: 12 }}/>
                     <span>{panelSubView.parentTitle}</span>
                   </div>
                 )}
@@ -2963,7 +2968,7 @@ export const StoreOpsHome: React.FC = () => {
                         >
                           <div className="dp-sku-checkbox">
                             <div className={`dp-sku-check ${selectedSkus.includes(sku.sku) ? 'checked' : ''}`}>
-                              {selectedSkus.includes(sku.sku) && <Check size={10} />}
+                              {selectedSkus.includes(sku.sku) && <Check sx={{ fontSize: 10 }}/>}
                             </div>
                           </div>
                           <div className="dp-sku-info">
@@ -2996,7 +3001,7 @@ export const StoreOpsHome: React.FC = () => {
                       ).map(([storeName, storeSkus]) => (
                         <div key={storeName} className="dp-sku-store-group">
                           <div className="dp-sku-store-header">
-                            <Store size={12} />
+                            <StoreOutlined sx={{ fontSize: 12 }}/>
                             <span>{storeName}</span>
                             <span className="dp-sku-store-count">{storeSkus.length} SKUs</span>
                           </div>
@@ -3014,7 +3019,7 @@ export const StoreOpsHome: React.FC = () => {
                             >
                               <div className="dp-sku-checkbox">
                                 <div className={`dp-sku-check ${selectedSkus.includes(sku.sku) ? 'checked' : ''}`}>
-                                  {selectedSkus.includes(sku.sku) && <Check size={10} />}
+                                  {selectedSkus.includes(sku.sku) && <Check sx={{ fontSize: 10 }}/>}
                                 </div>
                               </div>
                               <div className="dp-sku-info">
@@ -3045,7 +3050,7 @@ export const StoreOpsHome: React.FC = () => {
                   <button className="dp-action-btn outlined" onClick={() => {
                     showToast('Report downloaded');
                   }}>
-                    <Download size={15} />
+                    <FileDownloadOutlined sx={{ fontSize: 15 }}/>
                     <span>Export</span>
                   </button>
                   <button
@@ -3060,7 +3065,7 @@ export const StoreOpsHome: React.FC = () => {
                       goBackToPanel();
                     }}
                   >
-                    <Send size={15} />
+                    <SendOutlined sx={{ fontSize: 15 }}/>
                     <span>
                       {selectedSkus.filter(sk => filteredSkus.some(f => f.sku === sk)).length === 0
                         ? 'Select SKUs'
@@ -3078,12 +3083,12 @@ export const StoreOpsHome: React.FC = () => {
                 {/* Severity Badge */}
                 <div className="dp-severity-row">
                   <span className={`dp-severity-badge ${detailPanel.data.severity}`}>
-                    <AlertTriangle size={12} />
+                    <WarningAmberOutlined sx={{ fontSize: 12 }}/>
                     {detailPanel.data.severity === 'critical' ? 'CRITICAL' : detailPanel.data.severity === 'warning' ? 'WARNING' : 'RISK'}
                   </span>
                   {detailPanel.data.source && (
                     <span className="dp-source">
-                      <Users size={11} />
+                      <GroupOutlined sx={{ fontSize: 11 }}/>
                       {detailPanel.data.source}
                     </span>
                   )}
@@ -3095,14 +3100,14 @@ export const StoreOpsHome: React.FC = () => {
 
                 {/* Impact Summary */}
                 <div className="dp-impact-summary">
-                  <AlertCircle size={14} />
+                  <ErrorOutlined sx={{ fontSize: 14 }}/>
                   <span>{detailPanel.data.impactSummary}</span>
                 </div>
 
                 {/* Impacted Stores List */}
                 <div className="dp-section">
                   <h3 className="dp-section-title">
-                    <Store size={14} />
+                    <StoreOutlined sx={{ fontSize: 14 }}/>
                     Impacted Stores ({detailPanel.data.stores.length})
                   </h3>
                   <div className="dp-stores-list">
@@ -3123,21 +3128,21 @@ export const StoreOpsHome: React.FC = () => {
                             closeDetailPanel();
                             navigate(`/store-operations/store-deep-dive?store=${store.id}`);
                           }}>
-                            View Store <ExternalLink size={11} />
+                            View Store <OpenInNewOutlined sx={{ fontSize: 11 }}/>
                           </button>
                           {detailPanel.data.id === 'alert-inventory' && (
                             <button className="dp-store-sku-btn" onClick={() => {
                               setSelectedSkus([]);
                               setPanelSubView({ view: 'review-skus', parentTitle: detailPanel.data.title, storeFilter: store.name });
                             }}>
-                              View Impacted SKUs <ChevronRight size={12} />
+                              View Impacted SKUs <KeyboardArrowRight sx={{ fontSize: 12 }}/>
                             </button>
                           )}
                           {store.manager && (
                             <button className="dp-store-assign-btn" onClick={() => {
                               showToast(`✓ Added to Operations Queue — assigned to ${store.manager} (${store.name})`);
                             }}>
-                              <UserPlus size={11} />
+                              <PersonAddAlt1Outlined sx={{ fontSize: 11 }}/>
                               Assign to Manager
                             </button>
                           )}
@@ -3156,7 +3161,7 @@ export const StoreOpsHome: React.FC = () => {
                       onClick={() => handlePanelAction(cta.action)}
                     >
                       <span>{cta.label}</span>
-                      {cta.kind === 'navigate' ? <ExternalLink size={14} /> : <ChevronRight size={15} />}
+                      {cta.kind === 'navigate' ? <OpenInNewOutlined sx={{ fontSize: 14 }}/> : <KeyboardArrowRight sx={{ fontSize: 15 }}/>}
                     </button>
                   ))}
                 </div>
@@ -3164,7 +3169,7 @@ export const StoreOpsHome: React.FC = () => {
                 {/* Timestamp */}
                 {detailPanel.data.timestamp && (
                   <div className="dp-timestamp">
-                    <Clock size={11} />
+                    <AccessTimeOutlined sx={{ fontSize: 11 }}/>
                     <span>{formatTimeAgo(detailPanel.data.timestamp)}</span>
                   </div>
                 )}
@@ -3195,7 +3200,7 @@ export const StoreOpsHome: React.FC = () => {
                 {/* Scope */}
                 {detailPanel.data.scope && (
                   <div className="dp-scope-row">
-                    <Users size={13} />
+                    <GroupOutlined sx={{ fontSize: 13 }}/>
                     <span>{detailPanel.data.scope}</span>
                   </div>
                 )}
@@ -3204,7 +3209,7 @@ export const StoreOpsHome: React.FC = () => {
                 {detailPanel.data.keyDates.length > 0 && (
                   <div className="dp-section">
                     <h3 className="dp-section-title">
-                      <Calendar size={14} />
+                      <CalendarTodayOutlined sx={{ fontSize: 14 }}/>
                       Key Dates
                     </h3>
                     <div className="dp-key-dates">
@@ -3222,14 +3227,14 @@ export const StoreOpsHome: React.FC = () => {
                 {detailPanel.data.actionItems.length > 0 && (
                   <div className="dp-section">
                     <h3 className="dp-section-title">
-                      <CheckCircle2 size={14} />
+                      <TaskAltOutlined sx={{ fontSize: 14 }}/>
                       Required Actions ({detailPanel.data.actionItems.length})
                     </h3>
                     <div className="dp-action-checklist">
                       {detailPanel.data.actionItems.map((ai, i) => (
                         <div key={i} className={`dp-checklist-item ${ai.done ? 'done' : ''}`}>
                           <div className="dp-checklist-check">
-                            {ai.done ? <CheckCircle2 size={14} /> : <div className="dp-checklist-empty" />}
+                            {ai.done ? <TaskAltOutlined sx={{ fontSize: 14 }}/> : <div className="dp-checklist-empty" />}
                           </div>
                           <span>{ai.text}</span>
                         </div>
@@ -3242,18 +3247,18 @@ export const StoreOpsHome: React.FC = () => {
                 {detailPanel.data.attachments.length > 0 && (
                   <div className="dp-section">
                     <h3 className="dp-section-title">
-                      <FileText size={14} />
+                      <DescriptionOutlined sx={{ fontSize: 14 }}/>
                       Attachments ({detailPanel.data.attachments.length})
                     </h3>
                     <div className="dp-attachments">
                       {detailPanel.data.attachments.map((att, i) => (
                         <div key={i} className="dp-attachment-item">
                           <div className={`dp-attachment-icon ${att.type}`}>
-                            {att.type === 'pdf' ? <FileText size={14} /> : <Eye size={14} />}
+                            {att.type === 'pdf' ? <DescriptionOutlined sx={{ fontSize: 14 }}/> : <VisibilityOutlined sx={{ fontSize: 14 }}/>}
                           </div>
                           <span className="dp-attachment-name">{att.name}</span>
                           <button className="dp-attachment-download">
-                            <ArrowRight size={12} />
+                            <ArrowForwardOutlined sx={{ fontSize: 12 }}/>
                           </button>
                         </div>
                       ))}
@@ -3273,7 +3278,7 @@ export const StoreOpsHome: React.FC = () => {
                       <span className="dp-source-role">{detailPanel.data.senderRole}</span>
                     </div>
                     <span className="dp-source-time">
-                      <Clock size={11} />
+                      <AccessTimeOutlined sx={{ fontSize: 11 }}/>
                       {formatTimeAgo(detailPanel.data.timestamp)}
                     </span>
                   </div>
@@ -3283,7 +3288,7 @@ export const StoreOpsHome: React.FC = () => {
                 <div className="dp-actions">
                   <button className="dp-action-btn outlined navigate" onClick={() => { closeDetailPanel(); handleOpenChat('1'); }}>
                     <span>Chat</span>
-                    <ExternalLink size={14} />
+                    <OpenInNewOutlined sx={{ fontSize: 14 }}/>
                   </button>
                   {detailPanel.data.requiresAcknowledgement && !detailPanel.data.isAcknowledged ? (
                     <button className="dp-action-btn outlined" onClick={() => {
@@ -3292,7 +3297,7 @@ export const StoreOpsHome: React.FC = () => {
                       closeDetailPanel();
                     }}>
                       <span>Acknowledge</span>
-                      <ChevronRight size={15} />
+                      <KeyboardArrowRight sx={{ fontSize: 15 }}/>
                     </button>
                   ) : (
                     <button className="dp-action-btn outlined" onClick={() => {
@@ -3301,7 +3306,7 @@ export const StoreOpsHome: React.FC = () => {
                       closeDetailPanel();
                     }}>
                       <span>Mark as Read</span>
-                      <ChevronRight size={15} />
+                      <KeyboardArrowRight sx={{ fontSize: 15 }}/>
                     </button>
                   )}
                 </div>
@@ -3318,11 +3323,11 @@ export const StoreOpsHome: React.FC = () => {
                 {/* Severity + Source */}
                 <div className="dp-severity-row">
                   <span className={`dp-severity-badge ${action.severity === 'critical' ? 'critical' : action.severity === 'high' ? 'risk' : 'warning'}`}>
-                    <AlertTriangle size={12} />
+                    <WarningAmberOutlined sx={{ fontSize: 12 }}/>
                     {severityLabel}
                   </span>
                   <span className="dp-source">
-                    <Users size={11} />
+                    <GroupOutlined sx={{ fontSize: 11 }}/>
                     {action.source_module}
                   </span>
                 </div>
@@ -3333,11 +3338,11 @@ export const StoreOpsHome: React.FC = () => {
 
                 {/* Impact Summary */}
                 <div className="dp-impact-summary">
-                  <AlertCircle size={14} />
+                  <ErrorOutlined sx={{ fontSize: 14 }}/>
                   <span>
                     {action.context}
                     {action.microContext && <> · {action.microContext}</>}
-                    {action.status === 'overdue' && <> · <strong style={{color: '#dc2626'}}>Overdue</strong></>}
+                    {action.status === 'overdue' && <> · <strong style={{color: 'var(--ia-color-error-strong)'}}>Overdue</strong></>}
                   </span>
                 </div>
 
@@ -3350,7 +3355,7 @@ export const StoreOpsHome: React.FC = () => {
                       </div>
                     )}
                     <h3 className="dp-section-title">
-                      <ClipboardCheck size={14} />
+                      <AssignmentTurnedInOutlined sx={{ fontSize: 14 }}/>
                       Planogram Actions ({action.planogramActions.length})
                     </h3>
                     <div className="dp-stores-list">
@@ -3377,24 +3382,24 @@ export const StoreOpsHome: React.FC = () => {
                     {/* Store completion summary */}
                     <div className="dp-esc-meta" style={{ marginBottom: '12px' }}>
                       <span className="dp-esc-meta-item">
-                        <Users size={10} />
+                        <GroupOutlined sx={{ fontSize: 10 }}/>
                         Assigned: James Wilson
                       </span>
                       <span className="dp-esc-meta-item progress">In Progress</span>
                       <span className="dp-esc-meta-item sla">
-                        <Clock size={10} />
+                        <AccessTimeOutlined sx={{ fontSize: 10 }}/>
                         Due in 23h
                       </span>
                     </div>
 
-                    <div className="dp-impact-summary" style={{ background: '#fefce8', borderColor: '#fde68a' }}>
-                      <AlertTriangle size={14} />
+                    <div className="dp-impact-summary" style={{ background: 'var(--ia-color-warning-bg)', borderColor: 'var(--ia-color-warning-bg)' }}>
+                      <WarningAmberOutlined sx={{ fontSize: 14 }}/>
                       <span>5 of 8 stores completed · <strong>3 stores pending</strong> · 2 overdue</span>
                     </div>
 
                     <h3 className="dp-section-title">
-                      <ClipboardCheck size={14} />
-                      Checklist Items ({action.checklistItems.length}) — <span style={{ fontWeight: 400, color: '#94a3b8', fontSize: '11px' }}>Read-only for DM</span>
+                      <AssignmentTurnedInOutlined sx={{ fontSize: 14 }}/>
+                      Checklist Items ({action.checklistItems.length}) — <span style={{ fontWeight: 'var(--ia-font-weight-regular)', color: 'var(--ia-color-text-tertiary)', fontSize: 'var(--ia-text-2xs)' }}>Read-only for DM</span>
                     </h3>
 
                     {/* Group by category — selectable */}
@@ -3439,8 +3444,8 @@ export const StoreOpsHome: React.FC = () => {
                   const completed = action.shipmentItems.filter(si => si.status === 'complete');
                   return (
                   <div className="dp-section">
-                    <div className="dp-impact-summary" style={{ background: '#f0fdf4', borderColor: '#bbf7d0' }}>
-                      <Package size={14} />
+                    <div className="dp-impact-summary" style={{ background: 'var(--ia-color-success-bg)', borderColor: 'var(--ia-color-success-soft)' }}>
+                      <InventoryOutlined sx={{ fontSize: 14 }}/>
                       <span>
                         {action.shipmentDetails.carrier} · PO {action.shipmentDetails.poNumber} · {action.shipmentDetails.totalItems} items · ${action.shipmentDetails.totalValue.toLocaleString()}
                       </span>
@@ -3450,7 +3455,7 @@ export const StoreOpsHome: React.FC = () => {
                     {exceptions.length > 0 && (
                       <>
                         <h3 className="dp-section-title">
-                          <AlertTriangle size={14} />
+                          <WarningAmberOutlined sx={{ fontSize: 14 }}/>
                           Exceptions Requiring Review ({exceptions.length})
                         </h3>
                         <div className="dp-stores-list">
@@ -3469,13 +3474,13 @@ export const StoreOpsHome: React.FC = () => {
                                 <button className="dp-store-assign-btn" onClick={() => {
                                   showToast(`Issue assigned to operations — ${si.name} (${si.status === 'short' ? 'shortage' : 'overage'})`);
                                 }}>
-                                  <UserPlus size={11} />
+                                  <PersonAddAlt1Outlined sx={{ fontSize: 11 }}/>
                                   Assign to Operations
                                 </button>
-                                <button className="dp-store-link" style={{ color: '#dc2626' }} onClick={() => {
+                                <button className="dp-store-link" style={{ color: 'var(--ia-color-error-strong)' }} onClick={() => {
                                   showToast(`Escalated: ${si.name} — ${si.status === 'short' ? `${Math.abs(si.variance || 0)} units short` : `${si.variance} units over`}`);
                                 }}>
-                                  Escalate <ExternalLink size={11} />
+                                  Escalate <OpenInNewOutlined sx={{ fontSize: 11 }}/>
                                 </button>
                               </div>
                             </div>
@@ -3487,8 +3492,8 @@ export const StoreOpsHome: React.FC = () => {
                     {/* Completed items — de-emphasized */}
                     {completed.length > 0 && (
                       <>
-                        <h3 className="dp-section-title" style={{ color: '#94a3b8' }}>
-                          <Check size={14} />
+                        <h3 className="dp-section-title" style={{ color: 'var(--ia-color-text-tertiary)' }}>
+                          <Check sx={{ fontSize: 14 }}/>
                           Verified Items ({completed.length}) — No Action Needed
                         </h3>
                         <div className="dp-stores-list">
@@ -3512,7 +3517,7 @@ export const StoreOpsHome: React.FC = () => {
                 {action.source_module === 'Customer' && action.escalations && (
                   <div className="dp-section">
                     <h3 className="dp-section-title">
-                      <MessageCircle size={14} />
+                      <ChatBubbleOutlineOutlined sx={{ fontSize: 14 }}/>
                       Escalations ({action.escalations.length})
                     </h3>
                     <div className="dp-stores-list">
@@ -3523,7 +3528,7 @@ export const StoreOpsHome: React.FC = () => {
                         <div key={esc.id} className="dp-esc-card-premium">
                           {needsDMAttention && (
                             <div className="dp-esc-attention">
-                              <AlertTriangle size={11} />
+                              <WarningAmberOutlined sx={{ fontSize: 11 }}/>
                               <span>Needs DM Attention</span>
                               {isOverdue && <span className="dp-esc-overdue">SLA Overdue</span>}
                               {esc.isRepeated && <span className="dp-esc-repeated">Repeated</span>}
@@ -3538,14 +3543,14 @@ export const StoreOpsHome: React.FC = () => {
                           <p className="dp-esc-card-summary">{esc.summary}</p>
                           <div className="dp-esc-meta">
                             <span className="dp-esc-meta-item">
-                              <Users size={10} />
+                              <GroupOutlined sx={{ fontSize: 10 }}/>
                               {esc.storeManager || 'Unassigned'}
                             </span>
                             <span className={`dp-esc-meta-item ${esc.status === 'pending' ? 'pending' : esc.status === 'in_progress' ? 'progress' : 'resolved'}`}>
                               {esc.status === 'pending' ? 'Pending' : esc.status === 'in_progress' ? 'In Progress' : 'Resolved'}
                             </span>
                             <span className={`dp-esc-meta-item ${isOverdue ? 'overdue' : 'sla'}`}>
-                              <Clock size={10} />
+                              <AccessTimeOutlined sx={{ fontSize: 10 }}/>
                               {esc.slaDue ? (isOverdue ? `Overdue ${formatTimeAgo(esc.slaDue)}` : `Due ${formatTimeAgo(esc.slaDue)}`) : 'No SLA'}
                             </span>
                           </div>
@@ -3553,7 +3558,7 @@ export const StoreOpsHome: React.FC = () => {
                             <button className="dp-esc-action-primary" onClick={() => {
                               showToast(`✓ Assigned to ${esc.storeManager || 'Store Manager'} — ${esc.customerName}`);
                             }}>
-                              <UserPlus size={11} />
+                              <PersonAddAlt1Outlined sx={{ fontSize: 11 }}/>
                               Assign to {esc.storeManager?.split(' ')[0] || 'Manager'}
                             </button>
                             <button className="dp-esc-action-secondary" onClick={() => {
@@ -3561,13 +3566,13 @@ export const StoreOpsHome: React.FC = () => {
                               setEscalationResponse('');
                               setPanelSubView({ view: 'escalation-respond', parentTitle: action.title, escalationId: esc.id });
                             }}>
-                              Review Details <ChevronRight size={12} />
+                              Review Details <KeyboardArrowRight sx={{ fontSize: 12 }}/>
                             </button>
                             {needsDMAttention && (
                               <button className="dp-esc-action-escalate" onClick={() => {
                                 showToast(`Escalation intervened — ${esc.customerName} case flagged to regional`);
                               }}>
-                                Escalate <ExternalLink size={11} />
+                                Escalate <OpenInNewOutlined sx={{ fontSize: 11 }}/>
                               </button>
                             )}
                           </div>
@@ -3588,7 +3593,7 @@ export const StoreOpsHome: React.FC = () => {
                         showToast(`Planogram reset sent back for revision`);
                         closeDetailPanel();
                       }}>
-                        <X size={14} />
+                        <CloseOutlined sx={{ fontSize: 14 }}/>
                         <span>Send Back</span>
                       </button>
                       <button className="dp-action-btn filled" onClick={() => {
@@ -3597,7 +3602,7 @@ export const StoreOpsHome: React.FC = () => {
                         showToast(`✓ ${action.title} approved — stores notified`);
                         closeDetailPanel();
                       }}>
-                        <Check size={14} />
+                        <Check sx={{ fontSize: 14 }}/>
                         <span>Approve Now</span>
                       </button>
                     </>
@@ -3612,7 +3617,7 @@ export const StoreOpsHome: React.FC = () => {
                           setSelectedChecklistCategories([]);
                         }}
                       >
-                        <Send size={14} />
+                        <SendOutlined sx={{ fontSize: 14 }}/>
                         <span>Follow Up{selectedChecklistCategories.length > 0 ? ` (${selectedChecklistCategories.length})` : ''}</span>
                       </button>
                       <button
@@ -3624,7 +3629,7 @@ export const StoreOpsHome: React.FC = () => {
                           setPanelSubView({ view: 'assign-task', parentTitle: `${selectedChecklistCategories.join(', ')} — ${action.title}` });
                         }}
                       >
-                        <UserPlus size={14} />
+                        <PersonAddAlt1Outlined sx={{ fontSize: 14 }}/>
                         <span>Assign / Reassign</span>
                       </button>
                     </>
@@ -3637,13 +3642,13 @@ export const StoreOpsHome: React.FC = () => {
                         showToast(`✓ Shipment ${action.shipmentDetails?.shipmentId} acknowledged — exceptions flagged`);
                         closeDetailPanel();
                       }}>
-                        <Check size={14} />
+                        <Check sx={{ fontSize: 14 }}/>
                         <span>Acknowledge Receipt</span>
                       </button>
                       <button className="dp-action-btn outlined" onClick={() => {
                         showToast(`✓ Shipment exceptions assigned to Store Manager (${action.context})`);
                       }}>
-                        <UserPlus size={14} />
+                        <PersonAddAlt1Outlined sx={{ fontSize: 14 }}/>
                         <span>Assign to Store Manager</span>
                       </button>
                     </>
@@ -3655,7 +3660,7 @@ export const StoreOpsHome: React.FC = () => {
                       showToast(`✓ VoC escalations reviewed and assigned`);
                       closeDetailPanel();
                     }}>
-                      <Check size={14} />
+                      <Check sx={{ fontSize: 14 }}/>
                       <span>Mark All Reviewed</span>
                     </button>
                   )}
@@ -3663,7 +3668,7 @@ export const StoreOpsHome: React.FC = () => {
 
                 {/* Timestamp */}
                 <div className="dp-timestamp">
-                  <Clock size={11} />
+                  <AccessTimeOutlined sx={{ fontSize: 11 }}/>
                   <span>{action.status === 'overdue' ? `${formatTimeAgo(action.due_time)} overdue` : `Due ${formatTimeAgo(action.due_time)}`}</span>
                 </div>
               </div>
@@ -3674,7 +3679,7 @@ export const StoreOpsHome: React.FC = () => {
             {panelSubView?.view === 'escalation-respond' && selectedEscalation && (
               <div className="detail-panel-body">
                 <div className="dp-subview-header">
-                  <MessageCircle size={20} className="dp-subview-icon" />
+                  <ChatBubbleOutlineOutlined sx={{ fontSize: 20 }} className="dp-subview-icon"/>
                   <div>
                     <h2 className="dp-title">Respond to {selectedEscalation.customerName}</h2>
                     <p className="dp-description">{selectedEscalation.category} · Rating: {'★'.repeat(selectedEscalation.rating)}{'☆'.repeat(5 - selectedEscalation.rating)}</p>
@@ -3682,13 +3687,13 @@ export const StoreOpsHome: React.FC = () => {
                 </div>
 
                 <div className="dp-subview-context">
-                  <AlertTriangle size={12} />
+                  <WarningAmberOutlined sx={{ fontSize: 12 }}/>
                   <span>{selectedEscalation.summary}</span>
                 </div>
 
                 <div className="dp-section">
                   <div className="dp-store-card warning" style={{ cursor: 'default' }}>
-                    <p className="dp-store-detail" style={{ margin: 0, fontSize: '12px', lineHeight: '1.6', color: '#334155' }}>
+                    <p className="dp-store-detail" style={{ margin: 0, fontSize: 'var(--ia-text-xs)', lineHeight: '1.6', color: 'var(--ia-color-text-primary)' }}>
                       "{selectedEscalation.details}"
                     </p>
                   </div>
@@ -3701,7 +3706,7 @@ export const StoreOpsHome: React.FC = () => {
                     placeholder="Type your response to the customer..."
                     value={escalationResponse}
                     onChange={(e) => setEscalationResponse(e.target.value)}
-                    style={{ minHeight: '80px', resize: 'vertical', fontFamily: 'inherit', padding: '10px 12px' }}
+                    style={{ minHeight: '80px', resize: 'vertical', fontFamily: 'var(--ia-font-sans)', padding: '10px 12px' }}
                   />
                 </div>
 
@@ -3717,7 +3722,7 @@ export const StoreOpsHome: React.FC = () => {
                       goBackToPanel();
                     }}
                   >
-                    <Send size={15} />
+                    <SendOutlined sx={{ fontSize: 15 }}/>
                     <span>Send Response</span>
                   </button>
                 </div>

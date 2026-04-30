@@ -1,38 +1,37 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { 
-  Search, 
-  Plus, 
-  Eye, 
-  Edit, 
-  Trash2, 
-  AlertTriangle,
-  CheckCircle,
-  X,
-  Save,
-  ChevronRight,
-  ChevronLeft,
-  FileText,
-  Check,
-  Circle,
-  Upload,
-  ChevronDown,
-  Ruler,
-  LayoutGrid,
-  Layers,
-  ArrowLeftRight,
-  PackageCheck,
-  PackageX,
-  Star,
-  Box,
-  Building2,
-  PieChart,
-  TrendingUp,
-  Maximize2,
-  DollarSign,
-  Tag,
-  ShieldCheck
-} from 'lucide-react';
+import SearchOutlined from '@mui/icons-material/SearchOutlined';
+import Add from '@mui/icons-material/Add';
+import VisibilityOutlined from '@mui/icons-material/VisibilityOutlined';
+import EditOutlined from '@mui/icons-material/EditOutlined';
+import DeleteOutlined from '@mui/icons-material/DeleteOutlined';
+import WarningAmberOutlined from '@mui/icons-material/WarningAmberOutlined';
+import CheckCircleOutlined from '@mui/icons-material/CheckCircleOutlined';
+import CloseOutlined from '@mui/icons-material/CloseOutlined';
+import SaveOutlined from '@mui/icons-material/SaveOutlined';
+import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
+import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
+import DescriptionOutlined from '@mui/icons-material/DescriptionOutlined';
+import Check from '@mui/icons-material/Check';
+import RadioButtonUnchecked from '@mui/icons-material/RadioButtonUnchecked';
+import FileUploadOutlined from '@mui/icons-material/FileUploadOutlined';
+import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
+import StraightenOutlined from '@mui/icons-material/StraightenOutlined';
+import DashboardOutlined from '@mui/icons-material/DashboardOutlined';
+import LayersOutlined from '@mui/icons-material/LayersOutlined';
+import SwapHoriz from '@mui/icons-material/SwapHoriz';
+import InventoryOutlined from '@mui/icons-material/InventoryOutlined';
+import RemoveCircleOutlined from '@mui/icons-material/RemoveCircleOutlined';
+import StarBorderOutlined from '@mui/icons-material/StarBorderOutlined';
+import Inventory2Outlined from '@mui/icons-material/Inventory2Outlined';
+import ApartmentOutlined from '@mui/icons-material/ApartmentOutlined';
+import PieChartOutlined from '@mui/icons-material/PieChartOutlined';
+import TrendingUpOutlined from '@mui/icons-material/TrendingUpOutlined';
+import OpenInFullOutlined from '@mui/icons-material/OpenInFullOutlined';
+import AttachMoneyOutlined from '@mui/icons-material/AttachMoneyOutlined';
+import LabelOutlined from '@mui/icons-material/LabelOutlined';
+import GppGoodOutlined from '@mui/icons-material/GppGoodOutlined';
+import { Button, Card, Tabs } from 'impact-ui';
 import './POGRuleManagement.css';
 
 // Types
@@ -71,19 +70,19 @@ const wizardSteps: WizardStep[] = [
 ];
 
 const ruleTypeIcons: Record<RuleType, React.ReactNode> = {
-  'Space Allocation': <PieChart size={20} />,
-  'Performance': <TrendingUp size={20} />,
-  'Capacity': <Maximize2 size={20} />,
-  'Price Tier': <DollarSign size={20} />,
-  'Dimensional': <Ruler size={20} />,
-  'Facing': <LayoutGrid size={20} />,
-  'Brand Blocking': <Layers size={20} />,
-  'Adjacency': <ArrowLeftRight size={20} />,
-  'Mandatory SKU': <PackageCheck size={20} />,
-  'Prohibited SKU': <PackageX size={20} />,
-  'Priority': <Star size={20} />,
-  'Fixture-Specific': <Box size={20} />,
-  'Cluster-Specific': <Building2 size={20} />,
+  'Space Allocation': <PieChartOutlined sx={{ fontSize: 20 }} />,
+  'Performance': <TrendingUpOutlined sx={{ fontSize: 20 }} />,
+  'Capacity': <OpenInFullOutlined sx={{ fontSize: 20 }} />,
+  'Price Tier': <AttachMoneyOutlined sx={{ fontSize: 20 }} />,
+  'Dimensional': <StraightenOutlined sx={{ fontSize: 20 }} />,
+  'Facing': <DashboardOutlined sx={{ fontSize: 20 }} />,
+  'Brand Blocking': <LayersOutlined sx={{ fontSize: 20 }} />,
+  'Adjacency': <SwapHoriz sx={{ fontSize: 20 }} />,
+  'Mandatory SKU': <InventoryOutlined sx={{ fontSize: 20 }} />,
+  'Prohibited SKU': <RemoveCircleOutlined sx={{ fontSize: 20 }} />,
+  'Priority': <StarBorderOutlined sx={{ fontSize: 20 }} />,
+  'Fixture-Specific': <Inventory2Outlined sx={{ fontSize: 20 }} />,
+  'Cluster-Specific': <ApartmentOutlined sx={{ fontSize: 20 }} />,
 };
 
 // Rule type groups for visual organization
@@ -311,7 +310,7 @@ const SearchableDropdown: React.FC<{
         {selected.map(item => (
           <span key={item} className="dropdown-tag">
             {item}
-            <button onClick={() => handleRemove(item)}><X size={12} /></button>
+            <button onClick={() => handleRemove(item)}><CloseOutlined sx={{ fontSize: 12 }} /></button>
           </span>
         ))}
       </div>
@@ -324,7 +323,7 @@ const SearchableDropdown: React.FC<{
           placeholder={selected.length === 0 ? placeholder : 'Add more...'}
           className="dropdown-search-input"
         />
-        <ChevronDown size={16} className="dropdown-chevron" />
+        <KeyboardArrowDown sx={{ fontSize: 16 }} className="dropdown-chevron" />
       </div>
       {isOpen && (
         <div className="dropdown-menu">
@@ -346,7 +345,7 @@ const SearchableDropdown: React.FC<{
         <div className="dropdown-upload">
           <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".csv,.txt" style={{ display: 'none' }} />
           <button className="upload-btn" onClick={() => fileInputRef.current?.click()}>
-            <Upload size={14} /> Upload CSV/TXT
+            <FileUploadOutlined sx={{ fontSize: 14 }} /> Upload CSV/TXT
           </button>
         </div>
       )}
@@ -374,7 +373,7 @@ const CustomSelect: React.FC<{
         <span className={value ? '' : 'placeholder'}>
           {selectedOption ? selectedOption.label : placeholder}
         </span>
-        <ChevronDown size={18} className={`custom-select-arrow ${isOpen ? 'rotated' : ''}`} />
+        <KeyboardArrowDown sx={{ fontSize: 18 }} className={`custom-select-arrow ${isOpen ? 'rotated' : ''}`} />
       </div>
       {isOpen && (
         <>
@@ -386,7 +385,7 @@ const CustomSelect: React.FC<{
                 onClick={() => { onChange(opt.value); setIsOpen(false); }}
               >
                 {opt.label}
-                {opt.value === value && <Check size={16} />}
+                {opt.value === value && <Check sx={{ fontSize: 16 }} />}
               </div>
             ))}
           </div>
@@ -639,7 +638,7 @@ export const POGRuleManagement: React.FC = () => {
     switch (type) {
       case 'Space Allocation':
         return (
-          <div className="type-definition-card">
+          <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '24px 28px', marginBottom: '20px' }}>
             <h4>Space Allocation</h4>
             <div className="wizard-field-group">
               <label>Category</label>
@@ -668,11 +667,11 @@ export const POGRuleManagement: React.FC = () => {
                 <input type="number" min="0" max="100" value={def.maxPercent || ''} onChange={(e) => updateDefinition(type, 'maxPercent', parseInt(e.target.value) || 0)} placeholder="30" />
               </div>
             </div>
-          </div>
+          </Card>
         );
       case 'Performance':
         return (
-          <div className="type-definition-card">
+          <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '24px 28px', marginBottom: '20px' }}>
             <h4>Performance Rules</h4>
             <div className="wizard-field-row">
               <div className="wizard-field-group">
@@ -708,11 +707,11 @@ export const POGRuleManagement: React.FC = () => {
                 <option value="Increase Space">Increase Space 10%</option>
               </select>
             </div>
-          </div>
+          </Card>
         );
       case 'Capacity':
         return (
-          <div className="type-definition-card">
+          <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '24px 28px', marginBottom: '20px' }}>
             <h4>Capacity / Fit</h4>
             <div className="wizard-field-row">
               <div className="wizard-field-group">
@@ -731,11 +730,11 @@ export const POGRuleManagement: React.FC = () => {
                 <span className="field-hint">Total facings allowed</span>
               </div>
             </div>
-          </div>
+          </Card>
         );
       case 'Price Tier':
         return (
-          <div className="type-definition-card">
+          <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '24px 28px', marginBottom: '20px' }}>
             <h4>Price Tier Rules</h4>
             <div className="price-tier-section">
               <label>Tier Mix (must total 100%)</label>
@@ -789,11 +788,11 @@ export const POGRuleManagement: React.FC = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </Card>
         );
       case 'Facing':
         return (
-          <div className="type-definition-card">
+          <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '24px 28px', marginBottom: '20px' }}>
             <h4>Facing Rules</h4>
             <div className="wizard-field-row">
               <div className="wizard-field-group">
@@ -805,7 +804,7 @@ export const POGRuleManagement: React.FC = () => {
                 <input type="number" min="1" value={def.maxFacings || ''} onChange={(e) => updateDefinition(type, 'maxFacings', parseInt(e.target.value) || 0)} placeholder="6" />
               </div>
             </div>
-          </div>
+          </Card>
         );
       case 'Dimensional':
         const mappedCategory = mappedCategories[0] || 'Beverages';
@@ -813,7 +812,7 @@ export const POGRuleManagement: React.FC = () => {
         const sizeDefinitionType = def.sizeDefinitionType || 'category_standard';
         
         return (
-          <div className="type-definition-card">
+          <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '24px 28px', marginBottom: '20px' }}>
             <h4>Product Fit & Placement</h4>
             <p className="card-description">Sizes are automatically derived based on category standards for correct shelf placement.</p>
             
@@ -939,11 +938,11 @@ export const POGRuleManagement: React.FC = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </Card>
         );
       case 'Brand Blocking':
         return (
-          <div className="type-definition-card">
+          <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '24px 28px', marginBottom: '20px' }}>
             <h4>Brand Blocking Rules</h4>
             <div className="wizard-field-group">
               <label>Brands</label>
@@ -973,11 +972,11 @@ export const POGRuleManagement: React.FC = () => {
                 <input type="number" value={def.minProducts || ''} onChange={(e) => updateDefinition(type, 'minProducts', parseInt(e.target.value) || 0)} placeholder="e.g., 3" />
               </div>
             </div>
-          </div>
+          </Card>
         );
       case 'Adjacency':
         return (
-          <div className="type-definition-card">
+          <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '24px 28px', marginBottom: '20px' }}>
             <h4>Adjacency Rules</h4>
             <div className="wizard-field-row">
               <div className="wizard-field-group">
@@ -1001,11 +1000,11 @@ export const POGRuleManagement: React.FC = () => {
                 <input type="text" value={def.categoryB || ''} onChange={(e) => updateDefinition(type, 'categoryB', e.target.value)} placeholder="e.g., Diet Cola" />
               </div>
             </div>
-          </div>
+          </Card>
         );
       case 'Mandatory SKU':
         return (
-          <div className="type-definition-card">
+          <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '24px 28px', marginBottom: '20px' }}>
             <h4>Mandatory SKU Rules</h4>
             <div className="wizard-field-group">
               <label>Select SKUs (search or upload)</label>
@@ -1022,11 +1021,11 @@ export const POGRuleManagement: React.FC = () => {
               <label>Min Quantity</label>
               <input type="number" min="1" value={def.minQuantity || ''} onChange={(e) => updateDefinition(type, 'minQuantity', parseInt(e.target.value) || 1)} placeholder="1" />
             </div>
-          </div>
+          </Card>
         );
       case 'Prohibited SKU':
         return (
-          <div className="type-definition-card prohibited">
+          <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '24px 28px', marginBottom: '20px', backgroundColor: 'var(--ia-color-error-bg)', borderColor: 'var(--ia-color-error-soft)' }}>
             <h4>Prohibited SKU Rules</h4>
             <div className="wizard-field-group">
               <label>Select SKUs to Prohibit (search or upload)</label>
@@ -1043,11 +1042,11 @@ export const POGRuleManagement: React.FC = () => {
               <label>Reason</label>
               <input type="text" value={def.reason || ''} onChange={(e) => updateDefinition(type, 'reason', e.target.value)} placeholder="e.g., Competitor exclusion" />
             </div>
-          </div>
+          </Card>
         );
       case 'Priority':
         return (
-          <div className="type-definition-card">
+          <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '24px 28px', marginBottom: '20px' }}>
             <h4>Priority Rules</h4>
             <div className="wizard-field-row">
               <div className="wizard-field-group">
@@ -1091,11 +1090,11 @@ export const POGRuleManagement: React.FC = () => {
                 />
               </div>
             </div>
-          </div>
+          </Card>
         );
       case 'Fixture-Specific':
         return (
-          <div className="type-definition-card">
+          <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '24px 28px', marginBottom: '20px' }}>
             <h4>🗄️ Fixture-Specific Rules</h4>
             <div className="wizard-field-row">
               <div className="wizard-field-group">
@@ -1108,11 +1107,11 @@ export const POGRuleManagement: React.FC = () => {
               <div className="wizard-field-group"><label>Max SKUs</label><input type="number" value={def.maxSKUs || ''} onChange={(e) => updateDefinition(type, 'maxSKUs', parseInt(e.target.value) || 0)} /></div>
               <div className="wizard-field-group"><label>Max Shelves</label><input type="number" value={def.maxShelves || ''} onChange={(e) => updateDefinition(type, 'maxShelves', parseInt(e.target.value) || 0)} /></div>
             </div>
-          </div>
+          </Card>
         );
       case 'Cluster-Specific':
         return (
-          <div className="type-definition-card">
+          <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '24px 28px', marginBottom: '20px' }}>
             <h4>🏪 Cluster-Specific Rules</h4>
             <div className="wizard-field-group">
               <label>Target Cluster</label>
@@ -1125,7 +1124,7 @@ export const POGRuleManagement: React.FC = () => {
               <label>Special Instructions</label>
               <textarea value={def.instructions || ''} onChange={(e) => updateDefinition(type, 'instructions', e.target.value)} placeholder="Enter instructions..." rows={3} />
             </div>
-          </div>
+          </Card>
         );
       default:
         return null;
@@ -1192,7 +1191,7 @@ export const POGRuleManagement: React.FC = () => {
               <h4>Bulk Upload</h4>
               <p className="upload-hint">Upload a CSV or TXT file with categories, clusters, or fixtures to apply in bulk.</p>
               <label className="upload-btn">
-                <Upload size={16} />
+                <FileUploadOutlined sx={{ fontSize: 16 }} />
                 Upload CSV/TXT
                 <input type="file" accept=".csv,.txt" style={{ display: 'none' }} onChange={(e) => {
                   const file = e.target.files?.[0];
@@ -1215,10 +1214,10 @@ export const POGRuleManagement: React.FC = () => {
               </label>
             </div>
             {!isMapped(builderForm) && (
-              <div className="wizard-warning-card"><AlertTriangle size={18} /><div><strong>No Mapping Selected</strong><p>This rule will be saved but marked as Unmapped.</p></div></div>
+              <div className="wizard-warning-card"><WarningAmberOutlined sx={{ fontSize: 18 }} /><div><strong>No Mapping Selected</strong><p>This rule will be saved but marked as Unmapped.</p></div></div>
             )}
             {isMapped(builderForm) && (
-              <div className="wizard-success-card"><CheckCircle size={18} /><div><strong>Rule Will Be Applied To:</strong>
+              <div className="wizard-success-card"><CheckCircleOutlined sx={{ fontSize: 18 }} /><div><strong>Rule Will Be Applied To:</strong>
                 <ul>
                   {(builderForm.mapping?.categories?.length || 0) > 0 && <li>Categories: {builderForm.mapping?.categories.join(', ')}</li>}
                   {(builderForm.mapping?.clusters?.length || 0) > 0 && <li>Clusters: {builderForm.mapping?.clusters.join(', ')}</li>}
@@ -1248,7 +1247,7 @@ export const POGRuleManagement: React.FC = () => {
                             <h4>{rt.label}</h4>
                             <p>{rt.description}</p>
                           </div>
-                          {builderForm.types?.includes(rt.value) && <CheckCircle size={20} className="wizard-rule-type-check" />}
+                          {builderForm.types?.includes(rt.value) && <CheckCircleOutlined sx={{ fontSize: 20 }} className="wizard-rule-type-check" />}
                         </div>
                       );
                     })}
@@ -1269,7 +1268,7 @@ export const POGRuleManagement: React.FC = () => {
             <h3 className="wizard-step-title">Rule Definition</h3>
             <p className="wizard-step-description">Configure the parameters for each selected rule type.</p>
             {(builderForm.types?.length || 0) === 0 ? (
-              <div className="wizard-warning-card"><AlertTriangle size={18} /><div>Please go back and select at least one rule type.</div></div>
+              <div className="wizard-warning-card"><WarningAmberOutlined sx={{ fontSize: 18 }} /><div>Please go back and select at least one rule type.</div></div>
             ) : (
               <div className="wizard-definitions-list">
                 {builderForm.types?.map(type => (
@@ -1290,13 +1289,13 @@ export const POGRuleManagement: React.FC = () => {
         <div className="pi-header-row">
           <div className="rule-management-title-section">
             <div className="rule-management-title-row">
-              <ShieldCheck size={24} />
+              <GppGoodOutlined sx={{ fontSize: 24 }} />
               <h1 className="rule-management-title">POG Rule Management</h1>
             </div>
             <p className="rule-management-subtitle">Create and manage centralized planogram rules</p>
             <div className="pi-header-meta">
               <span className="pi-meta-pill">
-                <ShieldCheck size={12} />
+                <GppGoodOutlined sx={{ fontSize: 12 }} />
                 {rules.length} Rules
               </span>
               <span className="pi-meta-pill pi-meta-pill--success">
@@ -1315,34 +1314,32 @@ export const POGRuleManagement: React.FC = () => {
             </div>
           </div>
           <div className="pi-header-right">
-            <button className="pi-btn-primary" onClick={handleCreateNew}>
-              <Plus size={15} />
-              <span>Create Rule</span>
-            </button>
+            <Button variant="contained" color="primary" size="medium" className="pi-btn-primary" onClick={handleCreateNew} startIcon={<Add sx={{ fontSize: 15 }} />}>
+              Create Rule
+            </Button>
           </div>
         </div>
       </div>
 
-      <div className="rule-management-tabs">
-        <button className={`rule-tab ${activeTab === 'library' ? 'active' : ''}`} onClick={() => { setActiveTab('library'); resetBuilder(); }}>Rule Library</button>
-        <button className={`rule-tab ${activeTab === 'builder' ? 'active' : ''}`} onClick={() => setActiveTab('builder')}>
-          Rule Builder {isEditing && <span className="tab-badge">Editing</span>}
-        </button>
-      </div>
-
-      {activeTab === 'library' && (
-        <div className="rule-library">
+      <div style={{ marginTop: '24px' }}>
+      <Tabs
+        tabNames={[
+          { value: 'library', label: 'Rule Library' },
+          { value: 'builder', label: isEditing ? 'Rule Builder — Editing' : 'Rule Builder' },
+        ]}
+        tabPanels={[
+          <div className="rule-library">
           {(unmappedCount > 0 || draftCount > 0) && (
             <div className="rule-alerts">
               {unmappedCount > 0 && (
                 <div className="pi-banner pi-banner--warning">
-                  <AlertTriangle size={16} />
+                  <WarningAmberOutlined sx={{ fontSize: 16 }} />
                   <span>You have <strong>{unmappedCount}</strong> unmapped rule{unmappedCount > 1 ? 's' : ''}</span>
                 </div>
               )}
               {draftCount > 0 && (
                 <div className="pi-banner pi-banner--info">
-                  <FileText size={16} />
+                  <DescriptionOutlined sx={{ fontSize: 16 }} />
                   <span>You have <strong>{draftCount}</strong> draft rule{draftCount > 1 ? 's' : ''}</span>
                 </div>
               )}
@@ -1350,7 +1347,7 @@ export const POGRuleManagement: React.FC = () => {
           )}
           <div className="pi-toolbar">
             <div className="pi-toolbar-search">
-              <Search size={15} />
+              <SearchOutlined sx={{ fontSize: 15 }} />
               <input type="text" placeholder="Search rules..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
             </div>
             <div className="rule-filter-group">
@@ -1392,7 +1389,9 @@ export const POGRuleManagement: React.FC = () => {
                 placeholder="All"
               />
             </div>
-            <button className="pi-toolbar-clear" onClick={clearAllFilters}>Clear All</button>
+            <Button variant="text" color="primary" size="small" className="pi-toolbar-clear" onClick={clearAllFilters}>
+              Clear All
+            </Button>
           </div>
 
           <div className="premium-table-container">
@@ -1416,7 +1415,7 @@ export const POGRuleManagement: React.FC = () => {
                   <tr className="empty-row">
                     <td colSpan={10}>
                       <div className="pi-empty">
-                        <FileText size={24} />
+                        <DescriptionOutlined sx={{ fontSize: 24 }} />
                         <p className="pi-empty-title">No rules found</p>
                         <span className="pi-empty-desc">Create a new rule or adjust your filters</span>
                       </div>
@@ -1438,7 +1437,7 @@ export const POGRuleManagement: React.FC = () => {
                             <span className="rule-name-text">{rule.name}</span>
                             {isDraft && (
                               <span className="draft-progress">
-                                <Circle size={8} />
+                                <RadioButtonUnchecked sx={{ fontSize: 8 }} />
                                 {rule.completedSteps.length}/4
                               </span>
                             )}
@@ -1461,11 +1460,11 @@ export const POGRuleManagement: React.FC = () => {
                         <td>{renderMappingBadges(rule.mapping.fixtures)}</td>
                         <td>
                           {isDraft ? (
-                            <span className="mapping-badge draft"><FileText size={14} />Draft</span>
+                            <span className="mapping-badge draft"><DescriptionOutlined sx={{ fontSize: 14 }} />Draft</span>
                           ) : mapped ? (
-                            <span className="mapping-badge mapped"><CheckCircle size={14} />Mapped</span>
+                            <span className="mapping-badge mapped"><CheckCircleOutlined sx={{ fontSize: 14 }} />Mapped</span>
                           ) : (
-                            <span className="mapping-badge unmapped"><AlertTriangle size={14} />Unmapped</span>
+                            <span className="mapping-badge unmapped"><WarningAmberOutlined sx={{ fontSize: 14 }} />Unmapped</span>
                           )}
                         </td>
                         <td><span className="date-cell">{rule.lastUpdated}</span></td>
@@ -1477,13 +1476,13 @@ export const POGRuleManagement: React.FC = () => {
                         <td>
                           <div className="action-buttons">
                             <button className="action-btn view" onClick={() => handleViewRule(rule)} title="View">
-                              <Eye size={16} />
+                              <VisibilityOutlined sx={{ fontSize: 16 }} />
                             </button>
                             <button className="action-btn edit" onClick={() => handleEditRule(rule)} title="Edit">
-                              <Edit size={16} />
+                              <EditOutlined sx={{ fontSize: 16 }} />
                             </button>
                             <button className="action-btn delete" onClick={() => handleDeleteClick(rule)} title="Delete">
-                              <Trash2 size={16} />
+                              <DeleteOutlined sx={{ fontSize: 16 }} />
                             </button>
                           </div>
                         </td>
@@ -1501,7 +1500,7 @@ export const POGRuleManagement: React.FC = () => {
             </div>
             <div className="pagination-controls">
               <button className="pagination-btn" disabled>
-                <ChevronLeft size={16} />
+                <KeyboardArrowLeft sx={{ fontSize: 16 }} />
               </button>
               <button className="pagination-page active">1</button>
               <button className="pagination-page">2</button>
@@ -1509,7 +1508,7 @@ export const POGRuleManagement: React.FC = () => {
               <span className="pagination-ellipsis">...</span>
               <button className="pagination-page">12</button>
               <button className="pagination-btn">
-                <ChevronRight size={16} />
+                <KeyboardArrowRight sx={{ fontSize: 16 }} />
               </button>
             </div>
             <div className="pagination-per-page">
@@ -1521,11 +1520,8 @@ export const POGRuleManagement: React.FC = () => {
               </select>
             </div>
           </div>
-        </div>
-      )}
-
-      {activeTab === 'builder' && (
-        <div className="rule-builder-wizard">
+        </div>,
+          <div className="rule-builder-wizard">
           <div className="pi-steps wizard-progress">
             {wizardSteps.map((step, index) => {
               const isCompleted = builderForm.completedSteps?.includes(step.id) || (step.id < currentStep && isStepComplete(step.id));
@@ -1538,7 +1534,7 @@ export const POGRuleManagement: React.FC = () => {
                     onClick={() => isAccessible && setCurrentStep(step.id)}
                     style={{ cursor: isAccessible ? 'pointer' : 'default' }}
                   >
-                    <span className="pi-step-num">{isCompleted && !isCurrent ? <Check size={14} /> : step.id}</span>
+                    <span className="pi-step-num">{isCompleted && !isCurrent ? <Check sx={{ fontSize: 14 }} /> : step.id}</span>
                     <span className="pi-step-label">
                       {step.title}
                       <span className="pi-step-desc">{step.description}</span>
@@ -1549,21 +1545,49 @@ export const POGRuleManagement: React.FC = () => {
               );
             })}
           </div>
-          <div className="wizard-content">{isEditing && builderForm.status === 'Draft' && <div className="wizard-draft-banner"><FileText size={18} /><span>Continuing draft rule</span></div>}{renderWizardContent()}</div>
+          <div className="wizard-content">{isEditing && builderForm.status === 'Draft' && <div className="wizard-draft-banner"><DescriptionOutlined sx={{ fontSize: 18 }} /><span>Continuing draft rule</span></div>}{renderWizardContent()}</div>
           <div className="wizard-actions">
-            <div className="wizard-actions-left">{currentStep > 1 && <button className="wizard-btn secondary" onClick={handlePrevStep}><ChevronLeft size={18} />Previous</button>}</div>
+            <div className="wizard-actions-left">
+              {currentStep > 1 && (
+                <Button variant="outlined" color="primary" className="wizard-btn secondary" onClick={handlePrevStep} startIcon={<KeyboardArrowLeft sx={{ fontSize: 18 }} />}>
+                  Previous
+                </Button>
+              )}
+            </div>
             <div className="wizard-actions-right">
-              <button className="wizard-btn outline" onClick={() => { setActiveTab('library'); resetBuilder(); }}>Cancel</button>
-              <button className="wizard-btn secondary" onClick={handleSaveDraft}><Save size={18} />Save Draft</button>
+              <Button variant="outlined" color="primary" className="wizard-btn outline" onClick={() => { setActiveTab('library'); resetBuilder(); }}>
+                Cancel
+              </Button>
+              <Button variant="outlined" color="primary" className="wizard-btn secondary" onClick={handleSaveDraft} startIcon={<SaveOutlined sx={{ fontSize: 18 }} />}>
+                Save Draft
+              </Button>
               {currentStep < 4 ? (
-                <button className="wizard-btn primary" onClick={handleNextStep} disabled={!isStepComplete(currentStep)}>Next<ChevronRight size={18} /></button>
+                <Button variant="contained" color="primary" className="wizard-btn primary" onClick={handleNextStep} disabled={!isStepComplete(currentStep)} endIcon={<KeyboardArrowRight sx={{ fontSize: 18 }} />}>
+                  Next
+                </Button>
               ) : (
-                <button className="wizard-btn primary" onClick={handleSaveRule} disabled={!builderForm.name || !builderForm.types?.length}><CheckCircle size={18} />{isEditing ? 'Update' : 'Create'} Rule</button>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  className="wizard-btn primary"
+                  onClick={handleSaveRule}
+                  disabled={!builderForm.name || !builderForm.types?.length}
+                  startIcon={<CheckCircleOutlined sx={{ fontSize: 18 }} />}
+                >
+                  {isEditing ? 'Update' : 'Create'} Rule
+                </Button>
               )}
             </div>
           </div>
-        </div>
-      )}
+        </div>,
+        ]}
+        value={activeTab}
+        onChange={(_, val) => {
+          if (val === 'library') { setActiveTab('library'); resetBuilder(); }
+          else setActiveTab(val as 'library' | 'builder');
+        }}
+      />
+      </div>
 
       {selectedRule && (
         <div className="rule-modal-overlay" onClick={() => setSelectedRule(null)}>
@@ -1571,16 +1595,16 @@ export const POGRuleManagement: React.FC = () => {
             <div className="rule-detail-header">
               <div className="rule-detail-title-section">
                 <div className="rule-detail-icon">
-                  {ruleTypeIcons[selectedRule.types[0]] || <Layers size={24} />}
+                  {ruleTypeIcons[selectedRule.types[0]] || <LayersOutlined sx={{ fontSize: 24 }} />}
                 </div>
                 <div>
                   <h2>{selectedRule.name}</h2>
                   <span className="rule-detail-id">{selectedRule.id}</span>
                 </div>
               </div>
-              <button className="rule-detail-close" onClick={() => setSelectedRule(null)}>
-                <X size={20} />
-              </button>
+              <Button variant="text" size="small" className="rule-detail-close" onClick={() => setSelectedRule(null)} aria-label="Close">
+                <CloseOutlined sx={{ fontSize: 20 }} />
+              </Button>
             </div>
 
             <div className="rule-detail-status-bar">
@@ -1591,9 +1615,9 @@ export const POGRuleManagement: React.FC = () => {
               <div className="status-item">
                 <span className="status-label">Mapping</span>
                 {isMapped(selectedRule) ? (
-                  <span className="mapping-status mapped"><CheckCircle size={14} />Mapped</span>
+                  <span className="mapping-status mapped"><CheckCircleOutlined sx={{ fontSize: 14 }} />Mapped</span>
                 ) : (
-                  <span className="mapping-status unmapped"><AlertTriangle size={14} />Unmapped</span>
+                  <span className="mapping-status unmapped"><WarningAmberOutlined sx={{ fontSize: 14 }} />Unmapped</span>
                 )}
               </div>
               <div className="status-item">
@@ -1625,9 +1649,9 @@ export const POGRuleManagement: React.FC = () => {
               <div className="rule-detail-section">
                 <h4>Scope & Mapping</h4>
                 <div className="mapping-cards-grid">
-                  <div className="mapping-card">
+                  <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: 0, overflow: 'hidden' }}>
                     <div className="mapping-card-header">
-                      <Tag size={16} />
+                      <LabelOutlined sx={{ fontSize: 16 }} />
                       <span>Categories</span>
                     </div>
                     <div className="mapping-card-content">
@@ -1641,10 +1665,10 @@ export const POGRuleManagement: React.FC = () => {
                         <span className="no-mapping">No categories mapped</span>
                       )}
                     </div>
-                  </div>
-                  <div className="mapping-card">
+                  </Card>
+                  <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: 0, overflow: 'hidden' }}>
                     <div className="mapping-card-header">
-                      <Building2 size={16} />
+                      <ApartmentOutlined sx={{ fontSize: 16 }} />
                       <span>Clusters</span>
                     </div>
                     <div className="mapping-card-content">
@@ -1658,10 +1682,10 @@ export const POGRuleManagement: React.FC = () => {
                         <span className="no-mapping">No clusters mapped</span>
                       )}
                     </div>
-                  </div>
-                  <div className="mapping-card">
+                  </Card>
+                  <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: 0, overflow: 'hidden' }}>
                     <div className="mapping-card-header">
-                      <Box size={16} />
+                      <Inventory2Outlined sx={{ fontSize: 16 }} />
                       <span>Fixtures</span>
                     </div>
                     <div className="mapping-card-content">
@@ -1675,7 +1699,7 @@ export const POGRuleManagement: React.FC = () => {
                         <span className="no-mapping">No fixtures mapped</span>
                       )}
                     </div>
-                  </div>
+                  </Card>
                 </div>
               </div>
 
@@ -1710,13 +1734,12 @@ export const POGRuleManagement: React.FC = () => {
             </div>
 
             <div className="rule-detail-footer">
-              <button className="btn-secondary" onClick={() => setSelectedRule(null)}>
+              <Button variant="outlined" color="primary" className="btn-secondary" onClick={() => setSelectedRule(null)}>
                 Close
-              </button>
-              <button className="btn-primary" onClick={() => { setSelectedRule(null); handleEditRule(selectedRule); }}>
-                <Edit size={16} />
+              </Button>
+              <Button variant="contained" color="primary" className="btn-primary" onClick={() => { setSelectedRule(null); handleEditRule(selectedRule); }} startIcon={<EditOutlined sx={{ fontSize: 16 }} />}>
                 Edit Rule
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -1725,9 +1748,21 @@ export const POGRuleManagement: React.FC = () => {
       {showDeleteModal && ruleToDelete && (
         <div className="rule-modal-overlay" onClick={() => setShowDeleteModal(false)}>
           <div className="rule-modal delete-modal" onClick={e => e.stopPropagation()}>
-            <div className="rule-modal-header"><h2>Delete Rule</h2><button className="rule-modal-close" onClick={() => setShowDeleteModal(false)}><X size={20} /></button></div>
+            <div className="rule-modal-header">
+              <h2>Delete Rule</h2>
+              <Button variant="text" size="small" className="rule-modal-close" onClick={() => setShowDeleteModal(false)} aria-label="Close">
+                <CloseOutlined sx={{ fontSize: 20 }} />
+              </Button>
+            </div>
             <div className="rule-modal-content"><p>Are you sure you want to delete this rule?</p><p className="delete-rule-name">"{ruleToDelete.name}"</p><p className="delete-warning">This action cannot be undone.</p></div>
-            <div className="rule-modal-actions"><button className="rule-cancel-btn" onClick={() => setShowDeleteModal(false)}>Cancel</button><button className="rule-delete-confirm-btn" onClick={confirmDelete}><Trash2 size={16} />Delete</button></div>
+            <div className="rule-modal-actions">
+              <Button variant="outlined" color="primary" className="rule-cancel-btn" onClick={() => setShowDeleteModal(false)}>
+                Cancel
+              </Button>
+              <Button variant="contained" color="error" className="rule-delete-confirm-btn" onClick={confirmDelete} startIcon={<DeleteOutlined sx={{ fontSize: 16 }} />}>
+                Delete
+              </Button>
+            </div>
           </div>
         </div>
       )}

@@ -1,8 +1,8 @@
 /* Premium Broadcast Feed Styles */
 
 .broadcast-feed {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: var(--ia-color-surface);
+  border: 1px solid var(--ia-color-border);
   border-radius: 12px;
   padding: 24px;
 }
@@ -16,9 +16,9 @@
 }
 
 .broadcast-feed-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: #0f172a;
+  font-size: var(--ia-text-lg);
+  font-weight: var(--ia-font-weight-bold);
+  color: var(--ia-color-text-primary);
   margin: 0;
 }
 
@@ -27,15 +27,15 @@
   align-items: center;
   gap: 8px;
   padding: 8px 14px;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
+  background: var(--ia-color-bg-subtle);
+  border: 1px solid var(--ia-color-border);
   border-radius: 8px;
   flex: 1;
   max-width: 300px;
 }
 
 .broadcast-feed-search svg {
-  color: #9ca3af;
+  color: var(--ia-color-text-tertiary);
   flex-shrink: 0;
 }
 
@@ -43,13 +43,13 @@
   flex: 1;
   border: none;
   background: transparent;
-  font-size: 14px;
-  color: #0f172a;
+  font-size: var(--ia-text-sm);
+  color: var(--ia-color-text-primary);
   outline: none;
 }
 
 .broadcast-feed-search input::placeholder {
-  color: #9ca3af;
+  color: var(--ia-color-text-tertiary);
 }
 
 .broadcast-feed-filters {
@@ -61,24 +61,24 @@
 
 .broadcast-filter {
   padding: 8px 16px;
-  border: 1px solid #e5e7eb;
-  background: #ffffff;
+  border: 1px solid var(--ia-color-border);
+  background: var(--ia-color-surface);
   border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #6b7280;
+  font-size: var(--ia-text-13);
+  font-weight: var(--ia-font-weight-semibold);
+  color: var(--ia-color-text-secondary);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .broadcast-filter:hover {
-  border-color: #d1d5db;
-  background: #f9fafb;
+  border-color: var(--ia-color-border);
+  background: var(--ia-color-bg-subtle);
 }
 
 .broadcast-filter.active {
-  background: #3b82f6;
-  border-color: #3b82f6;
+  background: var(--ia-color-primary);
+  border-color: var(--ia-color-primary);
   color: white;
 }
 
@@ -94,7 +94,7 @@
   align-items: center;
   justify-content: center;
   padding: 60px 20px;
-  color: #9ca3af;
+  color: var(--ia-color-text-tertiary);
   text-align: center;
 }
 
@@ -104,8 +104,8 @@
 }
 
 .broadcast-feed-empty p {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--ia-text-sm);
+  font-weight: var(--ia-font-weight-medium);
   margin: 0;
 }
 

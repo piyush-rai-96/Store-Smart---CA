@@ -9,8 +9,8 @@
    ============================================================ */
 
 .wow-table-wrap {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--ia-color-surface);
+  border: 1px solid var(--ia-color-border);
   border-radius: 12px;
   overflow: auto;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
@@ -20,27 +20,27 @@ table.wow-table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  font-size: 13px;
-  color: #0f172a;
-  background: #ffffff;
+  font-size: var(--ia-text-13);
+  color: var(--ia-color-text-primary);
+  background: var(--ia-color-surface);
   table-layout: auto;
 }
 
 /* ── Header ─────────────────────────────────────────────── */
 table.wow-table thead {
-  background: #f1f5f9;
+  background: var(--ia-color-bg-muted);
 }
 
 table.wow-table thead th {
   padding: 14px 16px;
   text-align: left;
-  font-size: 12px;
-  font-weight: 700;
-  color: #1e293b;
+  font-size: var(--ia-text-xs);
+  font-weight: var(--ia-font-weight-bold);
+  color: var(--ia-color-text-primary);
   letter-spacing: 0.01em;
-  background: #f1f5f9;
-  border-right: 1px solid #e2e8f0;
-  border-bottom: 1px solid #cbd5e1;
+  background: var(--ia-color-bg-muted);
+  border-right: 1px solid var(--ia-color-border);
+  border-bottom: 1px solid var(--ia-color-border-strong);
   white-space: nowrap;
   position: sticky;
   top: 0;
@@ -54,16 +54,16 @@ table.wow-table thead th:last-child {
 /* Subtitle inside header (for grouped headers) */
 table.wow-table thead th .wow-th-sub {
   display: block;
-  font-size: 11px;
-  font-weight: 600;
-  color: #64748b;
+  font-size: var(--ia-text-2xs);
+  font-weight: var(--ia-font-weight-semibold);
+  color: var(--ia-color-text-secondary);
   margin-top: 4px;
 }
 
 /* Active / sortable header indicator */
 table.wow-table thead th.wow-th-active {
-  color: #4f46e5;
-  box-shadow: inset 0 -2px 0 0 #f59e0b;
+  color: var(--ia-color-primary-hover);
+  box-shadow: inset 0 -2px 0 0 var(--ia-color-warning);
 }
 
 table.wow-table thead th.wow-th-sortable {
@@ -72,17 +72,17 @@ table.wow-table thead th.wow-th-sortable {
 }
 
 table.wow-table thead th.wow-th-sortable:hover {
-  background: #e2e8f0;
+  background: var(--ia-color-border);
 }
 
 /* ── Body cells ─────────────────────────────────────────── */
 table.wow-table tbody td {
   padding: 14px 16px;
-  border-right: 1px solid #e2e8f0;
-  border-bottom: 1px solid #f1f5f9;
+  border-right: 1px solid var(--ia-color-border);
+  border-bottom: 1px solid var(--ia-color-bg-muted);
   vertical-align: middle;
-  color: #0f172a;
-  font-size: 13px;
+  color: var(--ia-color-text-primary);
+  font-size: var(--ia-text-13);
   background: inherit;
 }
 
@@ -100,12 +100,12 @@ table.wow-table tbody tr:nth-child(even) {
 }
 
 table.wow-table tbody tr:nth-child(odd) {
-  background: #ffffff;
+  background: var(--ia-color-surface);
 }
 
 /* Hover */
 table.wow-table tbody tr:hover {
-  background: #eef2ff;
+  background: var(--ia-color-primary-soft);
   transition: background 0.12s ease;
 }
 
@@ -113,14 +113,14 @@ table.wow-table tbody tr:hover {
 table.wow-table tbody tr.wow-row-highlight,
 table.wow-table tbody tr.selected,
 table.wow-table tbody tr[data-selected="true"] {
-  background: #f5f3ff;
+  background: var(--ia-color-primary-soft);
 }
 
 /* Numeric / link-style cell accent */
 table.wow-table tbody td.wow-td-num,
 table.wow-table tbody td .wow-num {
-  color: #4f46e5;
-  font-weight: 500;
+  color: var(--ia-color-primary-hover);
+  font-weight: var(--ia-font-weight-medium);
   font-variant-numeric: tabular-nums;
 }
 
@@ -133,7 +133,7 @@ table.wow-table tbody td {
 table.wow-table.wow-table--compact thead th,
 table.wow-table.wow-table--compact tbody td {
   padding: 10px 12px;
-  font-size: 12px;
+  font-size: var(--ia-text-xs);
 }
 
 /* ── Footer / Pagination ────────────────────────────────── */
@@ -142,10 +142,10 @@ table.wow-table.wow-table--compact tbody td {
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  background: #ffffff;
-  border-top: 1px solid #e2e8f0;
-  font-size: 12px;
-  color: #64748b;
+  background: var(--ia-color-surface);
+  border-top: 1px solid var(--ia-color-border);
+  font-size: var(--ia-text-xs);
+  color: var(--ia-color-text-secondary);
 }
 
 .wow-table-pager {
@@ -158,9 +158,9 @@ table.wow-table.wow-table--compact tbody td {
   width: 28px;
   height: 28px;
   border-radius: 6px;
-  border: 1px solid #e2e8f0;
-  background: #ffffff;
-  color: #475569;
+  border: 1px solid var(--ia-color-border);
+  background: var(--ia-color-surface);
+  color: var(--ia-color-text-secondary);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -169,8 +169,8 @@ table.wow-table.wow-table--compact tbody td {
 }
 
 .wow-table-pager button:hover:not(:disabled) {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
+  background: var(--ia-color-bg-muted);
+  border-color: var(--ia-color-border-strong);
 }
 
 .wow-table-pager button:disabled {
@@ -182,9 +182,9 @@ table.wow-table.wow-table--compact tbody td {
 table.wow-table tbody tr.wow-row-empty td {
   text-align: center;
   padding: 32px 16px;
-  color: #94a3b8;
+  color: var(--ia-color-text-tertiary);
   font-style: italic;
-  background: #ffffff !important;
+  background: var(--ia-color-surface) !important;
 }
 
 /* Inline row bg styles win automatically (higher specificity) — no override needed */

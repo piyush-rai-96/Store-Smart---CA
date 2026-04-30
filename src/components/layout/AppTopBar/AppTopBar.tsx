@@ -1,7 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Header as ImpactHeader } from 'impact-ui';
-import { AlertTriangle, Megaphone, ClipboardCheck, Package } from 'lucide-react';
+import { Header as ImpactHeader, Button } from 'impact-ui';
+import WarningAmberOutlined from '@mui/icons-material/WarningAmberOutlined';
+import CampaignOutlined from '@mui/icons-material/CampaignOutlined';
+import AssignmentTurnedInOutlined from '@mui/icons-material/AssignmentTurnedInOutlined';
+import InventoryOutlined from '@mui/icons-material/InventoryOutlined';
 import { User } from '../../../types';
 import { APP_CONFIG } from '../../../constants/app';
 import './AppTopBar.css';
@@ -22,10 +25,10 @@ interface NotifItem {
 }
 
 const MOCK_NOTIFICATIONS: NotifItem[] = [
-  { id: 1, icon: <AlertTriangle size={14} />, text: 'Store #5678 Pine Grove audit overdue', time: '12 min ago', type: 'warning' },
-  { id: 2, icon: <Megaphone size={14} />, text: 'New broadcast from HQ: Weekly priorities', time: '1h ago', type: 'info' },
-  { id: 3, icon: <ClipboardCheck size={14} />, text: 'SEA compliance updated for District 14', time: '2h ago', type: 'success' },
-  { id: 4, icon: <Package size={14} />, text: 'Inbound shipment delayed — Cologne East', time: '3h ago', type: 'warning' },
+  { id: 1, icon: <WarningAmberOutlined sx={{ fontSize: 14 }} />, text: 'Store #5678 Pine Grove audit overdue', time: '12 min ago', type: 'warning' },
+  { id: 2, icon: <CampaignOutlined sx={{ fontSize: 14 }} />, text: 'New broadcast from HQ: Weekly priorities', time: '1h ago', type: 'info' },
+  { id: 3, icon: <AssignmentTurnedInOutlined sx={{ fontSize: 14 }} />, text: 'SEA compliance updated for District 14', time: '2h ago', type: 'success' },
+  { id: 4, icon: <InventoryOutlined sx={{ fontSize: 14 }} />, text: 'Inbound shipment delayed — Cologne East', time: '3h ago', type: 'warning' },
 ];
 
 export const AppTopBar: React.FC<AppTopBarProps> = ({ user, onLogout }) => {
@@ -52,6 +55,11 @@ export const AppTopBar: React.FC<AppTopBarProps> = ({ user, onLogout }) => {
       label: firstName,
       onClick: () => {},
       isDisabled: true,
+    },
+    {
+      label: 'Log out',
+      onClick: onLogout,
+      isDisabled: false,
     },
   ];
 
@@ -90,9 +98,15 @@ export const AppTopBar: React.FC<AppTopBarProps> = ({ user, onLogout }) => {
             ))}
           </div>
           <div className="app-topbar-notif-footer">
-            <button className="app-topbar-notif-cta" onClick={() => setShowNotifications(false)}>
+            <Button
+              variant="text"
+              color="primary"
+              size="small"
+              className="app-topbar-notif-cta"
+              onClick={() => setShowNotifications(false)}
+            >
               Mark all as read
-            </button>
+            </Button>
           </div>
         </div>
       )}

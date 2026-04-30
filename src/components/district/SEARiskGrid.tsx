@@ -1,6 +1,8 @@
 import React from 'react';
 import { SEARiskPoint } from '../../types/district';
-import { AlertTriangle, CheckCircle, AlertCircle } from 'lucide-react';
+import WarningAmberOutlined from '@mui/icons-material/WarningAmberOutlined';
+import CheckCircleOutlined from '@mui/icons-material/CheckCircleOutlined';
+import ErrorOutlined from '@mui/icons-material/ErrorOutlined';
 import './SEARiskGrid.css';
 
 interface SEARiskGridProps {
@@ -11,19 +13,19 @@ interface SEARiskGridProps {
 export const SEARiskGrid: React.FC<SEARiskGridProps> = ({ data, onStoreClick }) => {
   const getRiskIcon = (riskLevel: string) => {
     switch (riskLevel) {
-      case 'chronic': return <AlertTriangle size={16} />;
-      case 'one-time-dip': return <AlertCircle size={16} />;
-      case 'strong': return <CheckCircle size={16} />;
-      default: return <AlertCircle size={16} />;
+      case 'chronic': return <WarningAmberOutlined sx={{ fontSize: 16 }} />;
+      case 'one-time-dip': return <ErrorOutlined sx={{ fontSize: 16 }} />;
+      case 'strong': return <CheckCircleOutlined sx={{ fontSize: 16 }} />;
+      default: return <ErrorOutlined sx={{ fontSize: 16 }} />;
     }
   };
 
   const getRiskColor = (riskLevel: string) => {
     switch (riskLevel) {
-      case 'chronic': return '#dc3545';
-      case 'one-time-dip': return '#ffc107';
-      case 'strong': return '#28a745';
-      case 'moderate': return '#17a2b8';
+      case 'chronic': return 'var(--ia-color-error)';
+      case 'one-time-dip': return 'var(--ia-color-warning)';
+      case 'strong': return 'var(--ia-color-success)';
+      case 'moderate': return 'var(--ia-color-info)';
       default: return '#6c757d';
     }
   };
@@ -86,7 +88,7 @@ export const SEARiskGrid: React.FC<SEARiskGridProps> = ({ data, onStoreClick }) 
                         <span className="sea-risk-metric-label">SEA Score</span>
                         <span 
                           className="sea-risk-metric-value"
-                          style={{ color: store.seaScore >= 85 ? '#28a745' : store.seaScore >= 75 ? '#ffc107' : '#dc3545' }}
+                          style={{ color: store.seaScore >= 85 ? 'var(--ia-color-success)' : store.seaScore >= 75 ? 'var(--ia-color-warning)' : 'var(--ia-color-error)' }}
                         >
                           {store.seaScore}%
                         </span>

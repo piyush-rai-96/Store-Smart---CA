@@ -1,6 +1,10 @@
 import React from 'react';
-import { Badge, Button } from 'impact-ui';
-import { User, Clock, Eye, CheckCircle, Flag } from 'lucide-react';
+import { Badge, Button, Card } from 'impact-ui';
+import PersonOutlined from '@mui/icons-material/PersonOutlined';
+import AccessTimeOutlined from '@mui/icons-material/AccessTimeOutlined';
+import VisibilityOutlined from '@mui/icons-material/VisibilityOutlined';
+import CheckCircleOutlined from '@mui/icons-material/CheckCircleOutlined';
+import FlagOutlined from '@mui/icons-material/FlagOutlined';
 import { Broadcast } from '../../types/home';
 import './BroadcastCard.css';
 
@@ -48,7 +52,8 @@ export const BroadcastCard: React.FC<BroadcastCardProps> = ({
   };
 
   return (
-    <div className={`broadcast-card ${!broadcast.isRead ? 'broadcast-card-unread' : ''}`}>
+    <Card size="small" sx={{ maxWidth: '100%', minHeight: 0, padding: 0, position: 'relative', borderLeft: !broadcast.isRead ? `4px solid var(--ia-color-primary)` : undefined }}>
+      <div className={`broadcast-card-inner ${!broadcast.isRead ? 'broadcast-card-unread' : ''}`}>
       <div className="broadcast-card-header">
         <Badge
           label={getPriorityLabel(broadcast.priority)}
@@ -58,7 +63,7 @@ export const BroadcastCard: React.FC<BroadcastCardProps> = ({
         {!broadcast.isRead && <div className="broadcast-card-unread-dot" />}
         {broadcast.isAcknowledged && (
           <div className="broadcast-card-acknowledged">
-            <CheckCircle size={14} />
+            <CheckCircleOutlined sx={{ fontSize: 14 }} />
             <span>Acknowledged</span>
           </div>
         )}
@@ -69,12 +74,12 @@ export const BroadcastCard: React.FC<BroadcastCardProps> = ({
 
       <div className="broadcast-card-meta">
         <div className="broadcast-card-meta-item">
-          <User size={14} />
+          <PersonOutlined sx={{ fontSize: 14 }} />
           <span>{broadcast.sender}</span>
           {broadcast.senderRole && <span className="broadcast-card-role">• {broadcast.senderRole}</span>}
         </div>
         <div className="broadcast-card-meta-item">
-          <Clock size={14} />
+          <AccessTimeOutlined sx={{ fontSize: 14 }} />
           <span>{formatTime(broadcast.timestamp)}</span>
         </div>
         {broadcast.category && (
@@ -87,7 +92,7 @@ export const BroadcastCard: React.FC<BroadcastCardProps> = ({
           variant="contained"
           color="primary"
           size="small"
-          startIcon={<Eye size={16} />}
+          startIcon={<VisibilityOutlined sx={{ fontSize: 16 }} />}
           onClick={() => onView(broadcast.id)}
         >
           View
@@ -96,7 +101,7 @@ export const BroadcastCard: React.FC<BroadcastCardProps> = ({
           <Button
             variant="outlined"
             size="small"
-            startIcon={<CheckCircle size={16} />}
+            startIcon={<CheckCircleOutlined sx={{ fontSize: 16 }} />}
             onClick={() => onAcknowledge(broadcast.id)}
           >
             Acknowledge
@@ -106,13 +111,14 @@ export const BroadcastCard: React.FC<BroadcastCardProps> = ({
           <Button
             variant="text"
             size="small"
-            startIcon={<Flag size={16} />}
+            startIcon={<FlagOutlined sx={{ fontSize: 16 }} />}
             onClick={() => onFollowUp(broadcast.id)}
           >
             Follow-up
           </Button>
         )}
       </div>
-    </div>
+      </div>
+    </Card>
   );
 };

@@ -1,5 +1,6 @@
 import React from 'react';
-import { TrendingUp, TrendingDown } from 'lucide-react';
+import TrendingUpOutlined from '@mui/icons-material/TrendingUpOutlined';
+import TrendingDownOutlined from '@mui/icons-material/TrendingDownOutlined';
 import { InsightMetric } from '../../types/home';
 import './InsightRibbon.css';
 
@@ -22,8 +23,8 @@ export const InsightRibbon: React.FC<InsightRibbonProps> = ({ insights }) => {
   };
 
   const getTrendIcon = (trend?: string) => {
-    if (trend === 'up') return <TrendingUp size={14} />;
-    if (trend === 'down') return <TrendingDown size={14} />;
+    if (trend === 'up') return <TrendingUpOutlined sx={{ fontSize: 14 }} />;
+    if (trend === 'down') return <TrendingDownOutlined sx={{ fontSize: 14 }} />;
     return null;
   };
 

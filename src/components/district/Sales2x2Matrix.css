@@ -1,7 +1,7 @@
 /* Sales 2x2 Matrix Styles */
 
 .sales-2x2-container {
-  background: #ffffff;
+  background: var(--ia-color-surface);
   border-radius: 8px;
   padding: 24px;
   border: 1px solid #dee2e6;
@@ -13,14 +13,14 @@
 }
 
 .sales-2x2-title {
-  font-size: 16px;
-  font-weight: 700;
+  font-size: var(--ia-text-md);
+  font-weight: var(--ia-font-weight-bold);
   color: #212529;
   margin: 0 0 4px 0;
 }
 
 .sales-2x2-subtitle {
-  font-size: 13px;
+  font-size: var(--ia-text-13);
   color: #6c757d;
   margin: 0;
 }
@@ -68,8 +68,8 @@
 }
 
 .quadrant-label {
-  font-size: 11px;
-  font-weight: 700;
+  font-size: var(--ia-text-2xs);
+  font-weight: var(--ia-font-weight-bold);
   color: #6c757d;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -80,8 +80,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--ia-text-2xs);
+  font-weight: var(--ia-font-weight-semibold);
   color: #495057;
 }
 
@@ -135,8 +135,8 @@
 }
 
 .bubble-label {
-  font-size: 11px;
-  font-weight: 700;
+  font-size: var(--ia-text-2xs);
+  font-weight: var(--ia-font-weight-bold);
   color: white;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
@@ -153,7 +153,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
+  font-size: var(--ia-text-xs);
   color: #495057;
 }
 
