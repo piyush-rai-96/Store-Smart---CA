@@ -8,7 +8,7 @@ import {
   ArrowRight,
   LucideIcon
 } from 'lucide-react';
-import { Badge } from 'impact-ui/dist/components';
+import { Badge } from 'impact-ui';
 import { QuickAccessItem } from '../../types/home';
 import './QuickActionsPanel.css';
 

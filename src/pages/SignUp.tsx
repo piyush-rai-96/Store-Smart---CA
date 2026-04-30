@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Input, Button, Card, Select } from 'impact-ui/dist/components';
+import { Input, Button, Card, Select } from 'impact-ui';
 import { useAuth } from '../context/AuthContext';
 import { ROUTES, UserRole } from '../types';
 import { ASSETS, APP_CONFIG } from '../constants/app';

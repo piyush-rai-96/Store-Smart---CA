@@ -30,7 +30,8 @@ import {
   TrendingUp,
   Maximize2,
   DollarSign,
-  Tag
+  Tag,
+  ShieldCheck
 } from 'lucide-react';
 import './POGRuleManagement.css';
 
@@ -1286,9 +1287,39 @@ export const POGRuleManagement: React.FC = () => {
   return (
     <div className="rule-management">
       <div className="rule-management-header">
-        <div className="rule-management-title-section">
-          <h1 className="rule-management-title">POG Rule Management</h1>
-          <p className="rule-management-subtitle">Create and manage centralized planogram rules</p>
+        <div className="pi-header-row">
+          <div className="rule-management-title-section">
+            <div className="rule-management-title-row">
+              <ShieldCheck size={24} />
+              <h1 className="rule-management-title">POG Rule Management</h1>
+            </div>
+            <p className="rule-management-subtitle">Create and manage centralized planogram rules</p>
+            <div className="pi-header-meta">
+              <span className="pi-meta-pill">
+                <ShieldCheck size={12} />
+                {rules.length} Rules
+              </span>
+              <span className="pi-meta-pill pi-meta-pill--success">
+                {rules.filter(r => r.status === 'Active').length} Active
+              </span>
+              {unmappedCount > 0 && (
+                <span className="pi-meta-pill pi-meta-pill--warning">
+                  {unmappedCount} Unmapped
+                </span>
+              )}
+              {draftCount > 0 && (
+                <span className="pi-meta-pill pi-meta-pill--neutral">
+                  {draftCount} Drafts
+                </span>
+              )}
+            </div>
+          </div>
+          <div className="pi-header-right">
+            <button className="pi-btn-primary" onClick={handleCreateNew}>
+              <Plus size={15} />
+              <span>Create Rule</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -1303,15 +1334,25 @@ export const POGRuleManagement: React.FC = () => {
         <div className="rule-library">
           {(unmappedCount > 0 || draftCount > 0) && (
             <div className="rule-alerts">
-              {unmappedCount > 0 && <div className="rule-warning-banner"><AlertTriangle size={18} /><span>You have <strong>{unmappedCount}</strong> unmapped rule{unmappedCount > 1 ? 's' : ''}</span></div>}
-              {draftCount > 0 && <div className="rule-draft-banner"><FileText size={18} /><span>You have <strong>{draftCount}</strong> draft rule{draftCount > 1 ? 's' : ''}</span></div>}
+              {unmappedCount > 0 && (
+                <div className="pi-banner pi-banner--warning">
+                  <AlertTriangle size={16} />
+                  <span>You have <strong>{unmappedCount}</strong> unmapped rule{unmappedCount > 1 ? 's' : ''}</span>
+                </div>
+              )}
+              {draftCount > 0 && (
+                <div className="pi-banner pi-banner--info">
+                  <FileText size={16} />
+                  <span>You have <strong>{draftCount}</strong> draft rule{draftCount > 1 ? 's' : ''}</span>
+                </div>
+              )}
             </div>
           )}
-          <div className="rule-toolbar">
-            <div className="rule-search"><Search size={18} className="rule-search-icon" /><input type="text" placeholder="Search rules..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="rule-search-input" /></div>
-            <button className="rule-create-btn" onClick={handleCreateNew}><Plus size={18} /><span>Create Rule</span></button>
-          </div>
-          <div className="rule-filters-bar">
+          <div className="pi-toolbar">
+            <div className="pi-toolbar-search">
+              <Search size={15} />
+              <input type="text" placeholder="Search rules..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+            </div>
             <div className="rule-filter-group">
               <label>Rule Type</label>
               <CustomSelect
@@ -1325,7 +1366,7 @@ export const POGRuleManagement: React.FC = () => {
               />
             </div>
             <div className="rule-filter-group">
-              <label>Mapping Status</label>
+              <label>Mapping</label>
               <CustomSelect
                 options={[
                   { value: '', label: 'All' },
@@ -1351,7 +1392,7 @@ export const POGRuleManagement: React.FC = () => {
                 placeholder="All"
               />
             </div>
-            <button className="filter-clear-btn" onClick={clearAllFilters}>Clear All</button>
+            <button className="pi-toolbar-clear" onClick={clearAllFilters}>Clear All</button>
           </div>
 
           <div className="premium-table-container">
@@ -1374,10 +1415,10 @@ export const POGRuleManagement: React.FC = () => {
                 {filteredRules.length === 0 ? (
                   <tr className="empty-row">
                     <td colSpan={10}>
-                      <div className="empty-state">
-                        <FileText size={40} />
-                        <p>No rules found</p>
-                        <span>Create a new rule or adjust your filters</span>
+                      <div className="pi-empty">
+                        <FileText size={24} />
+                        <p className="pi-empty-title">No rules found</p>
+                        <span className="pi-empty-desc">Create a new rule or adjust your filters</span>
                       </div>
                     </td>
                   </tr>
@@ -1485,18 +1526,25 @@ export const POGRuleManagement: React.FC = () => {
 
       {activeTab === 'builder' && (
         <div className="rule-builder-wizard">
-          <div className="wizard-progress">
+          <div className="pi-steps wizard-progress">
             {wizardSteps.map((step, index) => {
               const isCompleted = builderForm.completedSteps?.includes(step.id) || (step.id < currentStep && isStepComplete(step.id));
               const isCurrent = currentStep === step.id;
               const isAccessible = canProceedToStep(step.id);
               return (
                 <React.Fragment key={step.id}>
-                  <div className={`wizard-step ${isCurrent ? 'current' : ''} ${isCompleted ? 'completed' : ''} ${isAccessible ? 'accessible' : ''}`} onClick={() => isAccessible && setCurrentStep(step.id)}>
-                    <div className="wizard-step-number">{isCompleted && !isCurrent ? <Check size={16} /> : step.id}</div>
-                    <div className="wizard-step-info"><span className="wizard-step-label">{step.title}</span><span className="wizard-step-desc">{step.description}</span></div>
+                  <div
+                    className={`pi-step ${isCurrent ? 'pi-step--active' : ''} ${isCompleted && !isCurrent ? 'pi-step--done' : ''} ${isAccessible ? 'pi-step--accessible' : ''}`}
+                    onClick={() => isAccessible && setCurrentStep(step.id)}
+                    style={{ cursor: isAccessible ? 'pointer' : 'default' }}
+                  >
+                    <span className="pi-step-num">{isCompleted && !isCurrent ? <Check size={14} /> : step.id}</span>
+                    <span className="pi-step-label">
+                      {step.title}
+                      <span className="pi-step-desc">{step.description}</span>
+                    </span>
                   </div>
-                  {index < wizardSteps.length - 1 && <div className={`wizard-step-connector ${isCompleted ? 'completed' : ''}`} />}
+                  {index < wizardSteps.length - 1 && <div className={`pi-step-divider ${isCompleted ? 'pi-step-divider--done' : ''}`} />}
                 </React.Fragment>
               );
             })}

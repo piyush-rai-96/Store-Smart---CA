@@ -1,6 +1,6 @@
 import React from 'react';
 import { Search } from 'lucide-react';
-import { Input } from 'impact-ui/dist/components';
+import { Input } from 'impact-ui';
 import { BroadcastFilters, BroadcastPriority, BroadcastCategory } from '../../../types/broadcast';
 import { CATEGORY_CONFIG } from '../../../constants/broadcasts';
 import './FilterBar.css';

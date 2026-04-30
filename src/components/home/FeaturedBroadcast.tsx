@@ -1,6 +1,6 @@
 import React from 'react';
 import { AlertTriangle, Clock, Users, CheckCircle, Eye } from 'lucide-react';
-import { Button } from 'impact-ui/dist/components';
+import { Button } from 'impact-ui';
 import { BroadcastScope, BroadcastCategory } from '../../types/home';
 import './FeaturedBroadcast.css';
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Button } from 'impact-ui/dist/components';
+import { Modal, Button } from 'impact-ui';
 import { Clock, User, Calendar } from 'lucide-react';
 import { Broadcast } from '../../types/broadcast';
 import { PRIORITY_CONFIG, CATEGORY_CONFIG } from '../../constants/broadcasts';

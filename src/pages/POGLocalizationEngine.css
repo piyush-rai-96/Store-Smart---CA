@@ -1,4 +1,5 @@
 /* POG Localization Engine Styles */
+@import './planogram-shared.css';
 .loc-engine-container {
   flex: 1;
   display: flex;
@@ -9,18 +10,35 @@
   height: 100%;
 }
 
-/* Header */
+/* Header — matches District Intelligence header style */
 .loc-engine-header {
-  padding: 24px 32px;
+  padding: 16px 32px;
   background: #ffffff;
   border-bottom: 1px solid #e2e8f0;
+}
+
+.loc-engine-title-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.loc-engine-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.loc-engine-title-row svg {
+  color: #6366f1;
 }
 
 .loc-engine-title {
   font-size: 18px;
   font-weight: 700;
   color: #0f172a;
-  margin: 0 0 4px 0;
+  margin: 0;
+  letter-spacing: -0.02em;
 }
 
 .loc-engine-subtitle {
@@ -58,12 +76,12 @@
 }
 
 .loc-tab:hover:not(:disabled) {
-  color: #4f46e5;
+  color: var(--pi-primary);
 }
 
 .loc-tab.active {
-  color: #4f46e5;
-  border-bottom-color: #4f46e5;
+  color: var(--pi-primary);
+  border-bottom-color: var(--pi-primary);
 }
 
 .loc-tab-badge {
@@ -91,14 +109,8 @@
 
 /* Workflow Progress */
 .loc-workflow-progress {
-  display: flex;
-  align-items: center;
+  /* Layout spacing retained; visual skin inherits from .pi-steps */
   justify-content: center;
-  gap: 0;
-  padding: 16px 32px;
-  background: #ffffff;
-  border-radius: 10px;
-  border: 1px solid #e2e8f0;
 }
 
 .loc-workflow-step {
@@ -247,13 +259,13 @@
 }
 
 .loc-category-card:hover {
-  border-color: #6366f1;
-  background: #f5f3ff;
+  border-color: var(--pi-primary-light);
+  background: var(--pi-primary-pale);
 }
 
 .loc-category-card.selected {
-  border-color: #6366f1;
-  background: #f5f3ff;
+  border-color: var(--pi-primary);
+  background: var(--pi-primary-pale);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
@@ -356,10 +368,10 @@
 
 /* Agentic Insights */
 .loc-agentic-insights {
-  background: #f8fafc;
-  border: 1.5px solid #4338ca;
-  border-radius: 8px;
-  padding: 18px 20px;
+  background: var(--pi-primary-pale);
+  border: 1px solid #c7d2fe;
+  border-radius: 10px;
+  padding: 16px 18px;
   margin-bottom: 20px;
 }
 
@@ -395,24 +407,9 @@
   color: #1e293b;
 }
 
+/* .loc-continue-btn retained as a layout hook; styling inherits from .pi-btn-primary */
 .loc-continue-btn {
-  display: inline-flex;
-  align-items: center;
   gap: 8px;
-  padding: 12px 24px;
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-  color: white;
-  border: none;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.loc-continue-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
 /* Store Group Grid */
@@ -433,13 +430,13 @@
 }
 
 .loc-store-group-card:hover {
-  border-color: #6366f1;
-  background: #f5f3ff;
+  border-color: var(--pi-primary-light);
+  background: var(--pi-primary-pale);
 }
 
 .loc-store-group-card.selected {
-  border-color: #6366f1;
-  background: #f5f3ff;
+  border-color: var(--pi-primary);
+  background: var(--pi-primary-pale);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 

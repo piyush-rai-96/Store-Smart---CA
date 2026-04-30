@@ -1,6 +1,6 @@
 import React from 'react';
 import { AlertCircle, X } from 'lucide-react';
-import { Button } from 'impact-ui/dist/components';
+import { Button } from 'impact-ui';
 import { Broadcast } from '../../types/broadcast';
 import './CriticalBanner.css';
 

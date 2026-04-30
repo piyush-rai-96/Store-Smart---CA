@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Card } from 'impact-ui/dist/components';
+import { Button, Card } from 'impact-ui';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { getDefaultRouteForAccess } from '../types';

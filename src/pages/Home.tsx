@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Header } from 'impact-ui/dist/components';
+import { Header } from 'impact-ui';
 import { useAuth } from '../context/AuthContext';
 import { ROUTES } from '../types';
 import { APP_CONFIG } from '../constants/app';

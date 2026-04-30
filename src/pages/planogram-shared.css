@@ -1,0 +1,405 @@
+/* ==========================================================================
+   Planogram Intelligence — Shared Design Tokens & Primitives
+   Aligns Master POG Management, POG Rule Management, POG Localization Engine
+   with the District Intelligence visual system.
+   ========================================================================== */
+
+:root {
+  /* Mirror District Intelligence tokens so all Planogram screens pull from one source. */
+  --pi-primary: #6366f1;
+  --pi-primary-dark: #4f46e5;
+  --pi-primary-light: #818cf8;
+  --pi-primary-pale: #eef2ff;
+  --pi-text-primary: #0f172a;
+  --pi-text-body: #334155;
+  --pi-text-secondary: #64748b;
+  --pi-text-muted: #94a3b8;
+  --pi-border: #e2e8f0;
+  --pi-border-light: #f1f5f9;
+  --pi-bg-white: #ffffff;
+  --pi-bg-subtle: #f8fafc;
+  --pi-success: #059669;
+  --pi-success-pale: #ecfdf5;
+  --pi-warning: #d97706;
+  --pi-warning-pale: #fffbeb;
+  --pi-danger: #dc2626;
+  --pi-danger-pale: #fef2f2;
+}
+
+/* --------------------------------------------------------------------------
+   Header meta pills (matches DI .header-meta / .district-badge)
+   -------------------------------------------------------------------------- */
+.pi-header-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.pi-meta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: var(--pi-primary-pale);
+  color: var(--pi-primary-dark);
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.pi-meta-pill--neutral {
+  background: var(--pi-border-light);
+  color: var(--pi-text-body);
+}
+
+.pi-meta-pill--warning {
+  background: var(--pi-warning-pale);
+  color: #b45309;
+}
+
+.pi-meta-pill--success {
+  background: var(--pi-success-pale);
+  color: #047857;
+}
+
+.pi-meta-updated {
+  font-size: 12px;
+  color: var(--pi-text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Header layout (right side actions)
+   -------------------------------------------------------------------------- */
+.pi-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.pi-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* --------------------------------------------------------------------------
+   Shared buttons (pi-btn-primary / pi-btn-secondary)
+   Matches DI .header-action-btn aesthetic
+   -------------------------------------------------------------------------- */
+.pi-btn-primary,
+.pi-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.pi-btn-primary {
+  background: linear-gradient(135deg, var(--pi-primary-dark) 0%, var(--pi-primary) 100%);
+  border: none;
+  color: #ffffff;
+  box-shadow: 0 1px 4px rgba(67, 56, 202, 0.25);
+}
+
+.pi-btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(67, 56, 202, 0.32);
+}
+
+.pi-btn-primary:active { transform: translateY(0); }
+
+.pi-btn-primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.pi-btn-secondary {
+  background: var(--pi-bg-white);
+  border: 1px solid var(--pi-border);
+  color: var(--pi-text-body);
+}
+
+.pi-btn-secondary:hover:not(:disabled) {
+  background: var(--pi-bg-subtle);
+  border-color: #cbd5e1;
+}
+
+/* --------------------------------------------------------------------------
+   Shared compact toolbar (mirrors DI Leaderboard toolbar)
+   -------------------------------------------------------------------------- */
+.pi-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  background: var(--pi-bg-white);
+  border: 1px solid var(--pi-border);
+  border-radius: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.pi-toolbar-search {
+  flex: 1 1 260px;
+  min-width: 240px;
+  max-width: 420px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--pi-bg-white);
+  border: 1px solid var(--pi-border);
+  border-radius: 8px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pi-toolbar-search:focus-within {
+  border-color: #a5b4fc;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.08);
+}
+
+.pi-toolbar-search svg {
+  color: var(--pi-text-muted);
+  flex-shrink: 0;
+}
+
+.pi-toolbar-search input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 13px;
+  color: var(--pi-text-primary);
+  background: transparent;
+  font-family: inherit;
+}
+
+.pi-toolbar-search input::placeholder { color: var(--pi-text-muted); }
+
+.pi-toolbar-filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pi-toolbar-spacer { flex: 1; }
+
+.pi-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+/* Quieter clear-filters link */
+.pi-toolbar-clear {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--pi-text-secondary);
+  font-size: 12.5px;
+  font-weight: 500;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.pi-toolbar-clear:hover {
+  background: var(--pi-border-light);
+  color: var(--pi-text-primary);
+}
+
+/* --------------------------------------------------------------------------
+   Empty state (compact, DI-style)
+   -------------------------------------------------------------------------- */
+.pi-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 32px 20px;
+  color: var(--pi-text-muted);
+  text-align: center;
+}
+
+.pi-empty svg {
+  color: var(--pi-text-muted);
+  opacity: 0.6;
+}
+
+.pi-empty-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--pi-text-body);
+  margin: 0;
+}
+
+.pi-empty-desc {
+  font-size: 12.5px;
+  color: var(--pi-text-secondary);
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Flat banner (replaces heavy gradient alert banners)
+   -------------------------------------------------------------------------- */
+.pi-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid transparent;
+}
+
+.pi-banner svg { flex-shrink: 0; }
+
+.pi-banner--warning {
+  background: var(--pi-warning-pale);
+  border-color: #fde68a;
+  color: #92400e;
+}
+.pi-banner--warning svg { color: var(--pi-warning); }
+
+.pi-banner--info {
+  background: var(--pi-primary-pale);
+  border-color: #c7d2fe;
+  color: var(--pi-primary-dark);
+}
+.pi-banner--info svg { color: var(--pi-primary); }
+
+.pi-banner--success {
+  background: var(--pi-success-pale);
+  border-color: #a7f3d0;
+  color: #065f46;
+}
+.pi-banner--success svg { color: var(--pi-success); }
+
+/* --------------------------------------------------------------------------
+   Unified stepper (matches UAM / Broadcast Wizard pattern)
+   Usage: .pi-steps > (.pi-step + .pi-step-divider)*
+   -------------------------------------------------------------------------- */
+.pi-steps {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: linear-gradient(180deg, #fafbff 0%, var(--pi-bg-subtle) 100%);
+  border: 1px solid var(--pi-border);
+  border-radius: 12px;
+}
+
+.pi-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--pi-text-secondary);
+  transition: color 0.15s ease;
+  min-width: 0;
+}
+
+.pi-step-num {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--pi-border);
+  color: var(--pi-text-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pi-step-label {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 1px;
+  font-size: 13px;
+  font-weight: 600;
+  color: inherit;
+}
+
+.pi-step-desc {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--pi-text-muted);
+}
+
+.pi-step--active { color: var(--pi-primary-dark); }
+.pi-step--active .pi-step-num {
+  background: var(--pi-primary-pale);
+  color: var(--pi-primary-dark);
+  box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.12);
+}
+
+.pi-step--done { color: #15803d; }
+.pi-step--done .pi-step-num {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.pi-step-divider {
+  flex: 1;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--pi-border);
+  max-width: 80px;
+}
+
+.pi-step-divider--done { background: #86efac; }
+
+/* --------------------------------------------------------------------------
+   Wow-table shared tweaks — applied by Planogram tables that opt in via
+   .wow-table. Non-invasive: only sets defaults; pages can still override.
+   -------------------------------------------------------------------------- */
+.wow-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.wow-table thead th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--pi-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: #fafbfc;
+  border-bottom: 1px solid var(--pi-border-light);
+  white-space: nowrap;
+}
+
+.wow-table tbody td {
+  padding: 14px 16px;
+  font-size: 13px;
+  color: var(--pi-text-body);
+  border-bottom: 1px solid var(--pi-border-light);
+  vertical-align: middle;
+}
+
+.wow-table tbody tr:last-child td { border-bottom: none; }
+
+.wow-table tbody tr:hover { background: var(--pi-bg-subtle); }

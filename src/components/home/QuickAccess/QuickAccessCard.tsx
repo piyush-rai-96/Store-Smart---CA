@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card } from 'impact-ui/dist/components';
+import { Card } from 'impact-ui';
 import { QuickAccessCard as QuickAccessCardType } from '../../../types/quickAccess';
 import './QuickAccessCard.css';
 

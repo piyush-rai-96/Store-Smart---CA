@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ChevronRight, Home } from 'lucide-react';
+import { Breadcrumbs } from 'impact-ui';
 import './Breadcrumb.css';
 
 const ROUTE_LABELS: Record<string, string> = {
@@ -17,7 +17,7 @@ const ROUTE_LABELS: Record<string, string> = {
 };
 
 const SECTION_LABELS: Record<string, string> = {
-  'store-operations': 'Store Operations',
+  'store-operations': 'Store Operations Hub',
   'planogram': 'Planogram Intelligence',
   'command-center': 'Command Center',
   'app-config': 'Application Config',
@@ -35,31 +35,22 @@ export const Breadcrumb: React.FC = () => {
   const sectionKey = segments[0];
   const sectionLabel = SECTION_LABELS[sectionKey];
 
-  const isHome = path === '/store-operations/home';
+  const list = [
+    {
+      label: 'Home',
+      onClick: (e: React.MouseEvent) => {
+        e.preventDefault();
+        navigate('/store-operations/home');
+      },
+      to: '/store-operations/home',
+    },
+    ...(sectionLabel ? [{ label: sectionLabel, disabled: true, to: '#' }] : []),
+    { label: pageLabel, disabled: true, to: '#' },
+  ];
 
   return (
     <nav className="breadcrumb-bar" aria-label="Breadcrumb">
-      <button className="breadcrumb-home" onClick={() => navigate('/store-operations/home')} aria-label="Home">
-        <Home size={13} />
-      </button>
-      {sectionLabel && !isHome && (
-        <>
-          <ChevronRight size={12} className="breadcrumb-sep" />
-          <span className="breadcrumb-section">{sectionLabel}</span>
-        </>
-      )}
-      {!isHome && (
-        <>
-          <ChevronRight size={12} className="breadcrumb-sep" />
-          <span className="breadcrumb-current">{pageLabel}</span>
-        </>
-      )}
-      {isHome && (
-        <>
-          <ChevronRight size={12} className="breadcrumb-sep" />
-          <span className="breadcrumb-current">Dashboard</span>
-        </>
-      )}
+      <Breadcrumbs list={list} />
     </nav>
   );
 };

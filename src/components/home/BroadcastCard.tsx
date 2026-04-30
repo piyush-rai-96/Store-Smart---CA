@@ -1,5 +1,5 @@
 import React from 'react';
-import { Badge, Button } from 'impact-ui/dist/components';
+import { Badge, Button } from 'impact-ui';
 import { User, Clock, Eye, CheckCircle, Flag } from 'lucide-react';
 import { Broadcast } from '../../types/home';
 import './BroadcastCard.css';

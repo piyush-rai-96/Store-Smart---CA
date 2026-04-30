@@ -1,6 +1,6 @@
 import React from 'react';
 import { Clock, User } from 'lucide-react';
-import { Button, Card } from 'impact-ui/dist/components';
+import { Button, Card } from 'impact-ui';
 import { Broadcast } from '../../../types/broadcast';
 import { PRIORITY_CONFIG, CATEGORY_CONFIG } from '../../../constants/broadcasts';
 import './BroadcastCard.css';

@@ -1,0 +1,134 @@
+/*
+  Override Impact UI's position:fixed header to position:sticky inside the flex content column.
+  The header now spans only the content column width and sticks to the top on scroll.
+*/
+
+.app-topbar-host {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* Override Impact's own fixed positioning */
+.app-topbar-host .impact-header-container {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+/* Notification panel — anchor from viewport top (below header ~56px) */
+.app-topbar-notif-panel {
+  position: fixed;
+  top: 60px;
+  right: 120px;
+  width: 340px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  z-index: 1300;
+  overflow: hidden;
+  animation: appTopbarNotifSlideIn 0.15s ease-out;
+}
+
+@keyframes appTopbarNotifSlideIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.app-topbar-notif-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.app-topbar-notif-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.app-topbar-notif-count {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6366f1;
+  background: #eef2ff;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.app-topbar-notif-list {
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.app-topbar-notif-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f8fafc;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.app-topbar-notif-item:hover { background: #f8fafc; }
+.app-topbar-notif-item:last-child { border-bottom: none; }
+
+.app-topbar-notif-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.app-topbar-notif-warning .app-topbar-notif-icon { background: #fef3c7; color: #d97706; }
+.app-topbar-notif-info    .app-topbar-notif-icon { background: #eef2ff; color: #6366f1; }
+.app-topbar-notif-success .app-topbar-notif-icon { background: #dcfce7; color: #16a34a; }
+
+.app-topbar-notif-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.app-topbar-notif-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1e293b;
+  line-height: 1.35;
+}
+
+.app-topbar-notif-time {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.app-topbar-notif-footer {
+  padding: 10px 16px;
+  border-top: 1px solid #f1f5f9;
+  text-align: center;
+}
+
+.app-topbar-notif-cta {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6366f1;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.app-topbar-notif-cta:hover { background: #eef2ff; }

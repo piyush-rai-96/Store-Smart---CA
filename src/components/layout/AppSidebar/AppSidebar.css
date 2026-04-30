@@ -1,0 +1,22 @@
+/*
+  Override Impact UI's position:fixed sidebar to position:sticky inside a flex shell.
+  This makes it naturally reserve its column (64px collapsed / 280px open) so the
+  content to the right flows correctly without any margin tricks.
+*/
+
+.app-sidebar-host {
+  /* Sticky column — always visible even when page is scrolled */
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  flex-shrink: 0;
+  z-index: 200;
+}
+
+/* Override Impact's own fixed positioning */
+.app-sidebar-host .impact-sidebar-container {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  height: 100vh;
+}

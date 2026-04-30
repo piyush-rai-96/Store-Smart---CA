@@ -1,45 +1,9 @@
+/* Breadcrumb wrapper — provides the bar chrome; Impact UI Breadcrumbs handles its own internals. */
 .breadcrumb-bar {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 10px 28px;
+  padding: 8px 28px;
   background: #ffffff;
   border-bottom: 1px solid #e2e8f0;
-  font-size: 12.5px;
   min-height: 40px;
-  position: relative;
-  z-index: 5;
-}
-
-.breadcrumb-home {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border: none;
-  background: transparent;
-  border-radius: 6px;
-  color: #64748b;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.breadcrumb-home:hover {
-  background: #eef2ff;
-  color: #6366f1;
-}
-
-.breadcrumb-sep {
-  color: #94a3b8;
-  flex-shrink: 0;
-}
-
-.breadcrumb-section {
-  color: #64748b;
-  font-weight: 500;
-}
-
-.breadcrumb-current {
-  color: #0f172a;
-  font-weight: 600;
 }

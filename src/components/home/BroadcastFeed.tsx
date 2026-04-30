@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Search } from 'lucide-react';
-import { Chips } from 'impact-ui/dist/components';
+import { Chips } from 'impact-ui';
 import { Broadcast } from '../../types/home';
 import { BroadcastCard } from './BroadcastCard';
 import './BroadcastFeed.css';

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Badge } from 'impact-ui/dist/components';
+import { Badge } from 'impact-ui';
 import { Calendar, MapPin } from 'lucide-react';
 import './HomeHero.css';
 

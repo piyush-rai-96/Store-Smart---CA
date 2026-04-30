@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Upload, Search, Eye, Edit, Trash2, Clock, CheckCircle, ChevronDown, ChevronUp, Check } from 'lucide-react';
+import { Upload, Search, Eye, Edit, Trash2, Clock, CheckCircle, ChevronDown, ChevronUp, Check, Layers } from 'lucide-react';
 import './MasterPOGManagement.css';
 import WomensWallStandard from '../assets/C&A_WOMENS_WALL_STANDARD.png';
 import MensDenimWall from '../assets/C&A_MENS_DENIM_WALL.png';
@@ -209,9 +209,35 @@ export const MasterPOGManagement: React.FC = () => {
   return (
     <div className="master-pog-container">
       <div className="master-pog-header">
-        <div className="master-pog-title-section">
-          <h1 className="master-pog-title">Master POG Management</h1>
-          <p className="master-pog-subtitle">Manage and organize your planogram library</p>
+        <div className="pi-header-row">
+          <div className="master-pog-title-section">
+            <div className="master-pog-title-row">
+              <Layers size={24} />
+              <h1 className="master-pog-title">Master POG Management</h1>
+            </div>
+            <p className="master-pog-subtitle">Manage and organize your planogram library</p>
+            <div className="pi-header-meta">
+              <span className="pi-meta-pill">
+                <Layers size={12} />
+                {mockPOGData.length} POGs
+              </span>
+              <span className="pi-meta-pill pi-meta-pill--success">
+                {mockPOGData.filter(p => p.status === 'active').length} Active
+              </span>
+              <span className="pi-meta-pill pi-meta-pill--warning">
+                {mockPOGData.filter(p => p.status === 'draft').length} Drafts
+              </span>
+              <span className="pi-meta-pill pi-meta-pill--neutral">
+                {mockPOGData.filter(p => p.status === 'archived').length} Archived
+              </span>
+            </div>
+          </div>
+          <div className="pi-header-right">
+            <button className="pi-btn-primary">
+              <Upload size={15} />
+              <span>Upload POG</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -236,27 +262,17 @@ export const MasterPOGManagement: React.FC = () => {
       <div className="master-pog-content">
         {activeTab === 'library' && (
           <div className="pog-library">
-            <div className="pog-library-toolbar">
-              <div className="pog-search-wrapper">
-                <Search size={18} className="pog-search-icon" />
+            {/* Combined toolbar: search + filters (DI-style) */}
+            <div className="pi-toolbar">
+              <div className="pi-toolbar-search">
+                <Search size={15} />
                 <input
                   type="text"
                   placeholder="Search planograms..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pog-search-input"
                 />
               </div>
-              <div className="pog-toolbar-actions">
-                <button className="pog-toolbar-btn primary">
-                  <Upload size={16} />
-                  <span>Upload POG</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Filter Stripe */}
-            <div className="pog-filter-stripe">
               <CustomDropdown
                 label="Category"
                 value={filters.category}
@@ -324,7 +340,7 @@ export const MasterPOGManagement: React.FC = () => {
                 ]}
                 onChange={(value) => handleFilterChange('createdBy', value)}
               />
-              <button className="pog-filter-clear" onClick={clearAllFilters}>
+              <button className="pi-toolbar-clear" onClick={clearAllFilters}>
                 Clear All
               </button>
             </div>

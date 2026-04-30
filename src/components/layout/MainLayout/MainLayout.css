@@ -1,36 +1,34 @@
-/* Main Layout - Premium Theme */
+/*
+  Main Layout — flex shell approach.
+
+  Impact UI's Sidebar and Header are both position:fixed by default.
+  We override them to position:relative / position:sticky so they participate
+  in normal document flow inside this flex container. The sidebar naturally
+  reserves its own column (64px → 280px); the content column (flex:1) fills
+  the rest — no margin tricks, no CSS overrides that race with Impact's bundle.
+*/
 
 .main-layout {
+  display: flex;
+  align-items: flex-start;
   min-height: 100vh;
   background: #f8fafc;
 }
 
+/* Right-side column: header + body stacked vertically */
 .main-layout-content {
-  margin-left: 280px;
+  flex: 1;
+  min-width: 0;           /* allow the column to shrink below its content width */
   display: flex;
   flex-direction: column;
-  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.main-layout-content.sidebar-collapsed {
-  margin-left: 72px;
-}
-
-.main-layout-main {
-  overflow-y: auto;
+.main-layout-body {
+  flex: 1;
+  min-height: calc(100vh - 56px);
   overflow-x: hidden;
 }
 
-/* Constrain Impact UI Header to content area only */
-.main-layout-content > div:first-child {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .main-layout-content {
-    margin-left: 72px;
-  }
+.main-layout-main {
+  overflow-x: hidden;
 }

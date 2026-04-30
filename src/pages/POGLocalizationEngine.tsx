@@ -876,32 +876,29 @@ export const POGLocalizationEngine: React.FC = () => {
   };
 
   const renderWorkflowProgress = () => (
-    <div className="loc-workflow-progress">
+    <div className="pi-steps loc-workflow-progress">
       {workflowSteps.map((step, index) => {
         const status = getStepStatus(step.id);
         const summary = getStepSummary(step.id);
+        const isActive = status === 'current';
+        const isDone = status === 'completed';
         return (
           <React.Fragment key={step.id}>
-            <div 
-              className={`loc-workflow-step ${status}`}
-              onClick={() => status === 'completed' && setCurrentStep(step.id)}
+            <div
+              className={`pi-step ${isActive ? 'pi-step--active' : ''} ${isDone ? 'pi-step--done' : ''}`}
+              onClick={() => isDone && setCurrentStep(step.id)}
+              style={{ cursor: isDone ? 'pointer' : 'default' }}
             >
-              <div className="loc-workflow-step-indicator">
-                {status === 'completed' ? (
-                  <CheckCircle size={20} />
-                ) : (
-                  <span className="loc-step-number">{step.number}</span>
-                )}
-              </div>
-              <div className="loc-workflow-step-text">
-                <span className="loc-workflow-step-label">{step.label}</span>
-                {status === 'completed' && summary && (
-                  <span className="loc-workflow-step-summary">{summary}</span>
-                )}
-              </div>
+              <span className="pi-step-num">
+                {isDone ? <CheckCircle size={14} /> : step.number}
+              </span>
+              <span className="pi-step-label">
+                {step.label}
+                {isDone && summary && <span className="pi-step-desc">{summary}</span>}
+              </span>
             </div>
             {index < workflowSteps.length - 1 && (
-              <div className={`loc-workflow-connector ${status === 'completed' ? 'completed' : ''}`} />
+              <div className={`pi-step-divider ${isDone ? 'pi-step-divider--done' : ''}`} />
             )}
           </React.Fragment>
         );
@@ -1048,7 +1045,7 @@ export const POGLocalizationEngine: React.FC = () => {
         )}
         
         <button 
-          className="loc-continue-btn" 
+          className="pi-btn-primary loc-continue-btn" 
           onClick={() => transitionToStep('storeGroup')}
           disabled={!selectedPOG}
         >
@@ -1160,7 +1157,7 @@ export const POGLocalizationEngine: React.FC = () => {
               </div>
             </div>
 
-            <button className="loc-continue-btn" onClick={() => transitionToStep('engine')}>
+            <button className="pi-btn-primary loc-continue-btn" onClick={() => transitionToStep('engine')}>
               Continue to Engine <ChevronRight size={18} />
             </button>
           </>
@@ -1734,11 +1731,28 @@ export const POGLocalizationEngine: React.FC = () => {
   return (
     <div className="loc-engine-container">
       <div className="loc-engine-header">
-        <div>
-          <h1 className="loc-engine-title">Localization Engine</h1>
-          <p className="loc-engine-subtitle">
-            Adapt corporate planograms into store-specific layouts using demand signals and rule validation
-          </p>
+        <div className="pi-header-row">
+          <div className="loc-engine-title-section">
+            <div className="loc-engine-title-row">
+              <Target size={24} />
+              <h1 className="loc-engine-title">Localization Engine</h1>
+            </div>
+            <p className="loc-engine-subtitle">
+              Adapt corporate planograms into store-specific layouts using demand signals and rule validation
+            </p>
+            <div className="pi-header-meta">
+              <span className="pi-meta-pill">
+                <Target size={12} />
+                {publishedResults.length} Localizations
+              </span>
+              <span className="pi-meta-pill pi-meta-pill--success">
+                {publishedResults.filter(r => r.status === 'Published').length} Published
+              </span>
+              <span className="pi-meta-pill pi-meta-pill--warning">
+                {publishedResults.filter(r => r.status === 'Ready').length} Ready
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 

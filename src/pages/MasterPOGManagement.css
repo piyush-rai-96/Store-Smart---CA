@@ -1,4 +1,5 @@
 /* Master POG Management - Premium Theme */
+@import './planogram-shared.css';
 
 .master-pog-container {
   flex: 1;
@@ -10,18 +11,35 @@
   height: 100%;
 }
 
-/* Header */
+/* Header — matches District Intelligence header style */
 .master-pog-header {
-  padding: 24px 32px;
+  padding: 16px 32px;
   background: #ffffff;
   border-bottom: 1px solid #e2e8f0;
+}
+
+.master-pog-title-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.master-pog-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.master-pog-title-row svg {
+  color: #6366f1;
 }
 
 .master-pog-title {
   font-size: 18px;
   font-weight: 700;
   color: #0f172a;
-  margin: 0 0 4px 0;
+  margin: 0;
+  letter-spacing: -0.02em;
 }
 
 .master-pog-subtitle {
@@ -43,10 +61,10 @@
 }
 
 .pog-tab {
-  padding: 16px 24px;
+  padding: 14px 20px;
   font-size: 14px;
   font-weight: 500;
-  color: #64748b;
+  color: var(--pi-text-secondary);
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
@@ -56,12 +74,12 @@
 }
 
 .pog-tab:hover:not(:disabled) {
-  color: #4f46e5;
+  color: var(--pi-primary);
 }
 
 .pog-tab.active {
-  color: #4f46e5;
-  border-bottom-color: #4f46e5;
+  color: var(--pi-primary);
+  border-bottom-color: var(--pi-primary);
 }
 
 .pog-tab:disabled {
@@ -75,6 +93,47 @@
   padding: 24px 32px;
   overflow: auto;
   min-height: 0;
+}
+
+/* Compact filter items inside pi-toolbar (inline label + control) */
+.pi-toolbar .pog-filter-item {
+  flex: 0 0 auto;
+  min-width: 0;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.pi-toolbar .pog-filter-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--pi-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.pi-toolbar .custom-dropdown-trigger {
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid var(--pi-border);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--pi-text-body);
+  background: var(--pi-bg-white);
+  min-width: 140px;
+}
+
+.pi-toolbar .custom-dropdown-trigger:hover {
+  border-color: #cbd5e1;
+  background: var(--pi-bg-subtle);
+}
+
+.pi-toolbar .custom-dropdown-trigger.open {
+  border-color: var(--pi-primary-light);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.08);
 }
 
 /* POG Library */
@@ -339,18 +398,18 @@
 }
 
 .pog-card {
-  background: #ffffff;
-  border-radius: 16px;
-  border: 1px solid #e2e8f0;
+  background: var(--pi-bg-white);
+  border-radius: 12px;
+  border: 1px solid var(--pi-border);
   padding: 20px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .pog-card:hover {
-  border-color: #818cf8;
-  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.12);
-  transform: translateY(-2px);
+  border-color: var(--pi-primary-light);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+  transform: translateY(-1px);
 }
 
 .pog-card-header {
