@@ -13,14 +13,15 @@ import PersonOutlined from '@mui/icons-material/PersonOutlined';
 import MailOutlined from '@mui/icons-material/MailOutlined';
 import WorkOutlined from '@mui/icons-material/WorkOutlined';
 import PlaceOutlined from '@mui/icons-material/PlaceOutlined';
-import MonitorOutlined from '@mui/icons-material/MonitorOutlined';
 import SecurityOutlined from '@mui/icons-material/SecurityOutlined';
-import TaskAltOutlined from '@mui/icons-material/TaskAltOutlined';
-import TuneOutlined from '@mui/icons-material/TuneOutlined';
 import RotateLeftOutlined from '@mui/icons-material/RotateLeftOutlined';
 import DeleteOutlined from '@mui/icons-material/DeleteOutlined';
 import WarningAmberOutlined from '@mui/icons-material/WarningAmberOutlined';
-import { Button, Card } from 'impact-ui';
+import {
+  Button, Badge, Card,
+  Toast, Avatar, EmptyState, Tooltip,
+  Input, Switch, Checkbox, Stepper, Modal, Select, Tag,
+} from 'impact-ui';
 import { useAuth } from '../context/AuthContext';
 import { User, UserRole, ROLE_LABELS, ROLE_ACCESS, ScreenAccess } from '../types';
 import './UserAccessManagement.css';
@@ -76,14 +77,27 @@ export const UserAccessManagement: React.FC = () => {
   const [newRole, setNewRole] = useState<UserRole>('SM');
   const [newScope, setNewScope] = useState('');
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
-  const [showScopeDropdown, setShowScopeDropdown] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<{ name?: string; email?: string; scope?: string }>({});
+
+  // Scope — Impact UI Select state
+  const [scopeIsOpen, setScopeIsOpen] = useState(false);
+  const [scopeCurrentOptions, setScopeCurrentOptions] = useState<{ label: string; value: string }[]>(
+    () => SCOPE_OPTIONS['SM'].options.map(o => ({ label: o, value: o }))
+  );
+  const [scopeSelectedOptions, setScopeSelectedOptions] = useState<{ label: string; value: string }[]>([]);
+
+  const handleScopeChange = (options: { label: string; value: string }[] | { label: string; value: string } | null) => {
+    const opts = Array.isArray(options) ? options : options ? [options] : [];
+    setScopeSelectedOptions(opts);
+    const val = opts[0]?.value || '';
+    setNewScope(val);
+    if (val) setFieldErrors(prev => ({ ...prev, scope: undefined }));
+  };
   const [customizeAccess, setCustomizeAccess] = useState(false);
   const [customAccess, setCustomAccess] = useState<ScreenAccess[]>([]);
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
 
   const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const validateEmail = (v: string) => v.trim().length > 0 && EMAIL_REGEX.test(v.trim());
 
   const filteredUsers = allUsers.filter(u =>
     u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -106,7 +120,9 @@ export const UserAccessManagement: React.FC = () => {
     setNewScope('');
     setFieldErrors({});
     setShowRoleDropdown(false);
-    setShowScopeDropdown(false);
+    setScopeIsOpen(false);
+    setScopeCurrentOptions(SCOPE_OPTIONS['SM'].options.map(o => ({ label: o, value: o })));
+    setScopeSelectedOptions([]);
     setCustomizeAccess(false);
     setCustomAccess([]);
     setCurrentStep(1);
@@ -115,11 +131,6 @@ export const UserAccessManagement: React.FC = () => {
   const effectiveAccess: ScreenAccess[] = customizeAccess && customAccess.length > 0 ? customAccess : ROLE_ACCESS[newRole];
 
   // ── Step completion state (used by step indicator) ──
-  const stepState = {
-    identity: newName.trim().length > 0 && validateEmail(newEmail),
-    roleScope: newRole === 'ADMIN' || newScope.length > 0,
-    access: effectiveAccess.length > 0,
-  };
 
   const toggleCustomScreen = (screen: ScreenAccess) => {
     setCustomAccess(prev =>
@@ -221,27 +232,29 @@ export const UserAccessManagement: React.FC = () => {
           </div>
         </div>
         <div className="uam-header-right">
-          <Button variant="contained" color="primary" size="medium" className="uam-create-btn" onClick={() => { resetForm(); setShowCreateModal(true); }} startIcon={<PersonAddAlt1Outlined sx={{ fontSize: 15 }}/>}>
+          <Button variant="contained" size="medium" onClick={() => { resetForm(); setShowCreateModal(true); }} startIcon={<PersonAddAlt1Outlined sx={{ fontSize: 15 }}/>}>
             Create User
           </Button>
         </div>
       </div>
 
-      {/* Success toast */}
-      {inviteSuccess && (
-        <div className="uam-toast">
-          <div className="uam-toast-icon"><Check sx={{ fontSize: 14 }}/></div>
-          <span>Invitation sent successfully to <strong>{inviteSuccess}</strong></span>
-        </div>
-      )}
-
-      {/* Delete success toast */}
-      {deleteSuccess && (
-        <div className="uam-toast uam-toast--danger">
-          <div className="uam-toast-icon uam-toast-icon--danger"><DeleteOutlined sx={{ fontSize: 14 }}/></div>
-          <span><strong>{deleteSuccess}</strong> was removed</span>
-        </div>
-      )}
+      {/* Success / delete toasts — Impact UI Toast */}
+      <Toast
+        isOpen={!!inviteSuccess}
+        message={`Invitation sent successfully to ${inviteSuccess ?? ''}`}
+        variant="success"
+        position="top-right"
+        autoHideDuration={4000}
+        onClose={() => setInviteSuccess(null)}
+      />
+      <Toast
+        isOpen={!!deleteSuccess}
+        message={`${deleteSuccess ?? ''} was removed`}
+        variant="error"
+        position="top-right"
+        autoHideDuration={2800}
+        onClose={() => setDeleteSuccess(null)}
+      />
 
       {/* ── Stats Strip (DI bca-overview-grid pattern) ── */}
       <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: 0, overflow: 'hidden', margin: '0 16px 16px' }}>
@@ -274,21 +287,18 @@ export const UserAccessManagement: React.FC = () => {
         </div>
       </Card>
 
-      {/* ── Search toolbar (above table, mirrors DI Leaderboard) ── */}
+      {/* ── Search toolbar — Impact UI Input ── */}
       <div className="uam-table-toolbar">
         <div className="uam-search-bar">
-          <SearchOutlined sx={{ fontSize: 15 }}/>
-          <input
-            type="text"
+          <Input
+            leftIcon={<SearchOutlined sx={{ fontSize: 15 }}/>}
+            rightIcon={searchQuery ? <CloseOutlined sx={{ fontSize: 13 }}/> : undefined}
+            rightIconClick={() => setSearchQuery('')}
             placeholder="Search by name, email, or role..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
+            size="small"
           />
-          {searchQuery && (
-            <button className="uam-search-clear" onClick={() => setSearchQuery('')}>
-              <CloseOutlined sx={{ fontSize: 13 }}/>
-            </button>
-          )}
         </div>
         <span className="uam-toolbar-count">{filteredUsers.length} of {allUsers.length} users</span>
       </div>
@@ -315,9 +325,12 @@ export const UserAccessManagement: React.FC = () => {
                 >
                   <td className="uam-td-user">
                     <div className="uam-user-info">
-                      <div className={`uam-avatar uam-avatar--${u.role.toLowerCase()}`}>
-                        {u.name.split(' ').map(n => n[0]).join('').substring(0, 2)}
-                      </div>
+                      <Avatar
+                        type="withoutPicture"
+                        size="small"
+                        label={u.name}
+                        className={`uam-avatar--${u.role.toLowerCase()}`}
+                      />
                       <div className="uam-user-details">
                         <span className="uam-user-name">{u.name}</span>
                         <span className="uam-user-email">{u.email}</span>
@@ -325,37 +338,49 @@ export const UserAccessManagement: React.FC = () => {
                     </div>
                   </td>
                   <td>
-                    <span className={`uam-role-tag uam-role--${u.role.toLowerCase()}`}>
-                      {ROLE_LABELS[u.role]}
-                    </span>
+                    <Badge
+                      label={ROLE_LABELS[u.role]}
+                      variant="subtle"
+                      color={u.role === 'SM' ? 'primary' : u.role === 'DM' ? 'info' : u.role === 'HQ' ? 'warning' : 'error'}
+                      size="small"
+                    />
                   </td>
                   <td>
                     <span className="uam-scope-text">{getUserScope(u)}</span>
                   </td>
                   <td>
-                    <div className={`uam-status uam-status--${u.status}`}>
-                      <span className="uam-status-dot" />
-                      <span>{u.status === 'active' ? 'Active' : 'Invited'}</span>
-                    </div>
+                    <Badge
+                      label={u.status === 'active' ? 'Active' : 'Invited'}
+                      variant="subtle"
+                      color={u.status === 'active' ? 'success' : 'warning'}
+                      size="small"
+                    />
                   </td>
                   <td className="uam-td-screens">
-                    <div className="uam-screen-badge">
-                      <MonitorOutlined sx={{ fontSize: 12 }}/>
-                      <span>{u.accessRoutes.length}</span>
-                    </div>
+                    <Badge
+                      label={`${u.accessRoutes.length} screens`}
+                      variant="subtle"
+                      color="primary"
+                      size="small"
+                    />
                   </td>
                   <td className="uam-td-actions" onClick={e => e.stopPropagation()}>
                     {currentUser?.id === u.id ? (
-                      <span className="uam-action-self" title="You can't remove your own account">You</span>
+                      <Tooltip title="You can't remove your own account" orientation="top">
+                        <span className="uam-action-self">You</span>
+                      </Tooltip>
                     ) : (
-                      <button
-                        type="button"
-                        className="uam-action-delete"
-                        title={`Remove ${u.name}`}
-                        onClick={() => setConfirmDelete(u)}
-                      >
-                        <DeleteOutlined sx={{ fontSize: 14 }}/>
-                      </button>
+                      <Tooltip title={`Remove ${u.name}`} orientation="top">
+                        <Button
+                          variant="text"
+                          size="small"
+                          className="uam-action-delete"
+                          onClick={() => setConfirmDelete(u)}
+                          aria-label={`Remove ${u.name}`}
+                        >
+                          <DeleteOutlined sx={{ fontSize: 14 }}/>
+                        </Button>
+                      </Tooltip>
                     )}
                   </td>
                 </tr>
@@ -367,7 +392,12 @@ export const UserAccessManagement: React.FC = () => {
                         <div className="uam-expand-label">Screen Access</div>
                         <div className="uam-expand-chips">
                           {u.accessRoutes.map(screen => (
-                            <span key={screen} className="uam-expand-chip">{SCREEN_LABELS[screen]}</span>
+                            <Tag
+                              key={screen}
+                              label={SCREEN_LABELS[screen]}
+                              variant="stroke"
+                              size="small"
+                            />
                           ))}
                         </div>
                       </div>
@@ -379,8 +409,11 @@ export const UserAccessManagement: React.FC = () => {
             {filteredUsers.length === 0 && (
               <tr>
                 <td colSpan={6} className="uam-empty">
-                  <SearchOutlined sx={{ fontSize: 20 }}/>
-                  <span>No users match your search</span>
+                  <EmptyState
+                    heading="No users found"
+                    description={searchQuery ? 'No users match your search. Try adjusting the query.' : 'No users have been added yet.'}
+                    emptyStateIcon={<SearchOutlined sx={{ fontSize: 40 }}/>}
+                  />
                 </td>
               </tr>
             )}
@@ -388,52 +421,68 @@ export const UserAccessManagement: React.FC = () => {
         </table>
       </div>
 
-      {/* ========== Create User Modal ========== */}
-      {showCreateModal && (
-        <div className="uam-overlay" onClick={() => setShowCreateModal(false)}>
-          <div className="uam-modal" onClick={e => e.stopPropagation()}>
-            {/* Modal header */}
-            <div className="uam-m-header">
-              <div className="uam-m-header-icon">
-                <PersonAddAlt1Outlined sx={{ fontSize: 18 }}/>
-              </div>
-              <div className="uam-m-header-text">
-                <h3>Create New User</h3>
-                <p>Add a team member and configure their access</p>
-              </div>
-              <button className="uam-m-close" onClick={() => setShowCreateModal(false)}>
-                <CloseOutlined sx={{ fontSize: 16 }}/>
-              </button>
+      {/* ========== Create User — Impact UI Modal (large) ========== */}
+      <Modal
+        open={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        title="Create New User"
+        size="medium"
+        footerOptions={
+          <div className="uam-m-footer">
+            <Button variant="outlined" className="uam-m-cancel" onClick={() => setShowCreateModal(false)}>
+              Cancel
+            </Button>
+            <div className="uam-m-footer-right">
+              {currentStep > 1 && (
+                <Button variant="outlined" className="uam-m-back" onClick={goBack} startIcon={<KeyboardArrowLeft sx={{ fontSize: 14 }}/>}>
+                  Back
+                </Button>
+              )}
+              {currentStep < 3 ? (
+                <Button variant="contained" className="uam-m-submit" onClick={goNext} endIcon={<KeyboardArrowRight sx={{ fontSize: 14 }}/>}>
+                  Next
+                </Button>
+              ) : (
+                <Button
+                  variant="contained"
+                  className="uam-m-submit"
+                  onClick={handleCreateUser}
+                  disabled={customizeAccess && customAccess.length === 0}
+                  startIcon={<SendOutlined sx={{ fontSize: 13 }}/>}
+                >
+                  Send Invite
+                </Button>
+              )}
             </div>
+          </div>
+        }
+      >
+        {/* Modal subtitle */}
+        <div className="uam-m-subtitle">
+          <PersonAddAlt1Outlined sx={{ fontSize: 16 }}/>
+          <span>Add a team member and configure their access</span>
+        </div>
 
-            {/* Step indicator */}
-            <div className="uam-m-steps">
-              {[
-                { num: 1 as const, key: 'identity', label: 'Identity', done: stepState.identity, icon: <PersonOutlined sx={{ fontSize: 13 }}/> },
-                { num: 2 as const, key: 'roleScope', label: 'Role & Scope', done: stepState.roleScope, icon: <WorkOutlined sx={{ fontSize: 13 }}/> },
-                { num: 3 as const, key: 'access', label: 'Screen Access', done: stepState.access, icon: <SecurityOutlined sx={{ fontSize: 13 }}/> },
-              ].map((step, idx, arr) => {
-                const isActive = currentStep === step.num;
-                const isComplete = currentStep > step.num;
-                return (
-                  <React.Fragment key={step.key}>
-                    <div className={`uam-m-step ${isActive ? 'uam-m-step--active' : ''} ${isComplete ? 'uam-m-step--done' : ''}`}>
-                      <span className="uam-m-step-num">
-                        {isComplete ? <TaskAltOutlined sx={{ fontSize: 14 }}/> : step.num}
-                      </span>
-                      <span className="uam-m-step-label">
-                        {step.icon}
-                        {step.label}
-                      </span>
-                    </div>
-                    {idx < arr.length - 1 && <span className={`uam-m-step-divider ${isComplete ? 'uam-m-step-divider--done' : ''}`} />}
-                  </React.Fragment>
-                );
-              })}
-            </div>
+        {/* Stepper — Impact UI Stepper */}
+        <div className="uam-m-stepper">
+          <Stepper
+            variant="default"
+            orientation="horizontal"
+            activeStep={currentStep - 1}
+            handleStep={idx => {
+              const step = (idx + 1) as 1 | 2 | 3;
+              if (step < currentStep) setCurrentStep(step);
+            }}
+            steps={[
+              { label: 'Identity' },
+              { label: 'Role & Scope' },
+              { label: 'Screen Access' },
+            ]}
+          />
+        </div>
 
-            {/* Modal body */}
-            <div className="uam-m-body">
+        {/* Modal body */}
+        <div className="uam-m-body">
               {/* Section: Identity (Step 1) */}
               {currentStep === 1 && (
               <div className="uam-m-section">
@@ -443,37 +492,37 @@ export const UserAccessManagement: React.FC = () => {
                 </div>
                 <div className="uam-m-fields-row">
                   <div className="uam-m-field">
-                    <label>Full Name <span className="uam-m-req">*</span></label>
-                    <input
-                      type="text"
-                      className={fieldErrors.name ? 'uam-m-input--error' : ''}
+                    <Input
+                      label="Full Name"
+                      isRequired
                       placeholder="Sarah Johnson"
                       value={newName}
+                      isError={!!fieldErrors.name}
+                      isHelperText={!!fieldErrors.name}
+                      helperText={fieldErrors.name}
                       onChange={e => { setNewName(e.target.value); if (fieldErrors.name) setFieldErrors(prev => ({ ...prev, name: undefined })); }}
                       onBlur={() => { if (!newName.trim()) setFieldErrors(prev => ({ ...prev, name: 'Full name is required' })); }}
+                      size="large"
                     />
-                    {fieldErrors.name && (
-                      <span className="uam-m-field-error"><ErrorOutlined sx={{ fontSize: 12 }}/>{fieldErrors.name}</span>
-                    )}
                   </div>
                   <div className="uam-m-field">
-                    <label>Email Address <span className="uam-m-req">*</span></label>
-                    <div className={`uam-m-input-icon ${fieldErrors.email ? 'uam-m-input-icon--error' : ''}`}>
-                      <MailOutlined sx={{ fontSize: 14 }}/>
-                      <input
-                        type="email"
-                        placeholder="sarah.johnson@company.co"
-                        value={newEmail}
-                        onChange={e => { setNewEmail(e.target.value); if (fieldErrors.email) setFieldErrors(prev => ({ ...prev, email: undefined })); }}
-                        onBlur={() => {
-                          if (!newEmail.trim()) setFieldErrors(prev => ({ ...prev, email: 'Email is required' }));
-                          else if (!EMAIL_REGEX.test(newEmail.trim())) setFieldErrors(prev => ({ ...prev, email: 'Enter a valid email address' }));
-                        }}
-                      />
-                    </div>
-                    {fieldErrors.email && (
-                      <span className="uam-m-field-error"><ErrorOutlined sx={{ fontSize: 12 }}/>{fieldErrors.email}</span>
-                    )}
+                    <Input
+                      label="Email Address"
+                      isRequired
+                      leftIcon={<MailOutlined sx={{ fontSize: 14 }}/>}
+                      type="email"
+                      placeholder="sarah.johnson@company.co"
+                      value={newEmail}
+                      isError={!!fieldErrors.email}
+                      isHelperText={!!fieldErrors.email}
+                      helperText={fieldErrors.email}
+                      onChange={e => { setNewEmail(e.target.value); if (fieldErrors.email) setFieldErrors(prev => ({ ...prev, email: undefined })); }}
+                      onBlur={() => {
+                        if (!newEmail.trim()) setFieldErrors(prev => ({ ...prev, email: 'Email is required' }));
+                        else if (!EMAIL_REGEX.test(newEmail.trim())) setFieldErrors(prev => ({ ...prev, email: 'Enter a valid email address' }));
+                      }}
+                      size="large"
+                    />
                   </div>
                 </div>
               </div>
@@ -492,7 +541,7 @@ export const UserAccessManagement: React.FC = () => {
                     <div className="uam-dd-wrap">
                       <button
                         className="uam-dd-trigger"
-                        onClick={() => { setShowRoleDropdown(!showRoleDropdown); setShowScopeDropdown(false); }}
+                        onClick={() => { setShowRoleDropdown(!showRoleDropdown); setScopeIsOpen(false); }}
                       >
                         <span className={`uam-dd-role-dot uam-dd-role-dot--${newRole.toLowerCase()}`} />
                         <span>{ROLE_LABELS[newRole]}</span>
@@ -509,6 +558,9 @@ export const UserAccessManagement: React.FC = () => {
                                 setNewScope('');
                                 setShowRoleDropdown(false);
                                 setFieldErrors(prev => ({ ...prev, scope: undefined }));
+                                setScopeIsOpen(false);
+                                setScopeCurrentOptions(SCOPE_OPTIONS[r].options.map(o => ({ label: o, value: o })));
+                                setScopeSelectedOptions([]);
                                 // Reset custom access when role changes
                                 setCustomizeAccess(false);
                                 setCustomAccess([]);
@@ -529,37 +581,33 @@ export const UserAccessManagement: React.FC = () => {
                     </div>
                   </div>
                   <div className="uam-m-field">
-                    <label>{SCOPE_OPTIONS[newRole].label} {newRole !== 'ADMIN' && <span className="uam-m-req">*</span>}</label>
-                    <div className="uam-dd-wrap">
-                      <button
-                        className={`uam-dd-trigger ${fieldErrors.scope ? 'uam-dd-trigger--error' : ''}`}
-                        onClick={() => {
-                          if (newRole === 'ADMIN') return;
-                          setShowScopeDropdown(!showScopeDropdown);
-                          setShowRoleDropdown(false);
-                        }}
-                        disabled={newRole === 'ADMIN'}
-                      >
-                        <PlaceOutlined sx={{ fontSize: 14 }} className="uam-dd-icon-muted"/>
-                        <span>{newRole === 'ADMIN' ? 'Global (Full Access)' : newScope || 'Select assignment...'}</span>
-                        {newRole !== 'ADMIN' && <KeyboardArrowDown sx={{ fontSize: 14 }} className="uam-dd-chevron"/>}
-                      </button>
-                      {showScopeDropdown && (
-                        <div className="uam-dd-menu">
-                          {SCOPE_OPTIONS[newRole].options.map(opt => (
-                            <button
-                              key={opt}
-                              className={`uam-dd-item ${opt === newScope ? 'uam-dd-item--active' : ''}`}
-                              onClick={() => { setNewScope(opt); setShowScopeDropdown(false); setFieldErrors(prev => ({ ...prev, scope: undefined })); }}
-                            >
-                              <span>{opt}</span>
-                              {opt === newScope && <Check sx={{ fontSize: 14 }}/>}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    {fieldErrors.scope && (
+                    {newRole === 'ADMIN' ? (
+                      <Input
+                        label={SCOPE_OPTIONS[newRole].label}
+                        value="Global (Full Access)"
+                        isDisabled
+                        leftIcon={<PlaceOutlined sx={{ fontSize: 14 }}/>}
+                        size="large"
+                      />
+                    ) : (
+                      <Select
+                        label={SCOPE_OPTIONS[newRole].label}
+                        isRequired
+                        placeholder="Select assignment..."
+                        isOpen={scopeIsOpen}
+                        setIsOpen={setScopeIsOpen}
+                        initialOptions={SCOPE_OPTIONS[newRole].options.map(o => ({ label: o, value: o }))}
+                        currentOptions={scopeCurrentOptions}
+                        setCurrentOptions={opts => setScopeCurrentOptions(Array.isArray(opts) ? opts : [])}
+                        selectedOptions={scopeSelectedOptions}
+                        setSelectedOptions={handleScopeChange as (opts: { label: string; value: string }[] | { label: string; value: string } | null) => void}
+                        setIsSelectAll={() => {}}
+                        isError={!!fieldErrors.scope}
+                        helperText={fieldErrors.scope}
+                        width="100%"
+                      />
+                    )}
+                    {fieldErrors.scope && newRole !== 'ADMIN' && (
                       <span className="uam-m-field-error"><ErrorOutlined sx={{ fontSize: 12 }}/>{fieldErrors.scope}</span>
                     )}
                   </div>
@@ -577,20 +625,16 @@ export const UserAccessManagement: React.FC = () => {
                     {effectiveAccess.length} screen{effectiveAccess.length === 1 ? '' : 's'}{' '}
                     {customizeAccess ? 'selected' : 'auto-assigned'}
                   </span>
-                  <label className="uam-m-customize-toggle">
-                    <input
-                      type="checkbox"
-                      checked={customizeAccess}
-                      onChange={e => {
-                        const on = e.target.checked;
-                        setCustomizeAccess(on);
-                        if (on) setCustomAccess([...ROLE_ACCESS[newRole]]);
-                        else setCustomAccess([]);
-                      }}
-                    />
-                    <TuneOutlined sx={{ fontSize: 12 }}/>
-                    <span>Customize Access</span>
-                  </label>
+                  <Switch
+                    value={customizeAccess}
+                    rightLabel="Customize Access"
+                    onChange={e => {
+                      const on = e.target.checked;
+                      setCustomizeAccess(on);
+                      if (on) setCustomAccess([...ROLE_ACCESS[newRole]]);
+                      else setCustomAccess([]);
+                    }}
+                  />
                 </div>
 
                 {customizeAccess && (
@@ -615,21 +659,18 @@ export const UserAccessManagement: React.FC = () => {
                     if (!customizeAccess && !isAutoAssigned) return null;
 
                     return customizeAccess ? (
-                      <label
-                        key={screen}
-                        className={`uam-m-access-item uam-m-access-item--interactive ${isChecked ? 'uam-m-access-item--checked' : ''}`}
-                      >
-                        <input
-                          type="checkbox"
+                      <div key={screen} className={`uam-m-access-item uam-m-access-item--interactive ${isChecked ? 'uam-m-access-item--checked' : ''}`}>
+                        <Checkbox
+                          label={
+                            <span className="uam-m-access-checkbox-label">
+                              {SCREEN_LABELS[screen]}
+                              {isAutoAssigned && <span className="uam-m-access-default" title="Default for this role">default</span>}
+                            </span>
+                          }
                           checked={isChecked}
                           onChange={() => toggleCustomScreen(screen)}
                         />
-                        <span className="uam-m-access-check">
-                          {isChecked && <Check sx={{ fontSize: 11 }}/>}
-                        </span>
-                        <span>{SCREEN_LABELS[screen]}</span>
-                        {isAutoAssigned && <span className="uam-m-access-default" title="Default for this role">default</span>}
-                      </label>
+                      </div>
                     ) : (
                       <div key={screen} className="uam-m-access-item">
                         <Check sx={{ fontSize: 12 }}/>
@@ -644,65 +685,42 @@ export const UserAccessManagement: React.FC = () => {
                 )}
               </div>
               )}
-            </div>
-
-            {/* Modal footer — step-aware navigation */}
-            <div className="uam-m-footer">
-              <Button variant="outlined" color="primary" className="uam-m-cancel" onClick={() => setShowCreateModal(false)}>
-                Cancel
-              </Button>
-              <div className="uam-m-footer-right">
-                {currentStep > 1 && (
-                  <Button variant="outlined" color="primary" className="uam-m-back" onClick={goBack} startIcon={<KeyboardArrowLeft sx={{ fontSize: 14 }}/>}>
-                    Back
-                  </Button>
-                )}
-                {currentStep < 3 ? (
-                  <Button variant="contained" color="primary" className="uam-m-submit" onClick={goNext} endIcon={<KeyboardArrowRight sx={{ fontSize: 14 }}/>}>
-                    Next
-                  </Button>
-                ) : (
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    className="uam-m-submit"
-                    onClick={handleCreateUser}
-                    disabled={customizeAccess && customAccess.length === 0}
-                    startIcon={<SendOutlined sx={{ fontSize: 13 }}/>}
-                  >
-                    Send Invite
-                  </Button>
-                )}
-              </div>
-            </div>
-          </div>
         </div>
-      )}
+      </Modal>
 
-      {/* ========== Confirm Delete Modal ========== */}
-      {confirmDelete && (
-        <div className="uam-overlay" onClick={() => setConfirmDelete(null)}>
-          <div className="uam-confirm" onClick={e => e.stopPropagation()}>
-            <div className="uam-confirm-icon">
-              <WarningAmberOutlined sx={{ fontSize: 22 }}/>
-            </div>
-            <h3 className="uam-confirm-title">Remove user?</h3>
-            <p className="uam-confirm-text">
-              You're about to permanently remove <strong>{confirmDelete.name}</strong>
-              {' '}({confirmDelete.email}). They will lose access to StoreHub immediately.
-              This action cannot be undone.
-            </p>
-            <div className="uam-confirm-actions">
-              <Button variant="outlined" color="primary" className="uam-m-cancel" onClick={() => setConfirmDelete(null)}>
-                Cancel
-              </Button>
-              <Button variant="contained" color="error" className="uam-confirm-delete-btn" onClick={handleConfirmDelete} startIcon={<DeleteOutlined sx={{ fontSize: 13 }}/>}>
-                Remove user
-              </Button>
-            </div>
+      {/* ========== Confirm Delete — Impact UI Modal (small) ========== */}
+      <Modal
+        open={!!confirmDelete}
+        onClose={() => setConfirmDelete(null)}
+        title="Remove user?"
+        size="small"
+        footerOptions={
+          <div className="uam-confirm-actions">
+            <Button variant="outlined" onClick={() => setConfirmDelete(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              type="destructive"
+              onClick={handleConfirmDelete}
+              startIcon={<DeleteOutlined sx={{ fontSize: 13 }}/>}
+            >
+              Remove user
+            </Button>
           </div>
+        }
+      >
+        <div className="uam-confirm-body">
+          <div className="uam-confirm-icon">
+            <WarningAmberOutlined sx={{ fontSize: 28 }}/>
+          </div>
+          <p className="uam-confirm-text">
+            You're about to permanently remove <strong>{confirmDelete?.name}</strong>
+            {' '}({confirmDelete?.email}). They will lose access to StoreHub immediately.
+            This action cannot be undone.
+          </p>
         </div>
-      )}
+      </Modal>
     </div>
   );
 };

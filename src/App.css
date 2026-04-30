@@ -78,3 +78,20 @@ body,
   from { opacity: 1; }
   to { opacity: 0; }
 }
+
+/* ─── Impact UI Input (with icon) — focus fix ───────────────────────────────
+   MUI's .Mui-focused .MuiOutlinedInput-notchedOutline has equal specificity to
+   Impact UI's suppression rule and loads after it, causing a blue outlined
+   border to leak through inside the wrapper. We beat it with a 4-class selector
+   and show the correct primary-colour border on the outer wrapper instead.     */
+.impact_inputbox_container_with_icons .impact-input-wrapper .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border: none !important;
+  outline: none !important;
+}
+.impact_inputbox_container_with_icons .impact-input-wrapper:focus-within {
+  border-color: var(--ia-color-primary) !important;
+}
+/* Also prevent browser-native blue outline on the inner input element */
+.impact_inputbox_container_with_icons .impact-input-wrapper input:focus {
+  outline: none !important;
+}

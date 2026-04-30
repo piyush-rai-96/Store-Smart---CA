@@ -63,31 +63,6 @@
   font-weight: var(--ia-font-weight-regular);
 }
 
-.uam-create-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 9px 18px;
-  border: none;
-  border-radius: 9px;
-  background: linear-gradient(135deg, var(--ia-color-primary-pressed) 0%, var(--ia-color-primary) 100%);
-  color: var(--ia-color-surface);
-  font-size: var(--ia-text-12-5);
-  font-weight: var(--ia-font-weight-semibold);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 4px rgba(67, 56, 202, 0.3), 0 0 0 1px rgba(67, 56, 202, 0.08);
-  letter-spacing: 0.01em;
-}
-
-.uam-create-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(67, 56, 202, 0.35), 0 0 0 1px rgba(67, 56, 202, 0.12);
-}
-
-.uam-create-btn:active {
-  transform: translateY(0);
-}
 
 /* Stat pills */
 .uam-stats-row {
@@ -137,37 +112,7 @@
 .uam-stat-dot--invited { background: var(--ia-color-warning); box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.15); }
 
 /* ---- TOAST ---- */
-.uam-toast {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 11px 18px;
-  background: var(--ia-color-success-bg);
-  border: 1px solid var(--ia-color-success-soft);
-  border-radius: 10px;
-  margin-bottom: 16px;
-  color: var(--ia-color-success);
-  font-size: var(--ia-text-12-5);
-  font-weight: var(--ia-font-weight-medium);
-  animation: uamSlideIn 0.3s ease;
-}
-
-.uam-toast-icon {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--ia-color-success);
-  color: var(--ia-color-surface);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-@keyframes uamSlideIn {
-  from { opacity: 0; transform: translateY(-6px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+/* Toast — handled by Impact UI Toast component */
 
 /* ---- TOOLBAR ---- */
 .uam-toolbar {
@@ -177,52 +122,11 @@
   margin-bottom: 16px;
 }
 
+/* Search bar — now wraps Impact UI Input */
 .uam-search-bar {
   flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: 9px 14px;
-  background: var(--ia-color-surface);
-  border: 1px solid var(--ia-color-border);
-  border-radius: 9px;
-  transition: all 0.2s ease;
+  max-width: 420px;
 }
-
-.uam-search-bar:focus-within {
-  border-color: var(--ia-color-primary-border);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.05);
-}
-
-.uam-search-bar svg { color: var(--ia-color-text-tertiary); flex-shrink: 0; }
-
-.uam-search-bar input {
-  flex: 1;
-  border: none;
-  outline: none;
-  font-size: var(--ia-text-12-5);
-  color: var(--ia-color-text-primary);
-  background: transparent;
-  font-family: inherit;
-}
-
-.uam-search-bar input::placeholder { color: var(--ia-color-text-tertiary); }
-
-.uam-search-clear {
-  width: 22px;
-  height: 22px;
-  border: none;
-  background: var(--ia-color-bg-muted);
-  border-radius: 5px;
-  color: var(--ia-color-text-secondary);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.12s ease;
-}
-
-.uam-search-clear:hover { background: var(--ia-color-border); }
 
 .uam-result-count {
   font-size: var(--ia-text-11-5);
@@ -287,24 +191,7 @@
   gap: 12px;
 }
 
-.uam-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  color: var(--ia-color-surface);
-  font-size: var(--ia-text-xs);
-  font-weight: var(--ia-font-weight-bold);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  letter-spacing: 0.03em;
-}
-
-.uam-avatar--admin { background: linear-gradient(135deg, #ea580c 0%, #f97316 100%); }
-.uam-avatar--dm { background: linear-gradient(135deg, var(--ia-color-primary) 0%, var(--ia-color-primary) 100%); }
-.uam-avatar--sm { background: linear-gradient(135deg, var(--ia-color-success) 0%, #34d399 100%); }
-.uam-avatar--hq { background: linear-gradient(135deg, var(--ia-color-primary-pressed) 0%, var(--ia-color-primary-hover) 100%); }
+/* Avatar — Impact UI Avatar component; role colours applied via className above */
 
 .uam-user-details {
   display: flex;
@@ -325,21 +212,7 @@
   font-weight: var(--ia-font-weight-regular);
 }
 
-/* Role tag */
-.uam-role-tag {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: var(--ia-text-2xs);
-  font-weight: var(--ia-font-weight-semibold);
-  letter-spacing: 0.01em;
-}
-
-.uam-role--admin { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
-.uam-role--dm { background: var(--ia-color-primary-soft); color: var(--ia-color-primary); border: 1px solid var(--ia-color-primary-border); }
-.uam-role--sm { background: var(--ia-color-success-bg); color: var(--ia-color-success); border: 1px solid var(--ia-color-success-soft); }
-.uam-role--hq { background: var(--ia-color-bg-subtle); color: var(--ia-color-primary-pressed); border: 1px solid var(--ia-color-primary-border); }
+/* Role badge — Impact UI Badge handles rendering */
 
 /* Scope */
 .uam-scope-text {
@@ -348,43 +221,8 @@
   font-weight: 450;
 }
 
-/* Status */
-.uam-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: var(--ia-text-xs);
-  font-weight: var(--ia-font-weight-medium);
-}
-
-.uam-status .uam-status-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.uam-status--active { color: var(--ia-color-success); }
-.uam-status--active .uam-status-dot { background: var(--ia-color-success); box-shadow: 0 0 0 2px rgba(34,197,94,0.15); }
-.uam-status--invited { color: var(--ia-color-warning-text); }
-.uam-status--invited .uam-status-dot { background: var(--ia-color-warning); box-shadow: 0 0 0 2px rgba(245,158,11,0.15); }
-
-/* Screen badge */
+/* Status & Screen badge — Impact UI Badge handles rendering */
 .uam-td-screens { text-align: center; }
-
-.uam-screen-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 4px 10px;
-  background: var(--ia-color-bg-muted);
-  border-radius: 6px;
-  font-size: var(--ia-text-11-5);
-  font-weight: var(--ia-font-weight-semibold);
-  color: var(--ia-color-text-secondary);
-}
-
-.uam-screen-badge svg { color: var(--ia-color-text-tertiary); }
 
 /* Expanded row */
 .uam-expand-row td {
@@ -420,141 +258,44 @@
   gap: 6px;
 }
 
-.uam-expand-chip {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 10px;
-  background: var(--ia-color-surface);
-  border: 1px solid var(--ia-color-border);
-  border-radius: 6px;
-  font-size: var(--ia-text-2xs);
-  font-weight: var(--ia-font-weight-medium);
-  color: var(--ia-color-text-secondary);
-}
+/* Expand chips — Impact UI Tag handles rendering */
 
-/* Empty state */
-.uam-empty {
-  text-align: center;
-  padding: 48px 20px !important;
-  color: var(--ia-color-text-tertiary);
-  font-size: var(--ia-text-13);
-}
-
-.uam-empty svg { margin-bottom: 8px; opacity: 0.4; }
-.uam-empty span { display: block; }
+/* Empty state — Impact UI EmptyState handles rendering */
+.uam-empty { padding: 32px 20px !important; }
 
 
 /* ========================================
-   CREATE USER MODAL — Premium
+   CREATE USER MODAL — Impact UI Modal shell
    ======================================== */
 
-.uam-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.5);
-  backdrop-filter: blur(4px);
+/* Subtitle bar below the Impact UI modal header */
+.uam-m-subtitle {
   display: flex;
   align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  animation: uamFadeIn 0.15s ease;
-}
-
-@keyframes uamFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.uam-modal {
-  background: var(--ia-color-surface);
-  border-radius: 20px;
-  width: 760px;
-  max-width: 94vw;
-  max-height: 90vh;
-  /* overflow visible so dropdown menus can escape the modal box */
-  overflow: visible;
-  box-shadow:
-    0 0 0 1px rgba(15, 23, 42, 0.04),
-    0 12px 24px rgba(15, 23, 42, 0.08),
-    0 32px 72px rgba(15, 23, 42, 0.16);
-  animation: uamModalUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  display: flex;
-  flex-direction: column;
-}
-
-@keyframes uamModalUp {
-  from { opacity: 0; transform: translateY(16px) scale(0.97); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-/* Modal header */
-.uam-m-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  padding: 26px 32px 22px;
+  gap: 8px;
+  padding: 0 0 10px;
+  color: var(--ia-color-text-tertiary);
+  font-size: var(--ia-text-12-5);
   border-bottom: 1px solid var(--ia-color-bg-muted);
+  margin-bottom: 0;
 }
 
-.uam-m-header-icon {
-  width: 46px;
-  height: 46px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, var(--ia-color-primary-soft) 0%, var(--ia-color-primary-soft) 100%);
-  color: var(--ia-color-primary-hover);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  box-shadow: 0 1px 2px rgba(67, 56, 202, 0.08);
+.uam-m-subtitle svg { color: var(--ia-color-primary); flex-shrink: 0; }
+
+/* Stepper wrapper — sits flush inside ia_modalBody padding */
+.uam-m-stepper {
+  padding: 10px 0 14px;
+  border-bottom: 1px solid var(--ia-color-bg-muted);
+  margin-bottom: 0;
 }
 
-.uam-m-header-text {
-  flex: 1;
-  min-width: 0;
-}
-
-.uam-m-header-text h3 {
-  font-size: var(--ia-text-lg);
-  font-weight: var(--ia-font-weight-bold);
-  color: var(--ia-color-text-primary);
-  margin: 0;
-  letter-spacing: -0.02em;
-}
-
-.uam-m-header-text p {
-  font-size: var(--ia-text-13);
-  color: var(--ia-color-text-tertiary);
-  margin: 4px 0 0;
-  font-weight: var(--ia-font-weight-regular);
-}
-
-.uam-m-close {
-  width: 30px;
-  height: 30px;
-  border: 1px solid var(--ia-color-border);
-  background: var(--ia-color-surface);
-  border-radius: 8px;
-  color: var(--ia-color-text-tertiary);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s ease;
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-
-.uam-m-close:hover { background: var(--ia-color-bg-subtle); color: var(--ia-color-text-secondary); border-color: var(--ia-color-border-strong); }
-
-/* Modal body — overflow visible so absolute-positioned dropdowns can escape */
+/* Modal body — ia_modalBody already provides padding; we just need the layout */
 .uam-m-body {
-  padding: 28px 32px;
   overflow: visible;
   display: flex;
   flex-direction: column;
   gap: 0;
-  min-height: 280px;
+  padding: 14px 0 0;
 }
 
 /* Error */
@@ -574,8 +315,8 @@
 
 /* Sections */
 .uam-m-section {
-  padding-bottom: 20px;
-  margin-bottom: 20px;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
   border-bottom: 1px solid var(--ia-color-bg-muted);
 }
 
@@ -595,7 +336,7 @@
   color: var(--ia-color-text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
 }
 
 .uam-m-section-label svg { color: #c1c9d4; }
@@ -625,52 +366,9 @@
   gap: 5px;
 }
 
-.uam-m-field label {
-  font-size: var(--ia-text-11-5);
-  font-weight: var(--ia-font-weight-semibold);
-  color: var(--ia-color-text-secondary);
-  letter-spacing: 0.01em;
-}
-
-.uam-m-field input {
-  padding: 9px 12px;
-  border: 1.5px solid var(--ia-color-border);
-  border-radius: 8px;
-  font-size: var(--ia-text-12-5);
-  color: var(--ia-color-text-primary);
-  outline: none;
-  transition: all 0.2s ease;
-  background: var(--ia-color-surface);
-  font-family: inherit;
-}
-
-.uam-m-field input:focus {
-  border-color: var(--ia-color-primary-border);
-  box-shadow: 0 0 0 3px rgba(99,102,241,0.06);
-}
-
-.uam-m-field input::placeholder { color: #c1c9d4; }
+/* .uam-m-field label / input — now rendered by Impact UI Input component */
 
 /* Input with icon */
-.uam-m-input-icon {
-  position: relative;
-}
-
-.uam-m-input-icon svg {
-  position: absolute;
-  left: 11px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #c1c9d4;
-  pointer-events: none;
-}
-
-.uam-m-input-icon input {
-  padding-left: 32px;
-  width: 100%;
-  box-sizing: border-box;
-}
-
 /* ---- Dropdowns (modal) ---- */
 .uam-dd-wrap {
   position: relative;
@@ -810,16 +508,7 @@
 
 .uam-m-access-item svg { color: var(--ia-color-success); flex-shrink: 0; }
 
-/* Modal footer */
-.uam-m-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 18px 32px;
-  border-top: 1px solid var(--ia-color-bg-muted);
-  background: #fafbfc;
-  border-radius: 0 0 20px 20px;
-}
+/* Modal footer — see the footer block near the wizard-back/submit rules */
 
 .uam-m-cancel {
   padding: 8px 18px;
@@ -1002,48 +691,33 @@
 /* ==============================================================
    Confirm Delete Modal
    ============================================================== */
-.uam-confirm {
-  background: var(--ia-color-surface);
-  border-radius: 16px;
-  width: 440px;
-  max-width: 92vw;
-  padding: 28px 28px 22px;
-  box-shadow: 0 24px 64px rgba(15, 23, 42, 0.18);
+/* Confirm delete — Impact UI Modal shell; only body + footer content styles needed */
+.uam-confirm-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
-  animation: uamConfirmIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes uamConfirmIn {
-  from { opacity: 0; transform: translateY(6px) scale(0.98); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  padding: 8px 0 4px;
+  gap: 12px;
 }
 
 .uam-confirm-icon {
   width: 52px;
   height: 52px;
   border-radius: 14px;
-  background: linear-gradient(135deg, var(--ia-color-error-bg) 0%, var(--ia-color-error-bg) 100%);
+  background: var(--ia-color-error-bg);
   color: var(--ia-color-error-strong);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 14px;
-  box-shadow: 0 1px 2px rgba(220, 38, 38, 0.08);
-}
-
-.uam-confirm-title {
-  font-size: var(--ia-text-17);
-  font-weight: var(--ia-font-weight-bold);
-  color: var(--ia-color-text-primary);
-  margin: 0 0 8px;
-  letter-spacing: -0.02em;
+  flex-shrink: 0;
 }
 
 .uam-confirm-text {
   font-size: var(--ia-text-13);
   color: var(--ia-color-text-secondary);
   line-height: 1.55;
-  margin: 0 0 22px;
+  margin: 0;
 }
 
 .uam-confirm-text strong {
@@ -1054,45 +728,9 @@
 .uam-confirm-actions {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   gap: 10px;
-}
-
-.uam-confirm-delete-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 9px 18px;
-  border: 0;
-  border-radius: 8px;
-  background: linear-gradient(135deg, var(--ia-color-error-strong) 0%, var(--ia-color-error) 100%);
-  color: var(--ia-color-surface);
-  font-size: var(--ia-text-12-5);
-  font-weight: var(--ia-font-weight-semibold);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: inherit;
-  letter-spacing: 0.01em;
-  box-shadow: 0 1px 4px rgba(220, 38, 38, 0.3);
-}
-
-.uam-confirm-delete-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
-}
-
-.uam-confirm-delete-btn:active { transform: translateY(0); }
-
-/* Danger toast variant */
-.uam-toast--danger {
-  background: var(--ia-color-error-bg);
-  border-color: var(--ia-color-error-soft);
-  color: var(--ia-color-error-strong);
-}
-
-.uam-toast-icon--danger {
-  background: var(--ia-color-error-strong);
-  color: var(--ia-color-surface);
+  width: 100%;
 }
 
 .uam-table-card.uam-table-card--modern {
@@ -1103,100 +741,26 @@
   overflow: hidden;
 }
 
-/* Tone down avatars to monochrome slate */
-.uam-table-card--modern .uam-avatar,
-.uam-table-card--modern .uam-avatar--admin,
-.uam-table-card--modern .uam-avatar--dm,
-.uam-table-card--modern .uam-avatar--sm,
-.uam-table-card--modern .uam-avatar--hq {
-  background: var(--ia-color-bg-muted);
-  color: var(--ia-color-text-secondary);
-  font-weight: var(--ia-font-weight-semibold);
-  border: 1px solid var(--ia-color-border);
-  border-radius: 8px;
-  letter-spacing: 0.02em;
-}
+/* Avatar — apply role colours to the Impact UI Avatar .MuiAvatar-root via className */
+.uam-avatar--admin.ia-avatar { background: linear-gradient(135deg, #ea580c 0%, #f97316 100%); }
+.uam-avatar--dm.ia-avatar    { background: linear-gradient(135deg, var(--ia-color-primary) 0%, var(--ia-color-primary-hover) 100%); }
+.uam-avatar--sm.ia-avatar    { background: linear-gradient(135deg, var(--ia-color-success) 0%, #16a34a 100%); }
+.uam-avatar--hq.ia-avatar    { background: linear-gradient(135deg, var(--ia-color-primary-hover) 0%, #6366f1 100%); }
 
-/* Subtle role tags — neutral pill with a small role-colored dot */
-.uam-table-card--modern .uam-role-tag {
-  position: relative;
-  background: var(--ia-color-bg-subtle);
-  color: var(--ia-color-text-primary);
-  border: 1px solid var(--ia-color-border);
-  font-weight: var(--ia-font-weight-medium);
-  padding: 4px 10px 4px 22px;
-  border-radius: 6px;
-}
+/* Role badge, status badge, screen badge — Impact UI Badge handles rendering */
 
-.uam-table-card--modern .uam-role-tag::before {
-  content: '';
-  position: absolute;
-  left: 9px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--ia-color-text-tertiary);
-}
-
-.uam-table-card--modern .uam-role--admin::before { background: #f97316; }
-.uam-table-card--modern .uam-role--dm::before    { background: var(--ia-color-primary); }
-.uam-table-card--modern .uam-role--sm::before    { background: var(--ia-color-success); }
-.uam-table-card--modern .uam-role--hq::before    { background: var(--ia-color-primary-hover); }
-
-/* Reset background-only role styles to neutral so the tag is uniform */
-.uam-table-card--modern .uam-role--admin,
-.uam-table-card--modern .uam-role--dm,
-.uam-table-card--modern .uam-role--sm,
-.uam-table-card--modern .uam-role--hq {
-  background: var(--ia-color-bg-subtle);
-  color: var(--ia-color-text-primary);
-  border-color: var(--ia-color-border);
-}
-
-/* Quieter scope text */
+/* Scope text */
 .uam-table-card--modern .uam-scope-text {
   color: var(--ia-color-text-secondary);
   font-size: var(--ia-text-13);
 }
 
-/* Status pill softened */
-.uam-table-card--modern .uam-status {
-  font-size: var(--ia-text-xs);
-  font-weight: var(--ia-font-weight-medium);
-}
-
-.uam-table-card--modern .uam-status--active { color: var(--ia-color-success); }
-.uam-table-card--modern .uam-status--invited { color: var(--ia-color-warning-text); }
-
-/* Screen badge subtle */
-.uam-table-card--modern .uam-screen-badge {
-  background: var(--ia-color-bg-subtle);
-  border: 1px solid var(--ia-color-border);
-  color: var(--ia-color-text-secondary);
-}
-
 /* Cleaner hover/expand row */
-.uam-table-card--modern .uam-row {
-  cursor: pointer;
-}
+.uam-table-card--modern .uam-row { cursor: pointer; }
+.uam-table-card--modern .uam-row--expanded { background: var(--ia-color-primary-soft) !important; }
 
-.uam-table-card--modern .uam-row--expanded {
-  background: var(--ia-color-primary-soft) !important;
-}
-
-.uam-table-card--modern .uam-expand-row td {
-  background: #fafbfc;
-  padding: 12px 16px;
-}
-
-.uam-table-card--modern .uam-expand-content {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
+.uam-table-card--modern .uam-expand-row td { background: #fafbfc; padding: 12px 16px; }
+.uam-table-card--modern .uam-expand-content { display: flex; flex-direction: column; gap: 8px; }
 .uam-table-card--modern .uam-expand-label {
   font-size: var(--ia-text-2xs);
   font-weight: var(--ia-font-weight-semibold);
@@ -1204,109 +768,12 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
-
-.uam-table-card--modern .uam-expand-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.uam-table-card--modern .uam-expand-chip {
-  background: var(--ia-color-surface);
-  border: 1px solid var(--ia-color-border);
-  color: var(--ia-color-text-secondary);
-  font-size: var(--ia-text-2xs);
-  font-weight: var(--ia-font-weight-medium);
-  padding: 3px 8px;
-  border-radius: 4px;
-}
-
-/* Empty state */
-.uam-table-card--modern .uam-empty {
-  text-align: center;
-  padding: 40px 16px;
-  color: var(--ia-color-text-tertiary);
-  font-size: var(--ia-text-13);
-}
-
-/* Toolbar elements no longer needed — make sure stale margins don't break layout */
-.uam-toast {
-  margin: 0 16px 12px 16px;
-}
+.uam-table-card--modern .uam-expand-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 
 /* ==============================================================
    Create User Modal — Step Indicator + Inline Validation
    ============================================================== */
-.uam-m-steps {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 18px 32px;
-  background: linear-gradient(180deg, #fafbff 0%, var(--ia-color-bg-subtle) 100%);
-  border-bottom: 1px solid var(--ia-color-border);
-}
-
-.uam-m-step {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--ia-color-text-secondary);
-  transition: color 0.15s ease;
-}
-
-.uam-m-step--done {
-  color: var(--ia-color-success);
-}
-
-.uam-m-step--active {
-  color: var(--ia-color-primary-pressed);
-}
-
-.uam-m-step--active .uam-m-step-num {
-  background: var(--ia-color-primary-soft);
-  color: var(--ia-color-primary-pressed);
-  box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.12);
-}
-
-.uam-m-step-divider--done {
-  background: #86efac;
-}
-
-.uam-m-step-num {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: var(--ia-color-border);
-  color: var(--ia-color-text-secondary);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--ia-text-xs);
-  font-weight: var(--ia-font-weight-bold);
-  flex-shrink: 0;
-  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.uam-m-step--done .uam-m-step-num {
-  background: var(--ia-color-success-bg);
-  color: var(--ia-color-success);
-}
-
-.uam-m-step-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: var(--ia-text-13);
-  font-weight: var(--ia-font-weight-semibold);
-}
-
-.uam-m-step-divider {
-  flex: 1;
-  height: 2px;
-  border-radius: 2px;
-  background: var(--ia-color-border);
-  max-width: 80px;
-}
+/* Step indicator — Impact UI Stepper handles rendering */
 
 /* Required-field asterisk */
 .uam-m-req {
@@ -1326,66 +793,13 @@
   font-weight: var(--ia-font-weight-medium);
 }
 
-.uam-m-input--error,
-.uam-m-input-icon--error,
+/* Error border — Impact UI Input/Select handle error states natively */
 .uam-dd-trigger--error {
   border-color: #fca5a5 !important;
   box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.08) !important;
 }
 
-/* Customize Access toggle (inline with section label) */
-.uam-m-customize-toggle {
-  margin-left: auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: var(--ia-text-xs);
-  font-weight: var(--ia-font-weight-medium);
-  color: var(--ia-color-primary-pressed);
-  cursor: pointer;
-  padding: 4px 10px;
-  border: 1px solid var(--ia-color-border);
-  background: var(--ia-color-surface);
-  border-radius: 6px;
-  transition: background 0.15s ease, border-color 0.15s ease;
-}
-
-.uam-m-customize-toggle:hover {
-  background: var(--ia-color-primary-soft);
-  border-color: var(--ia-color-primary-border);
-}
-
-.uam-m-customize-toggle input[type="checkbox"] {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 14px;
-  height: 14px;
-  border: 1.5px solid var(--ia-color-border-strong);
-  border-radius: 3px;
-  background: var(--ia-color-surface);
-  cursor: pointer;
-  position: relative;
-  margin: 0;
-  flex-shrink: 0;
-  transition: background 0.15s ease, border-color 0.15s ease;
-}
-
-.uam-m-customize-toggle input[type="checkbox"]:checked {
-  background: var(--ia-color-primary-pressed);
-  border-color: var(--ia-color-primary-pressed);
-}
-
-.uam-m-customize-toggle input[type="checkbox"]:checked::after {
-  content: '';
-  position: absolute;
-  left: 3px;
-  top: 0px;
-  width: 5px;
-  height: 9px;
-  border: solid var(--ia-color-surface);
-  border-width: 0 1.5px 1.5px 0;
-  transform: rotate(45deg);
-}
+/* Customize Access toggle — Impact UI Switch handles rendering */
 
 .uam-m-customize-hint {
   display: flex;
@@ -1420,21 +834,14 @@
   background: rgba(67, 56, 202, 0.08);
 }
 
-/* Interactive Screen Access checkbox items */
+/* Interactive Screen Access — Impact UI Checkbox inside a styled tile */
 .uam-m-access-item--interactive {
-  cursor: pointer;
   position: relative;
-  padding: 8px 10px;
+  padding: 4px 8px;
   background: var(--ia-color-surface);
   border: 1px solid var(--ia-color-border);
   border-radius: 6px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: var(--ia-text-12-5);
-  color: var(--ia-color-text-secondary);
   transition: all 0.12s ease;
-  user-select: none;
 }
 
 .uam-m-access-item--interactive:hover {
@@ -1442,33 +849,16 @@
   background: var(--ia-color-bg-subtle);
 }
 
-.uam-m-access-item--interactive input[type="checkbox"] {
-  display: none;
-}
-
-.uam-m-access-check {
-  width: 16px;
-  height: 16px;
-  border: 1.5px solid var(--ia-color-border-strong);
-  border-radius: 3px;
-  background: var(--ia-color-surface);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  color: var(--ia-color-surface);
-  transition: background 0.12s ease, border-color 0.12s ease;
-}
-
 .uam-m-access-item--checked {
   border-color: var(--ia-color-primary-border);
   background: var(--ia-color-primary-soft);
-  color: var(--ia-color-text-primary);
 }
 
-.uam-m-access-item--checked .uam-m-access-check {
-  background: var(--ia-color-primary-pressed);
-  border-color: var(--ia-color-primary-pressed);
+.uam-m-access-checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--ia-text-12-5);
 }
 
 .uam-m-access-default {
@@ -1483,12 +873,20 @@
   border-radius: 3px;
 }
 
-/* Wizard footer — step-aware buttons */
+/* Wizard footer — lives inside ia_modalFooter (56px, flex, align-center, justify-end, pr-16) */
+.uam-m-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 8px;
+  padding-left: 16px;
+}
+
 .uam-m-footer-right {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-left: auto;
 }
 
 .uam-m-back {

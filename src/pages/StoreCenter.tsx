@@ -2416,78 +2416,68 @@ export const StoreCenter: React.FC = () => {
 
               return (
                 <div className="sc-bench-tab">
-                  {/* Overall Summary — Impact UI Card */}
-                  <Card sx={{ padding: 0, maxWidth: '100%', minHeight: 0, borderRadius: '14px', overflow: 'hidden' }}>
-                    <div className="sc-bench-summary">
-                      <div className="sc-bench-summary-rank">
-                        <span className="sc-bench-summary-label">Overall Cluster Rank</span>
-                        <div className="sc-bench-rank-hero">
-                          <span className="sc-bench-rank-num">#{avgRank}</span>
-                          <span className="sc-bench-rank-of">of {CLUSTER_SIZE}</span>
-                        </div>
-                        <div className="sc-bench-summary-meta">
-                          <Badge
-                            label={`${overallQuartile === 1 ? '🏆 ' : ''}${quartileLabel(overallQuartile)}`}
-                            color={overallQuartile === 1 ? 'success' : overallQuartile === 2 ? 'primary' : overallQuartile === 3 ? 'warning' : 'error'}
-                            variant="subtle"
-                            size="small"
-                          />
-                          <Badge
-                            label={`${avgRankDelta > 0 ? `↑ ${avgRankDelta}` : avgRankDelta < 0 ? `↓ ${Math.abs(avgRankDelta)}` : 'No change'} vs last period`}
-                            color={avgRankDelta > 0 ? 'success' : avgRankDelta < 0 ? 'error' : 'default'}
-                            variant="subtle"
-                            size="small"
-                          />
-                        </div>
+                  {/* Overall Summary — clean KPI strip (matches Inventory & Inbound pattern) */}
+                  <div className="sc-bench-summary-strip">
+                    {/* Cluster Rank tile */}
+                    <div className="sc-bench-tile sc-bench-tile--rank">
+                      <span className="sc-bench-tile-label sc-bench-tile-label--primary">Overall Cluster Rank</span>
+                      <div className="sc-bench-tile-value">
+                        <span className="sc-bench-rank-num">#{avgRank}</span>
+                        <span className="sc-bench-rank-of">of {CLUSTER_SIZE}</span>
                       </div>
+                      <span className="sc-bench-tile-sub">
+                        {quartileLabel(overallQuartile)}
+                        <span className="sc-bench-tile-sub-sep">·</span>
+                        {avgRankDelta > 0
+                          ? `↑ ${avgRankDelta} vs last period`
+                          : avgRankDelta < 0
+                            ? `↓ ${Math.abs(avgRankDelta)} vs last period`
+                            : 'No change vs last period'}
+                      </span>
+                    </div>
 
-                      <div className="sc-bench-summary-pillars">
-                        {/* Top Strengths pillar — Impact UI Card */}
-                        <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '12px 14px', borderLeft: '3px solid var(--ia-color-success)' }}>
-                          <div className="sc-bench-pillar-header" style={{ color: 'var(--ia-color-success)' }}>
-                            <EmojiEventsOutlined sx={{ fontSize: 13 }}/>
-                            <span>Top Strengths</span>
+                    {/* Top Strengths tile */}
+                    <div className="sc-bench-tile sc-bench-tile--strengths">
+                      <span className="sc-bench-tile-label sc-bench-tile-label--success">Top Strengths</span>
+                      <div className="sc-bench-tile-list">
+                        {topStrengths.map(s => (
+                          <div key={s.metric} className="sc-bench-tile-row">
+                            <span className="sc-bench-tile-row-rank">#{s.rank}</span>
+                            <span className="sc-bench-tile-row-metric" title={s.metric}>{s.metric}</span>
+                            <span className="sc-bench-tile-row-badge">
+                              <Badge
+                                label={quartileLabel(s.quartile)}
+                                color={s.quartile === 1 ? 'success' : s.quartile === 2 ? 'primary' : 'warning'}
+                                variant="subtle"
+                                size="small"
+                              />
+                            </span>
                           </div>
-                          <div className="sc-bench-pillar-list">
-                            {topStrengths.map(s => (
-                              <div key={s.metric} className="sc-bench-pillar-item">
-                                <span className="sc-bench-pillar-rank">#{s.rank}</span>
-                                <span className="sc-bench-pillar-metric">{s.metric}</span>
-                                <Badge
-                                  label={quartileLabel(s.quartile)}
-                                  color={s.quartile === 1 ? 'success' : s.quartile === 2 ? 'primary' : 'warning'}
-                                  variant="subtle"
-                                  size="small"
-                                />
-                              </div>
-                            ))}
-                          </div>
-                        </Card>
-
-                        {/* Biggest Gaps pillar — Impact UI Card */}
-                        <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '12px 14px', borderLeft: '3px solid var(--ia-color-warning)' }}>
-                          <div className="sc-bench-pillar-header" style={{ color: 'var(--ia-color-warning-text)' }}>
-                            <WarningAmberOutlined sx={{ fontSize: 13 }}/>
-                            <span>Biggest Gaps</span>
-                          </div>
-                          <div className="sc-bench-pillar-list">
-                            {biggestGaps.map(g => (
-                              <div key={g.metric} className="sc-bench-pillar-item">
-                                <span className="sc-bench-pillar-rank">#{g.rank}</span>
-                                <span className="sc-bench-pillar-metric">{g.metric}</span>
-                                <Badge
-                                  label={quartileLabel(g.quartile)}
-                                  color={g.quartile === 3 ? 'warning' : 'error'}
-                                  variant="subtle"
-                                  size="small"
-                                />
-                              </div>
-                            ))}
-                          </div>
-                        </Card>
+                        ))}
                       </div>
                     </div>
-                  </Card>
+
+                    {/* Biggest Gaps tile */}
+                    <div className="sc-bench-tile sc-bench-tile--gaps">
+                      <span className="sc-bench-tile-label sc-bench-tile-label--warning">Biggest Gaps</span>
+                      <div className="sc-bench-tile-list">
+                        {biggestGaps.map(g => (
+                          <div key={g.metric} className="sc-bench-tile-row">
+                            <span className="sc-bench-tile-row-rank">#{g.rank}</span>
+                            <span className="sc-bench-tile-row-metric" title={g.metric}>{g.metric}</span>
+                            <span className="sc-bench-tile-row-badge">
+                              <Badge
+                                label={quartileLabel(g.quartile)}
+                                color={g.quartile === 3 ? 'warning' : 'error'}
+                                variant="subtle"
+                                size="small"
+                              />
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
 
                   {/* Distribution legend */}
                   <div className="sc-bench-legend">

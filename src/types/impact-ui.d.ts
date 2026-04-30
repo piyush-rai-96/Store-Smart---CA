@@ -1,6 +1,6 @@
 declare module 'impact-ui' {
   import type React from 'react';
-  import type { FC, ReactNode, CSSProperties, MouseEvent as ReactMouseEvent } from 'react';
+  import type { FC, ReactNode, CSSProperties, MouseEvent as ReactMouseEvent, ChangeEvent } from 'react';
 
   export type ButtonVariant = 'contained' | 'outlined' | 'text' | 'primary' | 'secondary' | 'url';
   export type ButtonColor = 'primary' | 'secondary' | 'success' | 'error' | 'warning' | 'info' | 'inherit';
@@ -15,7 +15,7 @@ declare module 'impact-ui' {
     className?: string;
     style?: CSSProperties;
     onClick?: (e: ReactMouseEvent<HTMLButtonElement>) => void;
-    type?: 'button' | 'submit' | 'reset';
+    type?: 'button' | 'submit' | 'reset' | 'destructive' | 'default';
     startIcon?: ReactNode;
     endIcon?: ReactNode;
     fullWidth?: boolean;
@@ -68,9 +68,184 @@ declare module 'impact-ui' {
     style?: CSSProperties;
   }
   export const Card: FC<CardProps>;
-  export const Modal: FC<Record<string, unknown>>;
-  export const Input: FC<Record<string, unknown>>;
-  export const Select: FC<Record<string, unknown>>;
+
+  // ── Modal ────────────────────────────────────────────────────────────────
+  export interface ModalProps {
+    open: boolean;
+    onClose?: () => void;
+    title?: ReactNode;
+    size?: 'small' | 'medium' | 'large' | 'extraLarge';
+    children?: ReactNode;
+    className?: string;
+    width?: string | number;
+    height?: string | number;
+    maxHeight?: string | number;
+    zIndex?: number;
+    primaryButtonLabel?: string;
+    primaryButtonProps?: Record<string, unknown>;
+    onPrimaryButtonClick?: () => void;
+    secondaryButtonLabel?: string;
+    secondaryButtonProps?: Record<string, unknown>;
+    onSecondaryButtonClick?: () => void;
+    footerOptions?: ReactNode;
+  }
+  export const Modal: FC<ModalProps>;
+
+  // ── Input ────────────────────────────────────────────────────────────────
+  export interface InputProps {
+    label?: string;
+    isRequired?: boolean;
+    leftIcon?: ReactNode;
+    rightIcon?: ReactNode;
+    leftIconClick?: () => void;
+    rightIconClick?: () => void;
+    helperText?: string;
+    isHelperText?: boolean;
+    focusedText?: string;
+    isError?: boolean;
+    isDisabled?: boolean;
+    htmlFor?: string;
+    size?: 'small' | 'medium' | 'large';
+    id?: string;
+    name?: string;
+    placeholder?: string;
+    value?: string;
+    onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
+    onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
+    type?: string;
+    autoComplete?: string;
+    className?: string;
+  }
+  export const Input: FC<InputProps>;
+
+  // ── Select ───────────────────────────────────────────────────────────────
+  export interface SelectOption { label: string; value: string; }
+  export interface SelectProps {
+    label?: string;
+    isRequired?: boolean;
+    placeholder?: string;
+    isOpen: boolean;
+    setIsOpen: (open: boolean) => void;
+    initialOptions: SelectOption[];
+    currentOptions: SelectOption[];
+    setCurrentOptions: (opts: SelectOption[]) => void;
+    selectedOptions: SelectOption[];
+    setSelectedOptions: (opts: SelectOption[] | SelectOption | null) => void;
+    setIsSelectAll: (v: boolean) => void;
+    isMulti?: boolean;
+    isDisabled?: boolean;
+    isError?: boolean;
+    helperText?: string;
+    isWithSearch?: boolean;
+    isClearable?: boolean;
+    width?: string | number;
+    minWidth?: string | number;
+  }
+  export const Select: FC<SelectProps>;
+
+  // ── Toast ────────────────────────────────────────────────────────────────
+  export interface ToastProps {
+    isOpen?: boolean;
+    message?: string;
+    variant?: 'success' | 'error' | 'warning' | 'info';
+    position?: 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
+    autoHideDuration?: number;
+    onClose?: () => void;
+  }
+  export const Toast: FC<ToastProps>;
+
+  // ── Avatar ───────────────────────────────────────────────────────────────
+  export interface AvatarProps {
+    label?: string;
+    type?: 'withPicture' | 'withoutPicture' | 'onlyName';
+    src?: string;
+    size?: 'small' | 'medium' | 'large';
+    className?: string;
+  }
+  export const Avatar: FC<AvatarProps>;
+
+  // ── Tooltip ──────────────────────────────────────────────────────────────
+  export interface TooltipProps {
+    title: ReactNode;
+    children: React.ReactElement;
+    orientation?: 'top' | 'bottom' | 'left' | 'right' | 'top-start' | 'top-end' | 'bottom-start' | 'bottom-end';
+    variant?: 'primary' | 'secondary' | 'tertiary' | 'feature';
+    description?: string;
+    isHoverEnabled?: boolean;
+    className?: string;
+  }
+  export const Tooltip: FC<TooltipProps>;
+
+  // ── EmptyState ───────────────────────────────────────────────────────────
+  export interface EmptyStateProps {
+    heading?: ReactNode;
+    description?: ReactNode;
+    emptyStateIcon?: ReactNode;
+    emptyStateBottomOptions?: ReactNode;
+    primaryButtonLabel?: string;
+    onPrimaryButtonClick?: () => void;
+    primaryButtonProps?: Record<string, unknown>;
+    secondaryButtonLabel?: string;
+    onSecondaryButtonClick?: () => void;
+    secondaryButtonProps?: Record<string, unknown>;
+  }
+  export const EmptyState: FC<EmptyStateProps>;
+
+  // ── Switch ───────────────────────────────────────────────────────────────
+  export interface SwitchProps {
+    value?: boolean;
+    leftLabel?: string;
+    rightLabel?: string;
+    disabled?: boolean;
+    onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
+  }
+  export const Switch: FC<SwitchProps>;
+
+  // ── Checkbox ─────────────────────────────────────────────────────────────
+  export interface CheckboxProps {
+    label?: ReactNode;
+    variant?: 'default' | 'dashed';
+    checked?: boolean;
+    defaultChecked?: boolean;
+    disabled?: boolean;
+    required?: boolean;
+    onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
+    withoutFormLabel?: boolean;
+    withDropDown?: boolean;
+    dropDownData?: Array<{ label: string; value: string; onClick?: () => void; disabled?: boolean }>;
+    onDropDownCheckBoxClick?: (e: ChangeEvent<HTMLInputElement>) => void;
+    className?: string;
+  }
+  export const Checkbox: FC<CheckboxProps>;
+
+  // ── Stepper ──────────────────────────────────────────────────────────────
+  export interface StepperStep {
+    label: string;
+    description?: string;
+    statusConfig?: { label: string; color?: string; icon?: ReactNode };
+  }
+  export interface StepperProps {
+    steps: StepperStep[];
+    activeStep: number;
+    orientation?: 'horizontal' | 'vertical';
+    handleStep: (index: number) => void;
+    variant?: 'default' | 'progress' | 'mui';
+    width?: string | number;
+  }
+  export const Stepper: FC<StepperProps>;
+
+  // ── Tag ──────────────────────────────────────────────────────────────────
+  export interface TagProps {
+    label: string;
+    size?: 'small' | 'medium' | 'large';
+    variant?: 'filled' | 'stroke' | 'solid';
+    icon?: ReactNode;
+    onClick?: () => void;
+    isRemovable?: boolean;
+    onDelete?: () => void;
+  }
+  export const Tag: FC<TagProps>;
+
   export const Header: FC<Record<string, unknown>>;
   export const Sidebar: FC<Record<string, unknown>>;
   export const Breadcrumbs: FC<Record<string, unknown>>;
