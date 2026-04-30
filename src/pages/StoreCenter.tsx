@@ -34,7 +34,6 @@ import BoltOutlined from '@mui/icons-material/BoltOutlined';
 import GroupOutlined from '@mui/icons-material/GroupOutlined';
 import CalendarTodayOutlined from '@mui/icons-material/CalendarTodayOutlined';
 import FilterListOutlined from '@mui/icons-material/FilterListOutlined';
-import EmojiEventsOutlined from '@mui/icons-material/EmojiEventsOutlined';
 import GridOnOutlined from '@mui/icons-material/GridOnOutlined';
 import ShowChartOutlined from '@mui/icons-material/ShowChartOutlined';
 import OpenInNewOutlined from '@mui/icons-material/OpenInNewOutlined';
