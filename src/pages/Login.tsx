@@ -24,26 +24,26 @@ export const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [isSigningIn, setIsSigningIn] = useState(false);
 
-  // Handle form submission
   const handleSubmit = (e?: React.FormEvent | React.MouseEvent) => {
     if (e) e.preventDefault();
     setError('');
 
-    // Validate fields
     if (!email || !password) {
       setError(AUTH_ERRORS.REQUIRED_FIELD);
       return;
     }
 
-    // Attempt login
-    const success = login(email, password);
+    const success = login(email, password, true);
 
     if (success) {
-      // Redirect to portal home after login
-      navigate(ROUTES.PORTAL);
+      setIsSigningIn(true);
+      setTimeout(() => {
+        login(email, password);
+        navigate(ROUTES.PORTAL);
+      }, 1400);
     } else {
-      // Show error on failure
       setError(AUTH_ERRORS.INVALID_CREDENTIALS);
     }
   };
@@ -55,6 +55,15 @@ export const Login: React.FC = () => {
 
   return (
     <div className="login-container">
+
+      {/* ── Sign-in loading overlay ─────────────────── */}
+      {isSigningIn && (
+        <div className="login-signing-in">
+          <div className="login-signing-spinner" />
+          <p className="login-signing-text">Signing in...</p>
+          <p className="login-signing-sub">Preparing your workspace</p>
+        </div>
+      )}
 
       {/* ── Agentic background ─────────────────────────── */}
       <div className="login-agentic-bg" aria-hidden="true">

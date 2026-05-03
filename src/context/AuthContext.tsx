@@ -46,32 +46,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   // Login function - validates credentials against all known users
-  const login = (email: string, password: string): boolean => {
+  const login = (email: string, password: string, dryRun = false): boolean => {
     const trimmedEmail = email.trim().toLowerCase();
 
-    // Check default users first
     const match = DEFAULT_USERS.find(
       uc => uc.email.toLowerCase() === trimmedEmail && uc.password === password
     );
 
     if (match) {
-      setIsAuthenticated(true);
-      setUser(match.user);
-      storage.set(AUTH_STORAGE_KEY, { user: match.user });
+      if (!dryRun) {
+        setIsAuthenticated(true);
+        setUser(match.user);
+        storage.set(AUTH_STORAGE_KEY, { user: match.user });
+      }
       return true;
     }
 
-    // Check dynamically created users (invited users use default password)
     const dynamicUser = allUsers.find(u => u.email.toLowerCase() === trimmedEmail);
     if (dynamicUser && password === 'Password@123') {
-      const activatedUser = { ...dynamicUser, status: 'active' as const };
-      setIsAuthenticated(true);
-      setUser(activatedUser);
-      storage.set(AUTH_STORAGE_KEY, { user: activatedUser });
-      // Update user status in list
-      const updated = allUsers.map(u => u.id === activatedUser.id ? activatedUser : u);
-      setAllUsers(updated);
-      storage.set(USERS_STORAGE_KEY, updated);
+      if (!dryRun) {
+        const activatedUser = { ...dynamicUser, status: 'active' as const };
+        setIsAuthenticated(true);
+        setUser(activatedUser);
+        storage.set(AUTH_STORAGE_KEY, { user: activatedUser });
+        const updated = allUsers.map(u => u.id === activatedUser.id ? activatedUser : u);
+        setAllUsers(updated);
+        storage.set(USERS_STORAGE_KEY, updated);
+      }
       return true;
     }
 

@@ -38,7 +38,7 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   user: User | null;
   allUsers: User[];
-  login: (email: string, password: string) => boolean;
+  login: (email: string, password: string, dryRun?: boolean) => boolean;
   logout: () => void;
   addUser: (user: User) => void;
   updateUser: (userId: string, updates: Partial<User>) => void;
