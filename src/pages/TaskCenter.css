@@ -9,15 +9,35 @@
   min-height: calc(100vh - 106px);
 }
 
-/* ── Header (mirrors district-intel-header / uam-di-header — touches breadcrumbs) ── */
+/* ── Top card — header only ── */
+.tc-top-card {
+  margin: 16px 32px 0;
+  background: var(--ia-color-surface);
+  border-radius: 16px;
+  border: 1px solid var(--ia-color-border);
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+/* ── Summary card — KPI strip, gap below header card ── */
+.tc-summary-card {
+  margin: 10px 32px 20px;
+  background: var(--ia-color-surface);
+  border-radius: 16px;
+  border: 1px solid var(--ia-color-border);
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+/* ── Header inside the top card ── */
 .tc-di-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: var(--ia-color-surface);
-  border-bottom: 1px solid var(--ia-color-border);
-  padding: 16px 28px;
-  margin: 0 0 20px 0;
+  background: transparent;
+  border-bottom: none;
+  padding: 20px 24px;
+  margin: 0;
   border-radius: 0;
 }
 
@@ -62,11 +82,6 @@
   border-radius: 4px;
 }
 
-.tc-di-header .tc-meta-pill {
-  background: var(--ia-color-bg-muted);
-  color: var(--ia-color-text-secondary);
-}
-
 .tc-meta-updated {
   font-size: var(--ia-text-xs);
   color: var(--ia-color-text-tertiary);
@@ -87,63 +102,63 @@
   letter-spacing: 0.01em;
 }
 
-/* ── Summary Strip (Store Leaderboard mini-card style) ── */
+/* ── Summary Strip — matches BCA KPI strip exactly ── */
 .tc-summary-strip {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-  margin: 0 16px 18px;
+  gap: 0;
 }
 
 .tc-stat-pill {
-  background: var(--ia-color-surface);
-  border: 1px solid var(--ia-color-border);
-  border-radius: 10px;
-  padding: 14px 18px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  justify-content: center;
+  padding: 20px 16px;
+  border-right: 1px solid var(--ia-color-bg-muted);
+  transition: background 0.15s ease;
+  text-align: center;
+  background: transparent;
+  border-radius: 0;
+  gap: 0;
 }
 
-.tc-stat-pill:hover {
-  border-color: var(--ia-color-primary-border);
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+.tc-stat-pill:last-child { border-right: none; }
+.tc-stat-pill:hover { background: var(--ia-color-bg-subtle); }
+
+.tc-stat-pill-label {
+  font-size: var(--ia-text-3xs);
+  font-weight: var(--ia-font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--ia-color-text-tertiary);
+  margin-bottom: 8px;
+  white-space: nowrap;
 }
 
 .tc-stat-pill-value {
   font-size: var(--ia-text-3xl);
   font-weight: var(--ia-font-weight-bold);
   color: var(--ia-color-text-primary);
-  letter-spacing: -0.02em;
-  font-feature-settings: 'tnum';
-  line-height: 1.1;
+  line-height: 1;
+  margin-bottom: 6px;
+  letter-spacing: -0.5px;
 }
 
-.tc-stat-pill-label {
-  font-size: var(--ia-text-2xs);
-  font-weight: var(--ia-font-weight-semibold);
+.tc-stat-pill-value--neutral  { color: var(--ia-color-text-primary); }
+.tc-stat-pill-value--warning  { color: var(--ia-color-warning-text); }
+.tc-stat-pill-value--success  { color: var(--ia-color-success); }
+
+.tc-stat-pill-context {
+  font-size: var(--ia-text-3xs);
   color: var(--ia-color-text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.2px;
 }
 
-.tc-stat-pill--neutral { background: var(--ia-color-bg-subtle); }
-
-.tc-stat-pill--success {
-  background: var(--ia-color-success-bg);
-  border-color: #a7f3d0;
-}
-.tc-stat-pill--success .tc-stat-pill-value { color: var(--ia-color-success); }
-.tc-stat-pill--success .tc-stat-pill-label { color: var(--ia-color-success); }
-
-.tc-stat-pill--warning {
-  background: var(--ia-color-warning-bg);
-  border-color: var(--ia-color-warning-bg);
-}
-.tc-stat-pill--warning .tc-stat-pill-value { color: var(--ia-color-warning-text); }
-.tc-stat-pill--warning .tc-stat-pill-label { color: var(--ia-color-warning-text); }
+/* remove old modifier classes — no longer needed */
+.tc-stat-pill--neutral,
+.tc-stat-pill--success,
+.tc-stat-pill--warning { background: transparent; border-color: var(--ia-color-bg-muted); }
 
 /* ── Toolbar (Store Leaderboard placement) ── */
 .tc-toolbar {
@@ -1496,7 +1511,6 @@
   .tc-board { overflow-x: auto; grid-template-columns: repeat(3, minmax(260px, 1fr)); }
   .tc-detail-proof-grid { grid-template-columns: 1fr; }
   .tc-detail-grid { grid-template-columns: 1fr; }
-  .tc-summary-strip { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 768px) {

@@ -2390,7 +2390,9 @@
   border: 1px solid var(--ia-color-border);
   padding: 0;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  /* Force GPU compositing to prevent overflow:hidden+border-radius paint seams */
+  transform: translateZ(0);
 }
 
 .bca-header {
@@ -2398,7 +2400,7 @@
   align-items: flex-start;
   justify-content: space-between;
   padding: 20px 24px 16px;
-  border-bottom: 1px solid var(--ia-color-bg-muted);
+  border-bottom: 1px solid var(--ia-color-surface);
 }
 
 .bca-header-left { display: flex; flex-direction: column; gap: 2px; }
@@ -2447,12 +2449,20 @@
   transform: translateY(-1px);
 }
 
-/* A. Performance Overview KPI Cards */
+/* A. Performance Overview KPI Cards — gap “gutters” instead of borders
+   (no sub-pixel double/hairline lines between columns or vs section edge). */
 .bca-overview-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 0;
-  border-bottom: 1px solid var(--ia-color-bg-muted);
+}
+
+.bca-overview-grid > * {
+  min-width: 0;
+}
+
+.bca-overview-grid > *:not(:first-child) {
+  border-left: 1px solid var(--ia-color-bg-muted);
 }
 
 .bca-kpi-card {
@@ -2461,12 +2471,10 @@
   align-items: center;
   justify-content: center;
   padding: 20px 16px;
-  border-right: 1px solid var(--ia-color-bg-muted);
   transition: background 0.15s ease;
   text-align: center;
 }
 
-.bca-kpi-card:last-child { border-right: none; }
 .bca-kpi-card:hover { background: var(--ia-color-bg-subtle); }
 
 .bca-kpi-label {

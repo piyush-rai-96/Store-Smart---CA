@@ -18,6 +18,43 @@
   min-width: 0 !important;
 }
 
+/* Ask Alan button — overlaid on the right of the Impact UI header,
+   sitting to the left of the help / notification / avatar icons (~172px from right) */
+.app-topbar-ask-alan {
+  position: absolute;
+  top: 50%;
+  right: 172px;
+  transform: translateY(-50%);
+  z-index: 101;
+  pointer-events: auto;
+}
+
+.app-topbar-ask-alan-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: var(--ia-color-primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: "Manrope", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(67, 56, 202, 0.28);
+}
+
+.app-topbar-ask-alan-btn:hover {
+  filter: brightness(1.06);
+}
+
+.app-topbar-ask-alan-btn:active {
+  filter: brightness(0.96);
+}
+
 /* Notification panel — anchor from viewport top (below header ~56px) */
 .app-topbar-notif-panel {
   position: fixed;

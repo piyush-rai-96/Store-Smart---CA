@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import PsychologyOutlined from '@mui/icons-material/PsychologyOutlined';
 import BarChartOutlined from '@mui/icons-material/BarChartOutlined';
 import ImageOutlined from '@mui/icons-material/ImageOutlined';
@@ -19,8 +19,6 @@ import MenuBookOutlined from '@mui/icons-material/MenuBookOutlined';
 import AssignmentOutlined from '@mui/icons-material/AssignmentOutlined';
 import CloseOutlined from '@mui/icons-material/CloseOutlined';
 import RefreshOutlined from '@mui/icons-material/RefreshOutlined';
-import SearchOutlined from '@mui/icons-material/SearchOutlined';
-import KeyboardArrowUp from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import AccessTimeOutlined from '@mui/icons-material/AccessTimeOutlined';
@@ -28,7 +26,8 @@ import VisibilityOutlined from '@mui/icons-material/VisibilityOutlined';
 import BuildOutlined from '@mui/icons-material/BuildOutlined';
 import CheckCircleOutlined from '@mui/icons-material/CheckCircleOutlined';
 import StoreOutlined from '@mui/icons-material/StoreOutlined';
-import { Button, Card, Chips, Tabs, Badge } from 'impact-ui';
+import { Button, Card, Chips, Tabs, Badge, ChatBotComponent, Select } from 'impact-ui';
+import { useAuth } from '../context/AuthContext';
 import './AICopilot.css';
 
 // ── Types ──
@@ -356,6 +355,21 @@ const skills: { id: SkillMode; label: string; icon: React.ReactNode; description
   },
 ];
 
+const SKILL_SELECT_OPTIONS = skills.map(s => ({ label: s.label, value: s.id }));
+
+function timeOfDayPeriod(): 'Morning' | 'Afternoon' | 'Evening' {
+  const h = new Date().getHours();
+  if (h < 12) return 'Morning';
+  if (h < 17) return 'Afternoon';
+  return 'Evening';
+}
+
+function firstNameFromDisplayName(name: string | undefined | null): string {
+  const t = name?.trim();
+  if (!t) return 'there';
+  return t.split(/\s+/)[0] ?? 'there';
+}
+
 // ── Helper: match query to response ──
 const findKnowledgeResponse = (query: string) => {
   const q = query.toLowerCase();
@@ -367,6 +381,11 @@ const findKnowledgeResponse = (query: string) => {
     sources: [
       { doc: 'General Store Operations SOP v2.4', section: 'Section 1.1 — General Procedures', page: 'Pages 2–4' },
       { doc: 'Escalation Framework', section: 'Section 2.1 — Standard Escalation Matrix', page: 'Page 8' },
+    ],
+    followUpQuestions: [
+      'What is the fire exit blockage procedure?',
+      'How many days notice is required before a planogram change?',
+      'What are the weekly safety audit requirements?',
     ],
   };
 };
@@ -424,8 +443,10 @@ const districtGapsActionPlanResponse = {
 
 // ── Component ──
 export const AICopilot: React.FC = () => {
+  const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeSkill, setActiveSkill] = useState<SkillMode>('knowledge');
   const [pogRuleSent, setPogRuleSent] = useState<Set<string>>(new Set());
   const autoTriggeredRef = useRef(false);
@@ -443,7 +464,6 @@ export const AICopilot: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [pendingPogAction, setPendingPogAction] = useState<string | null>(null);
-  const [historyOpen, setHistoryOpen] = useState(false);
   // Add to Operations Queue state
   const [taskPushOpen, setTaskPushOpen] = useState<string | null>(null); // message ID
   const [taskAssignee, setTaskAssignee] = useState('');
@@ -454,12 +474,46 @@ export const AICopilot: React.FC = () => {
   const [copilotTab, setCopilotTab] = useState<'steps' | 'response'>('steps');
   const [openSource, setOpenSource] = useState<{ doc: string; section: string; page: string; tag?: string; updated?: string; excerpt?: string } | null>(null);
   const [sourcesPanelMsgId, setSourcesPanelMsgId] = useState<string | null>(null);
+  const [isChatBotOpen, setIsChatBotOpen] = useState(false);
+  const [skillSelectPanelOpen, setSkillSelectPanelOpen] = useState(false);
+  const [skillSelectPanelOptions, setSkillSelectPanelOptions] = useState<{ label: string; value: string }[]>(() => [...SKILL_SELECT_OPTIONS]);
+
+  // ── Conversation history (session-scoped) ──────────────────────────────────
+  interface SavedConversation {
+    id: string;
+    title: string;
+    skill: SkillMode;
+    skillLabel: string;
+    messages: ChatMessage[];
+    savedAt: Date;
+    isPinned?: boolean;
+  }
+  const [savedConversations, setSavedConversations] = useState<SavedConversation[]>([]);
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const currentMessages = messages[activeSkill];
   const currentSkill = skills.find(s => s.id === activeSkill)!;
+
+  const greetingFirstName = firstNameFromDisplayName(user?.name);
+  const timePeriod = timeOfDayPeriod();
+
+  const skillSelectedOption = useMemo(
+    () => ({ label: currentSkill.label, value: activeSkill }),
+    [currentSkill.label, activeSkill],
+  );
+
+  const handleSkillSelectChange = (
+    opts: { label: string; value: string }[] | { label: string; value: string } | null,
+  ) => {
+    const single = Array.isArray(opts) ? (opts[0] ?? null) : opts ?? null;
+    const v = single?.value;
+    if (v === 'knowledge' || v === 'analytics' || v === 'pog' || v === 'actions') {
+      setActiveSkill(v);
+    }
+  };
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -468,6 +522,127 @@ export const AICopilot: React.FC = () => {
   useEffect(() => {
     inputRef.current?.focus();
   }, [activeSkill]);
+
+  // ── History helpers ─────────────────────────────────────────────────────────
+
+  /** Snapshot current skill's messages into savedConversations and clear the thread. */
+  const saveCurrentAndClear = (skillToClear: SkillMode = activeSkill) => {
+    const msgs = messages[skillToClear];
+    if (msgs.length === 0) return;
+    const firstUser = msgs.find(m => m.role === 'user');
+    const title = firstUser
+      ? firstUser.content.slice(0, 70) + (firstUser.content.length > 70 ? '…' : '')
+      : 'Conversation';
+    const skill = skills.find(s => s.id === skillToClear)!;
+    setSavedConversations(prev => [{
+      id: `conv-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      title,
+      skill: skillToClear,
+      skillLabel: skill.label,
+      messages: [...msgs],
+      savedAt: new Date(),
+    }, ...prev]);
+    setMessages(prev => ({ ...prev, [skillToClear]: [] }));
+    setActiveConversationId(null);
+  };
+  const historyPanelData = useMemo(() => {
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const yesterdayStart = new Date(todayStart);
+    yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+    const weekStart = new Date(todayStart);
+    weekStart.setDate(weekStart.getDate() - 7);
+
+    const bucket = (d: Date): string => {
+      if (d >= todayStart) return 'Today';
+      if (d >= yesterdayStart) return 'Yesterday';
+      return 'Earlier';
+    };
+
+    const groups: Record<string, SavedConversation[]> = {};
+    savedConversations.forEach(c => {
+      const b = bucket(c.savedAt);
+      (groups[b] ??= []).push(c);
+    });
+
+    return ['Today', 'Yesterday', 'Earlier']
+      .filter(b => groups[b]?.length)
+      .map(b => ({
+        group_name: b,
+        conversation_list: groups[b].map(c => ({
+          conversation_id: c.id,   // library uses conversation_id for menu state tracking
+          id: c.id,
+          name: c.title,
+          module_name: c.skillLabel,
+          pinned: !!c.isPinned,
+        })),
+      }));
+  }, [savedConversations]);
+
+  /** Restore a saved conversation when user clicks it in the History panel. */
+  const handleHistorySelect = (item: { id?: string; conversation_id?: string; name: string; module_name?: string }) => {
+    const saved = savedConversations.find(c => c.id === (item.conversation_id ?? item.id));
+    if (!saved) return;
+    setActiveSkill(saved.skill);
+    setMessages(prev => ({ ...prev, [saved.skill]: saved.messages }));
+    setActiveConversationId(saved.id);
+  };
+
+  /**
+   * Handle history panel context menu actions.
+   * Rename callback signature from library: (action, item, newName)
+   * Pin/Unpin/Delete: (action, item)
+   */
+  const handleHistoryMenuAction = (
+    action: string,
+    item: { id?: string; conversation_id?: string; name?: string },
+    newName?: string,
+  ) => {
+    const convId = (item as { conversation_id?: string; id?: string }).conversation_id ?? item.id;
+    switch (action) {
+      case 'delete':
+        setSavedConversations(prev => prev.filter(c => c.id !== convId));
+        if (activeConversationId === convId) setActiveConversationId(null);
+        break;
+      case 'rename':
+        if (newName?.trim()) {
+          setSavedConversations(prev =>
+            prev.map(c => c.id === convId ? { ...c, title: newName.trim() } : c),
+          );
+        }
+        break;
+      case 'pin':
+        setSavedConversations(prev =>
+          prev.map(c => c.id === convId ? { ...c, isPinned: true } : c),
+        );
+        break;
+      case 'unpin':
+        setSavedConversations(prev =>
+          prev.map(c => c.id === convId ? { ...c, isPinned: false } : c),
+        );
+        break;
+      default:
+        break;
+    }
+  };
+
+
+  /** Header "Ask Alan" / chat icon: navigate here with `{ openAlan: true }` in location state */
+  useEffect(() => {
+    const st = location.state as { openAlan?: boolean } | null | undefined;
+    if (st?.openAlan) {
+      setIsChatBotOpen(true);
+      navigate(`${location.pathname}${location.search}${location.hash}`, { replace: true, state: {} });
+    }
+  }, [location.state, location.pathname, location.search, location.hash, navigate]);
+
+  /** Same-page open from header while already on AI Copilot */
+  useEffect(() => {
+    const onOpenAlan = () => setIsChatBotOpen(true);
+    window.addEventListener('storehub:open-alan', onOpenAlan);
+    return () => window.removeEventListener('storehub:open-alan', onOpenAlan);
+  }, []);
+
 
   // Agentic action processing — animated step-by-step
   const runAgenticActionFlow = async (
@@ -946,6 +1121,11 @@ export const AICopilot: React.FC = () => {
           category: ruleCategory,
         },
         suggestedQueries: ['Create another planogram rule', 'Schedule planogram reset for next Monday', 'Create a restocking task'],
+        followUpQuestions: ['Create another planogram rule', 'Send to POG Localization Engine', 'Schedule a planogram reset'],
+        nextActions: {
+          learnMore: ['What planogram rules are currently active?', 'How does the POG Localization Engine apply rules?'],
+          takeAction: ['Send this rule to the POG Localization Engine', 'Schedule a planogram reset for next week'],
+        },
       };
 
       runAgenticActionFlow(`proc-${Date.now()}`, ruleSteps, finalMsg);
@@ -973,6 +1153,11 @@ export const AICopilot: React.FC = () => {
         due: userQuery.toLowerCase().includes('monday') ? 'Next Monday' : userQuery.toLowerCase().includes('today') ? 'Today' : 'Tomorrow',
       },
       suggestedQueries: ['Create another task', 'View all active tasks', 'Assign to a different team member'],
+      followUpQuestions: ['Create another task', 'View all active tasks', 'Add a due date reminder'],
+      nextActions: {
+        learnMore: ['What tasks are currently in the Operations Queue?', 'What is the SLA for this priority level?'],
+        takeAction: ['Push task to Operations Queue', 'Create a follow-up audit task', 'Assign to team member'],
+      },
     };
 
     runAgenticActionFlow(`proc-${Date.now()}`, actionSteps, finalMsg);
@@ -1643,16 +1828,13 @@ export const AICopilot: React.FC = () => {
               <ul className="cop-followups-inline-list">
                 {all.map((q, i) => (
                   <li key={i}>
-                    <Button
-                      variant="text"
-                      color="primary"
-                      size="small"
+                    <button
+                      type="button"
                       className="cop-followup-prompt"
-                      fullWidth
                       onClick={() => { setInputValue(''); handleSend(q); }}
                     >
                       {q}
-                    </Button>
+                    </button>
                   </li>
                 ))}
               </ul>
@@ -2165,20 +2347,6 @@ export const AICopilot: React.FC = () => {
     );
   };
 
-  // Build conversation history entries from all skills
-  const historyEntries = Object.entries(messages)
-    .flatMap(([skill, msgs]) =>
-      msgs.filter(m => m.role === 'user').map(m => ({
-        skill: skill as SkillMode,
-        label: skills.find(s => s.id === skill)!.label,
-        icon: skills.find(s => s.id === skill)!.icon,
-        query: m.content.length > 50 ? m.content.slice(0, 50) + '…' : m.content,
-        time: m.timestamp,
-      }))
-    )
-    .sort((a, b) => b.time.getTime() - a.time.getTime());
-
-  const totalConversations = historyEntries.length;
 
   return (
     <div className="cop-container">
@@ -2212,204 +2380,195 @@ export const AICopilot: React.FC = () => {
         </div>
       )}
 
-      {/* Header — DI-style (matches District Intelligence Center look & feel) */}
-      <div className="district-intel-header cop-di-header">
-        <div className="header-left">
-          <div className="header-title">
-            <AutoAwesomeOutlined sx={{ fontSize: 24 }}/>
-            <h1>AI Copilot</h1>
-          </div>
-          <div className="header-meta">
-            <Badge
-              label={currentMessages.length > 0
-                ? `${currentMessages.length} message${currentMessages.length === 1 ? '' : 's'}`
-                : 'Ready to chat'}
-              size="small"
-              color={currentMessages.length > 0 ? 'primary' : 'success'}
-            />
-          </div>
-        </div>
-        <div className="header-right">
-          <div className="header-search">
-            <SearchOutlined sx={{ fontSize: 16 }}/>
-            <input type="text" placeholder="Search conversations..." />
-          </div>
-          <Button
-            variant="outlined"
-            color="primary"
-            className="header-action-btn secondary"
-            onClick={() => setMessages(prev => ({ ...prev, [activeSkill]: [] }))}
-            startIcon={<RefreshOutlined sx={{ fontSize: 16 }}/>}
-          >
-            Clear
-          </Button>
-        </div>
-      </div>
-
-      {/* Skill Tab Strip */}
-      <div className="cop-skill-tabs">
-        <Tabs
-          tabNames={[
-            { value: 'knowledge', label: 'Knowledge Center', icon: <PsychologyOutlined sx={{ fontSize: 15 }}/> },
-            { value: 'analytics', label: 'Analytics', icon: <BarChartOutlined sx={{ fontSize: 15 }}/> },
-            { value: 'pog', label: 'POG Audit', icon: <ImageOutlined sx={{ fontSize: 15 }}/> },
-            { value: 'actions', label: 'Actions', icon: <BoltOutlined sx={{ fontSize: 15 }}/> },
-          ]}
-          tabPanels={[]}
-          value={activeSkill}
-          onChange={(_, val) => setActiveSkill(val as SkillMode)}
-        />
-      </div>
-
-      {/* Messages Area — Full screen */}
-      <div className="cop-messages">
-        {currentMessages.length === 0 ? (
-          <div className="cop-welcome">
-            <div className="cop-welcome-top">
-              <div className="cop-welcome-logo">
-                <div className="cop-welcome-logo-ring" />
-                <AutoAwesomeOutlined sx={{ fontSize: 32 }}/>
-              </div>
-              <h2 className="cop-welcome-heading">Hello, how can I help you today?</h2>
-              <p>I'm your <strong>AI Copilot</strong> — I can answer SOP questions, analyze store performance, audit planograms, and create tasks. Select a skill or just start typing.</p>
-              <div className="cop-welcome-skill-badge">
-                <Badge label={`${currentSkill.label} active`} size="small" color="primary" />
-              </div>
-            </div>
-
-            <div className="cop-welcome-grid">
-              {skills.map(skill => (
-                <Button
-                  key={skill.id}
-                  type="button"
-                  variant="outlined"
-                  color="inherit"
-                  className={`cop-welcome-card cop-skill--${skill.id} ${activeSkill === skill.id ? 'cop-welcome-card--active' : ''}`}
-                  onClick={() => setActiveSkill(skill.id)}
-                >
-                  <span className={`cop-welcome-card-icon cop-skill-icon--${skill.id}`}>{skill.icon}</span>
-                  <span className="cop-welcome-card-name">{skill.label}</span>
-                  <span className="cop-welcome-card-desc">{skill.description}</span>
-                </Button>
-              ))}
-            </div>
-
-            <div className="cop-welcome-suggestions">
-              <div className="cop-welcome-suggestions-header">
-                <span className="cop-welcome-suggestions-icon">{currentSkill.icon}</span>
-                <span className="cop-welcome-suggestions-label">Suggested prompts</span>
-              </div>
-              <div className="cop-welcome-suggestions-grid">
-                {currentSkill.suggestions.map((q, i) => (
-                  <Chips key={i} label={q} variant="outlined" size="small" className="cop-suggestion-btn" onClick={() => handleSuggestionClick(q)} />
-                ))}
-              </div>
-            </div>
-          </div>
-        ) : (
-          currentMessages.map(msg => (
-            <div key={msg.id} className={`cop-msg cop-msg--${msg.role}`}>
-              <div className="cop-msg-inner">
-                <div className="cop-msg-avatar">
-                  {msg.role === 'user' ? <PersonOutlined sx={{ fontSize: 16 }}/> : <SmartToyOutlined sx={{ fontSize: 16 }}/>}
-                </div>
-                <div className="cop-msg-content">
-                  <div className="cop-msg-meta">
-                    <span className="cop-msg-sender">{msg.role === 'user' ? 'You' : 'AI Copilot'}</span>
-                    <span className="cop-msg-time">{formatTime(msg.timestamp)}</span>
-                  </div>
-                  {renderMessageContent(msg)}
-                </div>
-              </div>
-            </div>
-          ))
-        )}
-        <div ref={chatEndRef} />
-      </div>
-
-      {/* Input Area */}
-      <div className="cop-input-area">
-        <div className="cop-input-inner">
-          {uploadedImage && (
-            <div className="cop-upload-preview">
-              <img src={uploadedImage} alt="Upload preview" />
-              <Button variant="text" color="inherit" size="small" className="cop-upload-remove" aria-label="Remove image" onClick={() => setUploadedImage(null)}>
-                <CloseOutlined sx={{ fontSize: 14 }}/>
-              </Button>
-            </div>
-          )}
-          <div className="cop-input-row">
-            {activeSkill === 'pog' && (
-              <>
-                <Button variant="outlined" color="primary" className="cop-upload-btn" aria-label="Upload image" onClick={() => fileInputRef.current?.click()}>
-                  <FileUploadOutlined sx={{ fontSize: 18 }}/>
-                </Button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  style={{ display: 'none' }}
-                  onChange={handleImageUpload}
+      {/* Ask Alan — Impact UI ChatBotComponent as right-panel overlay */}
+      <ChatBotComponent
+        userName={user?.name ?? 'User'}
+        isChatBotOpen={isChatBotOpen}
+        setIsChatBotOpen={setIsChatBotOpen}
+        onClose={() => {
+          // Auto-save current thread when panel is closed
+          if (currentMessages.length > 0) saveCurrentAndClear();
+          setIsChatBotOpen(false);
+        }}
+        isCustomScreen
+        showSuggestionBanner={false}
+        showHistoryPanel
+        footerText=""
+        isStopIcon={false}
+        onSendIconClick={() => handleSend()}
+        isAssistantThinking={isProcessing}
+        historyPanelData={historyPanelData}
+        activeConversationId={activeConversationId ?? undefined}
+        onHistorySelectConversation={handleHistorySelect}
+        onHistoryMenuAction={handleHistoryMenuAction}
+        handleNewChatClick={() => {
+          saveCurrentAndClear();
+          return { isInitialClickPresent: false };
+        }}
+        customScreenJsx={
+          <div className="cop-panel-inner">
+            {/* Panel header — title + skill context + close */}
+            <div className="cop-panel-header">
+              <div className="cop-panel-header-left">
+                <span className="cop-panel-title-icon" aria-hidden="true">
+                  <AutoAwesomeOutlined sx={{ fontSize: 18 }} />
+                </span>
+                <span className="cop-panel-title-text">Ask Alan</span>
+                <Badge
+                  label={currentMessages.length > 0
+                    ? `${currentMessages.length} msg${currentMessages.length === 1 ? '' : 's'}`
+                    : 'Ready to chat'}
+                  size="small"
+                  color={currentMessages.length > 0 ? 'primary' : 'success'}
                 />
-              </>
-            )}
-            <textarea
-              ref={inputRef}
-              className="cop-input"
-              placeholder={currentSkill.placeholder}
-              value={inputValue}
-              onChange={e => setInputValue(e.target.value)}
-              onKeyDown={handleKeyDown}
-              rows={1}
-            />
-            <Button
-              variant="contained"
-              color="primary"
-              className={`cop-send-btn ${(inputValue.trim() || uploadedImage) && !isProcessing ? 'cop-send-btn--active' : ''}`}
-              onClick={() => handleSend()}
-              disabled={(!inputValue.trim() && !uploadedImage) || isProcessing}
-              aria-label="Send message"
-            >
-              <SendOutlined sx={{ fontSize: 18 }}/>
-            </Button>
-          </div>
-          <div className="cop-input-footer">
-            AI Copilot uses retrieval-augmented generation. Responses are sourced from your organization's knowledge base.
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom History Drawer */}
-      {totalConversations > 0 && (
-        <div className={`cop-drawer ${historyOpen ? 'cop-drawer--open' : ''}`}>
-          <Button variant="text" color="primary" fullWidth className="cop-drawer-toggle" onClick={() => setHistoryOpen(!historyOpen)}>
-            <AccessTimeOutlined sx={{ fontSize: 14 }}/>
-            <span>Recent ({totalConversations})</span>
-            {historyOpen ? <KeyboardArrowDown sx={{ fontSize: 14 }}/> : <KeyboardArrowUp sx={{ fontSize: 14 }}/>}
-          </Button>
-          {historyOpen && (
-            <div className="cop-drawer-body">
-              {historyEntries.map((entry, i) => (
-                <Button
-                  key={i}
-                  type="button"
-                  variant="text"
-                  color="inherit"
-                  fullWidth
-                  className="cop-drawer-item"
-                  onClick={() => { setActiveSkill(entry.skill); setHistoryOpen(false); }}
-                >
-                  <span className="cop-drawer-item-icon">{entry.icon}</span>
-                  <div className="cop-drawer-item-text">
-                    <span className="cop-drawer-item-query">{entry.query}</span>
-                    <span className="cop-drawer-item-meta">{entry.label} · {entry.time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                  </div>
-                </Button>
-              ))}
+              </div>
+              <div className="cop-panel-header-right">
+                <Button variant="text" color="inherit" size="small"
+                  onClick={() => setMessages(prev => ({ ...prev, [activeSkill]: [] }))}
+                  startIcon={<RefreshOutlined sx={{ fontSize: 14 }}/>}
+                >Clear</Button>
+                <button type="button" className="cop-panel-close-btn" aria-label="Close Ask Alan" onClick={() => {
+                  if (currentMessages.length > 0) saveCurrentAndClear();
+                  setIsChatBotOpen(false);
+                }}>
+                  <CloseOutlined sx={{ fontSize: 18 }}/>
+                </button>
+              </div>
             </div>
-          )}
-        </div>
-      )}
+            <div className="cop-skill-row cop-skill-row--panel">
+              <Select
+                label="Skill"
+                placeholder="Choose a skill..."
+                isOpen={skillSelectPanelOpen}
+                setIsOpen={setSkillSelectPanelOpen}
+                initialOptions={SKILL_SELECT_OPTIONS}
+                currentOptions={skillSelectPanelOptions}
+                setCurrentOptions={opts => setSkillSelectPanelOptions(opts.length ? opts : [...SKILL_SELECT_OPTIONS])}
+                selectedOptions={skillSelectedOption}
+                setSelectedOptions={handleSkillSelectChange}
+                setIsSelectAll={() => {}}
+                width="100%"
+                withPortal
+              />
+            </div>
+            {/* Messages area — all existing render logic is 100% preserved */}
+            <div className="cop-messages">
+              {currentMessages.length === 0 ? (
+                <div className="cop-panel-welcome">
+                  {/* Hero: gradient star + personalised greeting */}
+                  <div className="cop-panel-welcome-hero">
+                    {/* Inline SVG gradient definition — referenced by fill="url(#cop-alan-grad)" */}
+                    <svg width="0" height="0" aria-hidden="true" style={{ position: 'absolute', pointerEvents: 'none' }}>
+                      <defs>
+                        <linearGradient id="cop-alan-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%"   stopColor="#4259EE" />
+                          <stop offset="50%"  stopColor="#7c5cb1" />
+                          <stop offset="100%" stopColor="#ec7550" />
+                        </linearGradient>
+                      </defs>
+                    </svg>
+                    <div className="cop-panel-welcome-star">
+                      <AutoAwesomeOutlined sx={{ fontSize: 52, fill: 'url(#cop-alan-grad)' }} />
+                    </div>
+                    <h2 className="cop-panel-welcome-greeting">
+                      Good {timePeriod},{' '}
+                      <span className="cop-panel-welcome-name">{greetingFirstName}!</span>
+                      {' '}{timePeriod === 'Morning' ? '🌅' : timePeriod === 'Evening' ? '🌙' : '☀️'}
+                    </h2>
+                    <p className="cop-panel-welcome-sub">I am Alan, how can I help you today?</p>
+                  </div>
+
+                  {/* Suggestion cards */}
+                  <div className="cop-panel-suggestions">
+                    <p className="cop-panel-suggestions-label">Suggested questions</p>
+                    {currentSkill.suggestions.map((q, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        className="cop-panel-suggestion-card"
+                        onClick={() => handleSuggestionClick(q)}
+                      >
+                        {q}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                currentMessages.map(msg => (
+                  <div key={msg.id} className={`cop-msg cop-msg--${msg.role}`}>
+                    <div className="cop-msg-inner">
+                      <div className="cop-msg-avatar">
+                        {msg.role === 'user' ? <PersonOutlined sx={{ fontSize: 16 }}/> : <SmartToyOutlined sx={{ fontSize: 16 }}/>}
+                      </div>
+                      <div className="cop-msg-content">
+                        <div className="cop-msg-meta">
+                          <span className="cop-msg-sender">{msg.role === 'user' ? 'You' : 'AI Copilot'}</span>
+                          <span className="cop-msg-time">{formatTime(msg.timestamp)}</span>
+                        </div>
+                        {renderMessageContent(msg)}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+              <div ref={chatEndRef} />
+            </div>
+          </div>
+          }
+          customInputComponent={
+            /* Input area — POG upload, textarea, send button all unchanged */
+            <div className="cop-input-area">
+              <div className="cop-input-inner">
+                {uploadedImage && (
+                  <div className="cop-upload-preview">
+                    <img src={uploadedImage} alt="Upload preview" />
+                    <Button variant="text" color="inherit" size="small" className="cop-upload-remove" aria-label="Remove image" onClick={() => setUploadedImage(null)}>
+                      <CloseOutlined sx={{ fontSize: 14 }}/>
+                    </Button>
+                  </div>
+                )}
+                <div className="cop-input-row">
+                  {activeSkill === 'pog' && (
+                    <>
+                      <Button variant="outlined" color="primary" className="cop-upload-btn" aria-label="Upload image" onClick={() => fileInputRef.current?.click()}>
+                        <FileUploadOutlined sx={{ fontSize: 18 }}/>
+                      </Button>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        style={{ display: 'none' }}
+                        onChange={handleImageUpload}
+                      />
+                    </>
+                  )}
+                  <textarea
+                    ref={inputRef}
+                    className="cop-input"
+                    placeholder={currentSkill.placeholder}
+                    value={inputValue}
+                    onChange={e => setInputValue(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    rows={1}
+                  />
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    className={`cop-send-btn ${(inputValue.trim() || uploadedImage) && !isProcessing ? 'cop-send-btn--active' : ''}`}
+                    onClick={() => handleSend()}
+                    disabled={(!inputValue.trim() && !uploadedImage) || isProcessing}
+                    aria-label="Send message"
+                  >
+                    <SendOutlined sx={{ fontSize: 18 }}/>
+                  </Button>
+                </div>
+                <div className="cop-input-footer">
+                  AI Copilot uses retrieval-augmented generation. Responses are sourced from your organization's knowledge base.
+                </div>
+              </div>
+            </div>
+          }
+        />
 
       {/* Right-side Sources Panel — opens from inline "View sources" link */}
       {sourcesPanelMsgId && (() => {

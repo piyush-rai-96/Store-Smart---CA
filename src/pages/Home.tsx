@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from 'impact-ui';
 import { useAuth } from '../context/AuthContext';
@@ -9,6 +9,12 @@ import './Home.css';
 export const Home: React.FC = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 600);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -16,6 +22,17 @@ export const Home: React.FC = () => {
   };
 
   if (!user) return null;
+
+  if (isLoading) {
+    return (
+      <div className="home-container">
+        <div className="page-loading">
+          <div className="page-loading-spinner" />
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   const dropMenuOptions = [
     {

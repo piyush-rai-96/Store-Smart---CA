@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import GppGoodOutlined from '@mui/icons-material/GppGoodOutlined';
 import PersonAddAlt1Outlined from '@mui/icons-material/PersonAddAlt1Outlined';
 import SearchOutlined from '@mui/icons-material/SearchOutlined';
@@ -20,7 +20,7 @@ import WarningAmberOutlined from '@mui/icons-material/WarningAmberOutlined';
 import {
   Button, Badge, Card,
   Toast, Avatar, EmptyState, Tooltip,
-  Input, Switch, Checkbox, Stepper, Modal, Select, Tag,
+  Input, Switch, Checkbox, Modal, Select, Tag,
 } from 'impact-ui';
 import { useAuth } from '../context/AuthContext';
 import { User, UserRole, ROLE_LABELS, ROLE_ACCESS, ScreenAccess } from '../types';
@@ -55,6 +55,7 @@ const ROLE_DESCRIPTIONS: Record<UserRole, string> = {
 
 export const UserAccessManagement: React.FC = () => {
   const { allUsers, addUser, removeUser, user: currentUser } = useAuth();
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [inviteSuccess, setInviteSuccess] = useState<string | null>(null);
@@ -76,20 +77,33 @@ export const UserAccessManagement: React.FC = () => {
   const [newEmail, setNewEmail] = useState('');
   const [newRole, setNewRole] = useState<UserRole>('SM');
   const [newScope, setNewScope] = useState('');
-  const [showRoleDropdown, setShowRoleDropdown] = useState(false);
+  const [roleMenuOpen, setRoleMenuOpen] = useState(false);
+  const roleDropdownRef = useRef<HTMLDivElement>(null);
   const [fieldErrors, setFieldErrors] = useState<{ name?: string; email?: string; scope?: string }>({});
+
+  // Close role dropdown when clicking outside it
+  useEffect(() => {
+    if (!roleMenuOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (roleDropdownRef.current && !roleDropdownRef.current.contains(e.target as Node)) {
+        setRoleMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [roleMenuOpen]);
 
   // Scope — Impact UI Select state
   const [scopeIsOpen, setScopeIsOpen] = useState(false);
   const [scopeCurrentOptions, setScopeCurrentOptions] = useState<{ label: string; value: string }[]>(
     () => SCOPE_OPTIONS['SM'].options.map(o => ({ label: o, value: o }))
   );
-  const [scopeSelectedOptions, setScopeSelectedOptions] = useState<{ label: string; value: string }[]>([]);
+  const [scopeSelectedOptions, setScopeSelectedOptions] = useState<{ label: string; value: string } | null>(null);
 
   const handleScopeChange = (options: { label: string; value: string }[] | { label: string; value: string } | null) => {
-    const opts = Array.isArray(options) ? options : options ? [options] : [];
-    setScopeSelectedOptions(opts);
-    const val = opts[0]?.value || '';
+    const single = Array.isArray(options) ? (options[0] ?? null) : options ?? null;
+    setScopeSelectedOptions(single);
+    const val = single?.value || '';
     setNewScope(val);
     if (val) setFieldErrors(prev => ({ ...prev, scope: undefined }));
   };
@@ -119,10 +133,10 @@ export const UserAccessManagement: React.FC = () => {
     setNewRole('SM');
     setNewScope('');
     setFieldErrors({});
-    setShowRoleDropdown(false);
+    setRoleMenuOpen(false);
     setScopeIsOpen(false);
     setScopeCurrentOptions(SCOPE_OPTIONS['SM'].options.map(o => ({ label: o, value: o })));
-    setScopeSelectedOptions([]);
+    setScopeSelectedOptions(null);
     setCustomizeAccess(false);
     setCustomAccess([]);
     setCurrentStep(1);
@@ -210,9 +224,25 @@ export const UserAccessManagement: React.FC = () => {
     roles: [...new Set(allUsers.map(u => u.role))].length,
   };
 
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 600);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="uam-page">
+        <div className="page-loading">
+          <div className="page-loading-spinner" />
+          <p>Loading User Access...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="uam-page">
-      {/* ── Header (mirrors District Intelligence Center) ── */}
+      {/* ── Header ── */}
       <div className="district-intel-header uam-di-header">
         <div className="header-left">
           <div className="header-title">
@@ -221,11 +251,11 @@ export const UserAccessManagement: React.FC = () => {
           </div>
           <div className="header-meta">
             <span className="district-badge">
-              <SecurityOutlined sx={{ fontSize: 14 }}/>
+              <SecurityOutlined sx={{ fontSize: 13 }}/>
               Team Directory
             </span>
             <span className="district-badge uam-meta-pill">
-              <PersonOutlined sx={{ fontSize: 14 }}/>
+              <PersonOutlined sx={{ fontSize: 13 }}/>
               {statCounts.total} members
             </span>
             <span className="uam-meta-updated">Manage roles, scope &amp; platform access</span>
@@ -256,49 +286,51 @@ export const UserAccessManagement: React.FC = () => {
         onClose={() => setDeleteSuccess(null)}
       />
 
-      {/* ── Stats Strip (DI bca-overview-grid pattern) ── */}
-      <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: 0, overflow: 'hidden', margin: '0 16px 16px' }}>
-        <div className="bca-overview-grid uam-stats-grid">
-          <div className="bca-kpi-card">
-            <span className="bca-kpi-label">Total Users</span>
-            <span className="bca-kpi-value">{statCounts.total}</span>
-            <span className="bca-kpi-context">across all roles</span>
-          </div>
-          <div className="bca-kpi-card">
-            <span className="bca-kpi-label">Active</span>
-            <span className="bca-kpi-value">{statCounts.active}</span>
-            <span className="bca-kpi-context">currently signed in</span>
-          </div>
-          <div className="bca-kpi-card">
-            <span className="bca-kpi-label">Pending</span>
-            <span className="bca-kpi-value">{statCounts.invited}</span>
-            <span className="bca-kpi-context">invite not accepted</span>
-          </div>
-          <div className="bca-kpi-card">
-            <span className="bca-kpi-label">Roles</span>
-            <span className="bca-kpi-value">{statCounts.roles}</span>
-            <span className="bca-kpi-context">distinct role types</span>
-          </div>
-          <div className="bca-kpi-card">
-            <span className="bca-kpi-label">Filtered</span>
-            <span className="bca-kpi-value">{filteredUsers.length}</span>
-            <span className="bca-kpi-context">matching search</span>
-          </div>
-        </div>
-      </Card>
+      {/* ── Stats Strip ── */}
+      <div className="uam-kpi-grid">
+        <Card size="extraSmall" style={{ maxWidth: '100%', minHeight: 0, padding: '16px' }}>
+          <span className="uam-kpi-label">Total Users</span>
+          <span className="uam-kpi-value">{statCounts.total}</span>
+          <span className="uam-kpi-context">across all roles</span>
+        </Card>
+        <Card size="extraSmall" style={{ maxWidth: '100%', minHeight: 0, padding: '16px' }}>
+          <span className="uam-kpi-label">Active</span>
+          <span className="uam-kpi-value">{statCounts.active}</span>
+          <span className="uam-kpi-context">currently active</span>
+        </Card>
+        <Card size="extraSmall" style={{ maxWidth: '100%', minHeight: 0, padding: '16px' }}>
+          <span className="uam-kpi-label">Pending</span>
+          <span className="uam-kpi-value">{statCounts.invited}</span>
+          <span className="uam-kpi-context">invite not accepted</span>
+        </Card>
+        <Card size="extraSmall" style={{ maxWidth: '100%', minHeight: 0, padding: '16px' }}>
+          <span className="uam-kpi-label">Roles</span>
+          <span className="uam-kpi-value">{statCounts.roles}</span>
+          <span className="uam-kpi-context">distinct role types</span>
+        </Card>
+        <Card size="extraSmall" style={{ maxWidth: '100%', minHeight: 0, padding: '16px' }}>
+          <span className="uam-kpi-label">Filtered</span>
+          <span className="uam-kpi-value">{filteredUsers.length}</span>
+          <span className="uam-kpi-context">matching search</span>
+        </Card>
+      </div>
 
-      {/* ── Search toolbar — Impact UI Input ── */}
+      {/* ── Search toolbar ── */}
       <div className="uam-table-toolbar">
-        <div className="uam-search-bar">
-          <Input
-            leftIcon={<SearchOutlined sx={{ fontSize: 15 }}/>}
-            rightIcon={searchQuery ? <CloseOutlined sx={{ fontSize: 13 }}/> : undefined}
-            rightIconClick={() => setSearchQuery('')}
+        <div className="search-filter uam-search-filter">
+          <SearchOutlined sx={{ fontSize: 16 }}/>
+          <input
+            type="text"
+            className="store-search-input"
             placeholder="Search by name, email, or role..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            size="small"
           />
+          {searchQuery && (
+            <button className="store-search-clear" onClick={() => setSearchQuery('')} aria-label="Clear search">
+              <CloseOutlined sx={{ fontSize: 14 }}/>
+            </button>
+          )}
         </div>
         <span className="uam-toolbar-count">{filteredUsers.length} of {allUsers.length} users</span>
       </div>
@@ -364,7 +396,7 @@ export const UserAccessManagement: React.FC = () => {
                       size="small"
                     />
                   </td>
-                  <td className="uam-td-actions" onClick={e => e.stopPropagation()}>
+                  <td className="uam-td-actions uam-td-actions--hover" onClick={e => e.stopPropagation()}>
                     {currentUser?.id === u.id ? (
                       <Tooltip title="You can't remove your own account" orientation="top">
                         <span className="uam-action-self">You</span>
@@ -372,7 +404,7 @@ export const UserAccessManagement: React.FC = () => {
                     ) : (
                       <Tooltip title={`Remove ${u.name}`} orientation="top">
                         <Button
-                          variant="text"
+                          variant="outlined"
                           size="small"
                           className="uam-action-delete"
                           onClick={() => setConfirmDelete(u)}
@@ -421,272 +453,293 @@ export const UserAccessManagement: React.FC = () => {
         </table>
       </div>
 
-      {/* ========== Create User — Impact UI Modal (large) ========== */}
-      <Modal
-        open={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-        title="Create New User"
-        size="medium"
-        footerOptions={
-          <div className="uam-m-footer">
-            <Button variant="outlined" className="uam-m-cancel" onClick={() => setShowCreateModal(false)}>
-              Cancel
-            </Button>
-            <div className="uam-m-footer-right">
-              {currentStep > 1 && (
-                <Button variant="outlined" className="uam-m-back" onClick={goBack} startIcon={<KeyboardArrowLeft sx={{ fontSize: 14 }}/>}>
-                  Back
-                </Button>
-              )}
-              {currentStep < 3 ? (
-                <Button variant="contained" className="uam-m-submit" onClick={goNext} endIcon={<KeyboardArrowRight sx={{ fontSize: 14 }}/>}>
-                  Next
-                </Button>
-              ) : (
-                <Button
-                  variant="contained"
-                  className="uam-m-submit"
-                  onClick={handleCreateUser}
-                  disabled={customizeAccess && customAccess.length === 0}
-                  startIcon={<SendOutlined sx={{ fontSize: 13 }}/>}
-                >
-                  Send Invite
-                </Button>
-              )}
-            </div>
-          </div>
-        }
-      >
-        {/* Modal subtitle */}
-        <div className="uam-m-subtitle">
-          <PersonAddAlt1Outlined sx={{ fontSize: 16 }}/>
-          <span>Add a team member and configure their access</span>
-        </div>
+      {/* ========== Create User — Broadcast-style wizard ========== */}
+      {showCreateModal && (
+        <div className="uam-w-overlay" onClick={() => setShowCreateModal(false)}>
+          <div className="uam-w-modal" onClick={e => e.stopPropagation()}>
 
-        {/* Stepper — Impact UI Stepper */}
-        <div className="uam-m-stepper">
-          <Stepper
-            variant="default"
-            orientation="horizontal"
-            activeStep={currentStep - 1}
-            handleStep={idx => {
-              const step = (idx + 1) as 1 | 2 | 3;
-              if (step < currentStep) setCurrentStep(step);
-            }}
-            steps={[
-              { label: 'Identity' },
-              { label: 'Role & Scope' },
-              { label: 'Screen Access' },
-            ]}
-          />
-        </div>
-
-        {/* Modal body */}
-        <div className="uam-m-body">
-              {/* Section: Identity (Step 1) */}
-              {currentStep === 1 && (
-              <div className="uam-m-section">
-                <div className="uam-m-section-label">
-                  <PersonOutlined sx={{ fontSize: 13 }}/>
-                  <span>Identity</span>
-                </div>
-                <div className="uam-m-fields-row">
-                  <div className="uam-m-field">
-                    <Input
-                      label="Full Name"
-                      isRequired
-                      placeholder="Sarah Johnson"
-                      value={newName}
-                      isError={!!fieldErrors.name}
-                      isHelperText={!!fieldErrors.name}
-                      helperText={fieldErrors.name}
-                      onChange={e => { setNewName(e.target.value); if (fieldErrors.name) setFieldErrors(prev => ({ ...prev, name: undefined })); }}
-                      onBlur={() => { if (!newName.trim()) setFieldErrors(prev => ({ ...prev, name: 'Full name is required' })); }}
-                      size="large"
-                    />
-                  </div>
-                  <div className="uam-m-field">
-                    <Input
-                      label="Email Address"
-                      isRequired
-                      leftIcon={<MailOutlined sx={{ fontSize: 14 }}/>}
-                      type="email"
-                      placeholder="sarah.johnson@company.co"
-                      value={newEmail}
-                      isError={!!fieldErrors.email}
-                      isHelperText={!!fieldErrors.email}
-                      helperText={fieldErrors.email}
-                      onChange={e => { setNewEmail(e.target.value); if (fieldErrors.email) setFieldErrors(prev => ({ ...prev, email: undefined })); }}
-                      onBlur={() => {
-                        if (!newEmail.trim()) setFieldErrors(prev => ({ ...prev, email: 'Email is required' }));
-                        else if (!EMAIL_REGEX.test(newEmail.trim())) setFieldErrors(prev => ({ ...prev, email: 'Enter a valid email address' }));
-                      }}
-                      size="large"
-                    />
-                  </div>
-                </div>
+            {/* ── Header ── */}
+            <div className="uam-w-header">
+              <div className="uam-w-header-icon">
+                {currentStep === 1 && <PersonAddAlt1Outlined sx={{ fontSize: 20 }}/>}
+                {currentStep === 2 && <WorkOutlined sx={{ fontSize: 20 }}/>}
+                {currentStep === 3 && <SecurityOutlined sx={{ fontSize: 20 }}/>}
               </div>
-              )}
+              <div className="uam-w-header-text">
+                <h2>
+                  {currentStep === 1 && 'Create New User'}
+                  {currentStep === 2 && 'Role & Scope Assignment'}
+                  {currentStep === 3 && 'Screen Access Control'}
+                </h2>
+                <p>
+                  {currentStep === 1 && 'Enter the name and work email for the new team member'}
+                  {currentStep === 2 && 'Define their role, reporting scope, and optionally customise access'}
+                  {currentStep === 3 && 'Select which screens this user can access within the platform'}
+                </p>
+              </div>
+              <button className="uam-w-close" onClick={() => setShowCreateModal(false)} aria-label="Close">
+                <CloseOutlined sx={{ fontSize: 16 }}/>
+              </button>
+            </div>
 
-              {/* Section: Role & Scope (Step 2) */}
-              {currentStep === 2 && (
-              <div className="uam-m-section">
-                <div className="uam-m-section-label">
-                  <WorkOutlined sx={{ fontSize: 13 }}/>
-                  <span>Role & Scope</span>
-                </div>
-                <div className="uam-m-fields-row">
-                  <div className="uam-m-field">
-                    <label>Role</label>
-                    <div className="uam-dd-wrap">
-                      <button
-                        className="uam-dd-trigger"
-                        onClick={() => { setShowRoleDropdown(!showRoleDropdown); setScopeIsOpen(false); }}
-                      >
-                        <span className={`uam-dd-role-dot uam-dd-role-dot--${newRole.toLowerCase()}`} />
-                        <span>{ROLE_LABELS[newRole]}</span>
-                        <KeyboardArrowDown sx={{ fontSize: 14 }} className="uam-dd-chevron"/>
-                      </button>
-                      {showRoleDropdown && (
-                        <div className="uam-dd-menu">
-                          {roleOptions.map(r => (
-                            <button
-                              key={r}
-                              className={`uam-dd-item ${r === newRole ? 'uam-dd-item--active' : ''}`}
-                              onClick={() => {
-                                setNewRole(r);
-                                setNewScope('');
-                                setShowRoleDropdown(false);
-                                setFieldErrors(prev => ({ ...prev, scope: undefined }));
-                                setScopeIsOpen(false);
-                                setScopeCurrentOptions(SCOPE_OPTIONS[r].options.map(o => ({ label: o, value: o })));
-                                setScopeSelectedOptions([]);
-                                // Reset custom access when role changes
-                                setCustomizeAccess(false);
-                                setCustomAccess([]);
-                              }}
-                            >
-                              <div className="uam-dd-item-left">
+            {/* ── Stepper ── */}
+            <div className="uam-w-stepper">
+              {([
+                { n: 1, label: 'Identity' },
+                { n: 2, label: 'Role & Scope' },
+                { n: 3, label: 'Screen Access' },
+              ] as { n: 1 | 2 | 3; label: string }[]).map((s, i, arr) => (
+                <React.Fragment key={s.n}>
+                  <div className={`uam-w-step${currentStep === s.n ? ' active' : ''}${currentStep > s.n ? ' done' : ''}`}
+                       onClick={() => { if (s.n < currentStep) setCurrentStep(s.n); }}
+                       style={{ cursor: s.n < currentStep ? 'pointer' : 'default' }}>
+                    <div className="uam-w-step-dot">
+                      {currentStep > s.n ? <Check sx={{ fontSize: 12 }}/> : s.n}
+                    </div>
+                    <span className="uam-w-step-label">{s.label}</span>
+                  </div>
+                  {i < arr.length - 1 && (
+                    <div className={`uam-w-step-connector${currentStep > s.n ? ' done' : ''}`}/>
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
+
+            {/* ── Body ── */}
+            <div className="uam-w-body">
+              <div className="uam-w-step-content">
+
+                {/* Step 1: Identity */}
+                {currentStep === 1 && (<>
+                  <div className="uam-w-field-label">
+                    Team member details
+                    <span className="uam-w-field-hint">All fields marked <span className="uam-m-req">*</span> are required</span>
+                  </div>
+                  <div className="uam-m-fields-row">
+                    <div className="uam-m-field">
+                      <Input
+                        label="Full Name"
+                        isRequired
+                        placeholder="Sarah Johnson"
+                        value={newName}
+                        isError={!!fieldErrors.name}
+                        isHelperText={!!fieldErrors.name}
+                        helperText={fieldErrors.name}
+                        onChange={e => { setNewName(e.target.value); if (fieldErrors.name) setFieldErrors(prev => ({ ...prev, name: undefined })); }}
+                        onBlur={() => { if (!newName.trim()) setFieldErrors(prev => ({ ...prev, name: 'Full name is required' })); }}
+                        size="large"
+                      />
+                    </div>
+                    <div className="uam-m-field">
+                      <Input
+                        label="Email Address"
+                        isRequired
+                        leftIcon={<MailOutlined sx={{ fontSize: 14 }}/>}
+                        type="email"
+                        placeholder="sarah.johnson@company.co"
+                        value={newEmail}
+                        isError={!!fieldErrors.email}
+                        isHelperText={!!fieldErrors.email}
+                        helperText={fieldErrors.email}
+                        onChange={e => { setNewEmail(e.target.value); if (fieldErrors.email) setFieldErrors(prev => ({ ...prev, email: undefined })); }}
+                        onBlur={() => {
+                          if (!newEmail.trim()) setFieldErrors(prev => ({ ...prev, email: 'Email is required' }));
+                          else if (!EMAIL_REGEX.test(newEmail.trim())) setFieldErrors(prev => ({ ...prev, email: 'Enter a valid email address' }));
+                        }}
+                        size="large"
+                      />
+                    </div>
+                  </div>
+                </>)}
+
+                {/* Step 2: Role & Scope */}
+                {currentStep === 2 && (<>
+                  <div className="uam-w-field-label">Assign a role and reporting scope</div>
+                  <div className="uam-m-fields-row">
+                    <div className="uam-m-field">
+                      <label className="uam-dd-label">Role</label>
+                      <div className="uam-role-wrap" ref={roleDropdownRef}>
+                        <button
+                          className={`uam-dd-trigger${roleMenuOpen ? ' uam-dd-trigger--open' : ''}`}
+                          type="button"
+                          onClick={() => { setRoleMenuOpen(o => !o); setScopeIsOpen(false); }}
+                        >
+                          <span className={`uam-dd-role-dot uam-dd-role-dot--${newRole.toLowerCase()}`} />
+                          <span>{ROLE_LABELS[newRole]}</span>
+                          <KeyboardArrowDown sx={{ fontSize: 14 }} className={`uam-dd-chevron${roleMenuOpen ? ' uam-dd-chevron--open' : ''}`}/>
+                        </button>
+                        {roleMenuOpen && (
+                          <div className="uam-role-dropdown">
+                            {roleOptions.map(r => (
+                              <div
+                                key={r}
+                                className={`uam-role-option${r === newRole ? ' uam-role-option--active' : ''}`}
+                                onMouseDown={e => {
+                                  e.preventDefault(); // keep focus in modal
+                                  setNewRole(r);
+                                  setNewScope('');
+                                  setRoleMenuOpen(false);
+                                  setFieldErrors(prev => ({ ...prev, scope: undefined }));
+                                  setScopeIsOpen(false);
+                                  setScopeCurrentOptions(SCOPE_OPTIONS[r].options.map(o => ({ label: o, value: o })));
+                                  setScopeSelectedOptions(null);
+                                  setCustomizeAccess(false);
+                                  setCustomAccess([]);
+                                }}
+                              >
                                 <span className={`uam-dd-role-dot uam-dd-role-dot--${r.toLowerCase()}`} />
-                                <div className="uam-dd-item-text">
-                                  <span className="uam-dd-item-name">{ROLE_LABELS[r]}</span>
-                                  <span className="uam-dd-item-desc">{ROLE_DESCRIPTIONS[r]}</span>
+                                <div className="uam-role-option-text">
+                                  <span className="uam-role-option-label">{ROLE_LABELS[r]}</span>
+                                  <span className="uam-role-option-sub">{ROLE_DESCRIPTIONS[r]}</span>
                                 </div>
+                                {r === newRole && <Check sx={{ fontSize: 14, color: 'var(--ia-color-primary)' }}/>}
                               </div>
-                              {r === newRole && <Check sx={{ fontSize: 14 }}/>}
-                            </button>
-                          ))}
-                        </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="uam-m-field">
+                      {newRole === 'ADMIN' ? (
+                        <Input
+                          label={SCOPE_OPTIONS[newRole].label}
+                          value="Global (Full Access)"
+                          isDisabled
+                          leftIcon={<PlaceOutlined sx={{ fontSize: 14 }}/>}
+                          size="large"
+                        />
+                      ) : (
+                        <Select
+                          label={SCOPE_OPTIONS[newRole].label}
+                          isRequired
+                          placeholder="Select assignment..."
+                          isOpen={scopeIsOpen}
+                          setIsOpen={setScopeIsOpen}
+                          initialOptions={SCOPE_OPTIONS[newRole].options.map(o => ({ label: o, value: o }))}
+                          currentOptions={scopeCurrentOptions}
+                          setCurrentOptions={opts => setScopeCurrentOptions(Array.isArray(opts) ? opts : [])}
+                          selectedOptions={scopeSelectedOptions}
+                          setSelectedOptions={handleScopeChange as (opts: { label: string; value: string }[] | { label: string; value: string } | null) => void}
+                          setIsSelectAll={() => {}}
+                          isError={!!fieldErrors.scope}
+                          helperText={fieldErrors.scope}
+                          width="100%"
+                          withPortal
+                          isWithSearch
+                        />
+                      )}
+                      {fieldErrors.scope && newRole !== 'ADMIN' && (
+                        <span className="uam-m-field-error"><ErrorOutlined sx={{ fontSize: 12 }}/>{fieldErrors.scope}</span>
                       )}
                     </div>
                   </div>
-                  <div className="uam-m-field">
-                    {newRole === 'ADMIN' ? (
-                      <Input
-                        label={SCOPE_OPTIONS[newRole].label}
-                        value="Global (Full Access)"
-                        isDisabled
-                        leftIcon={<PlaceOutlined sx={{ fontSize: 14 }}/>}
-                        size="large"
-                      />
-                    ) : (
-                      <Select
-                        label={SCOPE_OPTIONS[newRole].label}
-                        isRequired
-                        placeholder="Select assignment..."
-                        isOpen={scopeIsOpen}
-                        setIsOpen={setScopeIsOpen}
-                        initialOptions={SCOPE_OPTIONS[newRole].options.map(o => ({ label: o, value: o }))}
-                        currentOptions={scopeCurrentOptions}
-                        setCurrentOptions={opts => setScopeCurrentOptions(Array.isArray(opts) ? opts : [])}
-                        selectedOptions={scopeSelectedOptions}
-                        setSelectedOptions={handleScopeChange as (opts: { label: string; value: string }[] | { label: string; value: string } | null) => void}
-                        setIsSelectAll={() => {}}
-                        isError={!!fieldErrors.scope}
-                        helperText={fieldErrors.scope}
-                        width="100%"
-                      />
-                    )}
-                    {fieldErrors.scope && newRole !== 'ADMIN' && (
-                      <span className="uam-m-field-error"><ErrorOutlined sx={{ fontSize: 12 }}/>{fieldErrors.scope}</span>
-                    )}
+                </>)}
+
+                {/* Step 3: Screen Access */}
+                {currentStep === 3 && (<>
+                  <div className="uam-w-step3-header">
+                    <div className="uam-w-field-label" style={{ margin: 0 }}>
+                      Screen access permissions
+                      <span className="uam-w-access-count">
+                        {effectiveAccess.length} screen{effectiveAccess.length === 1 ? '' : 's'}{' '}
+                        {customizeAccess ? 'selected' : 'auto-assigned'}
+                      </span>
+                    </div>
+                    <Switch
+                      value={customizeAccess}
+                      rightLabel="Customize"
+                      onChange={e => {
+                        const on = e.target.checked;
+                        setCustomizeAccess(on);
+                        if (on) setCustomAccess([...ROLE_ACCESS[newRole]]);
+                        else setCustomAccess([]);
+                      }}
+                    />
                   </div>
-                </div>
+
+                  {customizeAccess && (
+                    <div className="uam-m-customize-hint">
+                      <span>Toggle any screen on or off. Auto-assigned defaults are pre-selected.</span>
+                      <Button
+                        variant="text"
+                        size="small"
+                        onClick={() => setCustomAccess([...ROLE_ACCESS[newRole]])}
+                        startIcon={<RotateLeftOutlined sx={{ fontSize: 12 }}/>}
+                      >
+                        Reset to defaults
+                      </Button>
+                    </div>
+                  )}
+
+                  <div className="uam-m-access-grid">
+                    {(Object.keys(SCREEN_LABELS) as ScreenAccess[]).map(screen => {
+                      const isAutoAssigned = ROLE_ACCESS[newRole].includes(screen);
+                      const isChecked = customizeAccess ? customAccess.includes(screen) : isAutoAssigned;
+                      if (!customizeAccess && !isAutoAssigned) return null;
+                      return customizeAccess ? (
+                        <div key={screen} className={`uam-m-access-item uam-m-access-item--interactive ${isChecked ? 'uam-m-access-item--checked' : ''}`}>
+                          <Checkbox
+                            label={
+                              <span className="uam-m-access-checkbox-label">
+                                {SCREEN_LABELS[screen]}
+                                {isAutoAssigned && <span className="uam-m-access-default" title="Default for this role">default</span>}
+                              </span>
+                            }
+                            checked={isChecked}
+                            onChange={() => toggleCustomScreen(screen)}
+                          />
+                        </div>
+                      ) : (
+                        <div key={screen} className="uam-m-access-item">
+                          <Check sx={{ fontSize: 12 }}/>
+                          <span>{SCREEN_LABELS[screen]}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {customizeAccess && customAccess.length === 0 && (
+                    <span className="uam-m-field-error"><ErrorOutlined sx={{ fontSize: 12 }}/>Select at least one screen</span>
+                  )}
+                </>)}
+
               </div>
-              )}
+            </div>
 
-              {/* Section: Screen Access (Step 3) */}
-              {currentStep === 3 && (
-              <div className="uam-m-section uam-m-section--access">
-                <div className="uam-m-section-label">
-                  <SecurityOutlined sx={{ fontSize: 13 }}/>
-                  <span>Screen Access</span>
-                  <span className="uam-m-access-count">
-                    {effectiveAccess.length} screen{effectiveAccess.length === 1 ? '' : 's'}{' '}
-                    {customizeAccess ? 'selected' : 'auto-assigned'}
-                  </span>
-                  <Switch
-                    value={customizeAccess}
-                    rightLabel="Customize Access"
-                    onChange={e => {
-                      const on = e.target.checked;
-                      setCustomizeAccess(on);
-                      if (on) setCustomAccess([...ROLE_ACCESS[newRole]]);
-                      else setCustomAccess([]);
-                    }}
-                  />
-                </div>
-
-                {customizeAccess && (
-                  <div className="uam-m-customize-hint">
-                    <span>Toggle any screen on or off. Auto-assigned defaults are pre-selected.</span>
-                    <button
-                      type="button"
-                      className="uam-m-reset-btn"
-                      onClick={() => setCustomAccess([...ROLE_ACCESS[newRole]])}
-                    >
-                      <RotateLeftOutlined sx={{ fontSize: 11 }}/>
-                      Reset to role defaults
-                    </button>
-                  </div>
+            {/* ── Footer ── */}
+            <div className="uam-w-footer">
+              <div className="uam-w-footer-meta">
+                <PersonAddAlt1Outlined sx={{ fontSize: 13 }}/>
+                Step {currentStep} of 3
+                {currentStep === 2 && newRole && <> · <strong>{ROLE_LABELS[newRole]}</strong></>}
+                {currentStep === 3 && <> · <strong>{effectiveAccess.length}</strong> screen{effectiveAccess.length === 1 ? '' : 's'}</>}
+              </div>
+              <div className="uam-w-footer-actions">
+                {currentStep > 1 && (
+                  <Button variant="outlined" onClick={goBack} startIcon={<KeyboardArrowLeft sx={{ fontSize: 14 }}/>}>
+                    Back
+                  </Button>
                 )}
-
-                <div className="uam-m-access-grid">
-                  {(Object.keys(SCREEN_LABELS) as ScreenAccess[]).map(screen => {
-                    const isAutoAssigned = ROLE_ACCESS[newRole].includes(screen);
-                    const isChecked = customizeAccess ? customAccess.includes(screen) : isAutoAssigned;
-
-                    if (!customizeAccess && !isAutoAssigned) return null;
-
-                    return customizeAccess ? (
-                      <div key={screen} className={`uam-m-access-item uam-m-access-item--interactive ${isChecked ? 'uam-m-access-item--checked' : ''}`}>
-                        <Checkbox
-                          label={
-                            <span className="uam-m-access-checkbox-label">
-                              {SCREEN_LABELS[screen]}
-                              {isAutoAssigned && <span className="uam-m-access-default" title="Default for this role">default</span>}
-                            </span>
-                          }
-                          checked={isChecked}
-                          onChange={() => toggleCustomScreen(screen)}
-                        />
-                      </div>
-                    ) : (
-                      <div key={screen} className="uam-m-access-item">
-                        <Check sx={{ fontSize: 12 }}/>
-                        <span>{SCREEN_LABELS[screen]}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {customizeAccess && customAccess.length === 0 && (
-                  <span className="uam-m-field-error"><ErrorOutlined sx={{ fontSize: 12 }}/>Select at least one screen</span>
+                {currentStep < 3 ? (
+                  <Button variant="contained" onClick={goNext} endIcon={<KeyboardArrowRight sx={{ fontSize: 14 }}/>}>
+                    Next
+                  </Button>
+                ) : (
+                  <Button
+                    variant="contained"
+                    onClick={handleCreateUser}
+                    disabled={customizeAccess && customAccess.length === 0}
+                    startIcon={<SendOutlined sx={{ fontSize: 13 }}/>}
+                  >
+                    Send Invite
+                  </Button>
                 )}
               </div>
-              )}
+            </div>
+
+          </div>
         </div>
-      </Modal>
+      )}
 
       {/* ========== Confirm Delete — Impact UI Modal (small) ========== */}
       <Modal

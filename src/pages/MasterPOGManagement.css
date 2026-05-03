@@ -49,53 +49,287 @@
 }
 
 
+/* KPI Section wrapper — breathing room below header, inset margins like bca-section */
+.pog-kpi-section {
+  padding: 20px 32px 0;
+  background: var(--ia-color-bg-subtle);
+}
+
+/* Card container — inset card matching bca-section look */
+.pog-kpi-card {
+  background: var(--ia-color-surface);
+  border: 1px solid var(--ia-color-border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+/* KPI Summary Strip — matches bca-overview-grid pattern */
+.pog-kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+}
+
+.pog-kpi-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 16px;
+  border-right: 1px solid var(--ia-color-bg-muted);
+  transition: background 0.15s ease;
+  text-align: center;
+  cursor: default;
+}
+
+.pog-kpi-item:last-child {
+  border-right: none;
+}
+
+.pog-kpi-item:hover {
+  background: var(--ia-color-bg-subtle);
+}
+
+.pog-kpi-label {
+  font-size: var(--ia-text-3xs);
+  font-weight: var(--ia-font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--ia-color-text-tertiary);
+  margin-bottom: 8px;
+  white-space: nowrap;
+}
+
+.pog-kpi-value {
+  font-size: var(--ia-text-3xl);
+  font-weight: var(--ia-font-weight-bold);
+  color: var(--ia-color-text-primary);
+  line-height: 1;
+  margin-bottom: 6px;
+  letter-spacing: -0.5px;
+}
+
+.pog-kpi-value--success  { color: var(--ia-color-success); }
+.pog-kpi-value--warning  { color: var(--ia-color-warning-text); }
+.pog-kpi-value--neutral  { color: var(--ia-color-text-secondary); }
+
+.pog-kpi-context {
+  font-size: var(--ia-text-3xs);
+  color: var(--ia-color-text-tertiary);
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+
 /* Content */
 .master-pog-content {
   flex: 1;
   padding: 24px 32px;
   overflow: auto;
   min-height: 0;
-}
-
-/* Compact filter items inside pi-toolbar (inline label + control) */
-.pi-toolbar .pog-filter-item {
-  flex: 0 0 auto;
   min-width: 0;
-  flex-direction: row;
+}
+
+/* ── Single-row filter bar — matches leaderboard-controls pattern ──────── */
+.pog-filter-bar {
+  display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  margin-bottom: 12px;
+  position: relative;
+  flex-wrap: nowrap;
 }
 
-.pi-toolbar .pog-filter-label {
-  font-size: var(--ia-text-11-5);
-  font-weight: var(--ia-font-weight-semibold);
-  color: var(--pi-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin: 0;
-  white-space: nowrap;
+/* Search pill — exact .period-selector style from District Intelligence */
+.pog-filter-bar-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  background: var(--ia-color-surface);
+  border: 1px solid var(--ia-color-border);
+  border-radius: 6px;
+  min-width: 240px;
+  flex-shrink: 0;
+  cursor: text;
+  transition: all 0.15s ease;
 }
 
-.pi-toolbar .custom-dropdown-trigger {
-  height: 36px;
-  padding: 0 12px;
-  border-radius: 8px;
-  border: 1px solid var(--pi-border);
+.pog-filter-bar-search:hover {
+  border-color: var(--ia-color-primary-hover);
+  background: var(--ia-color-primary-soft);
+}
+
+.pog-filter-bar-search:focus-within {
+  border-color: var(--ia-color-primary);
+  background: var(--ia-color-primary-soft);
+}
+
+.pog-filter-bar-search svg {
+  color: var(--ia-color-text-tertiary);
+  flex-shrink: 0;
+}
+
+.pog-filter-bar-search input {
+  border: none;
+  background: transparent;
   font-size: var(--ia-text-13);
-  font-weight: var(--ia-font-weight-medium);
-  color: var(--pi-text-body);
-  background: var(--pi-bg-white);
+  color: var(--ia-color-text-primary);
+  width: 100%;
+  outline: none;
+  font-family: var(--ia-font-sans);
+}
+
+.pog-filter-bar-search input::placeholder {
+  color: var(--ia-color-text-tertiary);
+}
+
+/* Visual gap between search pill and the dropdowns */
+.pog-filter-bar-divider {
+  width: 1px;
+  height: 22px;
+  background: var(--ia-color-border);
+  flex-shrink: 0;
+  margin: 0 4px;
+}
+
+/* IA Select overrides — match DI period-selector style */
+.pog-filter-bar .ia-select-main-container-v3,
+.pog-filter-bar .ia-select-container-v3 {
+  flex-shrink: 0;
   min-width: 140px;
 }
 
-.pi-toolbar .custom-dropdown-trigger:hover {
-  border-color: var(--ia-color-border-strong);
-  background: var(--pi-bg-subtle);
+/* Make select trigger look like DI period-selector button */
+.pog-filter-bar .ia-select-styled-dropdown-main-button {
+  background: var(--ia-color-surface) !important;
+  border: 1px solid var(--ia-color-border) !important;
+  border-radius: 6px !important;
+  padding: 6px 12px !important;
+  height: auto !important;
+  min-height: unset !important;
+  font-size: var(--ia-text-13) !important;
+  font-weight: var(--ia-font-weight-medium) !important;
+  color: var(--ia-color-text-secondary) !important;
+  box-shadow: none !important;
+  cursor: pointer !important;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease !important;
 }
 
-.pi-toolbar .custom-dropdown-trigger.open {
-  border-color: var(--pi-primary-light);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.08);
+/* Hover — blue border + pale blue bg, exactly like DI period-selector */
+.pog-filter-bar .ia-select-styled-dropdown-main-button:hover {
+  border-color: var(--ia-color-primary-hover) !important;
+  background: var(--ia-color-primary-soft) !important;
+  color: var(--ia-color-primary) !important;
+}
+
+/* Button text & chevron turn blue on hover too */
+.pog-filter-bar .ia-select-styled-dropdown-main-button:hover .ia-select-button-text,
+.pog-filter-bar .ia-select-styled-dropdown-main-button:hover .ia-select-chevron-icon {
+  color: var(--ia-color-primary) !important;
+}
+
+/* Open / active state */
+.pog-filter-bar .ia-select-styled-dropdown-main-button[aria-expanded="true"],
+.pog-filter-bar .ia-select-main-container-v3.ia-select-open .ia-select-styled-dropdown-main-button {
+  border-color: var(--ia-color-primary) !important;
+  background: var(--ia-color-primary-soft) !important;
+  color: var(--ia-color-primary) !important;
+}
+
+.pog-more-filters-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.pog-more-filters-btn {
+  white-space: nowrap;
+}
+
+/* Override Impact UI Button to match period-selector pill style */
+.pog-more-filters-btn,
+.pog-more-filters-btn.ia-btn,
+.pog-more-filters-btn .ia-btn {
+  background: var(--ia-color-surface) !important;
+  border: 1px solid var(--ia-color-border) !important;
+  border-radius: 6px !important;
+  padding: 6px 12px !important;
+  height: auto !important;
+  min-height: unset !important;
+  font-size: var(--ia-text-13) !important;
+  font-weight: var(--ia-font-weight-medium) !important;
+  color: var(--ia-color-text-secondary) !important;
+  box-shadow: none !important;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease !important;
+}
+
+.pog-more-filters-btn:hover,
+.pog-more-filters-btn.ia-btn:hover,
+.pog-more-filters-btn .ia-btn:hover {
+  border-color: var(--ia-color-primary-hover) !important;
+  background: var(--ia-color-primary-soft) !important;
+  color: var(--ia-color-primary) !important;
+}
+
+.pog-more-filters-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 200;
+  background: var(--ia-color-surface);
+  border: 1px solid var(--ia-color-border);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+  min-width: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pog-more-filters-title {
+  font-size: var(--ia-text-xs);
+  font-weight: var(--ia-font-weight-semibold);
+  color: var(--ia-color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin: 0 0 4px 0;
+}
+
+.pog-filter-clear-btn {
+  margin-left: auto;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Active filter chips row */
+.pog-active-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+/* Compact filter items inside pi-toolbar — IA Select overrides */
+.pi-toolbar .impact_select_container {
+  flex: 0 0 auto;
+  min-width: 130px;
+}
+
+/* Keep IA Select label text compact */
+.pi-toolbar .impact_select_label {
+  font-size: var(--ia-text-2xs) !important;
+  font-weight: var(--ia-font-weight-semibold) !important;
+  color: var(--ia-color-text-secondary) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Keep IA Select trigger height compact */
+.pi-toolbar .impact_select_trigger,
+.pi-toolbar [class*="select_trigger"] {
+  height: 36px !important;
+  min-height: 36px !important;
 }
 
 /* POG Library */
@@ -136,8 +370,8 @@
 
 .pog-search-input:focus {
   outline: none;
-  border-color: var(--ia-color-primary-hover);
-  box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.15);
+  border-color: var(--ia-color-primary-border);
+  box-shadow: 0 0 0 3px var(--ia-color-primary-soft);
 }
 
 .pog-search-input::placeholder {
@@ -173,14 +407,15 @@
 }
 
 .pog-toolbar-btn.primary {
-  background: linear-gradient(135deg, var(--ia-color-primary-hover) 0%, var(--ia-color-primary) 100%);
+  background: var(--ia-color-primary);
   border: none;
   color: var(--ia-color-surface);
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 2px 8px var(--ia-color-primary-border);
 }
 
 .pog-toolbar-btn.primary:hover {
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+  background: var(--ia-color-primary-hover);
+  box-shadow: 0 4px 12px var(--ia-color-primary-border);
   transform: translateY(-1px);
 }
 
@@ -237,8 +472,8 @@
 
 .pog-filter-select:focus {
   outline: none;
-  border-color: var(--ia-color-primary-hover);
-  box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.15);
+  border-color: var(--ia-color-primary-border);
+  box-shadow: 0 0 0 3px var(--ia-color-primary-soft);
 }
 
 .pog-filter-clear {
@@ -261,140 +496,64 @@
   border-color: var(--ia-color-border);
 }
 
-/* Custom Dropdown - Premium */
-.custom-dropdown {
-  position: relative;
-}
-
-.custom-dropdown-trigger {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  height: 40px;
-  padding: 0 14px;
-  border: 1px solid var(--ia-color-border);
-  border-radius: 6px;
-  font-size: var(--ia-text-13);
-  font-weight: var(--ia-font-weight-medium);
-  color: var(--ia-color-text-secondary);
-  background: var(--ia-color-surface);
-  cursor: pointer;
-  transition: all 0.15s ease;
-  text-align: left;
-}
-
-.custom-dropdown-trigger span.has-value {
-  color: var(--ia-color-text-primary);
-}
-
-.custom-dropdown-trigger:hover {
-  border-color: var(--ia-color-border);
-  background: var(--ia-color-bg-subtle);
-}
-
-.custom-dropdown-trigger.open {
-  border-color: #1e40af;
-  box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.1);
-}
-
-.custom-dropdown-trigger svg {
-  color: var(--ia-color-text-tertiary);
-  flex-shrink: 0;
-}
-
-.custom-dropdown-menu {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  right: 0;
-  min-width: 200px;
-  background: var(--ia-color-surface);
-  border: 1px solid var(--ia-color-border);
-  border-radius: 8px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
-  z-index: 100;
-  overflow: hidden;
-  animation: dropdownFadeIn 0.15s ease;
-}
-
-@keyframes dropdownFadeIn {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.custom-dropdown-option {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 12px 16px;
-  border: none;
-  background: transparent;
-  font-size: var(--ia-text-sm);
-  font-weight: var(--ia-font-weight-medium);
-  color: var(--ia-color-text-secondary);
-  cursor: pointer;
-  transition: all 0.1s ease;
-  text-align: left;
-}
-
-.custom-dropdown-option:hover {
-  background: var(--ia-color-bg-subtle);
-}
-
-.custom-dropdown-option.selected {
-  background: var(--ia-color-primary-soft);
-  color: #1e40af;
-}
-
-.custom-dropdown-option .check-icon {
-  color: #1e40af;
+/* POG Library tab panel — padding keeps content away from sidebar */
+.pog-library {
+  padding: 20px 32px 32px;
 }
 
 /* POG Grid */
 .pog-library-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  align-items: start;
 }
 
 .pog-card {
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: box-shadow 0.18s ease, transform 0.18s ease, border-color 0.18s ease !important;
+  min-width: 0;
 }
 
 .pog-card:hover {
-  border-color: var(--pi-primary-light);
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
-  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.10) !important;
+  transform: translateY(-2px);
+  border-color: var(--ia-color-primary-border) !important;
+}
+
+.pog-card-inner {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
 .pog-card-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
 }
 
 .pog-card-icon {
-  width: 48px;
-  height: 48px;
-  background: linear-gradient(135deg, var(--ia-color-primary-soft) 0%, var(--ia-color-primary-soft) 100%);
-  border-radius: 12px;
+  width: 32px;
+  height: 32px;
+  background: var(--ia-color-primary-soft);
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .pog-card-icon svg {
-  width: 24px;
-  height: 24px;
+  width: 16px;
+  height: 16px;
   color: var(--ia-color-primary);
 }
 
 .pog-status-badge {
-  padding: 4px 10px;
+  padding: 3px 8px;
   border-radius: 20px;
   font-size: var(--ia-text-2xs);
   font-weight: var(--ia-font-weight-semibold);
@@ -418,7 +577,9 @@
 }
 
 .pog-card-body {
-  margin-bottom: 16px;
+  margin-bottom: 8px;
+  min-width: 0;
+  flex: 1;
 }
 
 .pog-card-id {
@@ -427,21 +588,27 @@
   font-weight: var(--ia-font-weight-semibold);
   color: var(--ia-color-primary);
   background: var(--ia-color-primary-soft);
-  padding: 3px 8px;
+  padding: 2px 7px;
   border-radius: 4px;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   letter-spacing: 0.5px;
 }
 
 .pog-card-name {
-  font-size: var(--ia-text-md);
+  font-size: var(--ia-text-sm);
   font-weight: var(--ia-font-weight-semibold);
   color: var(--ia-color-text-primary);
   margin: 0 0 4px 0;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .pog-card-category {
-  font-size: var(--ia-text-13);
+  font-size: var(--ia-text-xs);
   color: var(--ia-color-text-secondary);
   margin: 0;
 }
@@ -450,13 +617,18 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 16px;
+  padding-top: 8px;
   border-top: 1px solid var(--ia-color-bg-muted);
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: auto;
 }
 
 .pog-card-meta {
   display: flex;
-  gap: 12px;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
 }
 
 .pog-card-version,
@@ -464,8 +636,9 @@
   font-size: var(--ia-text-xs);
   color: var(--ia-color-text-secondary);
   background: var(--ia-color-bg-subtle);
-  padding: 4px 8px;
-  border-radius: 6px;
+  padding: 3px 8px;
+  border-radius: 5px;
+  white-space: nowrap;
 }
 
 .pog-card-date {
@@ -474,6 +647,8 @@
   gap: 4px;
   font-size: var(--ia-text-xs);
   color: var(--ia-color-text-tertiary);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* POG Workspace */
@@ -576,7 +751,7 @@
 .pog-viewer-icon {
   width: 80px;
   height: 80px;
-  background: linear-gradient(135deg, var(--ia-color-primary-soft) 0%, var(--ia-color-primary-soft) 100%);
+  background: var(--ia-color-primary-soft);
   border-radius: 20px;
   display: flex;
   align-items: center;
@@ -614,14 +789,14 @@
   background: var(--ia-color-surface);
   border-radius: 16px;
   border: 1px solid var(--ia-color-border);
-  padding: 20px;
+  padding: 16px;
 }
 
 .pog-sidebar-title {
   font-size: var(--ia-text-sm);
   font-weight: var(--ia-font-weight-semibold);
   color: var(--ia-color-text-primary);
-  margin: 0 0 16px 0;
+  margin: 0 0 12px 0;
 }
 
 .pog-version-list {
@@ -649,7 +824,7 @@
 .pog-cluster-stat {
   text-align: center;
   padding: 16px;
-  background: linear-gradient(135deg, var(--ia-color-primary-soft) 0%, var(--ia-color-primary-soft) 100%);
+  background: var(--ia-color-primary-soft);
   border-radius: 12px;
 }
 
@@ -726,6 +901,10 @@
     flex: 1;
     min-width: 280px;
   }
+
+  .pog-library-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 /* Applied Rules Section */
@@ -738,7 +917,8 @@
 .pog-rules-description {
   font-size: var(--ia-text-xs);
   color: var(--ia-color-text-secondary);
-  margin: 0 0 12px 0;
+  margin: 0 0 10px 0;
+  line-height: 1.4;
 }
 
 .pog-rules-list {
@@ -779,11 +959,11 @@
 }
 
 .pog-rule-icon.mandatory {
-  background: #d1fae5;
+  background: var(--ia-color-success-bg);
 }
 
 .pog-rule-icon.brand {
-  background: #fce7f3;
+  background: var(--ia-color-bg-muted);
 }
 
 .pog-rule-icon.priority {
@@ -813,9 +993,33 @@
 
 /* Premium Rules List */
 .pog-rules-list.premium {
-  gap: 12px;
-  max-height: 400px;
+  gap: 0;
+  max-height: 420px;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Compact rule row — no Card nesting */
+.pog-rule-row {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--ia-color-bg-muted);
+}
+
+.pog-rule-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.pog-rule-row:first-child {
+  padding-top: 0;
+}
+
+.pog-rule-row-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
 }
 
 .pog-rule-card {
@@ -824,7 +1028,7 @@
 
 .pog-rule-card:hover {
   border-color: var(--ia-color-primary);
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
+  box-shadow: 0 2px 8px var(--ia-color-primary-soft);
 }
 
 .pog-rule-card-header {
@@ -835,58 +1039,59 @@
 }
 
 .pog-rule-icon-badge {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
-  font-size: var(--ia-text-md);
+  border-radius: 7px;
+  font-size: var(--ia-text-sm);
   flex-shrink: 0;
 }
 
 .pog-rule-icon-badge.placement {
-  background: linear-gradient(135deg, var(--ia-color-primary-soft) 0%, var(--ia-color-primary-soft) 100%);
+  background: var(--ia-color-primary-soft);
 }
 
 .pog-rule-icon-badge.facing {
-  background: linear-gradient(135deg, var(--ia-color-success-bg) 0%, var(--ia-color-success-soft) 100%);
+  background: var(--ia-color-success-bg);
 }
 
 .pog-rule-icon-badge.priority {
-  background: linear-gradient(135deg, var(--ia-color-warning-bg) 0%, var(--ia-color-warning-bg) 100%);
+  background: var(--ia-color-warning-bg);
 }
 
 .pog-rule-icon-badge.space {
-  background: linear-gradient(135deg, var(--ia-color-primary-soft) 0%, #bae6fd 100%);
+  background: var(--ia-color-primary-soft);
 }
 
 .pog-rule-icon-badge.tier {
-  background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%);
+  background: var(--ia-color-error-bg);
 }
 
 .pog-rule-icon-badge.brand {
-  background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+  background: var(--ia-color-bg-muted);
 }
 
 .pog-rule-icon-badge.adjacency {
-  background: linear-gradient(135deg, #ccfbf1 0%, #99f6e4 100%);
+  background: var(--ia-color-success-bg);
 }
 
 .pog-rule-icon-badge.visual {
-  background: linear-gradient(135deg, var(--ia-color-warning-bg) 0%, #fef08a 100%);
+  background: var(--ia-color-warning-bg);
 }
 
 .pog-rule-card-title {
   flex: 1;
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  align-items: center;
+  gap: 6px;
   min-width: 0;
+  flex-wrap: wrap;
 }
 
 .pog-rule-card-title .pog-rule-name {
-  font-size: var(--ia-text-13);
+  font-size: var(--ia-text-xs);
   font-weight: var(--ia-font-weight-semibold);
   color: var(--ia-color-text-primary);
   white-space: nowrap;
@@ -924,16 +1129,20 @@
 
 .pog-rule-status.warning {
   background: var(--ia-color-warning-bg);
-  color: #854d0e;
-  border: 1px solid #fef08a;
+  color: var(--ia-color-warning-text);
+  border: 1px solid var(--ia-color-warning-bg);
 }
 
 .pog-rule-description {
   font-size: var(--ia-text-xs);
   color: var(--ia-color-text-secondary);
-  line-height: 1.5;
+  line-height: 1.4;
   margin: 0;
-  padding-left: 42px;
+  padding-left: 36px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 @media (max-width: 768px) {
@@ -959,5 +1168,17 @@
   .pog-workspace-header {
     flex-direction: column;
     gap: 16px;
+  }
+
+  .pog-library-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .pog-kpi-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .pog-kpi-section {
+    padding: 16px 16px 0;
   }
 }

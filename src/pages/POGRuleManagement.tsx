@@ -31,7 +31,7 @@ import OpenInFullOutlined from '@mui/icons-material/OpenInFullOutlined';
 import AttachMoneyOutlined from '@mui/icons-material/AttachMoneyOutlined';
 import LabelOutlined from '@mui/icons-material/LabelOutlined';
 import GppGoodOutlined from '@mui/icons-material/GppGoodOutlined';
-import { Button, Card, Tabs } from 'impact-ui';
+import { Button, Card, Tabs, Modal, EmptyState, Stepper, StepperStep, Badge, Select, SelectOption } from 'impact-ui';
 import './POGRuleManagement.css';
 
 // Types
@@ -396,12 +396,52 @@ const CustomSelect: React.FC<{
   );
 };
 
+// Filter select — wraps IA Select for compact single-row toolbar use
+interface RuleFilterSelectProps {
+  label: string;
+  value: string;
+  options: SelectOption[];
+  onChange: (value: string) => void;
+}
+
+const RuleFilterSelect: React.FC<RuleFilterSelectProps> = ({ label, value, options, onChange }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [currentOptions, setCurrentOptions] = useState<SelectOption[]>(options);
+  const selected = value ? (options.find(o => o.value === value) ?? null) : null;
+
+  return (
+    <Select
+      placeholder={label}
+      isOpen={isOpen}
+      setIsOpen={setIsOpen}
+      initialOptions={options}
+      currentOptions={currentOptions}
+      setCurrentOptions={(opts) => setCurrentOptions(Array.isArray(opts) ? opts : options)}
+      selectedOptions={selected}
+      setSelectedOptions={(opt) => {
+        const sel = Array.isArray(opt) ? opt[0] : opt;
+        onChange(sel?.value ?? '');
+      }}
+      setIsSelectAll={() => {}}
+      isClearable
+      withPortal
+      minWidth={160}
+    />
+  );
+};
+
 export const POGRuleManagement: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'library' | 'builder'>('library');
   const [searchQuery, setSearchQuery] = useState('');
   const [rules, setRules] = useState<Rule[]>(initialMockRules);
   const [newRuleHighlight, setNewRuleHighlight] = useState<string | null>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 600);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Accept new rule from AI Copilot via URL params
   useEffect(() => {
@@ -448,6 +488,8 @@ export const POGRuleManagement: React.FC = () => {
 
   const unmappedCount = rules.filter(r => !isMapped(r) && r.status !== 'Draft').length;
   const draftCount = rules.filter(r => r.status === 'Draft').length;
+
+  const hasActiveFilters = !!(searchQuery || filters.ruleType || filters.mappingStatus || filters.ruleStatus);
 
   const handleFilterChange = (filterName: keyof Filters, value: string) => {
     setFilters(prev => ({ ...prev, [filterName]: value }));
@@ -1283,6 +1325,17 @@ export const POGRuleManagement: React.FC = () => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="rule-management">
+        <div className="page-loading">
+          <div className="page-loading-spinner" />
+          <p>Loading Rule Management...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="rule-management">
       <div className="rule-management-header">
@@ -1345,53 +1398,46 @@ export const POGRuleManagement: React.FC = () => {
               )}
             </div>
           )}
-          <div className="pi-toolbar">
-            <div className="pi-toolbar-search">
-              <SearchOutlined sx={{ fontSize: 15 }} />
-              <input type="text" placeholder="Search rules..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
-            </div>
-            <div className="rule-filter-group">
-              <label>Rule Type</label>
-              <CustomSelect
-                options={[
-                  { value: '', label: 'All Types' },
-                  ...ruleTypeOptions.map(rt => ({ value: rt.value, label: rt.label }))
-                ]}
-                value={filters.ruleType}
-                onChange={(val) => handleFilterChange('ruleType', val)}
-                placeholder="All Types"
+          <div className="rule-filter-bar">
+            <div className="rule-filter-bar-search">
+              <SearchOutlined sx={{ fontSize: 16 }} />
+              <input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search rules..."
               />
             </div>
-            <div className="rule-filter-group">
-              <label>Mapping</label>
-              <CustomSelect
-                options={[
-                  { value: '', label: 'All' },
-                  { value: 'Mapped', label: 'Mapped' },
-                  { value: 'Unmapped', label: 'Unmapped' }
-                ]}
-                value={filters.mappingStatus}
-                onChange={(val) => handleFilterChange('mappingStatus', val)}
-                placeholder="All"
-              />
-            </div>
-            <div className="rule-filter-group">
-              <label>Status</label>
-              <CustomSelect
-                options={[
-                  { value: '', label: 'All' },
-                  { value: 'Active', label: 'Active' },
-                  { value: 'Inactive', label: 'Inactive' },
-                  { value: 'Draft', label: 'Draft' }
-                ]}
-                value={filters.ruleStatus}
-                onChange={(val) => handleFilterChange('ruleStatus', val)}
-                placeholder="All"
-              />
-            </div>
-            <Button variant="text" color="primary" size="small" className="pi-toolbar-clear" onClick={clearAllFilters}>
-              Clear All
-            </Button>
+            <div className="rule-filter-bar-divider" />
+            <RuleFilterSelect
+              label="Rule Type"
+              value={filters.ruleType}
+              options={ruleTypeOptions.map(rt => ({ value: rt.value, label: rt.label }))}
+              onChange={(value) => handleFilterChange('ruleType', value)}
+            />
+            <RuleFilterSelect
+              label="Mapping"
+              value={filters.mappingStatus}
+              options={[
+                { value: 'Mapped', label: 'Mapped' },
+                { value: 'Unmapped', label: 'Unmapped' },
+              ]}
+              onChange={(value) => handleFilterChange('mappingStatus', value)}
+            />
+            <RuleFilterSelect
+              label="Status"
+              value={filters.ruleStatus}
+              options={[
+                { value: 'Active', label: 'Active' },
+                { value: 'Inactive', label: 'Inactive' },
+                { value: 'Draft', label: 'Draft' },
+              ]}
+              onChange={(value) => handleFilterChange('ruleStatus', value)}
+            />
+            {hasActiveFilters && (
+              <Button variant="text" color="primary" size="small" className="rule-filter-clear-btn" onClick={clearAllFilters}>
+                Clear All
+              </Button>
+            )}
           </div>
 
           <div className="premium-table-container">
@@ -1414,11 +1460,13 @@ export const POGRuleManagement: React.FC = () => {
                 {filteredRules.length === 0 ? (
                   <tr className="empty-row">
                     <td colSpan={10}>
-                      <div className="pi-empty">
-                        <DescriptionOutlined sx={{ fontSize: 24 }} />
-                        <p className="pi-empty-title">No rules found</p>
-                        <span className="pi-empty-desc">Create a new rule or adjust your filters</span>
-                      </div>
+                      <EmptyState
+                        heading="No rules found"
+                        description="Create a new rule or adjust your filters."
+                        emptyStateIcon={<DescriptionOutlined sx={{ fontSize: 40 }} />}
+                        primaryButtonLabel="Create Rule"
+                        onPrimaryButtonClick={handleCreateNew}
+                      />
                     </td>
                   </tr>
                 ) : (
@@ -1469,9 +1517,12 @@ export const POGRuleManagement: React.FC = () => {
                         </td>
                         <td><span className="date-cell">{rule.lastUpdated}</span></td>
                         <td>
-                          <span className={`status-pill ${rule.status.toLowerCase()}`}>
-                            {rule.status}
-                          </span>
+                          <Badge
+                            label={rule.status}
+                            color={rule.status === 'Active' ? 'success' : rule.status === 'Draft' ? 'warning' : 'default'}
+                            size="small"
+                            variant="subtle"
+                          />
                         </td>
                         <td>
                           <div className="action-buttons">
@@ -1522,29 +1573,12 @@ export const POGRuleManagement: React.FC = () => {
           </div>
         </div>,
           <div className="rule-builder-wizard">
-          <div className="pi-steps wizard-progress">
-            {wizardSteps.map((step, index) => {
-              const isCompleted = builderForm.completedSteps?.includes(step.id) || (step.id < currentStep && isStepComplete(step.id));
-              const isCurrent = currentStep === step.id;
-              const isAccessible = canProceedToStep(step.id);
-              return (
-                <React.Fragment key={step.id}>
-                  <div
-                    className={`pi-step ${isCurrent ? 'pi-step--active' : ''} ${isCompleted && !isCurrent ? 'pi-step--done' : ''} ${isAccessible ? 'pi-step--accessible' : ''}`}
-                    onClick={() => isAccessible && setCurrentStep(step.id)}
-                    style={{ cursor: isAccessible ? 'pointer' : 'default' }}
-                  >
-                    <span className="pi-step-num">{isCompleted && !isCurrent ? <Check sx={{ fontSize: 14 }} /> : step.id}</span>
-                    <span className="pi-step-label">
-                      {step.title}
-                      <span className="pi-step-desc">{step.description}</span>
-                    </span>
-                  </div>
-                  {index < wizardSteps.length - 1 && <div className={`pi-step-divider ${isCompleted ? 'pi-step-divider--done' : ''}`} />}
-                </React.Fragment>
-              );
-            })}
-          </div>
+          <Stepper
+            steps={wizardSteps.map((s): StepperStep => ({ label: s.title, description: s.description }))}
+            activeStep={currentStep - 1}
+            handleStep={(i) => { if (canProceedToStep(i + 1)) setCurrentStep(i + 1); }}
+            variant="default"
+          />
           <div className="wizard-content">{isEditing && builderForm.status === 'Draft' && <div className="wizard-draft-banner"><DescriptionOutlined sx={{ fontSize: 18 }} /><span>Continuing draft rule</span></div>}{renderWizardContent()}</div>
           <div className="wizard-actions">
             <div className="wizard-actions-left">
@@ -1589,28 +1623,32 @@ export const POGRuleManagement: React.FC = () => {
       />
       </div>
 
-      {selectedRule && (
-        <div className="rule-modal-overlay" onClick={() => setSelectedRule(null)}>
-          <div className="rule-detail-modal" onClick={e => e.stopPropagation()}>
-            <div className="rule-detail-header">
-              <div className="rule-detail-title-section">
-                <div className="rule-detail-icon">
-                  {ruleTypeIcons[selectedRule.types[0]] || <LayersOutlined sx={{ fontSize: 24 }} />}
-                </div>
-                <div>
-                  <h2>{selectedRule.name}</h2>
-                  <span className="rule-detail-id">{selectedRule.id}</span>
-                </div>
-              </div>
-              <Button variant="text" size="small" className="rule-detail-close" onClick={() => setSelectedRule(null)} aria-label="Close">
-                <CloseOutlined sx={{ fontSize: 20 }} />
-              </Button>
+      <Modal
+        open={!!selectedRule}
+        title={selectedRule ? (
+          <div className="rule-detail-title-section">
+            <div className="rule-detail-icon">
+              {ruleTypeIcons[selectedRule.types[0]] || <LayersOutlined sx={{ fontSize: 24 }} />}
             </div>
-
+            <div>
+              <span>{selectedRule.name}</span>
+              <span className="rule-detail-id" style={{ display: 'block', fontSize: 'var(--ia-text-xs)', color: 'var(--ia-color-text-secondary)' }}>{selectedRule.id}</span>
+            </div>
+          </div>
+        ) : ''}
+        onClose={() => setSelectedRule(null)}
+        primaryButtonLabel="Edit Rule"
+        onPrimaryButtonClick={() => { if (selectedRule) { setSelectedRule(null); handleEditRule(selectedRule); } }}
+        secondaryButtonLabel="Close"
+        onSecondaryButtonClick={() => setSelectedRule(null)}
+        size="large"
+      >
+        {selectedRule && (
+          <>
             <div className="rule-detail-status-bar">
               <div className="status-item">
                 <span className="status-label">Status</span>
-                <span className={`rule-status-badge ${selectedRule.status.toLowerCase()}`}>{selectedRule.status}</span>
+                <Badge label={selectedRule.status} color={selectedRule.status === 'Active' ? 'success' : selectedRule.status === 'Draft' ? 'warning' : 'default'} size="small" variant="subtle" />
               </div>
               <div className="status-item">
                 <span className="status-label">Mapping</span>
@@ -1650,54 +1688,27 @@ export const POGRuleManagement: React.FC = () => {
                 <h4>Scope & Mapping</h4>
                 <div className="mapping-cards-grid">
                   <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: 0, overflow: 'hidden' }}>
-                    <div className="mapping-card-header">
-                      <LabelOutlined sx={{ fontSize: 16 }} />
-                      <span>Categories</span>
-                    </div>
+                    <div className="mapping-card-header"><LabelOutlined sx={{ fontSize: 16 }} /><span>Categories</span></div>
                     <div className="mapping-card-content">
                       {selectedRule.mapping.categories.length > 0 ? (
-                        <div className="mapping-tags">
-                          {selectedRule.mapping.categories.map(c => (
-                            <span key={c} className="mapping-tag">{c}</span>
-                          ))}
-                        </div>
-                      ) : (
-                        <span className="no-mapping">No categories mapped</span>
-                      )}
+                        <div className="mapping-tags">{selectedRule.mapping.categories.map(c => <span key={c} className="mapping-tag">{c}</span>)}</div>
+                      ) : <span className="no-mapping">No categories mapped</span>}
                     </div>
                   </Card>
                   <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: 0, overflow: 'hidden' }}>
-                    <div className="mapping-card-header">
-                      <ApartmentOutlined sx={{ fontSize: 16 }} />
-                      <span>Clusters</span>
-                    </div>
+                    <div className="mapping-card-header"><ApartmentOutlined sx={{ fontSize: 16 }} /><span>Clusters</span></div>
                     <div className="mapping-card-content">
                       {selectedRule.mapping.clusters.length > 0 ? (
-                        <div className="mapping-tags">
-                          {selectedRule.mapping.clusters.map(c => (
-                            <span key={c} className="mapping-tag">{c}</span>
-                          ))}
-                        </div>
-                      ) : (
-                        <span className="no-mapping">No clusters mapped</span>
-                      )}
+                        <div className="mapping-tags">{selectedRule.mapping.clusters.map(c => <span key={c} className="mapping-tag">{c}</span>)}</div>
+                      ) : <span className="no-mapping">No clusters mapped</span>}
                     </div>
                   </Card>
                   <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: 0, overflow: 'hidden' }}>
-                    <div className="mapping-card-header">
-                      <Inventory2Outlined sx={{ fontSize: 16 }} />
-                      <span>Fixtures</span>
-                    </div>
+                    <div className="mapping-card-header"><Inventory2Outlined sx={{ fontSize: 16 }} /><span>Fixtures</span></div>
                     <div className="mapping-card-content">
                       {selectedRule.mapping.fixtures.length > 0 ? (
-                        <div className="mapping-tags">
-                          {selectedRule.mapping.fixtures.map(f => (
-                            <span key={f} className="mapping-tag">{f}</span>
-                          ))}
-                        </div>
-                      ) : (
-                        <span className="no-mapping">No fixtures mapped</span>
-                      )}
+                        <div className="mapping-tags">{selectedRule.mapping.fixtures.map(f => <span key={f} className="mapping-tag">{f}</span>)}</div>
+                      ) : <span className="no-mapping">No fixtures mapped</span>}
                     </div>
                   </Card>
                 </div>
@@ -1715,57 +1726,37 @@ export const POGRuleManagement: React.FC = () => {
                             Object.entries(config as Record<string, unknown>).map(([key, value]) => (
                               <div key={key} className="config-row">
                                 <span className="config-key">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
-                                <span className="config-value">
-                                  {Array.isArray(value) ? value.join(', ') : String(value)}
-                                </span>
+                                <span className="config-value">{Array.isArray(value) ? value.join(', ') : String(value)}</span>
                               </div>
                             ))
-                          ) : (
-                            <span className="config-value">{String(config)}</span>
-                          )}
+                          ) : <span className="config-value">{String(config)}</span>}
                         </div>
                       </div>
                     ))
-                  ) : (
-                    <div className="no-config">No configuration defined yet</div>
-                  )}
+                  ) : <div className="no-config">No configuration defined yet</div>}
                 </div>
               </div>
             </div>
+          </>
+        )}
+      </Modal>
 
-            <div className="rule-detail-footer">
-              <Button variant="outlined" color="primary" className="btn-secondary" onClick={() => setSelectedRule(null)}>
-                Close
-              </Button>
-              <Button variant="contained" color="primary" className="btn-primary" onClick={() => { setSelectedRule(null); handleEditRule(selectedRule); }} startIcon={<EditOutlined sx={{ fontSize: 16 }} />}>
-                Edit Rule
-              </Button>
-            </div>
-          </div>
+      <Modal
+        open={showDeleteModal && !!ruleToDelete}
+        title="Delete Rule"
+        onClose={() => { setShowDeleteModal(false); setRuleToDelete(null); }}
+        primaryButtonLabel="Delete"
+        onPrimaryButtonClick={confirmDelete}
+        secondaryButtonLabel="Cancel"
+        onSecondaryButtonClick={() => { setShowDeleteModal(false); setRuleToDelete(null); }}
+        size="small"
+      >
+        <div className="rule-modal-content">
+          <p>Are you sure you want to delete this rule?</p>
+          <p className="delete-rule-name">"{ruleToDelete?.name}"</p>
+          <p className="delete-warning">This action cannot be undone.</p>
         </div>
-      )}
-
-      {showDeleteModal && ruleToDelete && (
-        <div className="rule-modal-overlay" onClick={() => setShowDeleteModal(false)}>
-          <div className="rule-modal delete-modal" onClick={e => e.stopPropagation()}>
-            <div className="rule-modal-header">
-              <h2>Delete Rule</h2>
-              <Button variant="text" size="small" className="rule-modal-close" onClick={() => setShowDeleteModal(false)} aria-label="Close">
-                <CloseOutlined sx={{ fontSize: 20 }} />
-              </Button>
-            </div>
-            <div className="rule-modal-content"><p>Are you sure you want to delete this rule?</p><p className="delete-rule-name">"{ruleToDelete.name}"</p><p className="delete-warning">This action cannot be undone.</p></div>
-            <div className="rule-modal-actions">
-              <Button variant="outlined" color="primary" className="rule-cancel-btn" onClick={() => setShowDeleteModal(false)}>
-                Cancel
-              </Button>
-              <Button variant="contained" color="error" className="rule-delete-confirm-btn" onClick={confirmDelete} startIcon={<DeleteOutlined sx={{ fontSize: 16 }} />}>
-                Delete
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      </Modal>
     </div>
   );
 };

@@ -8,7 +8,6 @@ import SettingsOutlined from '@mui/icons-material/SettingsOutlined';
 import HomeOutlined from '@mui/icons-material/HomeOutlined';
 import PlaceOutlined from '@mui/icons-material/PlaceOutlined';
 import StoreOutlined from '@mui/icons-material/StoreOutlined';
-import SmartToyOutlined from '@mui/icons-material/SmartToyOutlined';
 import PlaylistAddCheckOutlined from '@mui/icons-material/PlaylistAddCheckOutlined';
 import ForumOutlined from '@mui/icons-material/ForumOutlined';
 import GroupOutlined from '@mui/icons-material/GroupOutlined';
@@ -40,7 +39,6 @@ const SUB_MODULE_ACCESS: Record<string, ScreenAccess> = {
   'master-pog': 'master_pog_management',
   'rule-management': 'pog_rule_management',
   'localization-engine': 'pog_localization_engine',
-  'ai-copilot': 'ai_copilot',
   'operations-queue': 'operations_queue',
   communications: 'communications',
   'user-access': 'user_access_management',
@@ -72,7 +70,6 @@ const ALL_MODULES: SidebarRoute[] = [
     label: 'Command Center',
     icon: <RouterOutlined sx={{ fontSize: 20 }} />,
     children: [
-      { value: 'ai-copilot', label: 'AI Copilot', icon: <SmartToyOutlined sx={{ fontSize: 18 }} />, link: '/command-center/ai-copilot' },
       { value: 'operations-queue', label: 'Operations Queue', icon: <PlaylistAddCheckOutlined sx={{ fontSize: 18 }} />, link: '/command-center/operations-queue' },
       { value: 'communications', label: 'Communications', icon: <ForumOutlined sx={{ fontSize: 18 }} />, link: '/command-center/communications' },
     ],

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CheckCircleOutlined from '@mui/icons-material/CheckCircleOutlined';
 import PlayArrowOutlined from '@mui/icons-material/PlayArrowOutlined';
@@ -28,8 +28,7 @@ import TrendingUpOutlined from '@mui/icons-material/TrendingUpOutlined';
 import RotateLeftOutlined from '@mui/icons-material/RotateLeftOutlined';
 import AccessTimeOutlined from '@mui/icons-material/AccessTimeOutlined';
 import PrintOutlined from '@mui/icons-material/PrintOutlined';
-import CloseOutlined from '@mui/icons-material/CloseOutlined';
-import { Button, Card, Chips, Tabs } from 'impact-ui';
+import { Button, Card, Chips, Tabs, Modal, EmptyState, Stepper, StepperStep, Badge, Tooltip } from 'impact-ui';
 import { useExecutionTasks, ExecutionTask } from '../context/ExecutionTasksContext';
 import './POGLocalizationEngine.css';
 
@@ -394,6 +393,7 @@ const generateDemandImplication = (indexData: DemandIndexItem[]): string => {
 export const POGLocalizationEngine: React.FC = () => {
   const navigate = useNavigate();
   const { addTasks } = useExecutionTasks();
+  const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'run' | 'results'>('run');
   const [currentStep, setCurrentStep] = useState<WorkflowStep>('category');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -874,36 +874,29 @@ export const POGLocalizationEngine: React.FC = () => {
     return null;
   };
 
-  const renderWorkflowProgress = () => (
-    <div className="pi-steps loc-workflow-progress">
-      {workflowSteps.map((step, index) => {
-        const status = getStepStatus(step.id);
-        const summary = getStepSummary(step.id);
-        const isActive = status === 'current';
-        const isDone = status === 'completed';
-        return (
-          <React.Fragment key={step.id}>
-            <div
-              className={`pi-step ${isActive ? 'pi-step--active' : ''} ${isDone ? 'pi-step--done' : ''}`}
-              onClick={() => isDone && setCurrentStep(step.id)}
-              style={{ cursor: isDone ? 'pointer' : 'default' }}
-            >
-              <span className="pi-step-num">
-                {isDone ? <CheckCircleOutlined sx={{ fontSize: 14 }} /> : step.number}
-              </span>
-              <span className="pi-step-label">
-                {step.label}
-                {isDone && summary && <span className="pi-step-desc">{summary}</span>}
-              </span>
-            </div>
-            {index < workflowSteps.length - 1 && (
-              <div className={`pi-step-divider ${isDone ? 'pi-step-divider--done' : ''}`} />
-            )}
-          </React.Fragment>
-        );
-      })}
-    </div>
-  );
+  const renderWorkflowProgress = () => {
+    const stepOrder: WorkflowStep[] = ['category', 'corporate', 'storeGroup', 'engine'];
+    const activeStepIndex = stepOrder.indexOf(currentStep);
+    const locStepperSteps: StepperStep[] = workflowSteps.map(s => {
+      const status = getStepStatus(s.id);
+      const summary = getStepSummary(s.id);
+      return {
+        label: s.label,
+        description: status === 'completed' && summary ? summary : undefined,
+      };
+    });
+    return (
+      <Stepper
+        steps={locStepperSteps}
+        activeStep={activeStepIndex}
+        handleStep={(i) => {
+          const targetStep = workflowSteps[i];
+          if (getStepStatus(targetStep.id) === 'completed') setCurrentStep(targetStep.id);
+        }}
+        variant="default"
+      />
+    );
+  };
 
   const renderCategoryStep = () => (
     <div className="loc-step-content">
@@ -1104,9 +1097,9 @@ export const POGLocalizationEngine: React.FC = () => {
                 <div className="loc-demand-index-title">
                   <BarChartOutlined sx={{ fontSize: 18 }} />
                   <h4>Category Demand Index</h4>
-                  <div className="loc-demand-index-tooltip" title="Index shows how strongly a category performs in this store group compared to average stores. Values above 100 indicate higher demand.">
-                    <InfoOutlined sx={{ fontSize: 14 }} />
-                  </div>
+                  <Tooltip title="Index shows how strongly a category performs in this store group compared to average stores. Values above 100 indicate higher demand." orientation="top">
+                    <span className="loc-demand-index-tooltip"><InfoOutlined sx={{ fontSize: 14 }} /></span>
+                  </Tooltip>
                 </div>
                 <span className="loc-demand-index-subtitle">Relative demand vs average store (100 = baseline)</span>
               </div>
@@ -1535,58 +1528,37 @@ export const POGLocalizationEngine: React.FC = () => {
         </div>
 
         {/* Publish Confirmation Modal */}
-        {showPublishModal === result.id && (
-          <div className="loc-modal-overlay" onClick={() => !isPublishing && setShowPublishModal(null)}>
-            <div className="loc-modal" onClick={e => e.stopPropagation()}>
-              <Button variant="text" size="small" className="loc-modal-close" onClick={() => !isPublishing && setShowPublishModal(null)} aria-label="Close"><CloseOutlined sx={{ fontSize: 18 }} /></Button>
-              <div className="loc-modal-icon publish"><BoltOutlined sx={{ fontSize: 28 }} /></div>
-              <h3>Publish Localization</h3>
-              <p>This will deploy the localized planogram to <strong>{storeGroup?.storeCount || 0} {result.cluster} stores</strong> and generate <strong>{result.changes.tasksGenerated} execution tasks</strong> in the Operations Queue.</p>
-              <div className="loc-modal-summary">
-                <div className="loc-modal-summary-row">
-                  <span>Planogram</span>
-                  <strong>{result.corporatePOG}</strong>
-                </div>
-                <div className="loc-modal-summary-row">
-                  <span>Store Group</span>
-                  <strong>{result.cluster}</strong>
-                </div>
-                <div className="loc-modal-summary-row">
-                  <span>Confidence</span>
-                  <strong>{result.confidenceScore}%</strong>
-                </div>
-              </div>
-              <div className="loc-modal-actions">
-                <Button variant="outlined" color="primary" className="loc-modal-cancel" onClick={() => setShowPublishModal(null)} disabled={isPublishing}>
-                  Cancel
-                </Button>
-                <Button variant="contained" color="primary" className="loc-modal-confirm" onClick={() => handlePublishWithConfirm(result.id)} disabled={isPublishing} startIcon={isPublishing ? <RotateRight sx={{ fontSize: 16 }} className="spinning" /> : <BoltOutlined sx={{ fontSize: 16 }} />}>
-                  {isPublishing ? 'Publishing…' : 'Confirm Publish'}
-                </Button>
-              </div>
-            </div>
+        <Modal
+          open={showPublishModal === result.id}
+          title="Publish Localization"
+          onClose={() => !isPublishing && setShowPublishModal(null)}
+          primaryButtonLabel={isPublishing ? 'Publishing…' : 'Confirm Publish'}
+          onPrimaryButtonClick={() => handlePublishWithConfirm(result.id)}
+          secondaryButtonLabel="Cancel"
+          onSecondaryButtonClick={() => setShowPublishModal(null)}
+          size="small"
+        >
+          <p>This will deploy the localized planogram to <strong>{storeGroup?.storeCount || 0} {result.cluster} stores</strong> and generate <strong>{result.changes.tasksGenerated} execution tasks</strong> in the Operations Queue.</p>
+          <div className="loc-modal-summary">
+            <div className="loc-modal-summary-row"><span>Planogram</span><strong>{result.corporatePOG}</strong></div>
+            <div className="loc-modal-summary-row"><span>Store Group</span><strong>{result.cluster}</strong></div>
+            <div className="loc-modal-summary-row"><span>Confidence</span><strong>{result.confidenceScore}%</strong></div>
           </div>
-        )}
+        </Modal>
 
         {/* Rollback Confirmation Modal */}
-        {showRollbackConfirm === result.id && (
-          <div className="loc-modal-overlay" onClick={() => setShowRollbackConfirm(null)}>
-            <div className="loc-modal" onClick={e => e.stopPropagation()}>
-              <Button variant="text" size="small" className="loc-modal-close" onClick={() => setShowRollbackConfirm(null)} aria-label="Close"><CloseOutlined sx={{ fontSize: 18 }} /></Button>
-              <div className="loc-modal-icon rollback"><RotateLeftOutlined sx={{ fontSize: 28 }} /></div>
-              <h3>Rollback to Draft</h3>
-              <p>This will revert the localization status to <strong>Ready</strong>. Published tasks in the Operations Queue will remain but no new tasks will be dispatched.</p>
-              <div className="loc-modal-actions">
-                <Button variant="outlined" color="primary" className="loc-modal-cancel" onClick={() => setShowRollbackConfirm(null)}>
-                  Cancel
-                </Button>
-                <Button variant="contained" color="warning" className="loc-modal-confirm rollback" onClick={() => handleRollback(result.id)} startIcon={<RotateLeftOutlined sx={{ fontSize: 16 }} />}>
-                  Confirm Rollback
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
+        <Modal
+          open={showRollbackConfirm === result.id}
+          title="Rollback to Draft"
+          onClose={() => setShowRollbackConfirm(null)}
+          primaryButtonLabel="Confirm Rollback"
+          onPrimaryButtonClick={() => handleRollback(result.id)}
+          secondaryButtonLabel="Cancel"
+          onSecondaryButtonClick={() => setShowRollbackConfirm(null)}
+          size="small"
+        >
+          <p>This will revert the localization status to <strong>Ready</strong>. Published tasks in the Operations Queue will remain but no new tasks will be dispatched.</p>
+        </Modal>
       </div>
     );
   };
@@ -1686,16 +1658,13 @@ export const POGLocalizationEngine: React.FC = () => {
 
         {/* Results List */}
         {filteredResults.length === 0 ? (
-          <div className="loc-no-results">
-            <DescriptionOutlined sx={{ fontSize: 48 }} />
-            <h3>No Results Found</h3>
-            <p>{publishedResults.length === 0 ? 'Run the localization engine to generate results.' : 'Try adjusting your search or filters.'}</p>
-            {publishedResults.length === 0 && (
-              <Button variant="contained" color="primary" className="loc-go-run-btn" onClick={() => setActiveTab('run')}>
-                Go to Run Localization
-              </Button>
-            )}
-          </div>
+          <EmptyState
+            heading="No Results Found"
+            description={publishedResults.length === 0 ? 'Run the localization engine to generate results.' : 'Try adjusting your search or filters.'}
+            emptyStateIcon={<DescriptionOutlined sx={{ fontSize: 40 }} />}
+            primaryButtonLabel={publishedResults.length === 0 ? 'Go to Run Localization' : undefined}
+            onPrimaryButtonClick={publishedResults.length === 0 ? () => setActiveTab('run') : undefined}
+          />
         ) : (
           <div className="loc-results-list">
             {filteredResults.map(result => (
@@ -1724,7 +1693,7 @@ export const POGLocalizationEngine: React.FC = () => {
                       <span className="loc-stat-label">Changes</span>
                     </div>
                   </div>
-                  <span className={`loc-result-status ${result.status.toLowerCase()}`}>{result.status}</span>
+                  <Badge label={result.status} color={result.status === 'Published' ? 'success' : 'warning'} size="small" variant="subtle" />
                   <div className="loc-result-card-actions">
                     <button className="loc-card-action" onClick={(e) => { e.stopPropagation(); }}><VisibilityOutlined sx={{ fontSize: 14 }} /></button>
                     <button className="loc-card-action" onClick={(e) => { e.stopPropagation(); }}><FileDownloadOutlined sx={{ fontSize: 14 }} /></button>
@@ -1738,6 +1707,22 @@ export const POGLocalizationEngine: React.FC = () => {
       </div>
     );
   };
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 600);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="loc-engine-container">
+        <div className="page-loading">
+          <div className="page-loading-spinner" />
+          <p>Loading Localization Engine...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="loc-engine-container">

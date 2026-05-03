@@ -108,15 +108,16 @@
 }
 
 .pi-btn-primary {
-  background: linear-gradient(135deg, var(--pi-primary-dark) 0%, var(--pi-primary) 100%);
+  background: var(--ia-color-primary);
   border: none;
   color: var(--ia-color-surface);
-  box-shadow: 0 1px 4px rgba(67, 56, 202, 0.25);
+  box-shadow: 0 1px 4px var(--ia-color-primary-border);
 }
 
 .pi-btn-primary:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(67, 56, 202, 0.32);
+  background: var(--ia-color-primary-hover);
+  box-shadow: 0 4px 12px var(--ia-color-primary-border);
 }
 
 .pi-btn-primary:active { transform: translateY(0); }
@@ -144,7 +145,7 @@
    -------------------------------------------------------------------------- */
 .pi-toolbar {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 12px;
   padding: 12px 20px;
   background: var(--pi-bg-white);
@@ -170,7 +171,7 @@
 
 .pi-toolbar-search:focus-within {
   border-color: var(--ia-color-primary-border);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.08);
+  box-shadow: 0 0 0 3px var(--ia-color-primary-soft);
 }
 
 .pi-toolbar-search svg {
@@ -289,8 +290,8 @@
 
 .pi-banner--success {
   background: var(--pi-success-pale);
-  border-color: #a7f3d0;
-  color: #065f46;
+  border-color: var(--ia-color-success-soft);
+  color: var(--ia-color-success);
 }
 .pi-banner--success svg { color: var(--pi-success); }
 
@@ -303,7 +304,7 @@
   align-items: center;
   gap: 12px;
   padding: 16px 20px;
-  background: linear-gradient(180deg, #fafbff 0%, var(--pi-bg-subtle) 100%);
+  background: var(--ia-color-surface);
   border: 1px solid var(--pi-border);
   border-radius: 12px;
 }
@@ -351,7 +352,7 @@
 .pi-step--active .pi-step-num {
   background: var(--pi-primary-pale);
   color: var(--pi-primary-dark);
-  box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.12);
+  box-shadow: 0 0 0 3px var(--ia-color-primary-soft);
 }
 
 .pi-step--done { color: var(--ia-color-success); }
@@ -368,7 +369,7 @@
   max-width: 80px;
 }
 
-.pi-step-divider--done { background: #86efac; }
+.pi-step-divider--done { background: var(--ia-color-success-soft); }
 
 /* --------------------------------------------------------------------------
    Wow-table shared tweaks — applied by Planogram tables that opt in via
@@ -387,7 +388,7 @@
   color: var(--pi-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  background: #fafbfc;
+  background: var(--ia-color-bg-subtle);
   border-bottom: 1px solid var(--pi-border-light);
   white-space: nowrap;
 }

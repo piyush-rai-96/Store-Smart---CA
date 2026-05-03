@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import CheckCircleOutlined from '@mui/icons-material/CheckCircleOutlined';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import StoreOutlined from '@mui/icons-material/StoreOutlined';
@@ -68,6 +68,7 @@ const teamMembers: TeamMember[] = [
 
 export const StoreExecution: React.FC = () => {
   const { tasks: sharedTasks, assignTask, updateTaskStatus: updateSharedTaskStatus, teamMembers: sharedTeamMembers } = useExecutionTasks();
+  const [isLoading, setIsLoading] = useState(true);
   const [tasks, setTasks] = useState<ExecutionTask[]>([]);
   const [taskFilter, setTaskFilter] = useState<'all' | TaskStatus>('all');
   const [assigningTaskId, setAssigningTaskId] = useState<string | null>(null);
@@ -445,6 +446,22 @@ export const StoreExecution: React.FC = () => {
       )}
     </div>
   );
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 600);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="exec-container">
+        <div className="page-loading">
+          <div className="page-loading-spinner" />
+          <p>Loading Store Execution...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="exec-container">

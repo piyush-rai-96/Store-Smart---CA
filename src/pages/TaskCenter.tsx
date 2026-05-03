@@ -304,6 +304,7 @@ export const TaskCenter: React.FC = () => {
   const location = useLocation();
   const { tasks: contextTasks, addTasks, updateTaskStatus, assignTask, teamMembers } = useExecutionTasks();
   const [tcSearchParams, setTcSearchParams] = useSearchParams();
+  const [isLoading, setIsLoading] = useState(true);
   const [view, setView] = useState<ViewMode>('board');
   const [filter, setFilter] = useState<FilterStatus>('all');
   const [search, setSearch] = useState('');
@@ -319,6 +320,11 @@ export const TaskCenter: React.FC = () => {
   // Custom dropdown state for Create Task modal
   const [openDropdown, setOpenDropdown] = useState<null | 'priority' | 'type' | 'assignee'>(null);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 600);
+    return () => clearTimeout(timer);
+  }, []);
+
   useEffect(() => {
     if (!openDropdown) return;
     const handler = (e: MouseEvent) => {
@@ -638,6 +644,17 @@ export const TaskCenter: React.FC = () => {
     </Card>
   );
 
+  if (isLoading) {
+    return (
+      <div className="tc-container">
+        <div className="page-loading">
+          <div className="page-loading-spinner" />
+          <p>Loading Task Center...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="tc-container">
       {prefillLoading && (
@@ -669,56 +686,64 @@ export const TaskCenter: React.FC = () => {
         </div>
       )}
 
-      {/* ── Header (mirrors User Access Management — touches breadcrumbs) ── */}
-      <div className="district-intel-header tc-di-header">
-        <div className="header-left">
-          <div className="header-title">
-            <AssignmentOutlined sx={{ fontSize: 22 }} />
-            <h1>Operations Queue</h1>
+      {/* ── Header card ── */}
+      <div className="tc-top-card">
+        <div className="district-intel-header tc-di-header">
+          <div className="header-left">
+            <div className="header-title">
+              <AssignmentOutlined sx={{ fontSize: 22 }} />
+              <h1>Operations Queue</h1>
+            </div>
+            <div className="header-meta">
+              <span className="district-badge">
+                <AssignmentOutlined sx={{ fontSize: 13 }} />
+                Task Center
+              </span>
+              <span className="district-badge tc-meta-pill">
+                <TaskAltOutlined sx={{ fontSize: 13 }} />
+                {counts.all} tasks
+              </span>
+              <span className="tc-meta-updated">Manage, assign &amp; track tasks across your stores</span>
+            </div>
           </div>
-          <div className="header-meta">
-            <span className="district-badge">
-              <AssignmentOutlined sx={{ fontSize: 13 }} />
-              Task Center
-            </span>
-            <span className="district-badge tc-meta-pill">
-              <TaskAltOutlined sx={{ fontSize: 13 }} />
-              {counts.all} tasks
-            </span>
-            <span className="tc-meta-updated">Manage, assign &amp; track tasks across your stores</span>
+          <div className="tc-header-right">
+            <Button
+              variant="contained"
+              color="primary"
+              size="medium"
+              className="tc-create-btn"
+              startIcon={<Add sx={{ fontSize: 15 }} />}
+              onClick={() => setShowCreateModal(true)}
+            >
+              Create Task
+            </Button>
           </div>
-        </div>
-        <div className="tc-header-right">
-          <Button
-            variant="contained"
-            color="primary"
-            size="medium"
-            className="tc-create-btn"
-            startIcon={<Add sx={{ fontSize: 15 }} />}
-            onClick={() => setShowCreateModal(true)}
-          >
-            Create Task
-          </Button>
         </div>
       </div>
 
-      {/* ── Summary Strip (Store Leaderboard mini-card style) ── */}
-      <div className="tc-summary-strip">
-        <div className="tc-stat-pill">
-          <span className="tc-stat-pill-value">{counts.all}</span>
-          <span className="tc-stat-pill-label">Total</span>
-        </div>
-        <div className="tc-stat-pill tc-stat-pill--neutral">
-          <span className="tc-stat-pill-value">{counts.pending}</span>
-          <span className="tc-stat-pill-label">To Do</span>
-        </div>
-        <div className="tc-stat-pill tc-stat-pill--warning">
-          <span className="tc-stat-pill-value">{counts.inProgress}</span>
-          <span className="tc-stat-pill-label">In Progress</span>
-        </div>
-        <div className="tc-stat-pill tc-stat-pill--success">
-          <span className="tc-stat-pill-value">{counts.completed}</span>
-          <span className="tc-stat-pill-label">Done</span>
+      {/* ── Summary Strip card (BCA KPI strip style) ── */}
+      <div className="tc-summary-card">
+        <div className="tc-summary-strip">
+          <div className="tc-stat-pill">
+            <span className="tc-stat-pill-label">Total</span>
+            <span className="tc-stat-pill-value">{counts.all}</span>
+            <span className="tc-stat-pill-context">tasks in queue</span>
+          </div>
+          <div className="tc-stat-pill">
+            <span className="tc-stat-pill-label">To Do</span>
+            <span className="tc-stat-pill-value tc-stat-pill-value--neutral">{counts.pending}</span>
+            <span className="tc-stat-pill-context">not yet started</span>
+          </div>
+          <div className="tc-stat-pill">
+            <span className="tc-stat-pill-label">In Progress</span>
+            <span className="tc-stat-pill-value tc-stat-pill-value--warning">{counts.inProgress}</span>
+            <span className="tc-stat-pill-context">currently active</span>
+          </div>
+          <div className="tc-stat-pill">
+            <span className="tc-stat-pill-label">Done</span>
+            <span className="tc-stat-pill-value tc-stat-pill-value--success">{counts.completed}</span>
+            <span className="tc-stat-pill-context">completed</span>
+          </div>
         </div>
       </div>
 

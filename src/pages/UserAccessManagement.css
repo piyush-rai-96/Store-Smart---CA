@@ -8,132 +8,129 @@
   min-height: calc(100vh - 106px);
 }
 
-/* ---- HEADER CARD ---- */
-.uam-header-card {
-  background: var(--ia-color-surface);
-  border: 1px solid var(--ia-color-border);
-  border-radius: 16px;
-  overflow: hidden;
-  margin-bottom: 20px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-}
-
-.uam-header-accent {
-  height: 3px;
-  background: linear-gradient(90deg, var(--ia-color-primary-hover) 0%, var(--ia-color-primary-hover) 40%, #c4b5fd 100%);
-}
-
-.uam-header-inner {
+/* ── Page Header — matches the app-wide district-intel-header pattern ── */
+.uam-di-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding: 20px 24px 0;
+  align-items: center;
+  background: var(--ia-color-surface);
+  border-bottom: 1px solid var(--ia-color-border);
+  padding: 16px 28px;
+  margin: 0 0 16px 0;
+  border-radius: 0;
 }
 
-.uam-header-left {
+.uam-di-header .header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.uam-di-header .header-title {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
 }
 
-.uam-header-icon {
-  width: 46px;
-  height: 46px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, var(--ia-color-primary-soft) 0%, var(--ia-color-primary-soft) 100%);
-  color: var(--ia-color-primary-hover);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
+.uam-di-header .header-title svg { color: var(--ia-color-primary-pressed); }
 
-.uam-page-title {
+.uam-di-header .header-title h1 {
   font-size: var(--ia-text-lg);
   font-weight: var(--ia-font-weight-bold);
   color: var(--ia-color-text-primary);
   margin: 0;
-  letter-spacing: -0.025em;
-}
-
-.uam-page-subtitle {
-  font-size: var(--ia-text-12-5);
-  color: var(--ia-color-text-secondary);
-  margin: 3px 0 0;
-  font-weight: var(--ia-font-weight-regular);
-}
-
-
-/* Stat pills */
-.uam-stats-row {
-  display: flex;
-  align-items: center;
-  gap: 0;
-  padding: 16px 24px 18px;
-}
-
-.uam-stat {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 0 20px;
-}
-
-.uam-stat:first-child { padding-left: 0; }
-
-.uam-stat-divider {
-  width: 1px;
-  height: 24px;
-  background: var(--ia-color-border);
-  flex-shrink: 0;
-}
-
-.uam-stat-value {
-  font-size: var(--ia-text-md);
-  font-weight: var(--ia-font-weight-bold);
-  color: var(--ia-color-text-primary);
   letter-spacing: -0.02em;
 }
 
-.uam-stat-label {
-  font-size: var(--ia-text-11-5);
-  color: var(--ia-color-text-tertiary);
-  font-weight: var(--ia-font-weight-medium);
-}
-
-.uam-stat-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.uam-stat-dot--active { background: var(--ia-color-success); box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.15); }
-.uam-stat-dot--invited { background: var(--ia-color-warning); box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.15); }
-
-/* ---- TOAST ---- */
-/* Toast — handled by Impact UI Toast component */
-
-/* ---- TOOLBAR ---- */
-.uam-toolbar {
+.uam-di-header .header-meta {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 12px;
-  margin-bottom: 16px;
 }
 
-/* Search bar — now wraps Impact UI Input */
-.uam-search-bar {
-  flex: 1;
-  max-width: 420px;
-}
-
-.uam-result-count {
-  font-size: var(--ia-text-11-5);
-  color: var(--ia-color-text-tertiary);
+.uam-di-header .district-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--ia-text-xs);
   font-weight: var(--ia-font-weight-medium);
+  color: var(--ia-color-primary-pressed);
+  background: var(--ia-color-primary-soft);
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+
+.uam-di-header .uam-meta-pill {
+  background: var(--ia-color-bg-muted);
+  color: var(--ia-color-text-secondary);
+}
+
+.uam-meta-updated {
+  font-size: var(--ia-text-xs);
+  color: var(--ia-color-text-tertiary);
+}
+
+.uam-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ── KPI Strip (matches bca-overview-grid pattern from HQHome/DistrictIntelligence) ── */
+.uam-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0;
+  margin: 0 16px 16px;
+  border-bottom: 1px solid var(--ia-color-border);
+}
+
+.uam-kpi-grid .ia-card {
+  border-radius: 0 !important;
+  border-right: 1px solid var(--ia-color-border) !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+}
+
+.uam-kpi-grid .ia-card:first-child { border-left: 1px solid var(--ia-color-border) !important; border-radius: 8px 0 0 0 !important; }
+.uam-kpi-grid .ia-card:last-child  { border-radius: 0 8px 0 0 !important; }
+
+.uam-kpi-label {
+  display: block;
+  font-size: 10px;
+  font-weight: var(--ia-font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: var(--ia-color-text-tertiary);
+  margin-bottom: 6px;
   white-space: nowrap;
 }
+
+.uam-kpi-value {
+  display: block;
+  font-size: var(--ia-text-2xl);
+  font-weight: var(--ia-font-weight-bold);
+  color: var(--ia-color-text-primary);
+  line-height: 1;
+  margin-bottom: 4px;
+  letter-spacing: -0.5px;
+}
+
+.uam-kpi-context {
+  display: block;
+  font-size: 10px;
+  color: var(--ia-color-text-tertiary);
+  letter-spacing: 0.1px;
+}
+
+/* ── Toast ── */
+/* Toast — handled by Impact UI Toast component */
 
 /* ---- TABLE ---- */
 .uam-table-card {
@@ -157,8 +154,8 @@
   color: var(--ia-color-text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  background: #fafbfc;
-  border-bottom: 1px solid var(--ia-color-bg-muted);
+  background: var(--ia-color-bg-subtle);
+  border-bottom: 1px solid var(--ia-color-border);
 }
 
 .uam-th-name { min-width: 260px; }
@@ -168,12 +165,12 @@
 .uam-row {
   cursor: pointer;
   transition: all 0.15s ease;
-  border-bottom: 1px solid #f4f6f8;
+  border-bottom: 1px solid var(--ia-color-border);
 }
 
 .uam-row:last-child { border-bottom: none; }
-.uam-row:hover { background: #fafafc; }
-.uam-row--expanded { background: #fafafc; }
+.uam-row:hover { background: var(--ia-color-primary-soft); }
+.uam-row--expanded { background: var(--ia-color-primary-soft); }
 
 .uam-row td {
   padding: 16px 20px;
@@ -232,8 +229,8 @@
 
 .uam-expand-content {
   padding: 14px 18px;
-  background: #fafafc;
-  border: 1px solid var(--ia-color-bg-muted);
+  background: var(--ia-color-bg-subtle);
+  border: 1px solid var(--ia-color-border);
   border-radius: 10px;
   animation: uamExpandIn 0.2s ease;
 }
@@ -268,35 +265,28 @@
    CREATE USER MODAL — Impact UI Modal shell
    ======================================== */
 
-/* Subtitle bar below the Impact UI modal header */
-.uam-m-subtitle {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 0 10px;
-  color: var(--ia-color-text-tertiary);
-  font-size: var(--ia-text-12-5);
-  border-bottom: 1px solid var(--ia-color-bg-muted);
-  margin-bottom: 0;
+/* ── Step hero banner — removed (replaced by uam-w-header) ── */
+
+/* Stepper wrapper — removed (replaced by uam-w-stepper) ── */
+
+/* Override Impact UI modal body overflow so the role dropdown can escape it. */
+.ia_modalPopover .ia_modalBody {
+  overflow-x: visible !important;
+  overflow-y: auto !important;
 }
 
-.uam-m-subtitle svg { color: var(--ia-color-primary); flex-shrink: 0; }
-
-/* Stepper wrapper — sits flush inside ia_modalBody padding */
-.uam-m-stepper {
-  padding: 10px 0 14px;
-  border-bottom: 1px solid var(--ia-color-bg-muted);
-  margin-bottom: 0;
+/* Cap the portal-rendered Select dropdown so items scroll rather than overflow */
+.ia-select-container-v3-styled-menu {
+  max-height: 220px !important;
+  overflow-y: auto !important;
 }
 
-/* Modal body — ia_modalBody already provides padding; we just need the layout */
-.uam-m-body {
-  overflow: visible;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  padding: 14px 0 0;
+.menulistScroll {
+  max-height: 200px !important;
+  overflow-y: auto !important;
 }
+
+/* Modal body — removed (replaced by uam-w-body) */
 
 /* Error */
 .uam-m-error {
@@ -313,51 +303,16 @@
   margin-bottom: 18px;
 }
 
-/* Sections */
-.uam-m-section {
-  padding-bottom: 12px;
-  margin-bottom: 12px;
-  border-bottom: 1px solid var(--ia-color-bg-muted);
-}
+/* ── Section label row, section hint, section badge — removed (replaced by uam-w-field-label) ── */
 
-.uam-m-section:last-child,
-.uam-m-section--access {
-  border-bottom: none;
-  margin-bottom: 0;
-  padding-bottom: 0;
-}
-
-.uam-m-section-label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: var(--ia-text-2xs);
-  font-weight: var(--ia-font-weight-semibold);
-  color: var(--ia-color-text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-bottom: 10px;
-}
-
-.uam-m-section-label svg { color: #c1c9d4; }
-
-.uam-m-access-count {
-  margin-left: auto;
-  font-size: var(--ia-text-10-5);
-  font-weight: var(--ia-font-weight-medium);
-  color: var(--ia-color-primary-hover);
-  text-transform: none;
-  letter-spacing: 0;
-  background: var(--ia-color-primary-soft);
-  padding: 2px 8px;
-  border-radius: 4px;
-}
+/* ── Section header row (Step 3) — now uam-w-step3-header ── */
 
 /* Fields */
 .uam-m-fields-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px;
+  gap: 18px;
+  align-items: start; /* keep both columns top-aligned */
 }
 
 .uam-m-field {
@@ -366,37 +321,121 @@
   gap: 5px;
 }
 
+/* Role field label — matches Impact UI .ia-select-label-v3 (no extra margin; .uam-m-field gap handles spacing) */
+.uam-dd-label {
+  font-family: "Manrope", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #60697d;
+  line-height: 18px;
+  margin: 0;
+  display: block;
+}
+
 /* .uam-m-field label / input — now rendered by Impact UI Input component */
 
 /* Input with icon */
-/* ---- Dropdowns (modal) ---- */
-.uam-dd-wrap {
-  position: relative;
-}
+/* ---- Role trigger button (Impact UI Menu anchored) ---- */
 
+/* Trigger matches Impact UI .ia-select-styled-dropdown-main-button (37px height, 8px 12px padding) */
 .uam-dd-trigger {
   width: 100%;
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 9px 12px;
-  border: 1.5px solid var(--ia-color-border);
-  border-radius: 8px;
-  font-size: var(--ia-text-12-5);
+  padding: 8px 12px;
+  height: 37px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
   color: var(--ia-color-text-primary);
-  background: var(--ia-color-surface);
+  background: #fff;
   cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: inherit;
+  transition: border-color 0.15s ease;
+  font-family: "Manrope", sans-serif;
+  box-sizing: border-box;
 }
 
-.uam-dd-trigger:hover { border-color: var(--ia-color-border-strong); }
+.uam-dd-trigger:hover { border-color: var(--ia-color-primary); }
+.uam-dd-trigger:focus { outline: none; border-color: var(--ia-color-primary); }
 .uam-dd-trigger:disabled { background: var(--ia-color-bg-subtle); color: var(--ia-color-text-tertiary); cursor: not-allowed; }
 
 .uam-dd-chevron {
   margin-left: auto;
   color: var(--ia-color-text-tertiary);
   flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.uam-dd-chevron--open {
+  transform: rotate(180deg);
+}
+
+.uam-dd-trigger--open {
+  border-color: var(--ia-color-primary);
+  box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.08);
+}
+
+/* ── Inline Role Dropdown ── */
+.uam-role-wrap {
+  position: relative;
+}
+
+.uam-role-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--ia-color-surface);
+  border: 1px solid var(--ia-color-border);
+  border-radius: 12px;
+  box-shadow:
+    0 2px 8px rgba(15, 23, 42, 0.08),
+    0 8px 24px rgba(15, 23, 42, 0.10);
+  z-index: 200;
+  /* max-height keeps the dropdown within the modal body's remaining space;
+     overflow-y: auto adds internal scroll when items exceed the cap */
+  max-height: 180px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.uam-role-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;      /* 40px per option × 4 = 160px, fits within 180px cap */
+  cursor: pointer;
+  transition: background 0.12s ease;
+  border-bottom: 1px solid var(--ia-color-bg-muted);
+}
+
+.uam-role-option:last-child { border-bottom: none; }
+
+.uam-role-option:hover { background: var(--ia-color-bg-subtle); }
+
+.uam-role-option--active { background: var(--ia-color-primary-soft); }
+
+.uam-role-option-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.uam-role-option-label {
+  font-size: var(--ia-text-13);
+  font-weight: var(--ia-font-weight-semibold);
+  color: var(--ia-color-text-primary);
+}
+
+.uam-role-option--active .uam-role-option-label { color: var(--ia-color-primary-pressed); }
+
+.uam-role-option-sub {
+  font-size: var(--ia-text-xs);
+  color: var(--ia-color-text-tertiary);
 }
 
 .uam-dd-icon-muted { color: #c1c9d4; flex-shrink: 0; }
@@ -413,94 +452,33 @@
 .uam-dd-role-dot--hq { background: var(--ia-color-primary-hover); }
 .uam-dd-role-dot--admin { background: #f97316; }
 
-.uam-dd-menu {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
-  background: var(--ia-color-surface);
-  border: 1px solid var(--ia-color-border);
-  border-radius: 10px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.02);
-  z-index: 1000;
-  padding: 4px;
-  max-height: 240px;
-  overflow-y: auto;
-  animation: uamDropIn 0.15s ease;
+/* Impact UI Menu — style the role dots inside MUI menu items */
+.ia-menu .uam-dd-role-dot {
+  display: inline-block;
 }
 
-@keyframes uamDropIn {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.uam-dd-item {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 12px;
-  border: none;
-  background: transparent;
-  border-radius: 7px;
-  font-size: var(--ia-text-12-5);
-  color: var(--ia-color-text-primary);
-  cursor: pointer;
-  transition: background 0.12s ease;
-  font-family: inherit;
-}
-
-.uam-dd-item:hover { background: var(--ia-color-bg-subtle); }
-
-.uam-dd-item--active {
-  background: var(--ia-color-primary-soft);
-  color: var(--ia-color-primary-pressed);
-}
-
-.uam-dd-item--active svg { color: var(--ia-color-primary-pressed); }
-
-.uam-dd-item-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.uam-dd-item-text {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.uam-dd-item-name {
-  font-size: var(--ia-text-12-5);
-  font-weight: var(--ia-font-weight-semibold);
-  color: var(--ia-color-text-primary);
-}
-
-.uam-dd-item--active .uam-dd-item-name { color: var(--ia-color-primary-pressed); }
-
-.uam-dd-item-desc {
-  font-size: var(--ia-text-10-5);
+/* Widen the role menu to show subLabel text */
+.ia-menu .ia-list-sublabel {
+  font-size: 11px;
   color: var(--ia-color-text-tertiary);
-  font-weight: var(--ia-font-weight-regular);
 }
 
-/* Access grid */
+/* Access grid — Step 3 scrolls via the body; no cap needed here */
 .uam-m-access-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 6px;
+  gap: 8px;
 }
 
 .uam-m-access-item {
   display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 7px 10px;
+  gap: 8px;
+  padding: 10px 12px;
   background: var(--ia-color-bg-subtle);
   border: 1px solid var(--ia-color-bg-muted);
-  border-radius: 7px;
-  font-size: var(--ia-text-11-5);
+  border-radius: 8px;
+  font-size: var(--ia-text-xs);
   font-weight: var(--ia-font-weight-medium);
   color: var(--ia-color-text-secondary);
   transition: all 0.15s ease;
@@ -508,108 +486,15 @@
 
 .uam-m-access-item svg { color: var(--ia-color-success); flex-shrink: 0; }
 
-/* Modal footer — see the footer block near the wizard-back/submit rules */
-
-.uam-m-cancel {
-  padding: 8px 18px;
-  border: 1px solid var(--ia-color-border);
-  border-radius: 8px;
-  background: var(--ia-color-surface);
-  color: var(--ia-color-text-secondary);
-  font-size: var(--ia-text-12-5);
-  font-weight: var(--ia-font-weight-medium);
-  cursor: pointer;
-  transition: all 0.15s ease;
-  font-family: inherit;
-}
-
-.uam-m-cancel:hover { background: var(--ia-color-bg-subtle); border-color: var(--ia-color-border-strong); }
-
-.uam-m-submit {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 8px 20px;
-  border: none;
-  border-radius: 8px;
-  background: linear-gradient(135deg, var(--ia-color-primary-pressed) 0%, var(--ia-color-primary) 100%);
-  color: var(--ia-color-surface);
-  font-size: var(--ia-text-12-5);
-  font-weight: var(--ia-font-weight-semibold);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 4px rgba(67,56,202,0.3);
-  font-family: inherit;
-  letter-spacing: 0.01em;
-}
-
-.uam-m-submit:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(67,56,202,0.35);
-}
-
-.uam-m-submit:active { transform: translateY(0); }
+/* Modal footer — see the wizard-footer block near the bottom of this file */
 
 /* ==============================================================
-   DI-style Header (mirrors district-intel-header)
+   Stats Strip override (already defined above, just note)
    ============================================================== */
-.uam-di-header {
-  /* Inherits from .district-intel-header — just space-between layout */
-  background: var(--ia-color-surface);
-  border-bottom: 1px solid var(--ia-color-border);
-  padding: 16px 32px;
-  margin: 0 0 16px 0;
-  border-radius: 0;
-}
-
-.uam-di-header .header-title svg {
-  color: var(--ia-color-primary-pressed);
-}
-
-.uam-di-header .header-title h1 {
-  color: var(--ia-color-text-primary);
-  font-size: var(--ia-text-lg);
-  font-weight: var(--ia-font-weight-bold);
-  letter-spacing: -0.02em;
-  margin: 0;
-}
-
-.uam-di-header .header-meta {
-  flex-wrap: wrap;
-}
-
-.uam-di-header .district-badge {
-  background: var(--ia-color-primary-soft);
-  color: var(--ia-color-primary-pressed);
-  border-radius: 4px;
-  padding: 4px 10px;
-  font-size: var(--ia-text-xs);
-  font-weight: var(--ia-font-weight-medium);
-}
-
-.uam-di-header .uam-meta-pill {
-  background: var(--ia-color-bg-muted);
-  color: var(--ia-color-text-secondary);
-}
-
-.uam-meta-updated {
-  font-size: var(--ia-text-xs);
-  color: var(--ia-color-text-tertiary);
-}
-
-.uam-header-right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.uam-header-right .uam-search-bar {
-  width: 280px;
-  margin: 0;
-}
+/* uam-kpi-* classes defined in the header block above */
 
 /* ==============================================================
-   Search toolbar (above table, mirrors DI Leaderboard)
+   Search toolbar (above table)
    ============================================================== */
 .uam-table-toolbar {
   display: flex;
@@ -620,24 +505,15 @@
   padding: 0;
 }
 
-.uam-table-toolbar .uam-search-bar {
+.uam-table-toolbar .uam-search-filter {
   flex: 1;
   max-width: 420px;
-  margin: 0;
 }
 
 .uam-toolbar-count {
   font-size: var(--ia-text-xs);
   color: var(--ia-color-text-secondary);
   font-weight: var(--ia-font-weight-medium);
-}
-
-/* ==============================================================
-   Stats Strip (above table, mirrors DI bca-overview-grid)
-   ============================================================== */
-.uam-stats-grid {
-  grid-template-columns: repeat(5, 1fr) !important;
-  border-bottom: none !important;
 }
 
 /* ==============================================================
@@ -654,6 +530,16 @@
 .uam-td-actions {
   text-align: center;
   width: 84px;
+}
+
+.uam-td-actions--hover .uam-action-delete {
+  opacity: 0;
+  transition: opacity 0.15s ease, background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.uam-row:hover .uam-td-actions--hover .uam-action-delete,
+.uam-row--expanded .uam-td-actions--hover .uam-action-delete {
+  opacity: 1;
 }
 
 .uam-action-delete {
@@ -815,25 +701,6 @@
   color: var(--ia-color-primary-pressed);
 }
 
-.uam-m-reset-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: transparent;
-  border: none;
-  color: var(--ia-color-primary-pressed);
-  font-size: var(--ia-text-11-5);
-  font-weight: var(--ia-font-weight-semibold);
-  cursor: pointer;
-  padding: 2px 6px;
-  border-radius: 4px;
-  transition: background 0.12s ease;
-}
-
-.uam-m-reset-btn:hover {
-  background: rgba(67, 56, 202, 0.08);
-}
-
 /* Interactive Screen Access — Impact UI Checkbox inside a styled tile */
 .uam-m-access-item--interactive {
   position: relative;
@@ -873,47 +740,252 @@
   border-radius: 3px;
 }
 
-/* Wizard footer — lives inside ia_modalFooter (56px, flex, align-center, justify-end, pr-16) */
-.uam-m-footer {
+/* Wizard footer — replaced by uam-w-footer */
+
+/* ========================================
+   CREATE USER — Broadcast-style wizard
+   ======================================== */
+
+/* Overlay */
+.uam-w-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  gap: 8px;
-  padding-left: 16px;
+  justify-content: center;
+  z-index: 1300;
+  animation: uam-w-fade 0.15s ease;
 }
+@keyframes uam-w-fade { from { opacity: 0; } to { opacity: 1; } }
 
-.uam-m-footer-right {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.uam-m-back {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
+/* Modal shell — fixed height so the dropdown never causes expansion */
+.uam-w-modal {
   background: var(--ia-color-surface);
-  border: 1px solid var(--ia-color-border);
-  color: var(--ia-color-text-primary);
-  border-radius: 8px;
-  font-size: var(--ia-text-13);
-  font-weight: var(--ia-font-weight-medium);
-  cursor: pointer;
-  font-family: inherit;
-  transition: background 0.12s ease, border-color 0.12s ease;
+  border-radius: 20px;
+  width: 780px;
+  max-width: 95vw;
+  height: 560px;           /* fixed — prevents expansion when dropdown opens */
+  max-height: 90vh;        /* safety cap on small screens                    */
+  overflow: hidden;        /* clips any overflow at the rounded boundary      */
+  display: flex;
+  flex-direction: column;
+  box-shadow:
+    0 0 0 1px rgba(15, 23, 42, 0.04),
+    0 12px 24px rgba(15, 23, 42, 0.08),
+    0 32px 72px rgba(15, 23, 42, 0.16);
+  animation: uam-w-up 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes uam-w-up {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
 }
 
-.uam-m-back:hover {
-  background: var(--ia-color-bg-muted);
+/* Header */
+.uam-w-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 26px 32px 22px;
+  border-bottom: 1px solid var(--ia-color-bg-muted);
+  background: var(--ia-color-surface);
+  flex-shrink: 0;
+}
+
+.uam-w-header-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: var(--ia-color-primary-soft);
+  color: var(--ia-color-primary-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(67, 56, 202, 0.08);
+}
+
+.uam-w-header-text { flex: 1; min-width: 0; }
+
+.uam-w-header-text h2 {
+  margin: 0;
+  font-size: var(--ia-text-lg);
+  font-weight: var(--ia-font-weight-bold);
+  color: var(--ia-color-text-primary);
+  letter-spacing: -0.02em;
+}
+
+.uam-w-header-text p {
+  margin: 4px 0 0;
+  font-size: var(--ia-text-13);
+  color: var(--ia-color-text-tertiary);
+  font-weight: var(--ia-font-weight-regular);
+}
+
+.uam-w-close {
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--ia-color-border);
+  background: var(--ia-color-surface);
+  border-radius: 8px;
+  color: var(--ia-color-text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.uam-w-close:hover {
+  background: var(--ia-color-bg-subtle);
+  color: var(--ia-color-text-secondary);
   border-color: var(--ia-color-border-strong);
 }
 
-.uam-m-submit:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
+/* Stepper */
+.uam-w-stepper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 32px;
+  background: linear-gradient(180deg, #fafbff 0%, var(--ia-color-bg-subtle) 100%);
+  border-bottom: 1px solid var(--ia-color-border);
+  flex-shrink: 0;
+}
+
+.uam-w-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ia-color-text-secondary);
+  transition: color 0.15s ease;
+}
+
+.uam-w-step.done  { color: var(--ia-color-success); }
+.uam-w-step.active { color: var(--ia-color-primary-pressed); }
+
+.uam-w-step-dot {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--ia-color-border);
+  color: var(--ia-color-text-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--ia-text-xs);
+  font-weight: var(--ia-font-weight-bold);
+  flex-shrink: 0;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.uam-w-step.active .uam-w-step-dot {
+  background: var(--ia-color-primary-soft);
+  color: var(--ia-color-primary-pressed);
+  box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.12);
+}
+
+.uam-w-step.done .uam-w-step-dot {
+  background: var(--ia-color-success-bg);
+  color: var(--ia-color-success);
+}
+
+.uam-w-step-label {
+  font-size: var(--ia-text-13);
+  font-weight: var(--ia-font-weight-semibold);
+}
+
+.uam-w-step-connector {
+  flex: 1;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--ia-color-border);
+  max-width: 80px;
+}
+.uam-w-step-connector.done { background: #86efac; }
+
+/* Body — overflow-y: auto so Step 3 (customize mode) scrolls internally when
+   content exceeds the fixed modal height. In Step 2 the role dropdown ends at
+   ~316px from body top, well within the 329px body height, so it is never clipped. */
+.uam-w-body {
+  padding: 28px 32px 32px;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: visible;
+}
+
+.uam-w-step-content {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* Field label row */
+.uam-w-field-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: var(--ia-text-13);
+  font-weight: var(--ia-font-weight-semibold);
+  color: var(--ia-color-text-primary);
+}
+
+.uam-w-field-hint {
+  font-size: var(--ia-text-xs);
+  color: var(--ia-color-text-tertiary);
+  font-weight: var(--ia-font-weight-regular);
+}
+
+/* Step 3 — header row (label + count + switch) */
+.uam-w-step3-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.uam-w-access-count {
+  font-size: var(--ia-text-10-5);
+  font-weight: var(--ia-font-weight-semibold);
+  color: var(--ia-color-primary-hover);
+  background: var(--ia-color-primary-soft);
+  padding: 2px 9px;
+  border-radius: 4px;
+  margin-left: 8px;
+}
+
+/* Footer */
+.uam-w-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 32px 20px;   /* extra bottom padding keeps buttons away from the border */
+  border-top: 1px solid var(--ia-color-bg-muted);
+  background: #fafbfc;
+  border-radius: 0 0 20px 20px;
+  flex-shrink: 0;
+}
+
+.uam-w-footer-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--ia-text-xs);
+  color: var(--ia-color-text-tertiary);
+  font-weight: var(--ia-font-weight-medium);
+}
+
+.uam-w-footer-meta strong {
+  color: var(--ia-color-text-secondary);
+  font-weight: var(--ia-font-weight-semibold);
+}
+
+.uam-w-footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 

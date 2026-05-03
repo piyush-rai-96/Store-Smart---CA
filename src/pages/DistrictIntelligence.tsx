@@ -1710,7 +1710,7 @@ export const DistrictIntelligence: React.FC = () => {
           <div className="bca-header-left">
             <div className="bca-title-row">
               <CampaignOutlined sx={{ fontSize: 20 }}/>
-              <h2>Broadcast Analytics {isAnyFilterActive && <FilterListOutlined sx={{ fontSize: 12 }} className="filter-active-icon"/>}</h2>
+              <h2>Broadcast Analytics</h2>
             </div>
             <p className="bca-subtitle">Communication effectiveness, compliance gaps, and engagement insights</p>
           </div>

@@ -79,6 +79,37 @@ body,
   to { opacity: 0; }
 }
 
+/* ─── Shared page loading state ─────────────────────────────────────────────
+   Used by every screen for the brief loading splash on first mount.           */
+.page-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 14px;
+}
+
+.page-loading-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--ia-color-primary-soft);
+  border-top-color: var(--ia-color-primary);
+  border-radius: 50%;
+  animation: page-spin 0.75s linear infinite;
+}
+
+@keyframes page-spin {
+  to { transform: rotate(360deg); }
+}
+
+.page-loading p {
+  font-size: var(--ia-text-sm);
+  color: var(--ia-color-text-secondary);
+  font-weight: var(--ia-font-weight-medium);
+  margin: 0;
+}
+
 /* ─── Impact UI Input (with icon) — focus fix ───────────────────────────────
    MUI's .Mui-focused .MuiOutlinedInput-notchedOutline has equal specificity to
    Impact UI's suppression rule and loads after it, causing a blue outlined
@@ -94,4 +125,23 @@ body,
 /* Also prevent browser-native blue outline on the inner input element */
 .impact_inputbox_container_with_icons .impact-input-wrapper input:focus {
   outline: none !important;
+}
+
+/* ─── Browser autofill background suppression ───────────────────────────────
+   Chrome floods autofill-detected inputs with its own blue/yellow background
+   via -webkit-autofill. background-color can't override it — the only reliable
+   fix is an inset box-shadow. We also clip the wrapper so the shadow can't
+   bleed outside and hide the wrapper's 1px border.                             */
+.impact_inputbox_container_with_icons .impact-input-wrapper {
+  overflow: hidden;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
+  box-shadow: 0 0 0px 1000px #ffffff inset !important;
+  -webkit-text-fill-color: #1f2b4d !important;
+  transition: background-color 9999s ease-in-out 0s;
 }

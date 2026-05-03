@@ -50,8 +50,13 @@ declare module 'impact-ui' {
     label: ReactNode;
     color?: BadgeColor;
     size?: BadgeSize;
-    variant?: 'default' | 'subtle';
+    variant?: 'default' | 'subtle' | 'filled' | 'stroke';
+    isIcon?: boolean;
+    icon?: ReactNode;
     className?: string;
+    style?: CSSProperties;
+    sx?: Record<string, unknown>;
+    onClick?: (e: ReactMouseEvent<HTMLDivElement>) => void;
   }
 
   export const Badge: FC<BadgeProps>;
@@ -129,7 +134,7 @@ declare module 'impact-ui' {
     initialOptions: SelectOption[];
     currentOptions: SelectOption[];
     setCurrentOptions: (opts: SelectOption[]) => void;
-    selectedOptions: SelectOption[];
+    selectedOptions: SelectOption[] | SelectOption | null;
     setSelectedOptions: (opts: SelectOption[] | SelectOption | null) => void;
     setIsSelectAll: (v: boolean) => void;
     isMulti?: boolean;
@@ -138,6 +143,9 @@ declare module 'impact-ui' {
     helperText?: string;
     isWithSearch?: boolean;
     isClearable?: boolean;
+    withPortal?: boolean;
+    dropDownPortalClassName?: string;
+    portalContainer?: Element;
     width?: string | number;
     minWidth?: string | number;
   }
@@ -272,4 +280,69 @@ declare module 'impact-ui' {
   }
 
   export const Tabs: FC<TabsProps>;
+
+  export interface MenuOption {
+    label?: string;
+    subLabel?: string;
+    icon?: ReactNode;
+    rightIcon?: ReactNode;
+    value?: string;
+    disabled?: boolean;
+    section?: string;
+    callback?: (event?: React.MouseEvent, item?: MenuOption) => void;
+    onClick?: (value?: string, event?: React.MouseEvent) => void;
+    children?: MenuOption[];
+    sx?: Record<string, unknown>;
+  }
+
+  export interface MenuProps {
+    options?: MenuOption[];
+    anchorEl?: HTMLElement | null;
+    open?: boolean;
+    onClose?: () => void;
+    onClick?: (opt: MenuOption, selectedItems: string[], result?: unknown) => void;
+    MenuProps?: Record<string, unknown>;
+    iconPlacement?: 'left' | 'top';
+    withCheckbox?: boolean;
+    selected?: MenuOption | string[];
+    menuContainerClassName?: string;
+    renderCustomHeader?: (props: Record<string, unknown>) => ReactNode;
+    customHeaderProps?: Record<string, unknown>;
+    filteredOptions?: MenuOption[];
+    searchQuery?: string;
+    onSearchChange?: (value: string) => void;
+    onSelectAll?: (values: string[]) => void;
+    onClearSelection?: () => void;
+    withActionButtons?: boolean;
+    onPrimaryButtonClick?: () => void;
+    onTertiaryButtonClick?: () => void;
+    primaryButtonProps?: Record<string, unknown>;
+    tertiaryButtonProps?: Record<string, unknown>;
+    tertiaryButtonLabel?: string;
+    withSection?: boolean;
+    className?: string;
+    style?: CSSProperties;
+  }
+
+  export const Menu: FC<MenuProps>;
+
+  /** Right-panel chat shell used on AI Copilot with custom content */
+  export interface ChatBotComponentProps {
+    userName?: string;
+    isChatBotOpen?: boolean;
+    setIsChatBotOpen?: (open: boolean) => void;
+    onClose?: () => void;
+    isCustomScreen?: boolean;
+    showSuggestionBanner?: boolean;
+    showHistoryPanel?: boolean;
+    footerText?: string;
+    isStopIcon?: boolean;
+    onSendIconClick?: () => void;
+    isAssistantThinking?: boolean;
+    handleNewChatClick?: () => { isInitialClickPresent: boolean };
+    customScreenJsx?: ReactNode;
+    customInputComponent?: ReactNode;
+    [key: string]: unknown;
+  }
+  export const ChatBotComponent: FC<ChatBotComponentProps>;
 }

@@ -119,36 +119,6 @@
   to { opacity: 1; transform: scale(1); }
 }
 
-/* ========================================
-   DI-style page header (mirrors District Intelligence Center)
-   ======================================== */
-.cop-di-header {
-  flex-shrink: 0;
-  border-radius: 0;
-  border-bottom: none;
-  padding-bottom: 12px;
-}
-
-.cop-di-header .header-title svg {
-  color: var(--ia-color-primary-pressed);
-}
-
-.cop-di-header .header-title h1 {
-  color: var(--ia-color-text-primary);
-  font-size: var(--ia-text-lg);
-  font-weight: var(--ia-font-weight-bold);
-  letter-spacing: -0.02em;
-  margin: 0;
-}
-
-/* Tighten skill pills when nested inside header-meta */
-.cop-di-header .cop-header-skills {
-  display: flex;
-  gap: 6px;
-  flex: 0 0 auto;
-  justify-content: flex-start;
-}
-
 /* Skill Tab Strip */
 .cop-skill-tabs {
   padding: 12px 24px 0;
@@ -287,84 +257,7 @@
   background: var(--ia-color-surface);
 }
 
-/* ── Welcome Screen ── */
-.cop-welcome {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 24px 24px;
-  gap: 20px;
-  max-width: 700px;
-  margin: 0 auto;
-  width: 100%;
-}
 
-.cop-welcome-top {
-  text-align: center;
-}
-
-.cop-welcome-logo {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 72px;
-  height: 72px;
-  border-radius: 20px;
-  background: linear-gradient(135deg, var(--ia-color-primary), var(--ia-color-primary-hover));
-  color: var(--ia-color-surface);
-  margin-bottom: 18px;
-  position: relative;
-}
-
-.cop-welcome-logo-ring {
-  position: absolute;
-  inset: -8px;
-  border-radius: 26px;
-  border: 2px solid rgba(99, 102, 241, 0.2);
-  animation: cop-logo-pulse 2.5s ease infinite;
-  pointer-events: none;
-}
-
-@keyframes cop-logo-pulse {
-  0%   { transform: scale(1);    opacity: 1; }
-  50%  { transform: scale(1.06); opacity: 0.5; }
-  100% { transform: scale(1);    opacity: 1; }
-}
-
-.cop-welcome-heading {
-  background: linear-gradient(135deg, var(--ia-color-text-primary) 0%, var(--ia-color-primary-hover) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.cop-welcome-skill-badge {
-  margin-top: 10px;
-  display: flex;
-  justify-content: center;
-}
-
-.cop-welcome-top h2 {
-  font-size: var(--ia-text-2xl);
-  font-weight: var(--ia-font-weight-bold);
-  color: var(--ia-color-text-primary);
-  margin: 0 0 6px;
-}
-
-.cop-welcome-top p {
-  font-size: var(--ia-text-13-5);
-  line-height: 1.5;
-  color: var(--ia-color-text-secondary);
-  margin: 0;
-  max-width: 520px;
-}
-
-.cop-welcome-top p strong {
-  color: var(--ia-color-primary-hover);
-  font-weight: var(--ia-font-weight-semibold);
-}
 
 /* Skill Cards Grid */
 .cop-welcome-grid {
@@ -725,6 +618,236 @@
 
 .cop-md-table tbody tr:hover {
   background: var(--ia-color-bg-subtle);
+}
+
+/* ═══════════════════════════════════════════════════════
+   AI BRIEF — Premium panel-context response overrides
+   Enhances assistant messages inside the Ask Alan panel
+   to look like a polished IA intelligence brief.
+   ═══════════════════════════════════════════════════════ */
+
+/* Assistant message block: elevated card-like feel */
+.cop-panel-inner .cop-msg--assistant {
+  background: linear-gradient(180deg, #f6f8ff 0%, #eff3ff 100%) !important;
+  border-top: 1px solid rgba(99, 102, 241, 0.1) !important;
+  border-bottom: 1px solid rgba(99, 102, 241, 0.1) !important;
+}
+
+/* "AI Copilot" sender name — BRIEF label style */
+.cop-panel-inner .cop-msg--assistant .cop-msg-sender {
+  font-size: var(--ia-text-10-5);
+  font-weight: var(--ia-font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: linear-gradient(135deg, var(--ia-color-primary), #7c5cb1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* H2 — Main brief title with IA accent bar */
+.cop-panel-inner .cop-md-h2 {
+  font-size: var(--ia-text-14);
+  font-weight: var(--ia-font-weight-extrabold);
+  color: var(--ia-color-text-primary);
+  margin: 6px 0 10px;
+  padding: 9px 14px;
+  background: linear-gradient(135deg, rgba(66, 89, 238, 0.06) 0%, rgba(124, 92, 177, 0.04) 100%);
+  border-left: 3px solid var(--ia-color-primary);
+  border-radius: 0 8px 8px 0;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+}
+
+/* Classification / metadata line (bold+text on same p) — keep subtle */
+.cop-panel-inner .cop-msg--assistant .cop-md-p:first-of-type {
+  font-size: var(--ia-text-11-5);
+  color: var(--ia-color-text-tertiary);
+  font-weight: var(--ia-font-weight-medium);
+}
+
+/* H3 — Section headers: uppercase pill style */
+.cop-panel-inner .cop-md-h3 {
+  font-size: var(--ia-text-11);
+  font-weight: var(--ia-font-weight-bold);
+  color: var(--ia-color-primary-hover);
+  text-transform: uppercase;
+  letter-spacing: 0.065em;
+  margin: 16px 0 7px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgba(99, 102, 241, 0.18);
+}
+
+/* Horizontal rule — thinner, branded */
+.cop-panel-inner .cop-md-hr {
+  border-top: 1px solid rgba(99, 102, 241, 0.14);
+  margin: 10px 0;
+}
+
+/* Blockquotes — IA primary accent with soft bg */
+.cop-panel-inner .cop-md-bq {
+  border-left: 3px solid var(--ia-color-primary);
+  background: linear-gradient(135deg, rgba(66, 89, 238, 0.05) 0%, rgba(124, 92, 177, 0.03) 100%);
+  color: var(--ia-color-text-secondary);
+  border-radius: 0 8px 8px 0;
+  padding: 10px 14px;
+}
+.cop-panel-inner .cop-md-bq strong {
+  color: var(--ia-color-primary-hover);
+}
+
+/* List items — clean left indent with primary accent bullet-line */
+.cop-panel-inner .cop-md-li {
+  position: relative;
+  padding-left: 14px;
+  font-size: var(--ia-text-12-5);
+  line-height: 1.6;
+  color: var(--ia-color-text-primary);
+}
+
+/* Ordered list numbers — IA primary colour */
+.cop-panel-inner .cop-md-li-num {
+  color: var(--ia-color-primary);
+  font-weight: var(--ia-font-weight-bold);
+  min-width: 22px;
+}
+
+/* Table header — IA brand treatment */
+.cop-panel-inner .cop-md-table thead {
+  background: linear-gradient(135deg, rgba(66, 89, 238, 0.08) 0%, rgba(124, 92, 177, 0.05) 100%);
+}
+.cop-panel-inner .cop-md-table th {
+  color: var(--ia-color-primary-hover);
+  border-bottom-color: rgba(99, 102, 241, 0.25);
+  font-size: var(--ia-text-2xs);
+  letter-spacing: 0.5px;
+}
+
+/* Inline code — IA primary tint */
+.cop-panel-inner .cop-md-code {
+  background: rgba(66, 89, 238, 0.07);
+  color: var(--ia-color-primary-hover);
+  border: 1px solid rgba(66, 89, 238, 0.15);
+}
+
+/* Spacer — slightly tighter inside panel */
+.cop-panel-inner .cop-md-spacer { height: 4px; }
+
+/* ── History Panel — Context Menu cleanup ────────────────────
+   Hide only the Share action (non-functional in this context).
+   Rename, Pin Chat, and Delete are all functional.
+   ──────────────────────────────────────────────────────────── */
+.chatbot-modal-wrapper .history-item-menu .menu-item:first-child {
+  display: none !important;
+}
+
+/* ── History Panel — Premium Rename Input ────────────────────
+   The library renders a TextInput inline when Rename is clicked.
+   Target the input + action buttons inside history group lists.
+   ──────────────────────────────────────────────────────────── */
+
+/* Wrapper div that TextInput renders inside the history list */
+.chatbot-modal-wrapper .history-group-list > div,
+.chatbot-modal-wrapper .history-pinned-list > div {
+  padding: 4px 0;
+}
+
+/* The rename text input field */
+.chatbot-modal-wrapper .history-group-list input[type="text"],
+.chatbot-modal-wrapper .history-pinned-list input[type="text"] {
+  width: 100%;
+  background: linear-gradient(135deg, rgba(66, 89, 238, 0.04) 0%, rgba(124, 92, 177, 0.03) 100%) !important;
+  border: 1.5px solid var(--ia-color-primary) !important;
+  border-radius: 10px !important;
+  padding: 9px 44px 9px 12px !important;
+  font-family: 'Manrope', sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: var(--ia-color-text-primary) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(66, 89, 238, 0.10), 0 2px 8px rgba(66, 89, 238, 0.08) !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+  line-height: 1.4 !important;
+}
+
+.chatbot-modal-wrapper .history-group-list input[type="text"]:focus,
+.chatbot-modal-wrapper .history-pinned-list input[type="text"]:focus {
+  border-color: var(--ia-color-primary-hover) !important;
+  box-shadow: 0 0 0 3px rgba(66, 89, 238, 0.16), 0 2px 12px rgba(66, 89, 238, 0.12) !important;
+}
+
+/* The right-icon container (cancel + save buttons) inside TextInput */
+.chatbot-modal-wrapper .history-group-list [style*="display: flex"][style*="gap: 8px"],
+.chatbot-modal-wrapper .history-pinned-list [style*="display: flex"][style*="gap: 8px"] {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+/* Cancel (X) button */
+.chatbot-modal-wrapper .history-group-list [style*="display: flex"][style*="gap: 8px"] > button:first-child,
+.chatbot-modal-wrapper .history-pinned-list [style*="display: flex"][style*="gap: 8px"] > button:first-child,
+.chatbot-modal-wrapper .history-group-list [style*="display: flex"][style*="gap: 8px"] > svg:first-child,
+.chatbot-modal-wrapper .history-pinned-list [style*="display: flex"][style*="gap: 8px"] > svg:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: var(--ia-color-bg-subtle);
+  border: 1px solid var(--ia-color-border);
+  cursor: pointer;
+  transition: background 0.12s ease;
+  flex-shrink: 0;
+  color: var(--ia-color-text-tertiary);
+}
+
+/* Save (check) button */
+.chatbot-modal-wrapper .history-group-list [style*="display: flex"][style*="gap: 8px"] > button:last-child,
+.chatbot-modal-wrapper .history-pinned-list [style*="display: flex"][style*="gap: 8px"] > button:last-child,
+.chatbot-modal-wrapper .history-group-list [style*="display: flex"][style*="gap: 8px"] > svg:last-child,
+.chatbot-modal-wrapper .history-pinned-list [style*="display: flex"][style*="gap: 8px"] > svg:last-child {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: var(--ia-color-primary);
+  border: 1px solid var(--ia-color-primary-hover);
+  cursor: pointer;
+  transition: background 0.12s ease;
+  flex-shrink: 0;
+  color: #fff;
+}
+
+/* Menu items — Rename / Pin / Delete polish */
+.chatbot-modal-wrapper .history-item-menu {
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(30, 41, 59, 0.14), 0 2px 8px rgba(30, 41, 59, 0.06) !important;
+  border: 1px solid rgba(99, 102, 241, 0.12) !important;
+  padding: 6px !important;
+  min-width: 160px !important;
+}
+
+.chatbot-modal-wrapper .history-item-menu .menu-item {
+  font-family: 'Manrope', sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  border-radius: 8px !important;
+  padding: 9px 12px !important;
+  transition: background 0.12s ease, color 0.12s ease !important;
+}
+
+.chatbot-modal-wrapper .history-item-menu .menu-item:hover {
+  background: linear-gradient(135deg, rgba(66, 89, 238, 0.06) 0%, rgba(124, 92, 177, 0.04) 100%) !important;
+  color: var(--ia-color-primary-hover) !important;
+}
+
+.chatbot-modal-wrapper .history-item-menu .menu-item.danger:hover {
+  background: rgba(209, 44, 44, 0.06) !important;
+  color: #d12c2c !important;
 }
 
 /* Analytics Charts */
@@ -2041,113 +2164,6 @@
 }
 
 /* ========================================
-   BOTTOM HISTORY DRAWER
-   ======================================== */
-
-.cop-drawer {
-  flex-shrink: 0;
-  background: var(--ia-color-surface);
-  border-top: 1px solid var(--ia-color-primary-soft);
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.04);
-}
-
-.cop-drawer--open {
-  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
-}
-
-.cop-drawer-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  width: 100%;
-  padding: 6px 16px;
-  border: none;
-  background: transparent;
-  font-size: var(--ia-text-2xs);
-  font-weight: var(--ia-font-weight-semibold);
-  color: var(--ia-color-primary);
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-
-.cop-drawer-toggle:hover {
-  background: var(--ia-color-bg-subtle);
-}
-
-.cop-drawer-toggle svg {
-  width: 14px;
-  height: 14px;
-}
-
-.cop-drawer-body {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 2px 16px 8px;
-  max-height: 180px;
-  overflow-y: auto;
-}
-
-.cop-drawer-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  padding: 10px 14px;
-  border: none;
-  background: transparent;
-  border-radius: 10px;
-  cursor: pointer;
-  text-align: left;
-  transition: all 0.15s ease;
-}
-
-.cop-drawer-item:hover {
-  background: var(--ia-color-primary-soft);
-}
-
-.cop-drawer-item-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  background: var(--ia-color-bg-muted);
-  color: var(--ia-color-text-secondary);
-  flex-shrink: 0;
-}
-
-.cop-drawer-item:hover .cop-drawer-item-icon {
-  background: var(--ia-color-primary-soft);
-  color: var(--ia-color-primary);
-}
-
-.cop-drawer-item-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  flex: 1;
-  min-width: 0;
-}
-
-.cop-drawer-item-query {
-  font-size: var(--ia-text-13);
-  font-weight: var(--ia-font-weight-semibold);
-  color: var(--ia-color-text-primary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.cop-drawer-item-meta {
-  font-size: var(--ia-text-2xs);
-  color: var(--ia-color-text-tertiary);
-  font-weight: var(--ia-font-weight-medium);
-}
-
-/* ========================================
    AGENTIC PROCESSING — Tabbed Card
    ======================================== */
 
@@ -3271,7 +3287,7 @@
 
 /* ── Bullet-style Follow-up Questions ────────────────────────── */
 .cop-followups-inline {
-  margin-top: 16px;
+  margin-top: 14px;
 }
 
 .cop-followups-inline-label {
@@ -3280,7 +3296,7 @@
   color: var(--ia-color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .cop-followups-inline-list {
@@ -3289,27 +3305,28 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .cop-followups-inline-list li {
-  position: relative;
-  padding-left: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
   line-height: 1.5;
 }
 
 .cop-followups-inline-list li::before {
-  content: '';
-  position: absolute;
-  left: 4px;
-  top: 12px;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--ia-color-border-strong);
+  content: '›';
+  flex-shrink: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ia-color-primary);
+  font-weight: var(--ia-font-weight-bold);
 }
 
 .cop-followup-prompt {
+  display: block;
+  width: 100%;
   background: transparent;
   border: 0;
   padding: 2px 0;
@@ -3332,10 +3349,10 @@
 
 /* ── Right-side Sources Panel ─────────────────────────────────── */
 .cop-sources-panel-overlay {
-  position: absolute;
+  position: fixed;
   inset: 0;
   background: rgba(15, 23, 42, 0.32);
-  z-index: 1090;
+  z-index: 1400;
   display: flex;
   justify-content: flex-end;
   animation: cop-fade-in 0.18s ease;
@@ -3897,11 +3914,11 @@
 
 /* ── Source Detail Modal ─────────────────────────────────────── */
 .cop-source-modal-overlay {
-  position: absolute;
+  position: fixed;
   inset: 0;
   background: rgba(15, 23, 42, 0.45);
   backdrop-filter: blur(2px);
-  z-index: 1100;
+  z-index: 1500;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -4202,17 +4219,6 @@
   opacity: 0.6;
 }
 
-.cop-drawer-toggle.MuiButtonBase-root {
-  text-transform: none;
-  border-radius: 0;
-}
-
-.cop-drawer-item.MuiButtonBase-root {
-  text-transform: none;
-  justify-content: flex-start;
-  text-align: left;
-  border-radius: 8px;
-}
 
 /* Native button reset for the row */
 .cop-sources-panel-row:focus-visible {
@@ -4233,7 +4239,6 @@
   min-width: 0;
 }
 
-.cop-followup-prompt.MuiButtonBase-root,
 .cop-sources-inline-link.MuiButtonBase-root {
   text-transform: none;
   min-width: 0;
@@ -4257,3 +4262,375 @@
   align-items: center;
   gap: 6px;
 }
+
+
+
+
+/* ========================================
+   ASK ALAN PANEL — customScreenJsx wrapper
+   ======================================== */
+
+/* Full-height flex column that fills the right-side panel body */
+.cop-panel-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Panel header — title row + close */
+.cop-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px 14px;
+  border-bottom: 1px solid var(--ia-color-border);
+  flex-shrink: 0;
+  background: var(--ia-color-surface);
+}
+
+.cop-panel-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  color: var(--ia-color-primary);
+}
+
+.cop-panel-title-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  background: linear-gradient(145deg, var(--ia-color-primary-soft) 0%, rgba(236, 238, 253, 0.5) 100%);
+  border: 1px solid var(--ia-color-primary-border);
+  color: var(--ia-color-primary);
+}
+
+.cop-panel-title-text {
+  font-size: var(--ia-text-15);
+  font-weight: var(--ia-font-weight-bold);
+  letter-spacing: -0.02em;
+  color: var(--ia-color-text-primary);
+}
+
+.cop-panel-header-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.cop-panel-close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: var(--ia-color-surface);
+  border: 1px solid var(--ia-color-border);
+  cursor: pointer;
+  color: var(--ia-color-text-tertiary);
+  border-radius: 10px;
+  padding: 0;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.cop-panel-close-btn:hover {
+  background: var(--ia-color-bg-subtle);
+  color: var(--ia-color-text-secondary);
+  border-color: var(--ia-color-border-strong);
+}
+
+/* Skill tabs strip inside the panel */
+.cop-skill-tabs--panel {
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--ia-color-border);
+  background: var(--ia-color-surface);
+}
+
+/* Messages area fills remaining panel height */
+.cop-panel-inner .cop-messages {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding: 8px 0 12px;
+  background: linear-gradient(180deg, var(--ia-color-bg-subtle) 0%, var(--ia-color-surface) 56px);
+  scrollbar-width: thin;
+  scrollbar-color: var(--ia-color-border-strong) transparent;
+}
+
+.cop-panel-inner .cop-messages::-webkit-scrollbar {
+  width: 8px;
+}
+
+.cop-panel-inner .cop-messages::-webkit-scrollbar-thumb {
+  background: var(--ia-color-border-strong);
+  border-radius: 8px;
+}
+
+.cop-panel-inner .cop-messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Suppress Impact suggestion banner inside Ask Alan shell */
+.chatbot-modal-wrapper .chatbot-landing-screen-container .suggestion-banner {
+  display: none !important;
+}
+
+/* ========================================
+   ASK ALAN — Impact ChatBot shell (IA / StoreHub)
+   Full flex chain so the input is always pinned at the bottom;
+   messages scroll inside their own bounded region.
+
+   DOM tree (isCustomScreen=true):
+   .chatbot-modal-wrapper                           ← position: fixed
+     .chatbot-component-container                   ← height: calc(100vh - 56px)
+       .chatbot-component-left-side                 ← icon rail, 60px
+       .chatbot-component-right-side                ← position: absolute, fills container
+         .chatbot-landing-screen-container          ← flex col, height 100%
+           .chatbot-landing-screen-container-body   ← flex col, flex: 1
+             .cop-panel-inner            (customScreenJsx)  flex: 1
+               .cop-panel-header         flex-shrink: 0
+               .cop-skill-row--panel     flex-shrink: 0
+               .cop-messages             flex: 1, overflow-y: auto
+             .conversation-footer-container         ← flex-shrink: 0, SIBLING of cop-panel-inner
+               .chat-input-box.custom-screen
+                 .cop-input-area         (our customInputComponent)
+         .chatbot-component-footer                  ← always hidden
+   ======================================== */
+
+/* Container — IA surface & shadow */
+.chatbot-modal-wrapper .chatbot-component-container {
+  padding: 0;
+  background: var(--ia-color-surface);
+  border-left: 1px solid var(--ia-color-border);
+  box-shadow: -16px 0 48px rgba(31, 43, 77, 0.10);
+}
+
+/* Right side MUST be a flex column to bound its children */
+.chatbot-modal-wrapper .chatbot-component-right-side {
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Custom screen wrapper fills the right side height */
+.chatbot-modal-wrapper .chatbot-landing-screen-container {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100%;
+  pointer-events: auto !important;
+}
+
+/* Body: flex col — cop-panel-inner grows, footer stays pinned */
+.chatbot-modal-wrapper .chatbot-landing-screen-container-body {
+  flex: 1 !important;
+  min-height: 0 !important;
+  height: auto !important;   /* defeat library's calc(100vh - 125px) */
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden;
+}
+
+/* cop-panel-inner (customScreenJsx) grows to fill body minus input footer */
+.chatbot-modal-wrapper .chatbot-landing-screen-container-body > .cop-panel-inner {
+  flex: 1 !important;
+  min-height: 0 !important;
+  overflow: hidden;
+}
+
+/* Library close icon — replaced by our cop-panel-header X */
+.chatbot-modal-wrapper .chatbot-landing-screen-container-close-icon {
+  display: none !important;
+}
+
+/* Input footer: pinned at bottom, full width, normal flow */
+.chatbot-modal-wrapper .conversation-footer-container {
+  flex-shrink: 0 !important;
+  height: auto !important;
+  min-height: 0;
+  padding: 0;
+  background: var(--ia-color-surface);
+  border-top: 1px solid var(--ia-color-border);
+}
+
+/* Pull chat-input-box out of absolute positioning */
+.chatbot-modal-wrapper .chat-input-box.custom-screen {
+  position: static !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  bottom: auto !important;
+  left: auto !important;
+  right: auto !important;
+  border-radius: 0;
+  gap: 0;
+  margin: 0;
+}
+
+/* Our custom input component (.cop-input-area) is a sibling of .cop-panel-inner
+   so we target it via its actual ancestor: .conversation-footer-container */
+.chatbot-modal-wrapper .conversation-footer-container .cop-input-area {
+  padding: 12px 0 14px;
+  background: var(--ia-color-surface);
+  border-top: none; /* border is on conversation-footer-container */
+}
+
+.chatbot-modal-wrapper .conversation-footer-container .cop-input-inner {
+  max-width: 100%;
+  padding: 0 16px;
+}
+
+.chatbot-modal-wrapper .conversation-footer-container .cop-input-footer {
+  font-size: var(--ia-text-3xs);
+  color: var(--ia-color-text-tertiary);
+  text-align: center;
+  line-height: 1.45;
+  margin-top: 6px;
+}
+
+.chatbot-modal-wrapper .conversation-footer-container .cop-input::placeholder {
+  color: var(--ia-color-text-tertiary);
+}
+
+/* Library default footer — always hidden (empty string; our RAG copy is in cop-input-footer) */
+.chatbot-modal-wrapper .chatbot-component-footer {
+  display: none !important;
+}
+
+/* Suppress library suggestion banner */
+.chatbot-modal-wrapper .chatbot-landing-screen-container .suggestion-banner {
+  display: none !important;
+}
+
+/* ── Messages: panel-width density ── */
+.cop-panel-inner .cop-msg-inner {
+  padding-left: 16px;
+  padding-right: 16px;
+  max-width: none;
+}
+
+.cop-panel-inner .cop-msg--assistant {
+  background: linear-gradient(180deg, var(--ia-color-bg-subtle) 0%, var(--ia-color-primary-soft) 100%);
+}
+
+/* ── Scrollbar polish ── */
+.cop-panel-inner .cop-messages {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ia-color-border-strong) transparent;
+}
+
+.cop-panel-inner .cop-messages::-webkit-scrollbar { width: 6px; }
+.cop-panel-inner .cop-messages::-webkit-scrollbar-thumb {
+  background: var(--ia-color-border-strong);
+  border-radius: 6px;
+}
+.cop-panel-inner .cop-messages::-webkit-scrollbar-track { background: transparent; }
+
+/* ── Welcome / empty state — new design ── */
+
+/* Outer scroll wrapper that fills .cop-messages */
+.cop-panel-welcome {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100%;
+  animation: copMsgIn 0.3s ease;
+}
+
+/* Hero area: star logo + greeting centred */
+.cop-panel-welcome-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 36px 24px 24px;
+  gap: 6px;
+}
+
+.cop-panel-welcome-star {
+  line-height: 0;
+  margin-bottom: 10px;
+}
+
+.cop-panel-welcome-greeting {
+  font-size: var(--ia-text-xl);
+  font-weight: var(--ia-font-weight-bold);
+  color: var(--ia-color-text-primary);
+  letter-spacing: -0.02em;
+  margin: 0;
+  line-height: 1.25;
+}
+
+/* First-name highlight — warm brand gradient matching the star */
+.cop-panel-welcome-name {
+  background: linear-gradient(82deg, #ec7550 10.92%, #a0508f 81.37%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.cop-panel-welcome-sub {
+  font-size: var(--ia-text-sm);
+  color: var(--ia-color-text-tertiary);
+  font-weight: var(--ia-font-weight-medium);
+  margin: 4px 0 0;
+  line-height: 1.5;
+}
+
+/* Suggestion cards stack */
+.cop-panel-suggestions {
+  padding: 0 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cop-panel-suggestions-label {
+  font-size: var(--ia-text-2xs);
+  font-weight: var(--ia-font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--ia-color-text-tertiary);
+  margin: 0 0 4px;
+}
+
+/* Each card: slim lavender tile — no inflation */
+.cop-panel-suggestion-card {
+  width: 100%;
+  text-align: left;
+  background: rgba(236, 238, 253, 0.55);
+  border: 1px solid rgba(179, 189, 248, 0.35);
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-family: var(--ia-font-sans);
+  font-size: var(--ia-text-13);
+  font-weight: var(--ia-font-weight-medium);
+  color: var(--ia-color-text-primary);
+  line-height: 1.45;
+  cursor: pointer;
+  transition: background 0.13s ease, border-color 0.13s ease, box-shadow 0.13s ease;
+}
+
+.cop-panel-suggestion-card:hover {
+  background: rgba(179, 189, 248, 0.28);
+  border-color: var(--ia-color-primary-border);
+  box-shadow: 0 2px 10px rgba(99, 102, 241, 0.09);
+}
+
+.cop-panel-suggestion-card:active {
+  background: rgba(179, 189, 248, 0.38);
+  box-shadow: none;
+}
+
+

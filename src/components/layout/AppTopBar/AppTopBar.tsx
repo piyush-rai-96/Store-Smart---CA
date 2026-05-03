@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Header as ImpactHeader, Button } from 'impact-ui';
 import WarningAmberOutlined from '@mui/icons-material/WarningAmberOutlined';
 import CampaignOutlined from '@mui/icons-material/CampaignOutlined';
 import AssignmentTurnedInOutlined from '@mui/icons-material/AssignmentTurnedInOutlined';
 import InventoryOutlined from '@mui/icons-material/InventoryOutlined';
-import { User } from '../../../types';
+import AutoAwesomeOutlined from '@mui/icons-material/AutoAwesomeOutlined';
+import { User, SCREEN_TO_PATH } from '../../../types';
 import { APP_CONFIG } from '../../../constants/app';
 import './AppTopBar.css';
 
@@ -33,6 +34,7 @@ const MOCK_NOTIFICATIONS: NotifItem[] = [
 
 export const AppTopBar: React.FC<AppTopBarProps> = ({ user, onLogout }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [showNotifications, setShowNotifications] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
   const notificationCount = MOCK_NOTIFICATIONS.length;
@@ -49,6 +51,15 @@ export const AppTopBar: React.FC<AppTopBarProps> = ({ user, onLogout }) => {
   }, [showNotifications]);
 
   const firstName = user.name.split(' ')[0];
+
+  const openAlanCopilot = () => {
+    const copilotPath = SCREEN_TO_PATH.ai_copilot;
+    if (location.pathname === copilotPath) {
+      window.dispatchEvent(new CustomEvent('storehub:open-alan'));
+    } else {
+      navigate(copilotPath, { state: { openAlan: true } });
+    }
+  };
 
   const dropMenuOptions = [
     {
@@ -72,7 +83,8 @@ export const AppTopBar: React.FC<AppTopBarProps> = ({ user, onLogout }) => {
         showNotificationIcon
         notificationIndicator={notificationCount > 0}
         showMessageIcon={false}
-        showChatBotIcon={false}
+        showChatBotIcon
+        handleChatBotClick={openAlanCopilot}
         handleLogoClick={() => navigate('/store-operations/home')}
         handleHelpClick={() => window.open('https://impactanalytics.co', '_blank')}
         handleNotificationClick={() => setShowNotifications(prev => !prev)}
@@ -80,6 +92,19 @@ export const AppTopBar: React.FC<AppTopBarProps> = ({ user, onLogout }) => {
         avatarType="withoutPicture"
         avatarProps={{ label: user.name }}
       />
+
+      {/* Ask Alan — same panel as AI Copilot (custom ChatBot); opens via route or in-page event */}
+      <div className="app-topbar-ask-alan">
+        <button
+          className="app-topbar-ask-alan-btn"
+          type="button"
+          aria-label="Ask Alan"
+          onClick={openAlanCopilot}
+        >
+          <AutoAwesomeOutlined sx={{ fontSize: 14 }} />
+          Ask Alan
+        </button>
+      </div>
       {showNotifications && (
         <div className="app-topbar-notif-panel" ref={notifRef} role="dialog" aria-label="Notifications">
           <div className="app-topbar-notif-header">

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import FileUploadOutlined from '@mui/icons-material/FileUploadOutlined';
 import SearchOutlined from '@mui/icons-material/SearchOutlined';
 import VisibilityOutlined from '@mui/icons-material/VisibilityOutlined';
@@ -6,11 +6,9 @@ import EditOutlined from '@mui/icons-material/EditOutlined';
 import DeleteOutlined from '@mui/icons-material/DeleteOutlined';
 import AccessTimeOutlined from '@mui/icons-material/AccessTimeOutlined';
 import CheckCircleOutlined from '@mui/icons-material/CheckCircleOutlined';
-import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
-import KeyboardArrowUp from '@mui/icons-material/KeyboardArrowUp';
-import Check from '@mui/icons-material/Check';
 import LayersOutlined from '@mui/icons-material/LayersOutlined';
-import { Button, Badge, Card, Tabs } from 'impact-ui';
+import TuneOutlined from '@mui/icons-material/TuneOutlined';
+import { Button, Badge, Card, Tabs, Tag, Select, SelectOption, Chips } from 'impact-ui';
 import './MasterPOGManagement.css';
 import WomensWallStandard from '../assets/C&A_WOMENS_WALL_STANDARD.png';
 import MensDenimWall from '../assets/C&A_MENS_DENIM_WALL.png';
@@ -99,74 +97,48 @@ interface Filters {
   createdBy: string;
 }
 
-// Custom Dropdown Component
-interface DropdownOption {
-  value: string;
-  label: string;
-}
-
-interface CustomDropdownProps {
+// Filter select — wraps IA Select with self-contained state management
+interface FilterSelectProps {
   label: string;
   value: string;
-  options: DropdownOption[];
+  options: SelectOption[];
   onChange: (value: string) => void;
+  placeholder?: string;
 }
 
-const CustomDropdown: React.FC<CustomDropdownProps> = ({ label, value, options, onChange }) => {
+const FilterSelect: React.FC<FilterSelectProps> = ({ label, value, options, onChange, placeholder }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const selectedOption = options.find(opt => opt.value === value);
+  const [currentOptions, setCurrentOptions] = useState<SelectOption[]>(options);
+  const selected = value ? (options.find(o => o.value === value) ?? null) : null;
 
   return (
-    <div className="pog-filter-item" ref={dropdownRef}>
-      <label className="pog-filter-label">{label}</label>
-      <div className="custom-dropdown">
-        <button 
-          className={`custom-dropdown-trigger ${isOpen ? 'open' : ''}`}
-          onClick={() => setIsOpen(!isOpen)}
-          type="button"
-        >
-          <span className={value ? 'has-value' : ''}>{selectedOption?.label || options[0]?.label}</span>
-          {isOpen ? <KeyboardArrowUp sx={{ fontSize: 14 }} /> : <KeyboardArrowDown sx={{ fontSize: 14 }} />}
-        </button>
-        {isOpen && (
-          <div className="custom-dropdown-menu">
-            {options.map((option) => (
-              <button
-                key={option.value}
-                className={`custom-dropdown-option ${value === option.value ? 'selected' : ''}`}
-                onClick={() => {
-                  onChange(option.value);
-                  setIsOpen(false);
-                }}
-                type="button"
-              >
-                <span>{option.label}</span>
-                {value === option.value && <Check sx={{ fontSize: 16 }} className="check-icon" />}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
+    <Select
+      placeholder={placeholder ?? label}
+      isOpen={isOpen}
+      setIsOpen={setIsOpen}
+      initialOptions={options}
+      currentOptions={currentOptions}
+      setCurrentOptions={(opts) => setCurrentOptions(Array.isArray(opts) ? opts : options)}
+      selectedOptions={selected}
+      setSelectedOptions={(opt) => {
+        const sel = Array.isArray(opt) ? opt[0] : opt;
+        onChange(sel?.value ?? '');
+      }}
+      setIsSelectAll={() => {}}
+      isClearable
+      withPortal
+      minWidth={160}
+    />
   );
 };
 
 export const MasterPOGManagement: React.FC = () => {
+  const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'library' | 'workspace'>('library');
   const [selectedPOG, setSelectedPOG] = useState<POGItem | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showMoreFilters, setShowMoreFilters] = useState(false);
+  const moreFiltersRef = useRef<HTMLDivElement>(null);
   const [filters, setFilters] = useState<Filters>({
     category: '',
     status: '',
@@ -191,6 +163,30 @@ export const MasterPOGManagement: React.FC = () => {
     });
     setSearchQuery('');
   };
+
+  // Filter chip helpers
+  const filterLabelMap: Record<keyof Filters, string> = {
+    category: 'Category', status: 'Status', fixtureType: 'Fixture',
+    cluster: 'Cluster', lastUpdated: 'Updated', createdBy: 'By',
+  };
+  const activeChips = (Object.keys(filters) as (keyof Filters)[])
+    .filter(k => filters[k] !== '')
+    .map(k => ({ key: k, label: `${filterLabelMap[k]}: ${filters[k]}` }));
+  const hasActiveFilters = activeChips.length > 0 || searchQuery !== '';
+  const activeSecondaryCount = ['lastUpdated', 'createdBy'].filter(
+    k => filters[k as keyof Filters] !== ''
+  ).length;
+
+  // Close More Filters panel when clicking outside
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (moreFiltersRef.current && !moreFiltersRef.current.contains(e.target as Node)) {
+        setShowMoreFilters(false);
+      }
+    };
+    if (showMoreFilters) document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showMoreFilters]);
 
   const handlePOGSelect = (pog: POGItem) => {
     setSelectedPOG(pog);
@@ -217,6 +213,22 @@ export const MasterPOGManagement: React.FC = () => {
     return <Badge label={m.label} color={m.color} size="small" className="pog-status-badge" />;
   };
 
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 600);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="master-pog-container">
+        <div className="page-loading">
+          <div className="page-loading-spinner" />
+          <p>Loading Master POG...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="master-pog-container">
       <div className="master-pog-header">
@@ -227,17 +239,38 @@ export const MasterPOGManagement: React.FC = () => {
               <h1 className="master-pog-title">Master POG Management</h1>
             </div>
             <p className="master-pog-subtitle">Manage and organize your planogram library</p>
-            <div className="pi-header-meta">
-              <Badge label={`${mockPOGData.length} POGs`} color="info" size="small" className="pi-meta-pill" />
-              <Badge label={`${mockPOGData.filter(p => p.status === 'active').length} Active`} color="success" size="small" className="pi-meta-pill" />
-              <Badge label={`${mockPOGData.filter(p => p.status === 'draft').length} Drafts`} color="warning" size="small" className="pi-meta-pill" />
-              <Badge label={`${mockPOGData.filter(p => p.status === 'archived').length} Archived`} color="info" size="small" className="pi-meta-pill" />
-            </div>
           </div>
           <div className="pi-header-right">
             <Button variant="contained" color="primary" size="medium" className="pi-btn-primary" startIcon={<FileUploadOutlined sx={{ fontSize: 15 }} />}>
               Upload POG
             </Button>
+          </div>
+        </div>
+      </div>
+
+      <div className="pog-kpi-section">
+        <div className="pog-kpi-card">
+          <div className="pog-kpi-strip">
+        <div className="pog-kpi-item">
+          <span className="pog-kpi-label">Total POGs</span>
+          <span className="pog-kpi-value">{mockPOGData.length}</span>
+          <span className="pog-kpi-context">in library</span>
+        </div>
+        <div className="pog-kpi-item">
+          <span className="pog-kpi-label">Active</span>
+          <span className="pog-kpi-value">{mockPOGData.filter(p => p.status === 'active').length}</span>
+          <span className="pog-kpi-context">live planograms</span>
+        </div>
+        <div className="pog-kpi-item">
+          <span className="pog-kpi-label">Drafts</span>
+          <span className="pog-kpi-value">{mockPOGData.filter(p => p.status === 'draft').length}</span>
+          <span className="pog-kpi-context">pending review</span>
+        </div>
+        <div className="pog-kpi-item">
+          <span className="pog-kpi-label">Archived</span>
+          <span className="pog-kpi-value">{mockPOGData.filter(p => p.status === 'archived').length}</span>
+          <span className="pog-kpi-context">no longer active</span>
+        </div>
           </div>
         </div>
       </div>
@@ -250,55 +283,55 @@ export const MasterPOGManagement: React.FC = () => {
         ]}
         tabPanels={[
           <div className="pog-library">
-            {/* Combined toolbar: search + filters (DI-style) */}
-            <div className="pi-toolbar">
-              <div className="pi-toolbar-search">
-                <SearchOutlined sx={{ fontSize: 15 }} />
+            {/* Single-row filter bar */}
+            <div className="pog-filter-bar">
+              <div className="pog-filter-bar-search">
+                <SearchOutlined sx={{ fontSize: 16 }} />
                 <input
-                  type="text"
-                  placeholder="Search planograms..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search planograms..."
                 />
               </div>
-              <CustomDropdown
+              <div className="pog-filter-bar-divider" />
+              <FilterSelect
                 label="Category"
                 value={filters.category}
+                placeholder="Category"
                 options={[
-                  { value: '', label: 'All Categories' },
                   { value: 'Apparel', label: 'Apparel' },
                   { value: 'Accessories', label: 'Accessories' },
                   { value: 'Seasonal', label: 'Seasonal' },
                 ]}
                 onChange={(value) => handleFilterChange('category', value)}
               />
-              <CustomDropdown
+              <FilterSelect
                 label="Status"
                 value={filters.status}
+                placeholder="Status"
                 options={[
-                  { value: '', label: 'All Status' },
                   { value: 'active', label: 'Active' },
                   { value: 'draft', label: 'Draft' },
                   { value: 'archived', label: 'Archived' },
                 ]}
                 onChange={(value) => handleFilterChange('status', value)}
               />
-              <CustomDropdown
+              <FilterSelect
                 label="Fixture Type"
                 value={filters.fixtureType}
+                placeholder="Fixture Type"
                 options={[
-                  { value: '', label: 'All Fixtures' },
                   { value: 'wall', label: 'Wall Display' },
                   { value: 'table', label: 'Table' },
                   { value: 'endcap', label: 'End Cap' },
                 ]}
                 onChange={(value) => handleFilterChange('fixtureType', value)}
               />
-              <CustomDropdown
+              <FilterSelect
                 label="Cluster"
                 value={filters.cluster}
+                placeholder="Cluster"
                 options={[
-                  { value: '', label: 'All Clusters' },
                   { value: 'urban', label: 'Urban Flagship' },
                   { value: 'family', label: 'Family Center' },
                   { value: 'outlet', label: 'Outlet Value' },
@@ -306,65 +339,106 @@ export const MasterPOGManagement: React.FC = () => {
                 ]}
                 onChange={(value) => handleFilterChange('cluster', value)}
               />
-              <CustomDropdown
-                label="Last Updated"
-                value={filters.lastUpdated}
-                options={[
-                  { value: '', label: 'Any Time' },
-                  { value: 'today', label: 'Today' },
-                  { value: 'week', label: 'This Week' },
-                  { value: 'month', label: 'This Month' },
-                  { value: 'quarter', label: 'This Quarter' },
-                ]}
-                onChange={(value) => handleFilterChange('lastUpdated', value)}
-              />
-              <CustomDropdown
-                label="Created By"
-                value={filters.createdBy}
-                options={[
-                  { value: '', label: 'All Users' },
-                  { value: 'me', label: 'Me' },
-                  { value: 'team', label: 'My Team' },
-                ]}
-                onChange={(value) => handleFilterChange('createdBy', value)}
-              />
-              <Button variant="text" color="primary" size="small" className="pi-toolbar-clear" onClick={clearAllFilters}>
-                Clear All
-              </Button>
+              {/* More Filters popover */}
+              <div className="pog-more-filters-wrapper" ref={moreFiltersRef}>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  size="small"
+                  className="pog-more-filters-btn"
+                  startIcon={<TuneOutlined sx={{ fontSize: 14 }} />}
+                  onClick={() => setShowMoreFilters(p => !p)}
+                >
+                  More{activeSecondaryCount > 0 && ` (${activeSecondaryCount})`}
+                </Button>
+                {showMoreFilters && (
+                  <div className="pog-more-filters-panel">
+                    <p className="pog-more-filters-title">Additional Filters</p>
+                    <FilterSelect
+                      label="Last Updated"
+                      value={filters.lastUpdated}
+                      placeholder="Any Time"
+                      options={[
+                        { value: 'today', label: 'Today' },
+                        { value: 'week', label: 'This Week' },
+                        { value: 'month', label: 'This Month' },
+                        { value: 'quarter', label: 'This Quarter' },
+                      ]}
+                      onChange={(value) => handleFilterChange('lastUpdated', value)}
+                    />
+                    <FilterSelect
+                      label="Created By"
+                      value={filters.createdBy}
+                      placeholder="All Users"
+                      options={[
+                        { value: 'me', label: 'Me' },
+                        { value: 'team', label: 'My Team' },
+                      ]}
+                      onChange={(value) => handleFilterChange('createdBy', value)}
+                    />
+                  </div>
+                )}
+              </div>
+              {/* Clear All — only visible when filters active */}
+              {hasActiveFilters && (
+                <Button variant="text" color="primary" size="small" className="pog-filter-clear-btn" onClick={clearAllFilters}>
+                  Clear All
+                </Button>
+              )}
             </div>
+
+            {/* Active filter chips */}
+            {activeChips.length > 0 && (
+              <div className="pog-active-chips">
+                {activeChips.map(chip => (
+                  <Chips
+                    key={chip.key}
+                    label={chip.label}
+                    variant="filled"
+                    color="primary"
+                    size="small"
+                    isRemovable
+                    onDelete={() => handleFilterChange(chip.key, '')}
+                  />
+                ))}
+              </div>
+            )}
 
             <div className="pog-library-grid">
               {filteredPOGs.map(pog => (
                 <Card
                   key={pog.id}
                   size="extraSmall"
-                  sx={{ maxWidth: '100%', minHeight: 0, padding: '20px', cursor: 'pointer' }}
+                  className="pog-card"
+                  sx={{ padding: '0', cursor: 'pointer' }}
                   onClick={() => handlePOGSelect(pog)}
                 >
-                  <div className="pog-card-header">
-                    <div className="pog-card-icon">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                        <rect x="3" y="3" width="7" height="7" rx="1" />
-                        <rect x="14" y="3" width="7" height="7" rx="1" />
-                        <rect x="3" y="14" width="7" height="7" rx="1" />
-                        <rect x="14" y="14" width="7" height="7" rx="1" />
-                      </svg>
+                  <div className="pog-card-inner">
+                    <div className="pog-card-header">
+                      <div className="pog-card-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                          <rect x="3" y="3" width="7" height="7" rx="1" />
+                          <rect x="14" y="3" width="7" height="7" rx="1" />
+                          <rect x="3" y="14" width="7" height="7" rx="1" />
+                          <rect x="14" y="14" width="7" height="7" rx="1" />
+                        </svg>
+                      </div>
+                      {getStatusBadge(pog.status)}
                     </div>
-                    {getStatusBadge(pog.status)}
-                  </div>
-                  <div className="pog-card-body">
-                    <span className="pog-card-id">POG-{pog.id.padStart(3, '0')}</span>
-                    <h3 className="pog-card-name">{pog.name}</h3>
-                    <p className="pog-card-category">{pog.category}</p>
-                  </div>
-                  <div className="pog-card-footer">
-                    <div className="pog-card-meta">
-                      <span className="pog-card-version">{pog.version}</span>
-                      <span className="pog-card-clusters">{pog.clusters} clusters</span>
+                    <div className="pog-card-body">
+                      <span className="pog-card-id">POG-{pog.id.padStart(3, '0')}</span>
+                      <h3 className="pog-card-name">{pog.name}</h3>
+                      <p className="pog-card-category">{pog.category}</p>
                     </div>
-                    <div className="pog-card-date">
-                      <AccessTimeOutlined sx={{ fontSize: 12 }} />
-                      <span>{pog.lastModified}</span>
+                    <div className="pog-card-footer">
+                      <div className="pog-card-meta">
+                        <span className="pog-card-version">{pog.version}</span>
+                        <span className="pog-card-clusters">{pog.clusters} clusters</span>
+                      </div>
+                      <div className="pog-card-date">
+                        <AccessTimeOutlined sx={{ fontSize: 12 }} />
+                        <span>{pog.lastModified}</span>
+                      </div>
                     </div>
                   </div>
                 </Card>
@@ -431,7 +505,7 @@ export const MasterPOGManagement: React.FC = () => {
                     </div>
                     <div className="pog-cluster-names">
                       {pogClusterMapping[selectedPOG.id]?.clusters.map((cluster, idx) => (
-                        <span key={idx} className="pog-cluster-tag">{cluster}</span>
+                        <Tag key={idx} label={cluster} size="small" variant="stroke" />
                       ))}
                     </div>
                   </div>
@@ -457,8 +531,8 @@ export const MasterPOGManagement: React.FC = () => {
                   <p className="pog-rules-description">Rules dynamically applied based on category, cluster, and fixture mappings.</p>
                   <div className="pog-rules-list premium">
                     {pogRulesMapping[selectedPOG.id]?.map((rule, idx) => (
-                      <Card key={idx} size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '14px' }}>
-                        <div className="pog-rule-card-header">
+                      <div key={idx} className="pog-rule-row">
+                        <div className="pog-rule-row-header">
                           <div className={`pog-rule-icon-badge ${rule.type.toLowerCase()}`}>
                             <span>{rule.icon}</span>
                           </div>
@@ -469,7 +543,7 @@ export const MasterPOGManagement: React.FC = () => {
                           <span className={`pog-rule-status ${rule.status.toLowerCase()}`}>{rule.status}</span>
                         </div>
                         <p className="pog-rule-description">{rule.description}</p>
-                      </Card>
+                      </div>
                     ))}
                   </div>
                 </div>
