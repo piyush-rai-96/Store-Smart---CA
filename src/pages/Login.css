@@ -17,6 +17,7 @@
 }
 
 .login-container {
+  height: 100vh;
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -26,6 +27,7 @@
   animation: gradientShift 12s ease infinite;
   padding: 20px;
   position: relative;
+  overflow: hidden;
 }
 
 /* Subtle decorative glows */

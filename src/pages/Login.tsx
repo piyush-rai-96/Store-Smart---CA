@@ -13,6 +13,12 @@ export const Login: React.FC = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
 
+  // Lock body scroll while on login page
+  React.useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
+
   // Form state
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
