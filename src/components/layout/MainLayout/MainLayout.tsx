@@ -3,6 +3,7 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import { AppTopBar } from '../AppTopBar/AppTopBar';
 import { AppSidebar } from '../AppSidebar/AppSidebar';
 import { Breadcrumb } from '../../common/Breadcrumb';
+import { AICopilot } from '../../../pages/AICopilot';
 import { useAuth } from '../../../context/AuthContext';
 import { ROUTES } from '../../../types';
 import './MainLayout.css';
@@ -38,6 +39,8 @@ export const MainLayout: React.FC = () => {
           </main>
         </div>
       </div>
+      {/* Ask Alan panel — always mounted so it opens as an overlay on any screen */}
+      <AICopilot />
     </div>
   );
 };

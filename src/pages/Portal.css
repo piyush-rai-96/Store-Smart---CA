@@ -1,0 +1,32 @@
+/* Remove layout padding so HomePage fills edge-to-edge inside the content column */
+.portal-no-pad {
+  padding: 0 !important;
+  overflow: visible !important;
+  min-height: unset !important;
+}
+
+.portal-wrap {
+  width: 100%;
+  height: calc(100vh - 56px); /* 56px = AppTopBar height */
+  overflow: auto;
+}
+
+/* Impact UI renders main_landingpage_container as position:absolute with left:64px
+   (hardcoded collapsed-sidebar offset). We reset it to flow inside our flex shell
+   so the content shifts naturally when the sidebar opens/closes. */
+.portal-wrap .main_landingpage_container {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 100% !important;
+  box-sizing: border-box;
+}
+
+/* Override the Impact UI client logo with C&A logo */
+.portal-wrap .client_logo_container img {
+  content: url('/assets/c-a-logo.jpg');
+}

@@ -67,7 +67,7 @@ const seedTasks: ExecutionTask[] = [
     dueDate: '2026-04-23',
     storeName: 'Downtown Plaza #2034',
     storeGroup: 'Urban Flagship Cluster',
-    pogName: 'Women\'s Wall Display v3.0',
+    pogName: 'Women\'s Wall Display v2.1',
     category: 'Women\'s Apparel',
     createdAt: '2026-04-23T09:00:00Z',
     localizationId: 'loc-wwd-01',
@@ -649,7 +649,7 @@ export const TaskCenter: React.FC = () => {
       <div className="tc-container">
         <div className="page-loading">
           <div className="page-loading-spinner" />
-          <p>Loading Task Center...</p>
+          <p>Loading Operations Queue...</p>
         </div>
       </div>
     );

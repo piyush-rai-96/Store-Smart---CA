@@ -175,7 +175,7 @@ const initialMockRules: Rule[] = [
     description: 'Arrange sizes from XS to XL, left to right on rails and shelves',
     types: ['Facing'],
     mapping: { categories: ['Women\'s Apparel'], clusters: ['Urban Flagship', 'Family Center'], fixtures: ['Wall Display'] },
-    lastUpdated: '2025-04-22',
+    lastUpdated: '2026-04-22',
     status: 'Active',
     definition: { Facing: { minFacings: 2, maxFacings: 4 } },
     completedSteps: [1, 2, 3, 4],
@@ -186,7 +186,7 @@ const initialMockRules: Rule[] = [
     description: 'Group denim by wash color and prioritize bestsellers at eye level',
     types: ['Brand Blocking', 'Priority'],
     mapping: { categories: ['Denim'], clusters: [], fixtures: ['Wall Display'] },
-    lastUpdated: '2025-04-20',
+    lastUpdated: '2026-04-20',
     status: 'Active',
     definition: { 
       'Brand Blocking': { brand: 'C&A Essentials', blockingType: 'Vertical', minProducts: 3 },
@@ -200,7 +200,7 @@ const initialMockRules: Rule[] = [
     description: 'Require trend items, exclude discontinued styles in flagship stores',
     types: ['Mandatory SKU', 'Prohibited SKU'],
     mapping: { categories: ['Accessories'], clusters: ['Urban Flagship'], fixtures: ['End Cap'] },
-    lastUpdated: '2025-04-18',
+    lastUpdated: '2026-04-18',
     status: 'Active',
     definition: { 
       'Mandatory SKU': { skus: ['SKU-005', 'SKU-006'], minQuantity: 2 },
@@ -214,7 +214,7 @@ const initialMockRules: Rule[] = [
     description: 'Organize kids apparel by age group with toddler items at lower heights',
     types: ['Adjacency'],
     mapping: { categories: ['Kids Apparel'], clusters: ['Family Center'], fixtures: ['Wall Display'] },
-    lastUpdated: '2025-04-25',
+    lastUpdated: '2026-04-25',
     status: 'Draft',
     definition: {},
     completedSteps: [1, 2],
@@ -225,7 +225,7 @@ const initialMockRules: Rule[] = [
     description: 'Feature promotional items prominently with clear pricing on tables',
     types: ['Priority', 'Space Allocation'],
     mapping: { categories: ['Seasonal', 'Sale Items'], clusters: ['Mall Anchor', 'Outlet Value'], fixtures: ['Table'] },
-    lastUpdated: '2025-04-15',
+    lastUpdated: '2026-04-15',
     status: 'Active',
     definition: { 
       'Priority': { target: 'New Arrivals', placement: 'Front-center', priority: 'High' },
@@ -239,7 +239,7 @@ const initialMockRules: Rule[] = [
     description: 'Maintain proper spacing between hangers for easy browsing',
     types: ['Capacity'],
     mapping: { categories: ['Apparel', 'Dresses', 'Outerwear'], clusters: [], fixtures: ['Hanging Rail'] },
-    lastUpdated: '2025-04-10',
+    lastUpdated: '2026-04-10',
     status: 'Active',
     definition: { 
       'Capacity': { maxItemsPerRail: 25, minSpacing: '2 inches' }
@@ -479,6 +479,8 @@ export const POGRuleManagement: React.FC = () => {
   const [builderForm, setBuilderForm] = useState<Partial<Rule>>(emptyRule);
   const [isEditing, setIsEditing] = useState(false);
   const [editingRuleId, setEditingRuleId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const isMapped = (rule: Rule | Partial<Rule>): boolean => {
     const mapping = rule.mapping;
@@ -493,11 +495,13 @@ export const POGRuleManagement: React.FC = () => {
 
   const handleFilterChange = (filterName: keyof Filters, value: string) => {
     setFilters(prev => ({ ...prev, [filterName]: value }));
+    setCurrentPage(1);
   };
 
   const clearAllFilters = () => {
     setFilters({ ruleType: '', category: '', mappingStatus: '', ruleStatus: '' });
     setSearchQuery('');
+    setCurrentPage(1);
   };
 
   const filteredRules = rules.filter(rule => {
@@ -510,11 +514,16 @@ export const POGRuleManagement: React.FC = () => {
     const matchesRuleStatus = !filters.ruleStatus || rule.status === filters.ruleStatus;
     return matchesSearch && matchesType && matchesCategory && matchesMappingStatus && matchesRuleStatus;
   }).sort((a, b) => {
-    // Sort drafts to top, then by last updated (newest first)
     if (a.status === 'Draft' && b.status !== 'Draft') return -1;
     if (a.status !== 'Draft' && b.status === 'Draft') return 1;
     return new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime();
   });
+
+  const totalPages = Math.max(1, Math.ceil(filteredRules.length / rowsPerPage));
+  const safePage = Math.min(currentPage, totalPages);
+  const paginatedRules = filteredRules.slice((safePage - 1) * rowsPerPage, safePage * rowsPerPage);
+  const startRow = filteredRules.length === 0 ? 0 : (safePage - 1) * rowsPerPage + 1;
+  const endRow = Math.min(safePage * rowsPerPage, filteredRules.length);
 
   const handleViewRule = (rule: Rule) => setSelectedRule(rule);
 
@@ -1470,7 +1479,7 @@ export const POGRuleManagement: React.FC = () => {
                     </td>
                   </tr>
                 ) : (
-                  filteredRules.map(rule => {
+                  paginatedRules.map(rule => {
                     const mapped = isMapped(rule);
                     const isDraft = rule.status === 'Draft';
                     return (
@@ -1547,24 +1556,30 @@ export const POGRuleManagement: React.FC = () => {
 
           <div className="table-pagination">
             <div className="pagination-info">
-              Showing <strong>1-{Math.min(filteredRules.length, 10)}</strong> of <strong>{filteredRules.length}</strong> rules
+              {filteredRules.length === 0 ? 'No rules' : <>Showing <strong>{startRow}–{endRow}</strong> of <strong>{filteredRules.length}</strong> rules</>}
             </div>
             <div className="pagination-controls">
-              <button className="pagination-btn" disabled>
+              <button className="pagination-btn" disabled={safePage === 1} onClick={() => setCurrentPage(p => Math.max(1, p - 1))}>
                 <KeyboardArrowLeft sx={{ fontSize: 16 }} />
               </button>
-              <button className="pagination-page active">1</button>
-              <button className="pagination-page">2</button>
-              <button className="pagination-page">3</button>
-              <span className="pagination-ellipsis">...</span>
-              <button className="pagination-page">12</button>
-              <button className="pagination-btn">
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter(p => p === 1 || p === totalPages || Math.abs(p - safePage) <= 1)
+                .reduce<(number | string)[]>((acc, p, idx, arr) => {
+                  if (idx > 0 && typeof arr[idx - 1] === 'number' && (p as number) - (arr[idx - 1] as number) > 1) acc.push('…');
+                  acc.push(p);
+                  return acc;
+                }, [])
+                .map((p, idx) =>
+                  p === '…' ? <span key={`ellipsis-${idx}`} className="pagination-ellipsis">…</span>
+                  : <button key={p} className={`pagination-page${p === safePage ? ' active' : ''}`} onClick={() => setCurrentPage(p as number)}>{p}</button>
+                )}
+              <button className="pagination-btn" disabled={safePage === totalPages} onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}>
                 <KeyboardArrowRight sx={{ fontSize: 16 }} />
               </button>
             </div>
             <div className="pagination-per-page">
               <span>Rows per page:</span>
-              <select defaultValue="10">
+              <select value={rowsPerPage} onChange={e => { setRowsPerPage(Number(e.target.value)); setCurrentPage(1); }}>
                 <option value="10">10</option>
                 <option value="25">25</option>
                 <option value="50">50</option>

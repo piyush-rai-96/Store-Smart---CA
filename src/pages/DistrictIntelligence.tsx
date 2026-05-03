@@ -213,9 +213,9 @@ const DISTRICT_KPI_OVERRIDES: Record<string, Record<string, { primaryValue: stri
 interface TriageItem { id: string; title: string; priority: 'critical' | 'high' | 'medium'; stores: string; metric: string }
 const DISTRICT_TRIAGE: Record<string, TriageItem[]> = {
   d14: [
-    { id: 'voc-messy', title: 'VoC: Messy Aisles', priority: 'high', stores: 'Hamburg South · Cologne East · Berlin Mitte', metric: '+22% theme spike' },
-    { id: 'sea-fire', title: 'SEA Auto-Fail: Fire Exit', priority: 'critical', stores: 'Hamburg South — Display blocking exit', metric: 'Escalated to DM · Pending' },
-    { id: 'oos-risk', title: 'Inbound OOS Risk', priority: 'medium', stores: 'Cologne East — 3 SKUs delayed 48h', metric: 'Adaptation pending approval' },
+    { id: 'voc-messy', title: 'VoC: Messy Aisles', priority: 'high', stores: 'Johnson City Mall · Clarksville Crossing · Franklin Town Center', metric: '+22% theme spike' },
+    { id: 'sea-fire', title: 'SEA Auto-Fail: Fire Exit', priority: 'critical', stores: 'Johnson City Mall — Display blocking exit', metric: 'Escalated to DM · Pending' },
+    { id: 'oos-risk', title: 'Inbound OOS Risk', priority: 'medium', stores: 'Clarksville Crossing — 3 SKUs delayed 48h', metric: 'Adaptation pending approval' },
   ],
   d08: [
     { id: 'shrink-spike', title: 'Shrinkage Spike', priority: 'critical', stores: 'Peachtree Plaza · Savannah Square', metric: '+18% vs 4-week avg' },
@@ -259,9 +259,9 @@ const DISTRICT_BROADCAST_ANALYTICS: Record<string, DistrictBroadcastAnalytics> =
   d14: {
     overview: { active: 3, sentThisWeek: 12, ackPct: 94, avgAckTime: '1h 12m', trendVsLast: 3 },
     gaps: [
-      { store: 'Cologne East', storeId: '3456', pending: 3, overdue: 1, lastAck: '18h ago' },
-      { store: 'Pine Grove', storeId: '6789', pending: 2, overdue: 2, lastAck: '26h ago' },
-      { store: 'Berlin Mitte', storeId: '2345', pending: 1, overdue: 0, lastAck: '4h ago' },
+      { store: 'Franklin Town Center', storeId: '1234', pending: 3, overdue: 1, lastAck: '18h ago' },
+      { store: 'Johnson City Mall', storeId: '9012', pending: 2, overdue: 2, lastAck: '26h ago' },
+      { store: 'Murfreesboro Plaza', storeId: '4532', pending: 1, overdue: 0, lastAck: '4h ago' },
     ],
     effectiveness: [
       { id: 'b1', name: 'Safety Protocol Update', priority: 'high', ackRate: 100, avgAckTime: '32m', status: 'good', type: 'Action Required', sentAt: '2h ago', stores: 8, acked: 8 },
@@ -271,18 +271,18 @@ const DISTRICT_BROADCAST_ANALYTICS: Record<string, DistrictBroadcastAnalytics> =
       { id: 'b5', name: 'Fire Exit Compliance Alert', priority: 'high', ackRate: 88, avgAckTime: '45m', status: 'good', type: 'Action Required', sentAt: '1d ago', stores: 8, acked: 7 },
     ],
     storeCompliance: [
-      { store: 'Amsterdam Central', storeId: '1234', ackRate: 100, avgTime: '28m', tier: 'top', missedCount: 0 },
-      { store: 'Brussels Nord', storeId: '2156', ackRate: 100, avgTime: '35m', tier: 'top', missedCount: 0 },
-      { store: 'Hamburg South', storeId: '5678', ackRate: 92, avgTime: '1h 10m', tier: 'top', missedCount: 1 },
-      { store: 'Berlin Mitte', storeId: '2345', ackRate: 88, avgTime: '1h 45m', tier: 'at-risk', missedCount: 2 },
-      { store: 'Maple Heights', storeId: '4567', ackRate: 83, avgTime: '2h 20m', tier: 'at-risk', missedCount: 3 },
-      { store: 'Cologne East', storeId: '3456', ackRate: 75, avgTime: '3h 40m', tier: 'defaulter', missedCount: 5 },
-      { store: 'Pine Grove', storeId: '6789', ackRate: 67, avgTime: '5h 10m', tier: 'defaulter', missedCount: 7 },
-      { store: 'Frankfurt West', storeId: '7890', ackRate: 96, avgTime: '42m', tier: 'top', missedCount: 0 },
+      { store: 'Nashville Flagship', storeId: '2034', ackRate: 100, avgTime: '28m', tier: 'top', missedCount: 0 },
+      { store: 'Memphis Central', storeId: '1876', ackRate: 100, avgTime: '35m', tier: 'top', missedCount: 0 },
+      { store: 'Knoxville East', storeId: '3421', ackRate: 96, avgTime: '42m', tier: 'top', missedCount: 0 },
+      { store: 'Chattanooga Riverside', storeId: '2198', ackRate: 92, avgTime: '1h 10m', tier: 'top', missedCount: 1 },
+      { store: 'Murfreesboro Plaza', storeId: '4532', ackRate: 83, avgTime: '2h 20m', tier: 'at-risk', missedCount: 3 },
+      { store: 'Franklin Town Center', storeId: '1234', ackRate: 75, avgTime: '3h 40m', tier: 'defaulter', missedCount: 5 },
+      { store: 'Clarksville Crossing', storeId: '5678', ackRate: 88, avgTime: '1h 45m', tier: 'at-risk', missedCount: 2 },
+      { store: 'Johnson City Mall', storeId: '9012', ackRate: 67, avgTime: '5h 10m', tier: 'defaulter', missedCount: 7 },
     ],
     insights: [
       { pattern: 'Safety and compliance broadcasts achieve 98% ack within 2 hours — significantly faster than informational ones (avg 4h).', recommendation: 'Tag operational broadcasts as "Action Required" to leverage the urgency pattern and improve ack rates.' },
-      { pattern: 'Pine Grove and Cologne East are repeat defaulters — combined 12 missed acks in the last 2 weeks, correlating with their low DPI scores.', recommendation: 'Schedule a focused 1:1 with store managers at both locations. Consider linking broadcast compliance to performance reviews.' },
+      { pattern: 'Johnson City Mall and Franklin Town Center are repeat defaulters — combined 12 missed acks in the last 2 weeks, correlating with their low DPI scores.', recommendation: 'Schedule a focused 1:1 with store managers at both locations. Consider linking broadcast compliance to performance reviews.' },
       { pattern: 'Broadcasts sent before 9 AM get 22% faster acknowledgement vs those sent after 2 PM.', recommendation: 'Shift non-urgent broadcasts to early morning delivery windows for better engagement.' },
     ],
   },
@@ -300,7 +300,7 @@ const DISTRICT_BROADCAST_ANALYTICS: Record<string, DistrictBroadcastAnalytics> =
     ],
     storeCompliance: [
       { store: 'Savannah Square', storeId: '8234', ackRate: 100, avgTime: '30m', tier: 'top', missedCount: 0 },
-      { store: 'Macon Center', storeId: '8345', ackRate: 100, avgTime: '38m', tier: 'top', missedCount: 0 },
+      { store: 'Columbus Walk', storeId: '8345', ackRate: 100, avgTime: '38m', tier: 'top', missedCount: 0 },
       { store: 'Peachtree Plaza', storeId: '8456', ackRate: 88, avgTime: '1h 50m', tier: 'at-risk', missedCount: 2 },
       { store: 'Augusta Mall', storeId: '8567', ackRate: 83, avgTime: '2h 05m', tier: 'at-risk', missedCount: 3 },
       { store: 'Athens Center', storeId: '9012', ackRate: 79, avgTime: '2h 40m', tier: 'at-risk', missedCount: 3 },
@@ -315,7 +315,7 @@ const DISTRICT_BROADCAST_ANALYTICS: Record<string, DistrictBroadcastAnalytics> =
     overview: { active: 4, sentThisWeek: 15, ackPct: 82, avgAckTime: '2h 30m', trendVsLast: -5 },
     gaps: [
       { store: 'Chapel Hill', storeId: '2201', pending: 4, overdue: 3, lastAck: '32h ago' },
-      { store: 'Raleigh Commons', storeId: '2202', pending: 3, overdue: 1, lastAck: '14h ago' },
+      { store: 'Raleigh Court', storeId: '2202', pending: 3, overdue: 1, lastAck: '14h ago' },
       { store: 'Wilmington Bay', storeId: '2203', pending: 2, overdue: 0, lastAck: '8h ago' },
     ],
     effectiveness: [
@@ -327,15 +327,15 @@ const DISTRICT_BROADCAST_ANALYTICS: Record<string, DistrictBroadcastAnalytics> =
     storeCompliance: [
       { store: 'Charlotte Hub', storeId: '2204', ackRate: 100, avgTime: '32m', tier: 'top', missedCount: 0 },
       { store: 'Durham Heights', storeId: '2205', ackRate: 93, avgTime: '55m', tier: 'top', missedCount: 1 },
-      { store: 'Greensboro Mall', storeId: '2206', ackRate: 87, avgTime: '1h 30m', tier: 'at-risk', missedCount: 2 },
+      { store: 'Asheville Park', storeId: '2207', ackRate: 93, avgTime: '48m', tier: 'top', missedCount: 1 },
+      { store: 'Greensboro Lane', storeId: '2206', ackRate: 87, avgTime: '1h 30m', tier: 'at-risk', missedCount: 2 },
       { store: 'Wilmington Bay', storeId: '2203', ackRate: 80, avgTime: '2h 10m', tier: 'at-risk', missedCount: 3 },
-      { store: 'Raleigh Commons', storeId: '2202', ackRate: 67, avgTime: '3h 50m', tier: 'defaulter', missedCount: 6 },
+      { store: 'Raleigh Court', storeId: '2202', ackRate: 67, avgTime: '3h 50m', tier: 'defaulter', missedCount: 6 },
       { store: 'Chapel Hill', storeId: '2201', ackRate: 53, avgTime: '5h 30m', tier: 'defaulter', missedCount: 9 },
-      { store: 'Raleigh Court', storeId: '2207', ackRate: 93, avgTime: '48m', tier: 'top', missedCount: 1 },
     ],
     insights: [
       { pattern: 'Ack rate dropped 5% WoW — worst decline across all districts. Chapel Hill has not acknowledged any broadcast in 32 hours.', recommendation: 'Escalate Chapel Hill immediately. The store may have a staffing or device access issue preventing acknowledgements.' },
-      { pattern: 'High-priority broadcasts in Carolina are only achieving 64% avg ack — compared to 95% in District 14.', recommendation: 'Review broadcast delivery method. Consider requiring read-receipts or adding SMS fallback for critical alerts.' },
+      { pattern: 'High-priority broadcasts in Carolina are only achieving 64% avg ack — compared to 94% in District 14 (Tennessee).', recommendation: 'Review broadcast delivery method. Consider requiring read-receipts or adding SMS fallback for critical alerts.' },
     ],
   },
   d11: {
@@ -380,10 +380,10 @@ const DISTRICT_BROADCAST_ANALYTICS: Record<string, DistrictBroadcastAnalytics> =
       { id: 'b3', name: 'Monthly Team Meeting', priority: 'low', ackRate: 100, avgAckTime: '28m', status: 'good', type: 'Informational', sentAt: '2d ago', stores: 5, acked: 5 },
     ],
     storeCompliance: [
-      { store: 'Huntsville South', storeId: '1902', ackRate: 100, avgTime: '18m', tier: 'top', missedCount: 0 },
+      { store: 'Huntsville Plaza', storeId: '1902', ackRate: 100, avgTime: '18m', tier: 'top', missedCount: 0 },
       { store: 'Mobile Bay', storeId: '1903', ackRate: 100, avgTime: '25m', tier: 'top', missedCount: 0 },
       { store: 'Montgomery Mall', storeId: '1904', ackRate: 100, avgTime: '30m', tier: 'top', missedCount: 0 },
-      { store: 'Tuscaloosa', storeId: '1905', ackRate: 96, avgTime: '38m', tier: 'top', missedCount: 0 },
+      { store: 'Tuscaloosa Walk', storeId: '1905', ackRate: 96, avgTime: '38m', tier: 'top', missedCount: 0 },
       { store: 'Birmingham Center', storeId: '1901', ackRate: 88, avgTime: '1h 10m', tier: 'at-risk', missedCount: 1 },
     ],
     insights: [
@@ -640,13 +640,13 @@ const districtKPIs: DistrictKPI[] = [
     status: 'warning',
     clickable: true,
     trendData: [92, 93, 91, 90, 92, 91, 89, 90, 88, 89, 90, 89],
-    trendInsight: 'Below target for 6 consecutive weeks. Store variance: 78% (Pine Grove) to 97% (Brussels Nord).',
+    trendInsight: 'Below target for 6 consecutive weeks. Store variance: 78% (Johnson City Mall) to 97% (Memphis Central).',
     panelTitle: 'Shelf Audit Compliance — 52-Week Trend',
     panelDetails: [
       { label: 'Target', value: '95%', status: 'neutral' },
       { label: 'Gap', value: '-6pts', status: 'negative' },
-      { label: 'Best Store', value: 'Brussels Nord (97%)', status: 'positive' },
-      { label: 'Worst Store', value: 'Pine Grove (78%)', status: 'negative' },
+      { label: 'Best Store', value: 'Memphis Central (97%)', status: 'positive' },
+      { label: 'Worst Store', value: 'Johnson City Mall (78%)', status: 'negative' },
     ]
   },
   // 3. Execution — OOS Rate
@@ -662,13 +662,13 @@ const districtKPIs: DistrictKPI[] = [
     status: 'negative',
     clickable: true,
     trendData: [3.0, 2.8, 3.1, 3.3, 3.0, 3.2, 3.5, 3.3, 3.6, 3.8, 3.5, 4.1],
-    trendInsight: 'Rising trend over 8 weeks. Apparel category driving 60% of OOS. Cologne East shipment delay a key factor.',
+    trendInsight: 'Rising trend over 8 weeks. Apparel category driving 60% of OOS. Clarksville Crossing shipment delay a key factor.',
     panelTitle: 'OOS Rate — 52-Week Trend',
     panelDetails: [
       { label: 'Best', value: '2.1% (Jun 30)', status: 'positive' },
       { label: 'Worst', value: '4.5% (Feb 23)', status: 'negative' },
       { label: 'Top Category', value: 'Apparel (60% of OOS)', status: 'negative' },
-      { label: 'Key Driver', value: 'Cologne East delay', status: 'warning' },
+      { label: 'Key Driver', value: 'Clarksville Crossing delay', status: 'warning' },
     ]
   },
   // 4. Profitability (Combined)
@@ -696,13 +696,13 @@ const districtKPIs: DistrictKPI[] = [
   },
 ];
 
-// Team members for chat/broadcast (same as Home Screen)
+// Team members for chat/broadcast
 const teamMembers = [
-  { id: 'sm1', name: 'Sarah Mitchell', role: 'Store Manager - Hamburg South', avatar: 'SM', status: 'online' },
-  { id: 'sm2', name: 'Marcus Chen', role: 'Store Manager - Cologne East', avatar: 'MC', status: 'online' },
-  { id: 'sm3', name: 'Lisa Weber', role: 'Store Manager - Berlin Mitte', avatar: 'LW', status: 'away' },
-  { id: 'am1', name: 'Thomas Müller', role: 'Area Manager - North', avatar: 'TM', status: 'online' },
-  { id: 'am2', name: 'Anna Schmidt', role: 'Area Manager - South', avatar: 'AS', status: 'offline' },
+  { id: 'sm1', name: 'Sarah Mitchell', role: 'Store Manager - Nashville Flagship', avatar: 'SM', status: 'online' },
+  { id: 'sm2', name: 'Marcus Chen', role: 'Store Manager - Franklin Town Center', avatar: 'MC', status: 'online' },
+  { id: 'sm3', name: 'Lisa Warren', role: 'Store Manager - Johnson City Mall', avatar: 'LW', status: 'away' },
+  { id: 'am1', name: 'Thomas Miller', role: 'Area Manager - East Tennessee', avatar: 'TM', status: 'online' },
+  { id: 'am2', name: 'Anna Barnes', role: 'Area Manager - West Tennessee', avatar: 'AB', status: 'offline' },
 ];
 
 // Helper functions
@@ -1083,41 +1083,41 @@ export const DistrictIntelligence: React.FC = () => {
   interface DIBrief { greeting: string; sections: DIBriefSection[]; closing: string }
   const DISTRICT_BRIEFS: Record<string, DIBrief> = {
     d14: {
-      greeting: `3 active triage items this week across Hamburg South, Cologne East, and Berlin Mitte. Here's the full district intelligence picture with root causes, trend analysis, and recommended actions.`,
+      greeting: `3 active triage items this week across Johnson City Mall, Clarksville Crossing, and Franklin Town Center. Here's the full district intelligence picture with root causes, trend analysis, and recommended actions.`,
       sections: [
         {
           title: 'Triage & Critical Issues',
           icon: 'triage',
           bullets: [
-            '<strong>VoC: Messy Aisles</strong> — +22% theme spike across 3 stores (Hamburg South +45%, Cologne East +38%, Berlin Mitte +31%). WoW trend is accelerating; last week was +14%. Root cause: cleaning staff hours were cut by 2hrs/day at these locations last month.',
-            '<strong>SEA Auto-Fail: Fire Exit</strong> at Hamburg South is a <strong>CRITICAL</strong> regulatory exposure. Display fixture blocking emergency Exit B. Auto-escalated to DM 2 hours ago; store manager acknowledgment still pending. Any delay risks store closure and penalties.',
-            '<strong>Inbound OOS Risk</strong> at Cologne East — 3 SKUs (Summer Dress, Linen Pants, Cotton Blouse) delayed 48h from DC. Revenue impact estimated at €2,400. Adaptation plan awaiting DM approval.',
+            '<strong>VoC: Messy Aisles</strong> — +22% theme spike across 3 stores (Johnson City Mall +45%, Clarksville Crossing +38%, Franklin Town Center +31%). WoW trend is accelerating; last week was +14%. Root cause: cleaning staff hours were cut by 2hrs/day at these locations last month.',
+            '<strong>SEA Auto-Fail: Fire Exit</strong> at Johnson City Mall is a <strong>CRITICAL</strong> regulatory exposure. Display fixture blocking emergency Exit B. Auto-escalated to DM 2 hours ago; store manager acknowledgment still pending. Any delay risks store closure and penalties.',
+            '<strong>Inbound OOS Risk</strong> at Clarksville Crossing — 3 SKUs (Summer Dress, Linen Pants, Cotton Blouse) delayed 48h from DC. Revenue impact estimated at $2,400. Adaptation plan awaiting DM approval.',
           ],
         },
         {
           title: 'Performance & Trends',
           icon: 'performance',
           bullets: [
-            'District DPI moved from <strong>76 → 78</strong> (+2pts MoM), placing in the <strong>top 10% — Excellence Tier</strong>. However, the triage items above represent emerging risks that could reverse this trajectory.',
-            'Weekly revenue at <strong>$2.4M</strong> (+8% vs target, +5% WoW). 6 of 8 stores exceeded plan. Amsterdam Central and Hamburg South are the leading revenue contributors, but Hamburg South\'s operational issues are offsetting sales performance.',
+            'District DPI moved from <strong>85 → 87</strong> (+2pts MoM), placing in the <strong>top 10% — Excellence Tier</strong>. However, the triage items above represent emerging risks that could reverse this trajectory.',
+            'Weekly revenue at <strong>$1.26M</strong> (+8% vs target, +5% WoW). 6 of 8 stores exceeded plan. Nashville Flagship and Memphis Central are the leading revenue contributors, but Johnson City Mall\'s operational issues are offsetting sales performance.',
             'Gross margin held at <strong>34.2%</strong> (+0.3pp WoW). YoY comparison shows a <strong>+1.8pp improvement</strong> driven by markdown optimization. Seasonal clearance contributed an estimated $18K margin recovery this period.',
-            'Store-level variance is widening: top store (Amsterdam Central) at DPI 91 vs bottom (Pine Grove) at DPI 63. The gap increased by 4pts this month — requires targeted intervention.',
+            'Store-level variance is widening: top store (Nashville Flagship) at SPI 94 vs bottom (Johnson City Mall) at SPI 58. The gap increased by 4pts this month — requires targeted intervention.',
           ],
         },
         {
           title: 'Operational Analysis',
           icon: 'ops',
           bullets: [
-            '<strong>Compliance:</strong> District-wide POG adherence at <strong>97%</strong> (up from 94%). Brussels Nord at 100% Camera Shelf Audit for 3 consecutive weeks. However, Hamburg South dropped to 88% — directly linked to the messy aisles / fire exit issues.',
+            '<strong>Compliance:</strong> District-wide POG adherence at <strong>97%</strong> (up from 94%). Franklin Town Center at 100% Camera Shelf Audit for 3 consecutive weeks. However, Johnson City Mall dropped to 88% — directly linked to the messy aisles / fire exit issues.',
             '<strong>Cross-metric relationship:</strong> The VoC "Messy Aisles" complaints correlate 0.87 with declining Cleanliness audit scores. Both map to the same 3 stores. This is not a coincidence — it\'s a staffing execution failure.',
-            '<strong>Task execution:</strong> 87% on-time completion. 2 critical overdue items are the fire exit resolution and the Cologne East adaptation approval — both in your triage queue.',
+            '<strong>Task execution:</strong> 87% on-time completion. 2 critical overdue items are the fire exit resolution and the Clarksville Crossing adaptation approval — both in your triage queue.',
           ],
         },
         {
           title: 'Customer Experience',
           icon: 'customer',
           bullets: [
-            'NPS improved to <strong>72 (+12 pts)</strong> district-wide, but this masks a divergence: stores without triage issues are at NPS 81, while Hamburg South / Cologne East average NPS 58.',
+            'NPS improved to <strong>72 (+12 pts QoQ)</strong> district-wide, but this masks a divergence: stores without triage issues are at NPS 81, while Clarksville Crossing / Johnson City Mall average NPS 61.',
             '"Messy Aisles" is now the <strong>#1 negative VoC theme</strong> (+34% WoW, +22% overall). If not addressed within 2 weeks, NPS modeling projects a <strong>-6pt district-wide impact</strong>.',
             'Positive signal: "Helpful staff" remains the top positive theme. Staff friendliness scores are stable across all stores — the issue is purely operational (cleanliness, stocking), not service attitude.',
           ],
@@ -1126,14 +1126,14 @@ export const DistrictIntelligence: React.FC = () => {
           title: 'Recommendations & Next Steps',
           icon: 'recommendations',
           bullets: [
-            '<strong>Immediate (today):</strong> Deploy Hamburg South team to clear fire exit and confirm compliance. This is a zero-tolerance safety item — escalate to Regional if not resolved by EOD.',
-            '<strong>This week:</strong> Restore cleaning hours at Hamburg South, Cologne East, and Berlin Mitte (+2hrs/day). Model shows this alone could reverse the Messy Aisles trend within 10 days.',
-            '<strong>Approve:</strong> Cologne East adaptation plan for the 3 delayed SKUs — estimated to recover €2,400 in at-risk revenue.',
-            '<strong>Forward-looking:</strong> Amsterdam Central\'s execution playbook should be templated for Pine Grove turnaround. Schedule a best-practices session and consider pairing store managers.',
+            '<strong>Immediate (today):</strong> Deploy Johnson City Mall team to clear fire exit and confirm compliance. This is a zero-tolerance safety item — escalate to Regional if not resolved by EOD.',
+            '<strong>This week:</strong> Restore cleaning hours at Johnson City Mall, Clarksville Crossing, and Franklin Town Center (+2hrs/day). Model shows this alone could reverse the Messy Aisles trend within 10 days.',
+            '<strong>Approve:</strong> Clarksville Crossing adaptation plan for the 3 delayed SKUs — estimated to recover $2,400 in at-risk revenue.',
+            '<strong>Forward-looking:</strong> Nashville Flagship\'s execution playbook should be templated for Johnson City Mall turnaround. Schedule a best-practices session and consider pairing store managers.',
           ],
         },
       ],
-      closing: 'Overall, the district is in a strong position at DPI 78 / Excellence Tier, but the 3 active triage items need rapid resolution to prevent backsliding. Priority: fire exit (safety), messy aisles (VoC trend), OOS adaptation (revenue protection).',
+      closing: 'Overall, the district is in a strong position at DPI 87 / Excellence Tier, but the 3 active triage items need rapid resolution to prevent backsliding. Priority: fire exit (safety), messy aisles (VoC trend), OOS adaptation (revenue protection).',
     },
     d08: {
       greeting: `3 active triage items in Georgia district this week. Shrinkage and checkout speed are the dominant concerns. Here's your detailed intelligence brief with store-level analysis and action plan.`,
@@ -2194,7 +2194,7 @@ export const DistrictIntelligence: React.FC = () => {
               <tr>
                 <th className="th-rank th-sortable" onClick={() => handleLeaderboardSort('rank')}><span>Rank</span><SortIcon col="rank" /></th>
                 <th className="th-store th-sortable" onClick={() => handleLeaderboardSort('store')}><span>Store</span><SortIcon col="store" /></th>
-                <th className="th-dpi th-sortable" onClick={() => handleLeaderboardSort('dpi')}><span>DPI</span><SortIcon col="dpi" /></th>
+                <th className="th-dpi th-sortable" onClick={() => handleLeaderboardSort('dpi')}><span>SPI</span><SortIcon col="dpi" /></th>
                 <th className="th-sales th-sortable" onClick={() => handleLeaderboardSort('sales')}><span>Net Sales</span><SortIcon col="sales" /></th>
                 <th className="th-sea th-sortable" onClick={() => handleLeaderboardSort('sea')}><span>SEA Score</span><SortIcon col="sea" /></th>
                 <th className="th-voc th-sortable" onClick={() => handleLeaderboardSort('voc')}><span>VoC %</span><SortIcon col="voc" /></th>
@@ -2811,7 +2811,7 @@ export const DistrictIntelligence: React.FC = () => {
                                 <div className={`bw-checkbox ${selected ? 'checked' : ''}`}>{selected && <Check sx={{ fontSize: 11 }}/>}</div>
                                 <div className="bw-selector-item-body">
                                   <span className="bw-selector-item-title">{s.storeName} #{s.storeNumber}</span>
-                                  <span className="bw-selector-item-sub">{s.dpiTier} · DPI {s.dpi} · {s.status}</span>
+                                  <span className="bw-selector-item-sub">{s.dpiTier} · SPI {s.dpi} · {s.status}</span>
                                 </div>
                               </div>
                             );
@@ -2990,19 +2990,19 @@ export const DistrictIntelligence: React.FC = () => {
                 <div className="section-label">Affected Stores (4)</div>
                 <div className="store-list">
                   <div className="store-item">
-                    <span className="store-name">Hamburg South</span>
+                    <span className="store-name">Johnson City Mall</span>
                     <span className="store-metric negative">+52% complaints</span>
                   </div>
                   <div className="store-item">
-                    <span className="store-name">Cologne East</span>
+                    <span className="store-name">Clarksville Crossing</span>
                     <span className="store-metric negative">+45% complaints</span>
                   </div>
                   <div className="store-item">
-                    <span className="store-name">Berlin Mitte</span>
+                    <span className="store-name">Franklin Town Center</span>
                     <span className="store-metric negative">+38% complaints</span>
                   </div>
                   <div className="store-item">
-                    <span className="store-name">Munich Central</span>
+                    <span className="store-name">Murfreesboro Plaza</span>
                     <span className="store-metric negative">+31% complaints</span>
                   </div>
                 </div>
@@ -3054,15 +3054,15 @@ export const DistrictIntelligence: React.FC = () => {
                 <div className="section-label">Failing Stores (3)</div>
                 <div className="store-list">
                   <div className="store-item">
-                    <span className="store-name">Hamburg South</span>
+                    <span className="store-name">Johnson City Mall</span>
                     <span className="store-metric negative">3 failures</span>
                   </div>
                   <div className="store-item">
-                    <span className="store-name">Cologne East</span>
+                    <span className="store-name">Clarksville Crossing</span>
                     <span className="store-metric negative">2 failures</span>
                   </div>
                   <div className="store-item">
-                    <span className="store-name">Berlin Mitte</span>
+                    <span className="store-name">Franklin Town Center</span>
                     <span className="store-metric negative">2 failures</span>
                   </div>
                 </div>
@@ -3116,15 +3116,15 @@ export const DistrictIntelligence: React.FC = () => {
                     <div className="section-label">Affected Stores (3)</div>
                     <div className="store-list">
                       <div className="store-item">
-                        <span className="store-name">Hamburg South</span>
+                        <span className="store-name">Johnson City Mall</span>
                         <span className="store-metric negative">+45% complaints</span>
                       </div>
                       <div className="store-item">
-                        <span className="store-name">Cologne East</span>
+                        <span className="store-name">Clarksville Crossing</span>
                         <span className="store-metric negative">+38% complaints</span>
                       </div>
                       <div className="store-item">
-                        <span className="store-name">Berlin Mitte</span>
+                        <span className="store-name">Franklin Town Center</span>
                         <span className="store-metric negative">+31% complaints</span>
                       </div>
                     </div>
@@ -3161,14 +3161,14 @@ export const DistrictIntelligence: React.FC = () => {
                   <div className="investigation-summary">
                     <div className="summary-badge critical">CRITICAL</div>
                     <h4>Fire Exit Blocked - Safety Violation</h4>
-                    <p>Display fixture blocking emergency exit at Hamburg South. Immediate action required. Auto-escalated to District Manager.</p>
+                    <p>Display fixture blocking emergency exit at Johnson City Mall. Immediate action required. Auto-escalated to District Manager.</p>
                   </div>
                   
                   <div className="investigation-stores">
                     <div className="section-label">Violation Details</div>
                     <div className="store-list">
                       <div className="store-item">
-                        <span className="store-name">Hamburg South</span>
+                        <span className="store-name">Johnson City Mall</span>
                         <span className="store-metric negative">Fire Exit B - Blocked</span>
                       </div>
                     </div>
@@ -3219,7 +3219,7 @@ export const DistrictIntelligence: React.FC = () => {
                   <div className="investigation-summary">
                     <div className="summary-badge medium">MEDIUM PRIORITY</div>
                     <h4>Inbound Shipment Delay</h4>
-                    <p>3 SKUs delayed 48 hours affecting Cologne East. Adaptation plan pending approval. Estimated revenue impact: €2,400.</p>
+                    <p>3 SKUs delayed 48 hours affecting Clarksville Crossing. Adaptation plan pending approval. Estimated revenue impact: $2,400.</p>
                   </div>
                   
                   <div className="investigation-stores">

@@ -64,6 +64,7 @@ export const ROUTES = {
   LOGIN: '/login',
   SIGNUP: '/signup',
   FORGOT_PASSWORD: '/forgot-password',
+  PORTAL: '/portal',
   HOME: '/home',
   MASTER_POG: '/planogram/master-pog',
   // Store Operations Hub

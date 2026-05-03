@@ -7,6 +7,7 @@ import { PublicRoute } from './routes/PublicRoute';
 import { Login } from './pages/Login';
 // import { SignUp } from './pages/SignUp';
 // import { ForgotPassword } from './pages/ForgotPassword';
+import { Portal } from './pages/Portal';
 import { MainLayout } from './components/layout/MainLayout/MainLayout';
 import { MasterPOGManagement } from './pages/MasterPOGManagement';
 import { POGRuleManagement } from './pages/POGRuleManagement';
@@ -14,7 +15,6 @@ import { POGLocalizationEngine } from './pages/POGLocalizationEngine';
 import { StoreOpsHome } from './pages/StoreOpsHome';
 import { DistrictIntelligence } from './pages/DistrictIntelligence';
 import { StoreCenter as StoreDeepDive } from './pages/StoreCenter';
-import { AICopilot } from './pages/AICopilot';
 import { TaskCenter } from './pages/TaskCenter';
 import { MessageCenter } from './pages/MessageCenter';
 import { UserAccessManagement } from './pages/UserAccessManagement';
@@ -40,13 +40,15 @@ function App() {
       <ToastProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Navigate to={ROUTES.STORE_OPS_HOME} replace />} />
+          <Route path="/" element={<Navigate to={ROUTES.PORTAL} replace />} />
           <Route path={ROUTES.LOGIN} element={<PublicRoute><Login /></PublicRoute>} />
+          {/* Portal landing — protected, inside MainLayout for header+sidebar */}
           {/* <Route path={ROUTES.SIGNUP} element={<PublicRoute><SignUp /></PublicRoute>} />
           <Route path={ROUTES.FORGOT_PASSWORD} element={<PublicRoute><ForgotPassword /></PublicRoute>} /> */}
           
           {/* Protected routes with MainLayout */}
           <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
+            <Route path={ROUTES.PORTAL} element={<Portal />} />
             <Route path={ROUTES.HOME} element={<Navigate to={ROUTES.STORE_OPS_HOME} replace />} />
             <Route path={ROUTES.MASTER_POG} element={<MasterPOGManagement />} />
             <Route path="/planogram/rule-management" element={<POGRuleManagement />} />
@@ -56,8 +58,8 @@ function App() {
             <Route path={ROUTES.STORE_OPS_HOME} element={<StoreOpsHome />} />
             <Route path="/store-operations/district-intelligence" element={<DistrictIntelligence />} />
             <Route path="/store-operations/store-deep-dive" element={<StoreDeepDive />} />
-            {/* Command Center */}
-            <Route path="/command-center/ai-copilot" element={<AICopilot />} />
+            {/* Command Center — AI Copilot panel is always mounted globally in MainLayout; route redirects to home */}
+            <Route path="/command-center/ai-copilot" element={<Navigate to={ROUTES.STORE_OPS_HOME} replace />} />
             <Route path="/command-center/operations-queue" element={<TaskCenter />} />
             <Route path="/command-center/task-center" element={<Navigate to="/command-center/operations-queue" replace />} />
             <Route path="/command-center/communications" element={<MessageCenter />} />

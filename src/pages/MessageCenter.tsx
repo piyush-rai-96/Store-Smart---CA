@@ -148,7 +148,7 @@ const mockChats: Chat[] = [
     participants: contacts, unread: 1, pinned: false,
     lastActivity: new Date(Date.now() - 60 * 60000),
     messages: [
-      { id: 'm20', senderId: 'u2', content: 'Q4 Planogram Refresh — all stores must complete the Holiday reset by Nov 15.', timestamp: new Date(Date.now() - 180 * 60000), status: 'read', context: { label: 'Open Master POG Management', route: R.pog, kind: 'pog' } },
+      { id: 'm20', senderId: 'u2', content: 'Q2 Planogram Refresh — all stores must complete the Spring Reset by May 20.', timestamp: new Date(Date.now() - 180 * 60000), status: 'read', context: { label: 'Open Master POG Management', route: R.pog, kind: 'pog' } },
       { id: 'm21', senderId: 'u2', content: '🏆 Congrats to Store #2341, #1142, and #3021 for hitting 95%+ compliance this quarter.', timestamp: new Date(Date.now() - 60 * 60000), status: 'delivered', context: { label: 'View leaderboard', route: R.district, kind: 'audit' } },
     ],
   },
@@ -168,7 +168,7 @@ const mockChats: Chat[] = [
     participants: [contacts[0], contacts[5], contacts[7]], unread: 0, pinned: false,
     lastActivity: new Date(Date.now() - 300 * 60000),
     messages: [
-      { id: 'm40', senderId: 'u1', content: 'Team — holiday staffing draft is up. Pls review by tomorrow.', timestamp: new Date(Date.now() - 360 * 60000), status: 'read' },
+      { id: 'm40', senderId: 'u1', content: 'Team — spring staffing schedule is up. Pls review by tomorrow.', timestamp: new Date(Date.now() - 360 * 60000), status: 'read' },
       { id: 'm41', senderId: 'u8', content: 'Reviewed. We need +20% coverage for Black Friday — mostly at #2341 and #1142.', timestamp: new Date(Date.now() - 320 * 60000), status: 'read', context: { label: 'View District Intelligence', route: R.district, kind: 'audit' } },
       { id: 'm42', senderId: 'u6', content: 'Memphis is good. We can absorb +15% without new hires — OT only.', timestamp: new Date(Date.now() - 300 * 60000), status: 'read' },
     ],
@@ -189,7 +189,7 @@ const mockChats: Chat[] = [
     participants: [contacts[0], contacts[6], contacts[1], contacts[7]], unread: 3, pinned: false,
     lastActivity: new Date(Date.now() - 22 * 60000),
     messages: [
-      { id: 'mp1', senderId: 'u7', content: 'Pushed the Q4 Energy Drinks template to Localization Engine for Tennessee stores.', timestamp: new Date(Date.now() - 240 * 60000), status: 'read', context: { label: 'Open Localization Engine', route: R.loc, kind: 'localization' } },
+      { id: 'mp1', senderId: 'u7', content: 'Pushed the Spring Refresh Beverage template to Localization Engine for Tennessee stores.', timestamp: new Date(Date.now() - 240 * 60000), status: 'read', context: { label: 'Open Localization Engine', route: R.loc, kind: 'localization' } },
       { id: 'mp2', senderId: 'u1', content: 'Nashville is approved. Memphis still has 2 SKUs failing the SLA rule — reviewing.', timestamp: new Date(Date.now() - 180 * 60000), status: 'read', context: { label: 'Open POG Rules', route: R.pogRule, kind: 'pog' } },
       { id: 'mp3', senderId: 'u7', content: 'Copilot just opened 4 new audits across Beverages — confidence 88–94%.', timestamp: new Date(Date.now() - 60 * 60000), status: 'delivered', context: { label: 'Triage in AI Copilot', route: R.copilot, kind: 'audit' } },
       { id: 'mp4', senderId: 'u1', content: 'Pinning this thread. Anna will own approvals through Friday.', timestamp: new Date(Date.now() - 22 * 60000), status: 'delivered' },
@@ -206,8 +206,8 @@ const mockChats: Chat[] = [
     ],
   },
   {
-    id: 'c8', type: 'broadcast', name: 'Operations — Holiday Schedule', avatar: 'HS',
-    description: 'Holiday operations & scheduling updates',
+    id: 'c8', type: 'broadcast', name: 'Operations — Spring Schedule', avatar: 'SS',
+    description: 'Spring operations & scheduling updates',
     participants: contacts, unread: 1, pinned: true,
     lastActivity: new Date(Date.now() - 30 * 60000),
     messages: [
@@ -220,7 +220,7 @@ const mockChats: Chat[] = [
     participants: contacts, unread: 1, pinned: false,
     lastActivity: new Date(Date.now() - 120 * 60000),
     messages: [
-      { id: 'm80', senderId: 'u2', content: '🏆 Great work on Q4! District 14 hit 108% of plan. Top performers will be recognized at the regional sync.', timestamp: new Date(Date.now() - 120 * 60000), status: 'delivered', context: { label: 'View leaderboard', route: R.district, kind: 'audit' } },
+      { id: 'm80', senderId: 'u2', content: '🏆 Great start to Q2! District 14 hit 104% of April plan. Top performers will be recognized at the regional sync.', timestamp: new Date(Date.now() - 120 * 60000), status: 'delivered', context: { label: 'View leaderboard', route: R.district, kind: 'audit' } },
     ],
   },
   {

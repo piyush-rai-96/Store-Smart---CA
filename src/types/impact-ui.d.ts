@@ -345,4 +345,33 @@ declare module 'impact-ui' {
     [key: string]: unknown;
   }
   export const ChatBotComponent: FC<ChatBotComponentProps>;
+
+  export const HomePage: FC<{
+    clientName?: string;
+    userName?: string;
+    toolKitItems?: Array<{
+      name: string;
+      description?: string;
+      details?: string;
+      cta?: string;
+      folderContent?: string[];
+    }>;
+    smartAiItems?: Array<{
+      name: string;
+      description?: string;
+      details?: string;
+      cta?: string;
+      isNewProduct?: boolean;
+      folderContent?: string[];
+    }>;
+    configurationsMenuItems?: Array<{ logo: string; label: string; desc: string }>;
+    activeToolKitItem?: object | null;
+    activeSmartAiItem?: object | null;
+    onLaunchClick?: (item?: object | null) => void;
+    onBookDemoClick?: (item?: object) => void;
+    onViewReleasedNotesClick?: () => void;
+    onConfigurationsClick?: (item?: object) => void;
+    onKnowMoreClick?: (item?: object | null) => void;
+    showConfigurationsButton?: boolean;
+  }>;
 }

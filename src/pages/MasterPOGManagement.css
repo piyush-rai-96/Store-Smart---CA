@@ -1081,6 +1081,26 @@
   background: var(--ia-color-warning-bg);
 }
 
+.pog-rule-icon-badge.brand-blocking {
+  background: var(--ia-color-bg-muted);
+}
+
+.pog-rule-icon-badge.mandatory-sku {
+  background: var(--ia-color-warning-bg);
+}
+
+.pog-rule-icon-badge.prohibited-sku {
+  background: var(--ia-color-error-bg);
+}
+
+.pog-rule-icon-badge.space-allocation {
+  background: var(--ia-color-primary-soft);
+}
+
+.pog-rule-icon-badge.capacity {
+  background: var(--ia-color-success-bg);
+}
+
 .pog-rule-card-title {
   flex: 1;
   display: flex;

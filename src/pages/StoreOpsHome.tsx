@@ -1098,7 +1098,7 @@ export const StoreOpsHome: React.FC = () => {
       <div className="store-ops-home">
         <div className="store-ops-loading">
           <div className="store-ops-loading-spinner" />
-          <p>Loading your dashboard...</p>
+          <p>Loading My Space...</p>
         </div>
       </div>
     );
@@ -1161,7 +1161,7 @@ export const StoreOpsHome: React.FC = () => {
               <div className="ai-brief-section">
                 <h3 className="ai-brief-section-title"><TrendingUpOutlined sx={{ fontSize: 14 }}/> Sales &amp; Margin</h3>
                 <ul className="ai-brief-bullets">
-                  <li>District weekly revenue came in at <strong>$2.4M</strong>, <strong>+8% vs target</strong> and +5% WoW. 6 of 8 stores exceeded plan — Nashville Flagship and Memphis Central are leading contributors.</li>
+                  <li>District weekly revenue came in at <strong>$1.26M</strong>, <strong>+8% vs target</strong> and +5% WoW. 6 of 8 stores exceeded plan — Nashville Flagship and Memphis Central are leading contributors.</li>
                   <li>Gross margin held steady at <strong>34.2%</strong> (+0.3pp vs last week). Markdown optimization on seasonal clearance items contributed an estimated <strong>$18K margin recovery</strong> this period.</li>
                   <li>Average basket size increased to <strong>$47.20</strong> (+3.1%), likely driven by the new cross-sell POG rollout in personal care aisles. <em>Consider expanding this to remaining 3 stores.</em></li>
                 </ul>
@@ -1238,9 +1238,7 @@ export const StoreOpsHome: React.FC = () => {
                 )}
               </div>
               <div className="insights-meta">
-                <span className="meta-positive">{insights.filter(i => i.type === 'positive').length} Positive</span>
-                <span className="meta-divider">•</span>
-                <span className="meta-neutral">{insights.filter(i => i.type === 'info').length} On Track</span>
+                <span className="meta-positive">{2 + insights.filter(i => i.isHero || i.type === 'risk').slice(0, 1).length} Alerts</span>
               </div>
             </div>
             <div className="insights-content-v3">
@@ -1573,7 +1571,7 @@ export const StoreOpsHome: React.FC = () => {
                 <div className="kpi-snapshot-item-icon compliance"><TaskAltOutlined sx={{ fontSize: 16 }}/></div>
                 <div className="kpi-snapshot-item-data">
                   <span className="kpi-snapshot-value">87%</span>
-                  <span className="kpi-snapshot-label">Compliance</span>
+                  <span className="kpi-snapshot-label">On-Time Tasks</span>
                 </div>
                 <span className="kpi-snapshot-badge positive">+3%</span>
               </div>
@@ -1581,9 +1579,9 @@ export const StoreOpsHome: React.FC = () => {
                 <div className="kpi-snapshot-item-icon nps"><StarBorderOutlined sx={{ fontSize: 16 }}/></div>
                 <div className="kpi-snapshot-item-data">
                   <span className="kpi-snapshot-value">72</span>
-                  <span className="kpi-snapshot-label">NPS Score</span>
+                  <span className="kpi-snapshot-label">NPS</span>
                 </div>
-                <span className="kpi-snapshot-badge positive">+12</span>
+                <span className="kpi-snapshot-badge positive">+12 QoQ</span>
               </div>
             </div>
           </Card>
@@ -1612,7 +1610,7 @@ export const StoreOpsHome: React.FC = () => {
                 <div className="ai-brief-section">
                   <h3 className="ai-brief-section-title"><TrendingUpOutlined sx={{ fontSize: 14 }}/> Sales &amp; Margin</h3>
                   <ul className="ai-brief-bullets">
-                    <li>District weekly revenue came in at <strong>$2.4M</strong>, <strong>+8% vs target</strong> and +5% WoW. 6 of 8 stores exceeded plan — Nashville Flagship and Memphis Central are leading contributors.</li>
+                    <li>District weekly revenue came in at <strong>$1.26M</strong>, <strong>+8% vs target</strong> and +5% WoW. 6 of 8 stores exceeded plan — Nashville Flagship and Memphis Central are leading contributors.</li>
                     <li>Gross margin held steady at <strong>34.2%</strong> (+0.3pp vs last week). Markdown optimization on seasonal clearance items contributed an estimated <strong>$18K margin recovery</strong> this period.</li>
                     <li>Average basket size increased to <strong>$47.20</strong> (+3.1%), likely driven by the new cross-sell POG rollout in personal care aisles. <em>Consider expanding this to remaining 3 stores.</em></li>
                   </ul>

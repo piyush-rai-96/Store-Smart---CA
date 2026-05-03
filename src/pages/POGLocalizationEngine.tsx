@@ -599,8 +599,8 @@ export const POGLocalizationEngine: React.FC = () => {
     // Calculate dynamic metrics based on context
     const facingsChanged = Math.round((topDemand?.value || 120) / 8);
     const tasksCount = Math.round((storeGroup?.storeCount || 50) * 0.4);
-    const premiumShiftPct = storeGroup?.id === 'campus' ? '+18%' : storeGroup?.id === 'family' ? '+8%' : '+12%';
-    const valueShiftPct = storeGroup?.id === 'value' ? '+5%' : '-8%';
+    const premiumShiftPct = storeGroup?.id === 'urban' ? '+18%' : storeGroup?.id === 'family' ? '+8%' : '+12%';
+    const valueShiftPct = storeGroup?.id === 'outlet' ? '+5%' : '-8%';
 
     const result: LocalizationResult = {
       id: `loc-${Date.now()}`,

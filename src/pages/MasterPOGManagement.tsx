@@ -23,7 +23,7 @@ interface POGItem {
   lastModified: string;
   status: 'active' | 'draft' | 'archived';
   version: string;
-  clusters: number;
+  stores: number;
   planogramImage: string;
 }
 
@@ -42,34 +42,57 @@ interface POGClusterMapping {
 
 const pogRulesMapping: Record<string, POGRule[]> = {
   '1': [ // Women's Wall Display
-    { name: 'Product Fit & Placement', type: 'Placement', status: 'Active', description: 'Place folded items on shelves, hanging items on rails, and accessories on display hooks.', icon: '📍' },
-    { name: 'Size Sequencing', type: 'Priority', status: 'Active', description: 'Arrange sizes from small to large, left to right on each rail or shelf.', icon: '⭐' },
-    { name: 'Color Blocking', type: 'Visual', status: 'Active', description: 'Group items by color family for visual appeal and easy navigation.', icon: '🎨' },
+    { name: 'Product Fit & Placement', type: 'Adjacency', status: 'Active', description: 'Place folded items on shelves, hanging items on rails, and accessories on display hooks.', icon: '📍' },
+    { name: 'Size Sequencing', type: 'Facing', status: 'Active', description: 'Arrange sizes from small to large, left to right on each rail or shelf.', icon: '⭐' },
+    { name: 'Color Blocking', type: 'Brand Blocking', status: 'Active', description: 'Group items by color family for visual appeal and easy navigation.', icon: '🎨' },
     { name: 'Capacity Rules', type: 'Capacity', status: 'Active', description: 'Do not overcrowd rails. Maintain spacing between hangers for easy browsing.', icon: '📊' },
-    { name: 'Seasonal Rotation', type: 'Compliance', status: 'Active', description: 'Feature current season items prominently and phase out previous season stock.', icon: '🔄' },
+    { name: 'Seasonal Rotation', type: 'Space Allocation', status: 'Active', description: 'Feature current season items prominently and phase out previous season stock.', icon: '🔄' },
   ],
   '2': [ // Men's Denim Wall
-    { name: 'Fit Grouping', type: 'Placement', status: 'Active', description: 'Group by fit (slim, regular, relaxed) in distinct sections.', icon: '📍' },
-    { name: 'Wash Sequencing', type: 'Visual', status: 'Active', description: 'Arrange washes from light to dark within each fit section.', icon: '🎨' },
-    { name: 'Size Availability', type: 'Priority', status: 'Active', description: 'Ensure full size range is visible and accessible for each style.', icon: '⭐' },
-    { name: 'Visual Balance', type: 'Visual', status: 'Active', description: 'Maintain even stack heights and consistent folding across the display.', icon: '📐' },
+    { name: 'Fit Grouping', type: 'Adjacency', status: 'Active', description: 'Group by fit (slim, regular, relaxed) in distinct sections.', icon: '📍' },
+    { name: 'Wash Sequencing', type: 'Brand Blocking', status: 'Active', description: 'Arrange washes from light to dark within each fit section.', icon: '🎨' },
+    { name: 'Size Availability', type: 'Mandatory SKU', status: 'Active', description: 'Ensure full size range is visible and accessible for each style.', icon: '⭐' },
+    { name: 'Visual Balance', type: 'Space Allocation', status: 'Active', description: 'Maintain even stack heights and consistent folding across the display.', icon: '📐' },
   ],
   '3': [ // Kids Color Block Wall
-    { name: 'Age Grouping', type: 'Placement', status: 'Active', description: 'Organize by age group with toddler items at lower heights.', icon: '📍' },
-    { name: 'Color Blocking', type: 'Visual', status: 'Active', description: 'Create vibrant color blocks to attract attention and aid navigation.', icon: '🎨' },
-    { name: 'Safety Compliance', type: 'Compliance', status: 'Active', description: 'Ensure displays are stable and items are within safe reach for children.', icon: '🛡️' },
+    { name: 'Age Grouping', type: 'Adjacency', status: 'Active', description: 'Organize by age group with toddler items at lower heights.', icon: '📍' },
+    { name: 'Color Blocking', type: 'Brand Blocking', status: 'Active', description: 'Create vibrant color blocks to attract attention and aid navigation.', icon: '🎨' },
+    { name: 'Safety Compliance', type: 'Prohibited SKU', status: 'Active', description: 'Ensure displays are stable and items are within safe reach for children.', icon: '🛡️' },
   ],
   '4': [ // Accessories End Cap
-    { name: 'Category Grouping', type: 'Placement', status: 'Active', description: 'Group by type: bags, belts, scarves, jewelry in distinct sections.', icon: '📍' },
-    { name: 'Trend Highlighting', type: 'Priority', status: 'Active', description: 'Feature current trend items at eye level with clear trend signage.', icon: '⭐' },
-    { name: 'Gift Presentation', type: 'Visual', status: 'Active', description: 'Display gift-ready items with packaging visible and price tags accessible.', icon: '🎁' },
-    { name: 'Impulse Optimization', type: 'Compliance', status: 'Active', description: 'Position grab-and-go items at checkout-adjacent locations.', icon: '⚡' },
+    { name: 'Category Grouping', type: 'Adjacency', status: 'Active', description: 'Group by type: bags, belts, scarves, jewelry in distinct sections.', icon: '📍' },
+    { name: 'Trend Highlighting', type: 'Mandatory SKU', status: 'Active', description: 'Feature current trend items at eye level with clear trend signage.', icon: '⭐' },
+    { name: 'Gift Presentation', type: 'Brand Blocking', status: 'Active', description: 'Display gift-ready items with packaging visible and price tags accessible.', icon: '🎁' },
+    { name: 'Impulse Optimization', type: 'Space Allocation', status: 'Active', description: 'Position grab-and-go items at checkout-adjacent locations.', icon: '⚡' },
   ],
   '5': [ // Seasonal Promo Table
-    { name: 'Promotional Focus', type: 'Placement', status: 'Active', description: 'Feature current promotional items prominently with clear pricing.', icon: '📍' },
-    { name: 'Bundle Display', type: 'Visual', status: 'Active', description: 'Create outfit or gift bundles to encourage multi-item purchases.', icon: '🎨' },
-    { name: 'Urgency Signage', type: 'Compliance', status: 'Active', description: 'Include limited-time messaging to drive immediate purchase decisions.', icon: '⏰' },
+    { name: 'Promotional Focus', type: 'Space Allocation', status: 'Active', description: 'Feature current promotional items prominently with clear pricing.', icon: '📍' },
+    { name: 'Bundle Display', type: 'Brand Blocking', status: 'Active', description: 'Create outfit or bundles to encourage multi-item purchases.', icon: '🎨' },
+    { name: 'Urgency Signage', type: 'Mandatory SKU', status: 'Active', description: 'Include limited-time messaging to drive immediate purchase decisions.', icon: '⏰' },
   ],
+};
+
+const getPOGVersionHistory = (version: string, lastModified: string) => {
+  const match = version.match(/v(\d+)\.(\d+)/);
+  if (!match) return [{ ver: version, label: 'Current', date: null }];
+  const major = parseInt(match[1]);
+  const minor = parseInt(match[2]);
+  const baseDate = new Date(lastModified);
+  const prev1Date = new Date(baseDate);
+  prev1Date.setDate(prev1Date.getDate() - 18);
+  const prev2Date = new Date(baseDate);
+  prev2Date.setDate(prev2Date.getDate() - 45);
+  const fmtDate = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const prevMinor1 = minor > 0 ? minor - 1 : 0;
+  const prevMinor2 = prevMinor1 > 0 ? prevMinor1 - 1 : 0;
+  const prev1Ver = prevMinor1 > 0 ? `v${major}.${prevMinor1}` : major > 1 ? `v${major - 1}.0` : `v${major}.0`;
+  const prev2Ver = prevMinor2 > 0 ? `v${major}.${prevMinor2}` : major > 1 ? `v${major - 1}.0` : null;
+  const history = [
+    { ver: version, label: 'Current', date: null },
+    { ver: prev1Ver, label: null, date: fmtDate(prev1Date) },
+  ];
+  if (prev2Ver && prev2Ver !== prev1Ver) history.push({ ver: prev2Ver, label: null, date: fmtDate(prev2Date) });
+  return history;
 };
 
 const pogClusterMapping: Record<string, POGClusterMapping> = {
@@ -81,11 +104,11 @@ const pogClusterMapping: Record<string, POGClusterMapping> = {
 };
 
 const mockPOGData: POGItem[] = [
-  { id: '1', name: "Women's Wall Display - Standard", category: 'Apparel', lastModified: '2025-04-22', status: 'active', version: 'v2.1', clusters: 12, planogramImage: WomensWallStandard },
-  { id: '2', name: "Men's Denim Wall Display", category: 'Apparel', lastModified: '2025-04-20', status: 'active', version: 'v1.5', clusters: 8, planogramImage: MensDenimWall },
-  { id: '3', name: "Kids Color Block Wall", category: 'Apparel', lastModified: '2025-04-18', status: 'draft', version: 'v3.0', clusters: 5, planogramImage: KidsColorBlockWall },
-  { id: '4', name: 'Accessories End Cap', category: 'Accessories', lastModified: '2025-04-15', status: 'active', version: 'v1.2', clusters: 15, planogramImage: AccessoriesEndcap },
-  { id: '5', name: 'Seasonal Promo Table', category: 'Seasonal', lastModified: '2025-04-10', status: 'archived', version: 'v2.0', clusters: 3, planogramImage: SeasonalPromoTable },
+  { id: '1', name: "Women's Wall Display - Standard", category: 'Apparel', lastModified: '2026-04-22', status: 'active', version: 'v2.1', stores: 12, planogramImage: WomensWallStandard },
+  { id: '2', name: "Men's Denim Wall Display", category: 'Apparel', lastModified: '2026-04-20', status: 'active', version: 'v1.5', stores: 8, planogramImage: MensDenimWall },
+  { id: '3', name: "Kids Color Block Wall", category: 'Apparel', lastModified: '2026-04-18', status: 'draft', version: 'v3.0', stores: 5, planogramImage: KidsColorBlockWall },
+  { id: '4', name: 'Accessories End Cap', category: 'Accessories', lastModified: '2026-04-15', status: 'active', version: 'v1.3', stores: 15, planogramImage: AccessoriesEndcap },
+  { id: '5', name: 'Seasonal Promo Table', category: 'Seasonal', lastModified: '2026-04-10', status: 'archived', version: 'v2.0', stores: 3, planogramImage: SeasonalPromoTable },
 ];
 
 interface Filters {
@@ -324,6 +347,8 @@ export const MasterPOGManagement: React.FC = () => {
                   { value: 'wall', label: 'Wall Display' },
                   { value: 'table', label: 'Table' },
                   { value: 'endcap', label: 'End Cap' },
+                  { value: 'hangingrail', label: 'Hanging Rail' },
+                  { value: 'foldingshelf', label: 'Folding Shelf' },
                 ]}
                 onChange={(value) => handleFilterChange('fixtureType', value)}
               />
@@ -433,7 +458,7 @@ export const MasterPOGManagement: React.FC = () => {
                     <div className="pog-card-footer">
                       <div className="pog-card-meta">
                         <span className="pog-card-version">{pog.version}</span>
-                        <span className="pog-card-clusters">{pog.clusters} clusters</span>
+                        <span className="pog-card-clusters">{pog.stores} stores · {pogClusterMapping[pog.id]?.count ?? 0} clusters</span>
                       </div>
                       <div className="pog-card-date">
                         <AccessTimeOutlined sx={{ fontSize: 12 }} />
@@ -481,18 +506,14 @@ export const MasterPOGManagement: React.FC = () => {
                 <div className="pog-sidebar-section">
                   <h4 className="pog-sidebar-title">Version Control</h4>
                   <div className="pog-version-list">
-                    <div className="pog-version-item active">
-                      <CheckCircleOutlined sx={{ fontSize: 14 }} />
-                      <span>v2.1 - Current</span>
-                    </div>
-                    <div className="pog-version-item">
-                      <AccessTimeOutlined sx={{ fontSize: 14 }} />
-                      <span>v2.0 - Apr 10, 2025</span>
-                    </div>
-                    <div className="pog-version-item">
-                      <AccessTimeOutlined sx={{ fontSize: 14 }} />
-                      <span>v1.5 - Mar 28, 2025</span>
-                    </div>
+                    {getPOGVersionHistory(selectedPOG.version, selectedPOG.lastModified).map((v, idx) => (
+                      <div key={idx} className={`pog-version-item${idx === 0 ? ' active' : ''}`}>
+                        {idx === 0
+                          ? <CheckCircleOutlined sx={{ fontSize: 14 }} />
+                          : <AccessTimeOutlined sx={{ fontSize: 14 }} />}
+                        <span>{v.ver}{v.label ? ` - ${v.label}` : ''}{v.date ? ` - ${v.date}` : ''}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
@@ -533,7 +554,7 @@ export const MasterPOGManagement: React.FC = () => {
                     {pogRulesMapping[selectedPOG.id]?.map((rule, idx) => (
                       <div key={idx} className="pog-rule-row">
                         <div className="pog-rule-row-header">
-                          <div className={`pog-rule-icon-badge ${rule.type.toLowerCase()}`}>
+                          <div className={`pog-rule-icon-badge ${rule.type.toLowerCase().replace(/\s+/g, '-')}`}>
                             <span>{rule.icon}</span>
                           </div>
                           <div className="pog-rule-card-title">

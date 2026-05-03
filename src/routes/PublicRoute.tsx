@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getDefaultRouteForAccess } from '../types';
+import { ROUTES } from '../types';
 
 interface PublicRouteProps {
   children: React.ReactNode;
@@ -9,15 +9,14 @@ interface PublicRouteProps {
 
 /**
  * PublicRoute - Wrapper component for public routes (like login)
- * Redirects to home page if user is already authenticated
+ * Redirects to portal home if user is already authenticated
  * Use this to wrap login/register pages
  */
 export const PublicRoute: React.FC<PublicRouteProps> = ({ children }) => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   if (isAuthenticated) {
-    // Redirect to the user's default landing route based on their access
-    return <Navigate to={getDefaultRouteForAccess(user?.accessRoutes)} replace />;
+    return <Navigate to={ROUTES.PORTAL} replace />;
   }
 
   // Render the public content

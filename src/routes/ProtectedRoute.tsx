@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { ROUTES, SCREEN_TO_PATH, getDefaultRouteForAccess } from '../types';
+import { ROUTES, SCREEN_TO_PATH } from '../types';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -10,7 +10,7 @@ interface ProtectedRouteProps {
 /**
  * ProtectedRoute - Wrapper component for authenticated routes
  * Redirects to login page if user is not authenticated
- * Redirects to home if user lacks access to the current route
+ * Redirects to portal if user lacks access to the current route
  */
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { isAuthenticated, user } = useAuth();
@@ -25,12 +25,12 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     const allowedPaths = user.accessRoutes.map(screen => SCREEN_TO_PATH[screen]);
     const currentPath = location.pathname;
 
-    // Only enforce access on actual page routes (skip redirects like /home)
+    // Only enforce access on actual page routes (skip /portal and redirect stubs)
     const isProtectedPath = Object.values(SCREEN_TO_PATH).some(p => currentPath.startsWith(p));
     if (isProtectedPath) {
       const hasAccess = allowedPaths.some(p => currentPath.startsWith(p));
       if (!hasAccess) {
-        return <Navigate to={getDefaultRouteForAccess(user.accessRoutes)} replace />;
+        return <Navigate to={ROUTES.PORTAL} replace />;
       }
     }
   }

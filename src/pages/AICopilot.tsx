@@ -26,7 +26,7 @@ import VisibilityOutlined from '@mui/icons-material/VisibilityOutlined';
 import BuildOutlined from '@mui/icons-material/BuildOutlined';
 import CheckCircleOutlined from '@mui/icons-material/CheckCircleOutlined';
 import StoreOutlined from '@mui/icons-material/StoreOutlined';
-import { Button, Card, Chips, Tabs, Badge, ChatBotComponent, Select } from 'impact-ui';
+import { Button, Card, Chips, Tabs, Badge, ChatBotComponent } from 'impact-ui';
 import { useAuth } from '../context/AuthContext';
 import './AICopilot.css';
 
@@ -355,7 +355,7 @@ const skills: { id: SkillMode; label: string; icon: React.ReactNode; description
   },
 ];
 
-const SKILL_SELECT_OPTIONS = skills.map(s => ({ label: s.label, value: s.id }));
+
 
 function timeOfDayPeriod(): 'Morning' | 'Afternoon' | 'Evening' {
   const h = new Date().getHours();
@@ -475,8 +475,6 @@ export const AICopilot: React.FC = () => {
   const [openSource, setOpenSource] = useState<{ doc: string; section: string; page: string; tag?: string; updated?: string; excerpt?: string } | null>(null);
   const [sourcesPanelMsgId, setSourcesPanelMsgId] = useState<string | null>(null);
   const [isChatBotOpen, setIsChatBotOpen] = useState(false);
-  const [skillSelectPanelOpen, setSkillSelectPanelOpen] = useState(false);
-  const [skillSelectPanelOptions, setSkillSelectPanelOptions] = useState<{ label: string; value: string }[]>(() => [...SKILL_SELECT_OPTIONS]);
 
   // ── Conversation history (session-scoped) ──────────────────────────────────
   interface SavedConversation {
@@ -499,21 +497,6 @@ export const AICopilot: React.FC = () => {
 
   const greetingFirstName = firstNameFromDisplayName(user?.name);
   const timePeriod = timeOfDayPeriod();
-
-  const skillSelectedOption = useMemo(
-    () => ({ label: currentSkill.label, value: activeSkill }),
-    [currentSkill.label, activeSkill],
-  );
-
-  const handleSkillSelectChange = (
-    opts: { label: string; value: string }[] | { label: string; value: string } | null,
-  ) => {
-    const single = Array.isArray(opts) ? (opts[0] ?? null) : opts ?? null;
-    const v = single?.value;
-    if (v === 'knowledge' || v === 'analytics' || v === 'pog' || v === 'actions') {
-      setActiveSkill(v);
-    }
-  };
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -2390,6 +2373,7 @@ export const AICopilot: React.FC = () => {
           if (currentMessages.length > 0) saveCurrentAndClear();
           setIsChatBotOpen(false);
         }}
+        tabList={[]}
         isCustomScreen
         showSuggestionBanner={false}
         showHistoryPanel
@@ -2436,20 +2420,21 @@ export const AICopilot: React.FC = () => {
               </div>
             </div>
             <div className="cop-skill-row cop-skill-row--panel">
-              <Select
-                label="Skill"
-                placeholder="Choose a skill..."
-                isOpen={skillSelectPanelOpen}
-                setIsOpen={setSkillSelectPanelOpen}
-                initialOptions={SKILL_SELECT_OPTIONS}
-                currentOptions={skillSelectPanelOptions}
-                setCurrentOptions={opts => setSkillSelectPanelOptions(opts.length ? opts : [...SKILL_SELECT_OPTIONS])}
-                selectedOptions={skillSelectedOption}
-                setSelectedOptions={handleSkillSelectChange}
-                setIsSelectAll={() => {}}
-                width="100%"
-                withPortal
-              />
+              {/* Premium skill cards — replaces plain Select dropdown */}
+              <div className="cop-skill-cards">
+                {skills.map(skill => (
+                  <button
+                    key={skill.id}
+                    type="button"
+                    className={`cop-skill-card${activeSkill === skill.id ? ' active' : ''}`}
+                    onClick={() => setActiveSkill(skill.id)}
+                    title={skill.description}
+                  >
+                    <span className="cop-skill-card-icon">{skill.icon}</span>
+                    <span className="cop-skill-card-label">{skill.label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
             {/* Messages area — all existing render logic is 100% preserved */}
             <div className="cop-messages">

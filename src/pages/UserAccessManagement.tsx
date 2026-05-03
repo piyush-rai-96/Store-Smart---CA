@@ -27,7 +27,7 @@ import { User, UserRole, ROLE_LABELS, ROLE_ACCESS, ScreenAccess } from '../types
 import './UserAccessManagement.css';
 
 const SCREEN_LABELS: Record<ScreenAccess, string> = {
-  home: 'Home',
+  home: 'My Space',
   district_intelligence: 'District Intelligence',
   store_deep_dive: 'Store Deep Dive',
   master_pog_management: 'Master POG Management',

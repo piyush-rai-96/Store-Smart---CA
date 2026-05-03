@@ -21,7 +21,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #3019b0 0%, #4735d9 30%, #684ef0 65%, #8a6bff 100%);
+  background: linear-gradient(135deg, #2ac2ee 0%, #4d78f0 35%, #6962ef 65%, #8a5be2 100%);
   background-size: 300% 300%;
   animation: gradientShift 12s ease infinite;
   padding: 20px;
@@ -145,7 +145,7 @@
   margin: 0 0 10px 0;
   text-align: center;
   letter-spacing: -0.45px;
-  background: linear-gradient(135deg, #120c59 0%, #3a2bbd 60%, #7e7dff 100%);
+  background: linear-gradient(135deg, #0e6a8a 0%, #2a5bc4 60%, #6962ef 100%);
   -webkit-text-fill-color: transparent;
   -webkit-background-clip: text;
   background-clip: text;
@@ -459,7 +459,7 @@
 .login-button button:not(.password-toggle),
 .login-form button[type="submit"],
 .login-form .login-button button {
-  background: linear-gradient(135deg, #3c27c2 0%, #5b45e0 55%, #7a62ff 100%) !important;
+  background: linear-gradient(135deg, #2ac2ee 0%, #4d78f0 50%, #6962ef 100%) !important;
   color: var(--ia-color-surface) !important;
   border: none !important;
   border-radius: 14px !important;
@@ -511,6 +511,141 @@
   margin: 0;
   font-weight: var(--ia-font-weight-medium);
 }
+
+/* ── Agentic Background Animations ───────────────────────── */
+
+.login-agentic-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Neural network SVG */
+.ln-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.ln-line {
+  stroke: rgba(255, 255, 255, 0.14);
+  stroke-width: 1;
+  stroke-dasharray: 6 5;
+  animation: ln-dash 18s linear infinite;
+}
+
+@keyframes ln-dash {
+  to { stroke-dashoffset: -110; }
+}
+
+/* Data packets */
+.ln-pkt { opacity: 0.9; }
+.ln-pkt-cyan   { fill: #2ac2ee; filter: drop-shadow(0 0 4px #2ac2ee); }
+.ln-pkt-white  { fill: rgba(255,255,255,0.9); filter: drop-shadow(0 0 3px rgba(255,255,255,0.8)); }
+.ln-pkt-violet { fill: #a09df8; filter: drop-shadow(0 0 4px #6962ef); }
+
+/* Pulsing nodes */
+.ln-node {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  transform: translate(-50%, -50%);
+  animation: ln-node-pulse 3.5s ease-in-out infinite;
+}
+
+.ln-node:nth-child(3n)   { width: 5px;  height: 5px;  }
+.ln-node:nth-child(3n+1) { width: 9px;  height: 9px;  }
+
+@keyframes ln-node-pulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.5);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.5);
+    box-shadow: 0 0 0 8px rgba(255, 255, 255, 0);
+    opacity: 1;
+  }
+}
+
+/* Floating gradient orbs */
+.ln-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(72px);
+  pointer-events: none;
+  animation: ln-float 10s ease-in-out infinite;
+}
+
+.ln-orb-cyan {
+  width: 420px;
+  height: 420px;
+  background: radial-gradient(circle, rgba(42, 194, 238, 0.35), transparent 70%);
+  top: -120px;
+  left: -100px;
+  animation-duration: 11s;
+}
+
+.ln-orb-violet {
+  width: 360px;
+  height: 360px;
+  background: radial-gradient(circle, rgba(105, 98, 239, 0.35), transparent 70%);
+  bottom: -90px;
+  right: -90px;
+  animation-duration: 13s;
+  animation-delay: -5s;
+}
+
+.ln-orb-white {
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.15), transparent 70%);
+  top: 42%;
+  left: 52%;
+  transform: translate(-50%, -50%);
+  animation-duration: 16s;
+  animation-delay: -8s;
+}
+
+@keyframes ln-float {
+  0%, 100% { transform: translate(0, 0); }
+  33%       { transform: translate(24px, -32px); }
+  66%       { transform: translate(-18px, 22px); }
+}
+
+/* Rising particles */
+.ln-particle {
+  position: absolute;
+  bottom: -8px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  animation: ln-rise 6s ease-in infinite;
+}
+
+.ln-p0 { animation-duration: 5.2s;  animation-delay: 0s;     }
+.ln-p1 { animation-duration: 7.1s;  animation-delay: -1.6s;  width: 2px; height: 2px; }
+.ln-p2 { animation-duration: 6.3s;  animation-delay: -3.1s;  }
+.ln-p3 { animation-duration: 8.4s;  animation-delay: -0.9s;  width: 2px; height: 2px; }
+.ln-p4 { animation-duration: 5.8s;  animation-delay: -2.4s;  }
+.ln-p5 { animation-duration: 9.2s;  animation-delay: -4.3s;  width: 4px; height: 4px; background: rgba(42,194,238,0.7); }
+
+@keyframes ln-rise {
+  0%   { bottom: -8px;  opacity: 0;   transform: translateX(0);    }
+  8%   {                opacity: 0.6; }
+  50%  {                              transform: translateX(18px);  }
+  90%  {                opacity: 0.2; }
+  100% { bottom: 105%;  opacity: 0;   transform: translateX(-12px); }
+}
+
+/* ── End Agentic Animations ───────────────────────────────── */
 
 /* Responsive adjustments */
 @media (max-width: 480px) {

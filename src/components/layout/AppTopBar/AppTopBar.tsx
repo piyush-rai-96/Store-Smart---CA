@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Header as ImpactHeader, Button } from 'impact-ui';
 import WarningAmberOutlined from '@mui/icons-material/WarningAmberOutlined';
 import CampaignOutlined from '@mui/icons-material/CampaignOutlined';
 import AssignmentTurnedInOutlined from '@mui/icons-material/AssignmentTurnedInOutlined';
 import InventoryOutlined from '@mui/icons-material/InventoryOutlined';
 import AutoAwesomeOutlined from '@mui/icons-material/AutoAwesomeOutlined';
-import { User, SCREEN_TO_PATH } from '../../../types';
+import { User } from '../../../types';
 import { APP_CONFIG } from '../../../constants/app';
 import './AppTopBar.css';
 
@@ -32,9 +32,8 @@ const MOCK_NOTIFICATIONS: NotifItem[] = [
   { id: 4, icon: <InventoryOutlined sx={{ fontSize: 14 }} />, text: 'Inbound shipment delayed — Cologne East', time: '3h ago', type: 'warning' },
 ];
 
-export const AppTopBar: React.FC<AppTopBarProps> = ({ user, onLogout }) => {
+export const AppTopBar: React.FC<AppTopBarProps> = ({ user, onLogout: _onLogout }) => {
   const navigate = useNavigate();
-  const location = useLocation();
   const [showNotifications, setShowNotifications] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
   const notificationCount = MOCK_NOTIFICATIONS.length;
@@ -53,12 +52,7 @@ export const AppTopBar: React.FC<AppTopBarProps> = ({ user, onLogout }) => {
   const firstName = user.name.split(' ')[0];
 
   const openAlanCopilot = () => {
-    const copilotPath = SCREEN_TO_PATH.ai_copilot;
-    if (location.pathname === copilotPath) {
-      window.dispatchEvent(new CustomEvent('storehub:open-alan'));
-    } else {
-      navigate(copilotPath, { state: { openAlan: true } });
-    }
+    window.dispatchEvent(new CustomEvent('storehub:open-alan'));
   };
 
   const dropMenuOptions = [
@@ -66,11 +60,6 @@ export const AppTopBar: React.FC<AppTopBarProps> = ({ user, onLogout }) => {
       label: firstName,
       onClick: () => {},
       isDisabled: true,
-    },
-    {
-      label: 'Log out',
-      onClick: onLogout,
-      isDisabled: false,
     },
   ];
 

@@ -735,7 +735,7 @@ export const StoreDeepDive: React.FC = () => {
     return (
       <div className="store-deep-dive">
         <div className="store-deep-dive-loading">
-          <div className="loading-spinner" />
+          <div className="sdd-loading-spinner" />
           <p>Loading Store Deep Dive...</p>
         </div>
       </div>

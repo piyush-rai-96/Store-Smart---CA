@@ -998,6 +998,7 @@ export const StoreCenter: React.FC = () => {
   const [inventoryView, setInventoryView] = useState<'at-risk' | 'all'>('at-risk');
   const [vocExpanded, setVocExpanded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isPageLoading, setIsPageLoading] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
   // OCV state
   const [activeTabId, setActiveTabId] = useState<string>(broadcastActions[0]?.broadcastId ?? '');
@@ -1131,6 +1132,11 @@ export const StoreCenter: React.FC = () => {
 
   // Close calendar on outside click
   useEffect(() => {
+    const timer = setTimeout(() => setIsPageLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
     const handler = (e: MouseEvent) => {
       const t = e.target as HTMLElement;
       if (!t.closest('.calendar-picker-wrapper')) setShowCalendar(false);
@@ -1212,6 +1218,17 @@ export const StoreCenter: React.FC = () => {
 
     return { ...b, storeVal, vsCluster, vsChain, rank, rankTotal: CLUSTER_SIZE, quartile, rankDelta, clampedPos };
   });
+
+  if (isPageLoading) {
+    return (
+      <div className="sc-container">
+        <div className="sc-page-loading">
+          <div className="sc-page-loading-spinner" />
+          <p>Loading Store Deep Dive...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="sc-container">

@@ -4,7 +4,7 @@ import { Breadcrumbs } from 'impact-ui';
 import './Breadcrumb.css';
 
 const ROUTE_LABELS: Record<string, string> = {
-  '/store-operations/home': 'Home',
+  '/store-operations/home': 'My Space',
   '/store-operations/district-intelligence': 'District Intelligence',
   '/store-operations/store-deep-dive': 'Store Deep Dive',
   '/planogram/master-pog': 'Master POG Management',
