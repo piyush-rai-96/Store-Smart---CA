@@ -1503,6 +1503,46 @@
 }
 
 /* ── Benchmarking Tab ── */
+/* District vs Cluster-Wide rank callout */
+.sc-bench-rank-callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  border-left: 3px solid;
+  margin-bottom: 4px;
+}
+.sc-bench-rank-callout--positive {
+  background: var(--ia-color-success-bg, #f0fdf4);
+  border-color: var(--ia-color-success-strong, #16a34a);
+  color: var(--ia-color-success-text, #166534);
+}
+.sc-bench-rank-callout--amber {
+  background: var(--ia-color-warning-bg, #fffbeb);
+  border-color: var(--ia-color-warning-strong, #d97706);
+  color: var(--ia-color-warning-text, #92400e);
+}
+.sc-bench-callout-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.sc-bench-callout-body {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.sc-bench-callout-body strong {
+  font-size: var(--ia-text-xs);
+  font-weight: var(--ia-font-weight-semibold);
+}
+.sc-bench-callout-body span {
+  font-size: var(--ia-text-xs);
+  line-height: 1.55;
+  opacity: 0.9;
+}
+
 .sc-bench-tab {
   display: flex;
   flex-direction: column;

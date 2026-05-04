@@ -31,7 +31,7 @@ const seedTasks: ExecutionTask[] = [
     id: 'tc-seed-1',
     type: 'Reset Shelf',
     title: 'C&A Accessories Endcap — Compliance Reset Required',
-    description: 'Multiple compliance deviations detected via AI Copilot audit. Scarves section shifted, sunglasses rotated, and belt display missing from fixture.',
+    description: 'Multiple compliance deviations detected via Ask Alan audit. Scarves section shifted, sunglasses rotated, and belt display missing from fixture.',
     priority: 'High',
     reason: 'Compliance score 76.4% — below threshold',
     impact: 'Estimated $340/week lost sales from missing belt display alone',
@@ -57,7 +57,7 @@ const seedTasks: ExecutionTask[] = [
     id: 'tc-seed-2',
     type: 'Add',
     title: 'Replenish OOS Items — Women\'s Wall Display',
-    description: 'AI Copilot detected 4 out-of-stock positions on the Women\'s Wall Display requiring immediate replenishment.',
+    description: 'Ask Alan detected 4 out-of-stock positions on the Women\'s Wall Display requiring immediate replenishment.',
     priority: 'High',
     reason: '4 OOS items detected — V-Neck Tee, Floral Dress, Slim Denim, Classic Blouse',
     impact: 'Critical revenue loss on high-traffic display section',
@@ -813,7 +813,7 @@ export const TaskCenter: React.FC = () => {
           <div className="tc-empty">
             <div className="tc-empty-icon"><AssignmentOutlined sx={{ fontSize: 28 }} /></div>
             <h3>No Tasks Yet</h3>
-            <p>Create a task or use AI Copilot to generate tasks from shelf audits.</p>
+            <p>Create a task or use Ask Alan to generate tasks from shelf audits.</p>
             <Button
               variant="contained"
               color="primary"

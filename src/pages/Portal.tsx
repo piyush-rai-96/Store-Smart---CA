@@ -33,7 +33,7 @@ export const Portal: React.FC = () => {
         'Master POG & Localization Engine',
         'Operations Queue & Task Center',
         'Communications & Broadcast',
-        'AI Copilot — Ask Alan',
+        'Ask Alan',
       ],
     },
   ];
@@ -172,7 +172,11 @@ export const Portal: React.FC = () => {
   ];
 
   const handleLaunchClick = () => {
-    navigate(ROUTES.STORE_OPS_HOME);
+    if (user?.role === 'SM') {
+      navigate('/store-operations/store-deep-dive');
+    } else {
+      navigate(ROUTES.STORE_OPS_HOME);
+    }
   };
 
   return (

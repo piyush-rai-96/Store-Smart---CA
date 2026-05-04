@@ -27,13 +27,13 @@ import { User, UserRole, ROLE_LABELS, ROLE_ACCESS, ScreenAccess } from '../types
 import './UserAccessManagement.css';
 
 const SCREEN_LABELS: Record<ScreenAccess, string> = {
-  home: 'My Space',
+  home: 'Dashboard',
   district_intelligence: 'District Intelligence',
   store_deep_dive: 'Store Deep Dive',
   master_pog_management: 'Master POG Management',
   pog_rule_management: 'POG Rule Management',
   pog_localization_engine: 'POG Localization Engine',
-  ai_copilot: 'AI Copilot',
+  ai_copilot: 'Ask Alan',
   operations_queue: 'Operations Queue',
   communications: 'Communications',
   user_access_management: 'User Access Management',

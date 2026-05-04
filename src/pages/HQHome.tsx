@@ -30,6 +30,7 @@ import AssignmentTurnedInOutlined from '@mui/icons-material/AssignmentTurnedInOu
 import { Button, Card } from 'impact-ui';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { openAskAlan } from '../utils/openAskAlan';
 // Reuse DM Home styles to mirror the same layout/components on HQ Home
 import './StoreOpsHome.css';
 import './HQHome.css';
@@ -242,7 +243,7 @@ export const HQHome: React.FC = () => {
           { id: 'd14', name: 'District 14 — Tennessee', status: 'info', detail: 'DPI 82 · Compliance 91% · Trend improving (+4%)', manager: 'John Doe' },
         ],
         ctas: [
-          { label: 'Open in AI Copilot', action: 'ai-copilot' },
+          { label: 'Ask Alan', action: 'ai-copilot' },
           { label: 'Open District Intelligence', action: 'district-intel' },
         ],
       };
@@ -296,7 +297,7 @@ export const HQHome: React.FC = () => {
         break;
       }
       case 'ai-copilot':
-        navigate('/command-center/ai-copilot?mode=actions&context=district-gaps');
+        openAskAlan({ preset: 'district-gaps' });
         break;
       case 'communications':
         navigate('/command-center/communications');
@@ -365,14 +366,14 @@ export const HQHome: React.FC = () => {
   const aiBriefContent = (
     <div className="ai-brief-summary">
       <p className="ai-brief-paragraph">
-        Good {greetingPart}, {user?.name || 'Elena'}. Here's what changed across your regions overnight — performance is mixed, with two districts widening execution gaps and one delivering a record-setting compliance week.
+        Good {greetingPart}, {user?.name || 'Elena'}. Here's what changed across your districts this week — performance is mixed, with two districts widening execution gaps and one delivering a record-setting compliance week.
       </p>
 
       <div className="ai-brief-section">
         <h3 className="ai-brief-section-title"><TrendingUpOutlined sx={{ fontSize: 14 }}/> Network Performance</h3>
         <ul className="ai-brief-bullets">
           <li>Network execution compliance moved to <strong>84.8%</strong> (+1.2pp WoW). 2 of 5 districts trending up; District 11 declined (–6%) and District 22 softened (–3%).</li>
-          <li>Average District Performance Index (DPI) is <strong>73</strong> (+1 pt MoM). District 14 leads at 82 — top 10% nationally — and is the highest single-district score in 6 months.</li>
+          <li>Average District Performance Index (DPI) is <strong>73</strong> (+1 pt MoM). District 14 leads at 87 — top 10% nationally — and is the highest single-district score in 6 months.</li>
           <li>Average basket size across the network is <strong>$47.20</strong> (+3.1%), driven by the personal-care cross-sell POG rollout. <em>Recommend extending to remaining 3 districts.</em></li>
         </ul>
       </div>
@@ -420,7 +421,7 @@ export const HQHome: React.FC = () => {
   );
 
   return (
-    <div className="store-ops-home">
+    <div className="store-ops-home hq-home">
       {/* ZONE 1: Welcome Header */}
       <div className="store-ops-welcome-bar">
         <div className="welcome-bar-left">
@@ -497,33 +498,33 @@ export const HQHome: React.FC = () => {
 
         {/* Performance Overview */}
         <div className="bca-overview-grid">
-          <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '16px' }}>
+          <div className="bca-kpi-card">
             <span className="bca-kpi-label">Active Broadcasts</span>
             <span className="bca-kpi-value">{HQ_BROADCAST_OVERVIEW.active}</span>
             <span className="bca-kpi-context">currently live</span>
-          </Card>
-          <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '16px' }}>
+          </div>
+          <div className="bca-kpi-card">
             <span className="bca-kpi-label">Sent This Week</span>
             <span className="bca-kpi-value">{HQ_BROADCAST_OVERVIEW.sentThisWeek}</span>
             <span className="bca-kpi-context">broadcasts</span>
-          </Card>
-          <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '16px' }}>
+          </div>
+          <div className="bca-kpi-card">
             <span className="bca-kpi-label">Acknowledged</span>
             <span className="bca-kpi-value">{HQ_BROADCAST_OVERVIEW.ackPct}%</span>
             <span className="bca-kpi-context">of all districts</span>
-          </Card>
-          <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '16px' }}>
+          </div>
+          <div className="bca-kpi-card">
             <span className="bca-kpi-label">Avg Ack Time</span>
             <span className="bca-kpi-value">{HQ_BROADCAST_OVERVIEW.avgAckTime}</span>
             <span className="bca-kpi-context">time to acknowledge</span>
-          </Card>
-          <Card size="extraSmall" sx={{ maxWidth: '100%', minHeight: 0, padding: '16px' }}>
+          </div>
+          <div className="bca-kpi-card">
             <span className="bca-kpi-label">Trend vs Last</span>
             <span className={`bca-kpi-value ${HQ_BROADCAST_OVERVIEW.trendVsLast >= 0 ? 'positive' : 'negative'}`}>
               {HQ_BROADCAST_OVERVIEW.trendVsLast >= 0 ? '+' : ''}{HQ_BROADCAST_OVERVIEW.trendVsLast}%
             </span>
             <span className="bca-kpi-context">vs last period</span>
-          </Card>
+          </div>
         </div>
 
         {/* Broadcast List */}
@@ -610,8 +611,8 @@ export const HQHome: React.FC = () => {
                     <span>District 11 — Florida (3 stores impacted)</span>
                   </div>
                   <div className="hero-actions">
-                    <button className="hero-action-primary" onClick={() => openHqAlertPanel('compliance-risk')}>
-                      <span>View district detail</span>
+                    <button type="button" className="hero-action-primary hq-alert-cta" onClick={() => openHqAlertPanel('compliance-risk')}>
+                      <span>View Details</span>
                       <KeyboardArrowRight sx={{ fontSize: 16 }}/>
                     </button>
                   </div>
@@ -639,11 +640,11 @@ export const HQHome: React.FC = () => {
                   </div>
                   <div className="hero-top-store">
                     <AutoAwesomeOutlined sx={{ fontSize: 12 }}/>
-                    <span>AI Copilot has prepared an action plan for these districts</span>
+                    <span>Ask Alan has prepared an action plan for these districts</span>
                   </div>
                   <div className="hero-actions">
-                    <button className="hero-action-primary" onClick={() => openHqAlertPanel('district-trending')}>
-                      <span>Open in AI Copilot</span>
+                    <button type="button" className="hero-action-primary hq-alert-cta" onClick={() => openHqAlertPanel('district-trending')}>
+                      <span>View Details</span>
                       <KeyboardArrowRight sx={{ fontSize: 16 }}/>
                     </button>
                   </div>
@@ -674,8 +675,8 @@ export const HQHome: React.FC = () => {
                     <span>Districts 11, 19, and 22 most impacted</span>
                   </div>
                   <div className="hero-actions">
-                    <button className="hero-action-primary" onClick={() => openHqAlertPanel('communication-gap')}>
-                      <span>View broadcast analytics</span>
+                    <button type="button" className="hero-action-primary hq-alert-cta" onClick={() => openHqAlertPanel('communication-gap')}>
+                      <span>View Details</span>
                       <KeyboardArrowRight sx={{ fontSize: 16 }}/>
                     </button>
                   </div>
@@ -702,8 +703,8 @@ export const HQHome: React.FC = () => {
                     <span>DM John Doe — share-out recommended</span>
                   </div>
                   <div className="hero-actions">
-                    <button className="hero-action-primary" onClick={() => openHqAlertPanel('performance-win')}>
-                      <span>View district detail</span>
+                    <button type="button" className="hero-action-primary hq-alert-cta" onClick={() => openHqAlertPanel('performance-win')}>
+                      <span>View Details</span>
                       <KeyboardArrowRight sx={{ fontSize: 16 }}/>
                     </button>
                   </div>
@@ -737,7 +738,7 @@ export const HQHome: React.FC = () => {
                   <span className="kpi-snapshot-value">14</span>
                   <span className="kpi-snapshot-label">Critical Issues</span>
                 </div>
-                <span className="kpi-snapshot-badge warning">+3</span>
+                <span className="kpi-snapshot-badge warning">+3 WoW</span>
               </div>
               <div className="kpi-snapshot-item">
                 <div className="kpi-snapshot-item-icon compliance"><TaskAltOutlined sx={{ fontSize: 16 }}/></div>
@@ -745,7 +746,7 @@ export const HQHome: React.FC = () => {
                   <span className="kpi-snapshot-value">94.1%</span>
                   <span className="kpi-snapshot-label">Broadcast Reach</span>
                 </div>
-                <span className="kpi-snapshot-badge positive">+1.8%</span>
+                <span className="kpi-snapshot-badge positive">+1.8% WoW</span>
               </div>
               <div className="kpi-snapshot-item">
                 <div className="kpi-snapshot-item-icon nps"><StarBorderOutlined sx={{ fontSize: 16 }}/></div>
@@ -753,7 +754,7 @@ export const HQHome: React.FC = () => {
                   <span className="kpi-snapshot-value">73</span>
                   <span className="kpi-snapshot-label">District Perf. Index</span>
                 </div>
-                <span className="kpi-snapshot-badge positive">+1 pt</span>
+                <span className="kpi-snapshot-badge positive">+1 pt MoM</span>
               </div>
             </div>
           </Card>

@@ -31,6 +31,7 @@ import AttachMoneyOutlined from '@mui/icons-material/AttachMoneyOutlined';
 import LabelOutlined from '@mui/icons-material/LabelOutlined';
 import GppGoodOutlined from '@mui/icons-material/GppGoodOutlined';
 import { Button, Card, Tabs, Modal, EmptyState, Stepper, StepperStep, Badge, Select, SelectOption } from 'impact-ui';
+import { useAuth } from '../context/AuthContext';
 import './POGRuleManagement.css';
 
 // Types
@@ -430,46 +431,15 @@ const RuleFilterSelect: React.FC<RuleFilterSelectProps> = ({ label, value, optio
 };
 
 export const POGRuleManagement: React.FC = () => {
+  const { user } = useAuth();
+  /** District managers: browse rules only — no create, edit, delete, or uploads */
+  const isPogViewOnly = user?.role === 'DM';
   const [searchParams, setSearchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'library' | 'builder'>('library');
   const [searchQuery, setSearchQuery] = useState('');
   const [rules, setRules] = useState<Rule[]>(initialMockRules);
   const [newRuleHighlight, setNewRuleHighlight] = useState<string | null>(null);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 600);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Accept new rule from AI Copilot via URL params
-  useEffect(() => {
-    const ruleName = searchParams.get('newRuleName');
-    const ruleType = searchParams.get('newRuleType');
-    const ruleCategory = searchParams.get('newRuleCategory');
-    if (ruleName && ruleType) {
-      const mappedType = (ruleTypeOptions.find(rt => rt.label === ruleType || rt.value === ruleType)?.value || 'Brand Blocking') as RuleType;
-      const newId = `RULE-${String(rules.length + 1).padStart(3, '0')}`;
-      const newRule: Rule = {
-        id: newId,
-        name: ruleName,
-        description: `${ruleName} — created via AI Copilot. Applies ${ruleType.toLowerCase()} constraints to planogram layouts.`,
-        types: [mappedType],
-        mapping: { categories: ruleCategory ? [ruleCategory] : [], clusters: [], fixtures: [] },
-        lastUpdated: new Date().toISOString().split('T')[0],
-        status: 'Active',
-        definition: {},
-        completedSteps: [1, 2, 3, 4],
-      };
-      setRules(prev => {
-        if (prev.some(r => r.name === ruleName)) return prev;
-        return [newRule, ...prev];
-      });
-      setNewRuleHighlight(newId);
-      setSearchParams({}, { replace: true });
-      setTimeout(() => setNewRuleHighlight(null), 5000);
-    }
-  }, []);
   const [filters, setFilters] = useState<Filters>({ ruleType: '', category: '', mappingStatus: '', ruleStatus: '' });
   const [selectedRule, setSelectedRule] = useState<Rule | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -480,6 +450,50 @@ export const POGRuleManagement: React.FC = () => {
   const [editingRuleId, setEditingRuleId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 600);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Accept new rule from Ask Alan via URL params (not for view-only / DM)
+  useEffect(() => {
+    if (isPogViewOnly) {
+      if (searchParams.get('newRuleName') || searchParams.get('newRuleType') || searchParams.get('newRuleCategory')) {
+        setSearchParams({}, { replace: true });
+      }
+      return;
+    }
+    const ruleName = searchParams.get('newRuleName');
+    const ruleType = searchParams.get('newRuleType');
+    const ruleCategory = searchParams.get('newRuleCategory');
+    if (ruleName && ruleType) {
+      const mappedType = (ruleTypeOptions.find(rt => rt.label === ruleType || rt.value === ruleType)?.value || 'Brand Blocking') as RuleType;
+      let createdId: string | null = null;
+      setRules(prev => {
+        if (prev.some(r => r.name === ruleName)) return prev;
+        const newId = `RULE-${String(prev.length + 1).padStart(3, '0')}`;
+        createdId = newId;
+        const newRule: Rule = {
+          id: newId,
+          name: ruleName,
+          description: `${ruleName} — created via Ask Alan. Applies ${ruleType.toLowerCase()} constraints to planogram layouts.`,
+          types: [mappedType],
+          mapping: { categories: ruleCategory ? [ruleCategory] : [], clusters: [], fixtures: [] },
+          lastUpdated: new Date().toISOString().split('T')[0],
+          status: 'Active',
+          definition: {},
+          completedSteps: [1, 2, 3, 4],
+        };
+        return [newRule, ...prev];
+      });
+      setSearchParams({}, { replace: true });
+      if (createdId) {
+        setNewRuleHighlight(createdId);
+        setTimeout(() => setNewRuleHighlight(null), 5000);
+      }
+    }
+  }, [isPogViewOnly, searchParams, setSearchParams]);
 
   const isMapped = (rule: Rule | Partial<Rule>): boolean => {
     const mapping = rule.mapping;
@@ -527,6 +541,7 @@ export const POGRuleManagement: React.FC = () => {
   const handleViewRule = (rule: Rule) => setSelectedRule(rule);
 
   const handleEditRule = (rule: Rule) => {
+    if (isPogViewOnly) return;
     setBuilderForm({ ...rule });
     setIsEditing(true);
     setEditingRuleId(rule.id);
@@ -535,11 +550,13 @@ export const POGRuleManagement: React.FC = () => {
   };
 
   const handleDeleteClick = (rule: Rule) => {
+    if (isPogViewOnly) return;
     setRuleToDelete(rule);
     setShowDeleteModal(true);
   };
 
   const confirmDelete = () => {
+    if (isPogViewOnly) return;
     if (ruleToDelete) {
       setRules(prev => prev.filter(r => r.id !== ruleToDelete.id));
       setShowDeleteModal(false);
@@ -548,6 +565,7 @@ export const POGRuleManagement: React.FC = () => {
   };
 
   const handleCreateNew = () => {
+    if (isPogViewOnly) return;
     setBuilderForm({ ...emptyRule });
     setIsEditing(false);
     setEditingRuleId(null);
@@ -584,6 +602,7 @@ export const POGRuleManagement: React.FC = () => {
   const handlePrevStep = () => { if (currentStep > 1) setCurrentStep(currentStep - 1); };
 
   const handleSaveDraft = () => {
+    if (isPogViewOnly) return;
     const newCompletedSteps = [...(builderForm.completedSteps || [])];
     if (isStepComplete(currentStep) && !newCompletedSteps.includes(currentStep)) newCompletedSteps.push(currentStep);
     const draftRule: Rule = {
@@ -607,6 +626,7 @@ export const POGRuleManagement: React.FC = () => {
   };
 
   const handleSaveRule = () => {
+    if (isPogViewOnly) return;
     if (!builderForm.name || !builderForm.types?.length) return;
     const newRule: Rule = {
       id: editingRuleId || `RULE-${String(rules.length + 1).padStart(3, '0')}`,
@@ -634,6 +654,15 @@ export const POGRuleManagement: React.FC = () => {
     setEditingRuleId(null);
     setCurrentStep(1);
   };
+
+  useEffect(() => {
+    if (!isPogViewOnly || activeTab !== 'builder') return;
+    setActiveTab('library');
+    setBuilderForm({ ...emptyRule });
+    setIsEditing(false);
+    setEditingRuleId(null);
+    setCurrentStep(1);
+  }, [isPogViewOnly, activeTab]);
 
   const handleTypeToggle = (type: RuleType) => {
     const currentTypes = builderForm.types || [];
@@ -1353,7 +1382,9 @@ export const POGRuleManagement: React.FC = () => {
               <GppGoodOutlined sx={{ fontSize: 24 }} />
               <h1 className="rule-management-title">POG Rule Management</h1>
             </div>
-            <p className="rule-management-subtitle">Create and manage centralized planogram rules</p>
+            <p className="rule-management-subtitle">
+              {isPogViewOnly ? 'View centralized planogram rules for your district (read-only)' : 'Create and manage centralized planogram rules'}
+            </p>
             <div className="pi-header-meta">
               <span className="pi-meta-pill">
                 <GppGoodOutlined sx={{ fontSize: 12 }} />
@@ -1374,20 +1405,26 @@ export const POGRuleManagement: React.FC = () => {
               )}
             </div>
           </div>
-          <div className="pi-header-right">
-            <Button variant="contained" color="primary" size="medium" className="pi-btn-primary" onClick={handleCreateNew} startIcon={<Add sx={{ fontSize: 15 }} />}>
-              Create Rule
-            </Button>
-          </div>
+          {!isPogViewOnly && (
+            <div className="pi-header-right">
+              <Button variant="contained" color="primary" size="medium" className="pi-btn-primary" onClick={handleCreateNew} startIcon={<Add sx={{ fontSize: 15 }} />}>
+                Create Rule
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 
       <div style={{ marginTop: '24px' }}>
       <Tabs
-        tabNames={[
-          { value: 'library', label: 'Rule Library' },
-          { value: 'builder', label: isEditing ? 'Rule Builder — Editing' : 'Rule Builder' },
-        ]}
+        tabNames={
+          isPogViewOnly
+            ? [{ value: 'library', label: 'Rule Library' }]
+            : [
+                { value: 'library', label: 'Rule Library' },
+                { value: 'builder', label: isEditing ? 'Rule Builder — Editing' : 'Rule Builder' },
+              ]
+        }
         tabPanels={[
           <div className="rule-library">
           {(unmappedCount > 0 || draftCount > 0) && (
@@ -1461,7 +1498,7 @@ export const POGRuleManagement: React.FC = () => {
                   <th>Mapping</th>
                   <th>Last Updated</th>
                   <th>Status</th>
-                  <th>Actions</th>
+                  <th>{isPogViewOnly ? 'Details' : 'Actions'}</th>
                 </tr>
               </thead>
               <tbody>
@@ -1470,10 +1507,11 @@ export const POGRuleManagement: React.FC = () => {
                     <td colSpan={10}>
                       <EmptyState
                         heading="No rules found"
-                        description="Create a new rule or adjust your filters."
+                        description={isPogViewOnly ? 'No rules match your filters. Try adjusting search or filters.' : 'Create a new rule or adjust your filters.'}
                         emptyStateIcon={<DescriptionOutlined sx={{ fontSize: 40 }} />}
-                        primaryButtonLabel="Create Rule"
-                        onPrimaryButtonClick={handleCreateNew}
+                        {...(!isPogViewOnly
+                          ? { primaryButtonLabel: 'Create Rule', onPrimaryButtonClick: handleCreateNew }
+                          : {})}
                       />
                     </td>
                   </tr>
@@ -1533,14 +1571,20 @@ export const POGRuleManagement: React.FC = () => {
                           />
                         </td>
                         <td>
-                          <div className="action-buttons">
-                            <button className="action-btn edit" onClick={() => handleEditRule(rule)} title="Edit">
-                              <EditOutlined sx={{ fontSize: 16 }} />
+                          {isPogViewOnly ? (
+                            <button type="button" className="rule-id-link" onClick={() => handleViewRule(rule)}>
+                              View details
                             </button>
-                            <button className="action-btn delete" onClick={() => handleDeleteClick(rule)} title="Delete">
-                              <DeleteOutlined sx={{ fontSize: 16 }} />
-                            </button>
-                          </div>
+                          ) : (
+                            <div className="action-buttons">
+                              <button className="action-btn edit" onClick={() => handleEditRule(rule)} title="Edit">
+                                <EditOutlined sx={{ fontSize: 16 }} />
+                              </button>
+                              <button className="action-btn delete" onClick={() => handleDeleteClick(rule)} title="Delete">
+                                <DeleteOutlined sx={{ fontSize: 16 }} />
+                              </button>
+                            </div>
+                          )}
                         </td>
                       </tr>
                     );
@@ -1583,7 +1627,9 @@ export const POGRuleManagement: React.FC = () => {
             </div>
           </div>
         </div>,
-          <div className="rule-builder-wizard">
+          ...(!isPogViewOnly
+            ? [
+          <div key="rule-builder" className="rule-builder-wizard">
           <Stepper
             steps={wizardSteps.map((s): StepperStep => ({ label: s.title, description: s.description }))}
             activeStep={currentStep - 1}
@@ -1625,9 +1671,12 @@ export const POGRuleManagement: React.FC = () => {
             </div>
           </div>
         </div>,
+              ]
+            : []),
         ]}
         value={activeTab}
         onChange={(_, val) => {
+          if (isPogViewOnly) return;
           if (val === 'library') { setActiveTab('library'); resetBuilder(); }
           else setActiveTab(val as 'library' | 'builder');
         }}
@@ -1648,8 +1697,8 @@ export const POGRuleManagement: React.FC = () => {
           </div>
         ) : ''}
         onClose={() => setSelectedRule(null)}
-        primaryButtonLabel="Edit Rule"
-        onPrimaryButtonClick={() => { if (selectedRule) { setSelectedRule(null); handleEditRule(selectedRule); } }}
+        primaryButtonLabel={isPogViewOnly ? undefined : 'Edit Rule'}
+        onPrimaryButtonClick={isPogViewOnly ? undefined : () => { if (selectedRule) { setSelectedRule(null); handleEditRule(selectedRule); } }}
         secondaryButtonLabel="Close"
         onSecondaryButtonClick={() => setSelectedRule(null)}
         size="large"

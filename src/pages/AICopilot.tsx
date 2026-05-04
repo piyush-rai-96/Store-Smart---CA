@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { flushSync } from 'react-dom';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import PsychologyOutlined from '@mui/icons-material/PsychologyOutlined';
 import BarChartOutlined from '@mui/icons-material/BarChartOutlined';
@@ -28,6 +29,8 @@ import CheckCircleOutlined from '@mui/icons-material/CheckCircleOutlined';
 import StoreOutlined from '@mui/icons-material/StoreOutlined';
 import { Button, Card, Chips, Tabs, Badge, ChatBotComponent } from 'impact-ui';
 import { useAuth } from '../context/AuthContext';
+import type { StorehubOpenAlanDetail } from '../types';
+import { STOREHUB_OPEN_ALAN } from '../utils/openAskAlan';
 import './AICopilot.css';
 
 // ── Types ──
@@ -448,8 +451,11 @@ export const AICopilot: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [activeSkill, setActiveSkill] = useState<SkillMode>('knowledge');
+  const activeSkillRef = useRef<SkillMode>(activeSkill);
+  activeSkillRef.current = activeSkill;
   const [pogRuleSent, setPogRuleSent] = useState<Set<string>>(new Set());
-  const autoTriggeredRef = useRef(false);
+  /** Dedupe deep-link runs (same URL) while allowing repeats when `alan` nonce changes */
+  const processedDeepLinkKeysRef = useRef<Set<string>>(new Set());
   const [isInitializing, setIsInitializing] = useState(false);
   const [initStep, setInitStep] = useState(0);
   const [initMode, setInitMode] = useState<SkillMode | null>(null);
@@ -619,14 +625,6 @@ export const AICopilot: React.FC = () => {
     }
   }, [location.state, location.pathname, location.search, location.hash, navigate]);
 
-  /** Same-page open from header while already on AI Copilot */
-  useEffect(() => {
-    const onOpenAlan = () => setIsChatBotOpen(true);
-    window.addEventListener('storehub:open-alan', onOpenAlan);
-    return () => window.removeEventListener('storehub:open-alan', onOpenAlan);
-  }, []);
-
-
   // Agentic action processing — animated step-by-step
   const runAgenticActionFlow = async (
     processingId: string,
@@ -674,13 +672,16 @@ export const AICopilot: React.FC = () => {
     setIsProcessing(false);
   };
 
-  // Auto-trigger from Home Screen VoC "Open in AI Copilot" button
+  // Auto-trigger from Home Screen VoC "Ask Alan" (query params; `alan` nonce allows repeat opens)
   useEffect(() => {
     const mode = searchParams.get('mode');
     const context = searchParams.get('context');
-    
-    if (mode === 'actions' && context === 'voc-messy-aisles' && !autoTriggeredRef.current) {
-      autoTriggeredRef.current = true;
+    const alanNonce = searchParams.get('alan') || 'legacy';
+
+    if (mode === 'actions' && context === 'voc-messy-aisles') {
+      const deepKey = `voc|${alanNonce}`;
+      if (processedDeepLinkKeysRef.current.has(deepKey)) return;
+      processedDeepLinkKeysRef.current.add(deepKey);
       setActiveSkill('actions');
       setInitMode('actions');
       setSearchParams({}, { replace: true });
@@ -735,9 +736,11 @@ export const AICopilot: React.FC = () => {
       }, 2000);
     }
 
-    // Deep-link: HQ Home — District Gaps "Open in AI Copilot"
-    if (mode === 'actions' && context === 'district-gaps' && !autoTriggeredRef.current) {
-      autoTriggeredRef.current = true;
+    // Deep-link: HQ Home — District Gaps via Ask Alan
+    if (mode === 'actions' && context === 'district-gaps') {
+      const deepKey = `dg|${alanNonce}`;
+      if (processedDeepLinkKeysRef.current.has(deepKey)) return;
+      processedDeepLinkKeysRef.current.add(deepKey);
       setActiveSkill('actions');
       setInitMode('actions');
       setSearchParams({}, { replace: true });
@@ -790,8 +793,10 @@ export const AICopilot: React.FC = () => {
     }
 
     // Deep-link: POG Self Audit from District Broadcasting
-    if (mode === 'pog' && context === 'pog-self-audit' && !autoTriggeredRef.current) {
-      autoTriggeredRef.current = true;
+    if (mode === 'pog' && context === 'pog-self-audit') {
+      const deepKey = `psa|${alanNonce}`;
+      if (processedDeepLinkKeysRef.current.has(deepKey)) return;
+      processedDeepLinkKeysRef.current.add(deepKey);
       setActiveSkill('pog');
       setInitMode('pog');
       setSearchParams({}, { replace: true });
@@ -830,7 +835,7 @@ export const AICopilot: React.FC = () => {
     }
 
     // Deep-link: Generic audit dimension from Heatmap
-    if (context?.startsWith('audit-') && !autoTriggeredRef.current) {
+    if (context?.startsWith('audit-')) {
       const skill = mode as SkillMode;
       const storeNum = searchParams.get('store') || '';
       const storeName = decodeURIComponent(searchParams.get('storeName') || '');
@@ -838,7 +843,9 @@ export const AICopilot: React.FC = () => {
       const dimension = context.replace('audit-', '').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
       if (['pog', 'knowledge', 'actions', 'analytics'].includes(skill)) {
-        autoTriggeredRef.current = true;
+        const deepKey = `audit|${skill}|${context}|${storeNum}|${alanNonce}`;
+        if (processedDeepLinkKeysRef.current.has(deepKey)) return;
+        processedDeepLinkKeysRef.current.add(deepKey);
         setActiveSkill(skill);
         setInitMode(skill === 'pog' ? 'pog' : skill === 'actions' ? 'actions' : null);
         setSearchParams({}, { replace: true });
@@ -902,15 +909,17 @@ export const AICopilot: React.FC = () => {
   }, [searchParams]);
 
   const addMessage = (msg: ChatMessage) => {
+    const sk = msg.skill;
     setMessages(prev => ({
       ...prev,
-      [activeSkill]: [...prev[activeSkill], msg],
+      [sk]: [...prev[sk], msg],
     }));
   };
 
   const generateId = () => `msg-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
 
   const simulateResponse = async (userQuery: string) => {
+    const skill = activeSkillRef.current;
     setIsProcessing(true);
 
     // Build skill-specific agentic processing steps
@@ -928,7 +937,7 @@ export const AICopilot: React.FC = () => {
         { step: 'Generating KPI cards and charts…', status: 'pending' },
       ],
     };
-    const steps = stepsBySkill[activeSkill as 'knowledge' | 'analytics'];
+    const steps = stepsBySkill[skill as 'knowledge' | 'analytics'];
 
     // Add processing message
     const processingId = generateId();
@@ -937,13 +946,13 @@ export const AICopilot: React.FC = () => {
       role: 'assistant',
       content: '',
       timestamp: new Date(),
-      skill: activeSkill,
+      skill,
       isProcessing: true,
       processingSteps: [...steps],
     };
     setMessages(prev => ({
       ...prev,
-      [activeSkill]: [...prev[activeSkill], processingMsg],
+      [skill]: [...prev[skill], processingMsg],
     }));
 
     // Animate steps — slow for impressive demo feel
@@ -951,7 +960,7 @@ export const AICopilot: React.FC = () => {
       await new Promise(resolve => setTimeout(resolve, 1200 + Math.random() * 600));
       setMessages(prev => ({
         ...prev,
-        [activeSkill]: prev[activeSkill].map(m =>
+        [skill]: prev[skill].map(m =>
           m.id === processingId ? {
             ...m,
             processingSteps: m.processingSteps?.map((s, idx) => ({
@@ -1007,10 +1016,10 @@ export const AICopilot: React.FC = () => {
     };
 
     setMessages(prev => {
-      const filtered = prev[activeSkill].filter(m => m.id !== processingId);
+      const filtered = prev[skill].filter(m => m.id !== processingId);
       let response: ChatMessage;
 
-      if (activeSkill === 'knowledge') {
+      if (skill === 'knowledge') {
         const result = findKnowledgeResponse(userQuery);
         const conf = randConfidence();
         const enrichedSources = enrichSources(result.sources);
@@ -1026,7 +1035,7 @@ export const AICopilot: React.FC = () => {
           confidence: conf,
           confidenceBreakdown: buildBreakdown(conf, enrichedSources),
         };
-      } else if (activeSkill === 'analytics') {
+      } else if (skill === 'analytics') {
         const result = findAnalyticsResponse(userQuery);
         const conf = randConfidence();
         response = {
@@ -1042,13 +1051,13 @@ export const AICopilot: React.FC = () => {
           confidence: conf,
           confidenceBreakdown: buildBreakdown(conf, result.kpiCards),
         };
-      } else if (activeSkill === 'pog') {
+      } else if (skill === 'pog') {
         response = { id: generateId(), role: 'assistant', content: '', timestamp: new Date(), skill: 'pog' };
       } else {
         response = { id: generateId(), role: 'assistant', content: '', timestamp: new Date(), skill: 'actions' };
       }
 
-      return { ...prev, [activeSkill]: [...filtered, response] };
+      return { ...prev, [skill]: [...filtered, response] };
     });
 
     setIsProcessing(false);
@@ -1103,7 +1112,6 @@ export const AICopilot: React.FC = () => {
           status: 'Active',
           category: ruleCategory,
         },
-        suggestedQueries: ['Create another planogram rule', 'Schedule planogram reset for next Monday', 'Create a restocking task'],
         followUpQuestions: ['Create another planogram rule', 'Send to POG Localization Engine', 'Schedule a planogram reset'],
         nextActions: {
           learnMore: ['What planogram rules are currently active?', 'How does the POG Localization Engine apply rules?'],
@@ -1135,7 +1143,6 @@ export const AICopilot: React.FC = () => {
         priority: userQuery.toLowerCase().includes('urgent') || userQuery.toLowerCase().includes('fire') ? 'Critical' : 'Medium',
         due: userQuery.toLowerCase().includes('monday') ? 'Next Monday' : userQuery.toLowerCase().includes('today') ? 'Today' : 'Tomorrow',
       },
-      suggestedQueries: ['Create another task', 'View all active tasks', 'Assign to a different team member'],
       followUpQuestions: ['Create another task', 'View all active tasks', 'Add a due date reminder'],
       nextActions: {
         learnMore: ['What tasks are currently in the Operations Queue?', 'What is the SLA for this priority level?'],
@@ -1349,6 +1356,7 @@ export const AICopilot: React.FC = () => {
   };
 
   const handleSend = (overrideText?: string) => {
+    const skill = activeSkillRef.current;
     const text = (overrideText ?? inputValue).trim();
     if (!text && !uploadedImage) return;
     if (isProcessing) return;
@@ -1358,7 +1366,7 @@ export const AICopilot: React.FC = () => {
       role: 'user',
       content: text || 'Audit this shelf image',
       timestamp: new Date(),
-      skill: activeSkill,
+      skill,
       imageUrl: uploadedImage || undefined,
     };
 
@@ -1367,14 +1375,63 @@ export const AICopilot: React.FC = () => {
     setInputValue('');
     setUploadedImage(null);
 
-    if (activeSkill === 'pog') {
+    if (skill === 'pog') {
       simulatePogAgentic(text || 'audit shelf', currentImage || undefined);
-    } else if (activeSkill === 'actions') {
+    } else if (skill === 'actions') {
       simulateActionAgentic(text || 'create task');
     } else {
       simulateResponse(text || 'audit shelf');
     }
   };
+
+  const openAlanDetailHandlerRef = useRef<(d: StorehubOpenAlanDetail) => void>(() => {});
+  openAlanDetailHandlerRef.current = (detail: StorehubOpenAlanDetail) => {
+    setIsChatBotOpen(true);
+    if (detail.preset === 'district-gaps' || detail.preset === 'voc-messy-aisles') {
+      const qs = new URLSearchParams();
+      qs.set('mode', 'actions');
+      qs.set('context', detail.preset === 'district-gaps' ? 'district-gaps' : 'voc-messy-aisles');
+      qs.set('alan', String(Date.now()));
+      navigate(
+        { pathname: location.pathname, search: `?${qs.toString()}`, hash: location.hash || '' },
+        { replace: true },
+      );
+      return;
+    }
+    if (detail.heatmapAudit) {
+      const h = detail.heatmapAudit;
+      const qs = new URLSearchParams();
+      qs.set('mode', h.skill);
+      qs.set('context', h.context);
+      qs.set('store', h.storeNumber);
+      qs.set('storeName', h.storeName);
+      qs.set('score', String(h.score));
+      qs.set('alan', String(Date.now()));
+      navigate(
+        { pathname: location.pathname, search: `?${qs.toString()}`, hash: location.hash || '' },
+        { replace: true },
+      );
+      return;
+    }
+    if (detail.skill != null && detail.initialMessage != null) {
+      flushSync(() => {
+        setActiveSkill(detail.skill!);
+      });
+      if (detail.autoSend) {
+        queueMicrotask(() => handleSend(detail.initialMessage!));
+      } else {
+        setInputValue(detail.initialMessage!);
+      }
+    }
+  };
+
+  useEffect(() => {
+    const onOpenAlan = (e: Event) => {
+      openAlanDetailHandlerRef.current((e as CustomEvent<StorehubOpenAlanDetail>).detail ?? {});
+    };
+    window.addEventListener(STOREHUB_OPEN_ALAN, onOpenAlan);
+    return () => window.removeEventListener(STOREHUB_OPEN_ALAN, onOpenAlan);
+  }, []);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -1802,29 +1859,6 @@ export const AICopilot: React.FC = () => {
           );
         })()}
 
-        {/* Follow-up Questions — bullet-style conversational prompts */}
-        {msg.nextActions && ((msg.nextActions.learnMore?.length || 0) + (msg.nextActions.takeAction?.length || 0)) > 0 && (() => {
-          const all = [...(msg.nextActions.learnMore || []), ...(msg.nextActions.takeAction || [])];
-          return (
-            <div className="cop-followups-inline">
-              <div className="cop-followups-inline-label">Follow-up questions</div>
-              <ul className="cop-followups-inline-list">
-                {all.map((q, i) => (
-                  <li key={i}>
-                    <button
-                      type="button"
-                      className="cop-followup-prompt"
-                      onClick={() => { setInputValue(''); handleSend(q); }}
-                    >
-                      {q}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          );
-        })()}
-
         {/* OOS Alert — ShelfIQ Style */}
         {msg.oosItems && msg.oosItems.length > 0 && (
           <div className="cop-oos-alert">
@@ -2077,15 +2111,18 @@ export const AICopilot: React.FC = () => {
 
         {/* Action Item Card — Add to Operations Queue */}
         {msg.taskCreated && (
-          <div className={`cop-task-card ${taskPushed.has(msg.id) ? 'cop-task-pushed' : ''}`}>
-            <div className="cop-task-header">
+          <div className={`cop-outcome-card cop-task-card ${taskPushed.has(msg.id) ? 'cop-task-pushed' : ''}`}>
+            <div className="cop-outcome-card__header cop-task-header">
               <AssignmentOutlined sx={{ fontSize: 15 }}/>
               <span>{taskPushed.has(msg.id) ? 'Added to Operations Queue' : 'Action Item Created'}</span>
               {taskPushed.has(msg.id) && <TaskAltOutlined sx={{ fontSize: 14 }} className="cop-task-check"/>}
             </div>
-            <div className="cop-task-body">
+            <div className="cop-task-body cop-outcome-card__body">
               <div className="cop-task-row"><span className="cop-task-label">Title</span><span className="cop-task-value">{msg.taskCreated.title}</span></div>
               <div className="cop-task-row"><span className="cop-task-label">Due</span><span className="cop-task-value">{msg.taskCreated.due}</span></div>
+              {!taskPushed.has(msg.id) && (
+                <div className="cop-outcome-card__hint">Assign an owner and push to Operations Queue to track execution across StoreHub.</div>
+              )}
               {msg.taskCreated.stores && msg.taskCreated.stores.length > 0 && (
                 <div className="cop-task-stores">
                   <div className="cop-task-stores-label">
@@ -2272,19 +2309,19 @@ export const AICopilot: React.FC = () => {
 
         {/* POG Rule Created Card */}
         {msg.pogRuleCreated && (
-          <div className={`cop-pog-rule-card ${pogRuleSent.has(msg.id) ? 'cop-pog-rule-sent' : ''}`}>
-            <div className="cop-pog-rule-header">
+          <div className={`cop-outcome-card cop-pog-rule-card ${pogRuleSent.has(msg.id) ? 'cop-pog-rule-sent' : ''}`}>
+            <div className="cop-outcome-card__header cop-pog-rule-header">
               <DescriptionOutlined sx={{ fontSize: 15 }}/>
               <span>{pogRuleSent.has(msg.id) ? 'Rule Sent to POG Engine' : 'Planogram Rule Created'}</span>
               {pogRuleSent.has(msg.id) && <TaskAltOutlined sx={{ fontSize: 14 }} className="cop-task-check"/>}
             </div>
-            <div className="cop-pog-rule-body">
+            <div className="cop-pog-rule-body cop-outcome-card__body">
               <div className="cop-task-row"><span className="cop-task-label">Rule Name</span><span className="cop-task-value">{msg.pogRuleCreated.name}</span></div>
               <div className="cop-task-row"><span className="cop-task-label">Type</span><span className="cop-task-value">{msg.pogRuleCreated.type}</span></div>
               <div className="cop-task-row"><span className="cop-task-label">Category</span><span className="cop-task-value">{msg.pogRuleCreated.category}</span></div>
               <div className="cop-task-row"><span className="cop-task-label">Status</span><span className={`cop-task-priority cop-pri--${msg.pogRuleCreated.status === 'Active' ? 'medium' : 'high'}`}>{msg.pogRuleCreated.status}</span></div>
               {msg.pogRuleCreated.description && (
-                <div className="cop-pog-rule-desc">{msg.pogRuleCreated.description}</div>
+                <div className="cop-outcome-card__hint cop-pog-rule-desc">{msg.pogRuleCreated.description}</div>
               )}
             </div>
             {!pogRuleSent.has(msg.id) ? (
@@ -2318,8 +2355,35 @@ export const AICopilot: React.FC = () => {
           </div>
         )}
 
+        {/* Follow-up questions — below outcome cards (task / planogram rule) so the created entity reads first */}
+        {msg.nextActions && ((msg.nextActions.learnMore?.length || 0) + (msg.nextActions.takeAction?.length || 0)) > 0 && (() => {
+          const all = [...(msg.nextActions.learnMore || []), ...(msg.nextActions.takeAction || [])];
+          return (
+            <div className={`cop-followups-inline ${msg.taskCreated || msg.pogRuleCreated ? 'cop-followups-inline--after-outcome' : ''}`}>
+              <div className="cop-followups-inline-label">Follow-up questions</div>
+              <ul className="cop-followups-inline-list">
+                {all.map((q, i) => (
+                  <li key={i}>
+                    <button
+                      type="button"
+                      className="cop-followup-prompt"
+                      onClick={() => { setInputValue(''); handleSend(q); }}
+                    >
+                      {q}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        })()}
+
         {/* Suggested Follow-ups — hidden once task is pushed to Operations Queue */}
-        {msg.suggestedQueries && msg.suggestedQueries.length > 0 && !(msg.taskCreated && taskPushed.has(msg.id)) && !(msg.pogRuleCreated && pogRuleSent.has(msg.id)) && (
+        {msg.suggestedQueries && msg.suggestedQueries.length > 0
+          && !(msg.taskCreated && taskPushed.has(msg.id))
+          && !(msg.pogRuleCreated && pogRuleSent.has(msg.id))
+          && !(((msg.nextActions?.learnMore?.length || 0) + (msg.nextActions?.takeAction?.length || 0)) > 0)
+          && (
           <div className="cop-suggestions-inline">
             {msg.suggestedQueries.map((q, i) => (
               <Chips key={i} label={q} variant="outlined" size="small" className="cop-suggestion-chip" onClick={() => handleSuggestionClick(q)} />
@@ -2338,7 +2402,7 @@ export const AICopilot: React.FC = () => {
         <div className="cop-initializing-overlay">
           <div className="cop-init-content">
             <div className="cop-init-spinner" />
-            <h3>AI Copilot</h3>
+            <h3>Ask Alan</h3>
             <p>
               {initMode === 'pog' ? 'Initializing POG Audit Mode...'
                 : initMode === 'actions' ? 'Initializing Action Mode...'
@@ -2350,7 +2414,7 @@ export const AICopilot: React.FC = () => {
               {(initStepLabels.length > 0 ? initStepLabels : [
                 initMode === 'pog' ? 'Loading district planogram catalog' : 'Loading VoC theme context',
                 initMode === 'pog' ? 'Connecting to AI Vision engine' : 'Connecting to analytics engine',
-                initMode === 'pog' ? 'Preparing compliance audit workspace' : 'Connect to AI Copilot Action Engine',
+                initMode === 'pog' ? 'Preparing compliance audit workspace' : 'Connect to Ask Alan Action Engine',
               ]).map((label, idx) => (
                 <div key={idx} className={`cop-init-step ${initStep >= idx + 1 ? 'active' : ''}`}>
                   <span className="cop-init-dot" />
@@ -2487,7 +2551,7 @@ export const AICopilot: React.FC = () => {
                       </div>
                       <div className="cop-msg-content">
                         <div className="cop-msg-meta">
-                          <span className="cop-msg-sender">{msg.role === 'user' ? 'You' : 'AI Copilot'}</span>
+                          <span className="cop-msg-sender">{msg.role === 'user' ? 'You' : 'Ask Alan'}</span>
                           <span className="cop-msg-time">{formatTime(msg.timestamp)}</span>
                         </div>
                         {renderMessageContent(msg)}
@@ -2548,7 +2612,7 @@ export const AICopilot: React.FC = () => {
                   </Button>
                 </div>
                 <div className="cop-input-footer">
-                  AI Copilot uses retrieval-augmented generation. Responses are sourced from your organization's knowledge base.
+                  Ask Alan uses retrieval-augmented generation. Responses are sourced from your organization's knowledge base.
                 </div>
               </div>
             </div>

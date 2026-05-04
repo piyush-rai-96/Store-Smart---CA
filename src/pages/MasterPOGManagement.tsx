@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import FileUploadOutlined from '@mui/icons-material/FileUploadOutlined';
 import SearchOutlined from '@mui/icons-material/SearchOutlined';
-import VisibilityOutlined from '@mui/icons-material/VisibilityOutlined';
 import EditOutlined from '@mui/icons-material/EditOutlined';
 import DeleteOutlined from '@mui/icons-material/DeleteOutlined';
 import AccessTimeOutlined from '@mui/icons-material/AccessTimeOutlined';
@@ -9,6 +8,7 @@ import CheckCircleOutlined from '@mui/icons-material/CheckCircleOutlined';
 import LayersOutlined from '@mui/icons-material/LayersOutlined';
 import TuneOutlined from '@mui/icons-material/TuneOutlined';
 import { Button, Badge, Card, Tabs, Tag, Select, SelectOption, Chips } from 'impact-ui';
+import { useAuth } from '../context/AuthContext';
 import './MasterPOGManagement.css';
 import WomensWallStandard from '../assets/C&A_WOMENS_WALL_STANDARD.png';
 import MensDenimWall from '../assets/C&A_MENS_DENIM_WALL.png';
@@ -156,6 +156,9 @@ const FilterSelect: React.FC<FilterSelectProps> = ({ label, value, options, onCh
 };
 
 export const MasterPOGManagement: React.FC = () => {
+  const { user } = useAuth();
+  /** District managers: browse catalog only — no uploads or edits */
+  const isPogViewOnly = user?.role === 'DM';
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'library' | 'workspace'>('library');
   const [selectedPOG, setSelectedPOG] = useState<POGItem | null>(null);
@@ -261,12 +264,21 @@ export const MasterPOGManagement: React.FC = () => {
               <LayersOutlined sx={{ fontSize: 24 }} />
               <h1 className="master-pog-title">Master POG Management</h1>
             </div>
-            <p className="master-pog-subtitle">Manage and organize your planogram library</p>
+            <p className="master-pog-subtitle">
+              {isPogViewOnly ? 'View corporate planograms for your district (read-only)' : 'Manage and organize your planogram library'}
+            </p>
+            {isPogViewOnly && (
+              <p className="master-pog-subtitle" style={{ marginTop: 8, fontSize: 'var(--ia-text-xs)', color: 'var(--ia-color-text-secondary)' }}>
+                Upload and edit actions are limited to HQ and administrators.
+              </p>
+            )}
           </div>
           <div className="pi-header-right">
-            <Button variant="contained" color="primary" size="medium" className="pi-btn-primary" startIcon={<FileUploadOutlined sx={{ fontSize: 15 }} />}>
-              Upload POG
-            </Button>
+            {!isPogViewOnly && (
+              <Button variant="contained" color="primary" size="medium" className="pi-btn-primary" startIcon={<FileUploadOutlined sx={{ fontSize: 15 }} />}>
+                Upload POG
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -480,17 +492,18 @@ export const MasterPOGManagement: React.FC = () => {
                   <span className="pog-workspace-category">{selectedPOG.category}</span>
                 </div>
               </div>
-              <div className="pog-workspace-actions">
-                <Button variant="outlined" color="primary" size="medium" className="pog-action-btn" startIcon={<VisibilityOutlined sx={{ fontSize: 16 }} />}>
-                  Preview
-                </Button>
-                <Button variant="outlined" color="primary" size="medium" className="pog-action-btn" startIcon={<EditOutlined sx={{ fontSize: 16 }} />}>
-                  Edit
-                </Button>
-                <Button variant="outlined" color="error" size="medium" className="pog-action-btn danger" startIcon={<DeleteOutlined sx={{ fontSize: 16 }} />}>
-                  Delete
-                </Button>
-              </div>
+              {!isPogViewOnly && (
+                <div className="pog-workspace-actions">
+                  <button type="button" className="pog-toolbar-btn pog-toolbar-btn--default" aria-label="Edit planogram">
+                    <EditOutlined sx={{ fontSize: 18 }} aria-hidden />
+                    <span>Edit</span>
+                  </button>
+                  <button type="button" className="pog-toolbar-btn pog-toolbar-btn--danger" aria-label="Delete planogram">
+                    <DeleteOutlined sx={{ fontSize: 18 }} aria-hidden />
+                    <span>Delete</span>
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="pog-workspace-content">
@@ -535,9 +548,11 @@ export const MasterPOGManagement: React.FC = () => {
                 <div className="pog-sidebar-section">
                   <h4 className="pog-sidebar-title">Quick Actions</h4>
                   <div className="pog-quick-actions">
-                    <Button variant="outlined" color="primary" size="small" className="pog-quick-action-btn" fullWidth>
-                      Clone POG
-                    </Button>
+                    {!isPogViewOnly && (
+                      <Button variant="outlined" color="primary" size="small" className="pog-quick-action-btn" fullWidth>
+                        Clone POG
+                      </Button>
+                    )}
                     <Button variant="outlined" color="primary" size="small" className="pog-quick-action-btn" fullWidth>
                       Export
                     </Button>

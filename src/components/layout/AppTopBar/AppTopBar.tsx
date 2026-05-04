@@ -8,6 +8,7 @@ import InventoryOutlined from '@mui/icons-material/InventoryOutlined';
 import AutoAwesomeOutlined from '@mui/icons-material/AutoAwesomeOutlined';
 import { User, ROUTES } from '../../../types';
 import { APP_CONFIG } from '../../../constants/app';
+import { STOREHUB_OPEN_ALAN } from '../../../utils/openAskAlan';
 import './AppTopBar.css';
 
 interface AppTopBarProps {
@@ -54,7 +55,7 @@ export const AppTopBar: React.FC<AppTopBarProps> = ({ user, onLogout: _onLogout 
   const firstName = user.name.split(' ')[0];
 
   const openAlanCopilot = () => {
-    window.dispatchEvent(new CustomEvent('storehub:open-alan'));
+    window.dispatchEvent(new CustomEvent(STOREHUB_OPEN_ALAN));
   };
 
   const dropMenuOptions = [

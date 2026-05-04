@@ -8,6 +8,19 @@
   min-height: 100vh;
 }
 
+/* HQ Alerts column — primary CTA: Impact UI font + consistent label */
+.hq-home .insights-section-v3 .hero-action-primary.hq-alert-cta {
+  font-family: var(--ia-font-sans, 'Manrope', 'Inter', system-ui, sans-serif);
+  font-size: var(--ia-text-13);
+  font-weight: var(--ia-font-weight-semibold);
+  letter-spacing: 0.02em;
+  -webkit-font-smoothing: antialiased;
+}
+
+.hq-home .insights-section-v3 .hero-action-primary.hq-alert-cta span {
+  font: inherit;
+}
+
 /* Loading */
 .hq-loading {
   display: flex;
@@ -1901,24 +1914,32 @@
 .hq-modal-meta-item svg { color: var(--ia-color-text-tertiary); }
 
 .hq-modal-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
   gap: 12px;
 }
 
 .hq-modal-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 14px 20px;
+  padding: 12px 16px;
   border-radius: 12px;
-  font-size: var(--ia-text-sm);
+  font-size: var(--ia-text-xs);
   font-weight: var(--ia-font-weight-semibold);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
   cursor: pointer;
   font-family: inherit;
   transition: all 0.2s ease;
   border: none;
+}
+
+.hq-modal-btn span,
+.hq-modal-btn .MuiButton-startIcon {
+  flex-shrink: 0;
 }
 
 .hq-modal-btn--secondary {

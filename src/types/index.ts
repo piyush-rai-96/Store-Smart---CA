@@ -1,3 +1,22 @@
+/** Ask Alan (AICopilot) — event detail + deep-link presets */
+export type AskAlanSkillMode = 'knowledge' | 'analytics' | 'pog' | 'actions';
+export type AskAlanPreset = 'district-gaps' | 'voc-messy-aisles';
+
+export interface StorehubOpenAlanDetail {
+  preset?: AskAlanPreset;
+  /** Heatmap / dimension drill — same behavior as former ?mode=&context=audit-…&store=… URL */
+  heatmapAudit?: {
+    skill: AskAlanSkillMode;
+    context: string;
+    storeNumber: string;
+    storeName: string;
+    score: number;
+  };
+  skill?: AskAlanSkillMode;
+  initialMessage?: string;
+  autoSend?: boolean;
+}
+
 // User role types
 export type UserRole = 'DM' | 'SM' | 'HQ' | 'ADMIN';
 
@@ -101,6 +120,7 @@ export const ROLE_ACCESS: Record<UserRole, ScreenAccess[]> = {
   ],
   DM: [
     'home', 'district_intelligence', 'store_deep_dive',
+    'master_pog_management', 'pog_rule_management', 'pog_localization_engine',
     'ai_copilot', 'operations_queue', 'communications',
   ],
   SM: [

@@ -3199,6 +3199,7 @@
   color: var(--ia-color-surface);
   cursor: pointer;
   transition: all 0.2s ease;
+  text-transform: capitalize;
 }
 
 .hero-action-primary:hover {

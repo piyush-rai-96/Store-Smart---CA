@@ -37,6 +37,7 @@ import FilterListOutlined from '@mui/icons-material/FilterListOutlined';
 import TaskAltOutlined from '@mui/icons-material/TaskAltOutlined';
 import { Button, Card, Tabs } from 'impact-ui';
 import { useAuth } from '../context/AuthContext';
+import { openAskAlan } from '../utils/openAskAlan';
 import { AIDailyBrief } from '../components/common/AIDailyBrief';
 import './DistrictIntelligence.css';
 
@@ -565,8 +566,8 @@ const districtKPIs: DistrictKPI[] = [
     category: 'commercial',
     label: 'Sales Performance',
     primaryValue: '$1.26M',
-    primaryUnit: 'MTD',
-    microInsight: '4W avg $1.19M',
+    primaryUnit: 'Weekly',
+    microInsight: '4W avg $1.24M',
     delta: '+4.2%',
     deltaDirection: 'up',
     deltaContext: 'YoY',
@@ -996,22 +997,22 @@ export const DistrictIntelligence: React.FC = () => {
     if (calendarMode === 'week') return baseKPIs;
     
     // Month and Quarter KPI overrides for realistic data
-    const monthOverrides: Record<string, { primaryValue: string; primaryUnit?: string; delta: string; deltaDirection: 'up' | 'down' | 'flat'; microInsight: string }> = {
-      'sales-performance': { primaryValue: '$4.92M', primaryUnit: 'MTD', delta: '+3.8%', deltaDirection: 'up', microInsight: 'Monthly total across 8 stores' },
-      'voc-satisfaction': { primaryValue: '81%', delta: '-2.1 pts', deltaDirection: 'down', microInsight: 'Avg across 4 weeks' },
-      'voc-issue-rate': { primaryValue: '3.4', delta: '+0.4', deltaDirection: 'up', microInsight: '4 of 8 stores affected' },
-      'shelf-audit': { primaryValue: '88%', delta: '-7 pts', deltaDirection: 'down', microInsight: 'Monthly avg below target' },
-      'oos-rate': { primaryValue: '3.8%', delta: '+0.6 pts', deltaDirection: 'up', microInsight: 'Apparel drives 55%' },
-      'margin-health': { primaryValue: '34.0%', primaryUnit: 'GM', delta: '-55 bps', deltaDirection: 'down', microInsight: 'Markdown pressure sustained' },
+    const monthOverrides: Record<string, { primaryValue: string; primaryUnit?: string; delta: string; deltaDirection: 'up' | 'down' | 'flat'; microInsight: string; deltaContext?: string }> = {
+      'sales-performance': { primaryValue: '$4.92M', primaryUnit: 'MTD', delta: '+3.8%', deltaDirection: 'up', microInsight: 'Monthly total across 8 stores', deltaContext: 'MoM' },
+      'voc-satisfaction': { primaryValue: '81%', delta: '-2.1 pts', deltaDirection: 'down', microInsight: 'Avg across 4 weeks', deltaContext: 'MoM' },
+      'voc-issue-rate': { primaryValue: '3.4', delta: '+0.4', deltaDirection: 'up', microInsight: '4 of 8 stores affected', deltaContext: 'MoM' },
+      'shelf-audit': { primaryValue: '88%', delta: '-7 pts', deltaDirection: 'down', microInsight: 'Monthly avg below target', deltaContext: 'vs target' },
+      'oos-rate': { primaryValue: '3.8%', delta: '+0.6 pts', deltaDirection: 'up', microInsight: 'Apparel drives 55%', deltaContext: 'MoM' },
+      'margin-health': { primaryValue: '34.0%', primaryUnit: 'GM', delta: '-55 bps', deltaDirection: 'down', microInsight: 'Markdown pressure sustained', deltaContext: 'MoM' },
     };
     
-    const quarterOverrides: Record<string, { primaryValue: string; primaryUnit?: string; delta: string; deltaDirection: 'up' | 'down' | 'flat'; microInsight: string }> = {
-      'sales-performance': { primaryValue: '$14.8M', primaryUnit: 'QTD', delta: '+2.9%', deltaDirection: 'up', microInsight: 'Q1 total across 8 stores' },
-      'voc-satisfaction': { primaryValue: '83%', delta: '-1.8 pts', deltaDirection: 'down', microInsight: 'Quarterly avg across stores' },
-      'voc-issue-rate': { primaryValue: '3.2', delta: '+0.3', deltaDirection: 'up', microInsight: '3 of 8 stores impacted' },
-      'shelf-audit': { primaryValue: '90%', delta: '-5 pts', deltaDirection: 'down', microInsight: 'Quarterly avg below target' },
-      'oos-rate': { primaryValue: '3.5%', delta: '+0.4 pts', deltaDirection: 'up', microInsight: 'Apparel drives 52%' },
-      'margin-health': { primaryValue: '34.4%', primaryUnit: 'GM', delta: '-30 bps', deltaDirection: 'down', microInsight: 'Seasonal markdown impact' },
+    const quarterOverrides: Record<string, { primaryValue: string; primaryUnit?: string; delta: string; deltaDirection: 'up' | 'down' | 'flat'; microInsight: string; deltaContext?: string }> = {
+      'sales-performance': { primaryValue: '$14.8M', primaryUnit: 'QTD', delta: '+2.9%', deltaDirection: 'up', microInsight: 'Q1 total across 8 stores', deltaContext: 'QoQ' },
+      'voc-satisfaction': { primaryValue: '83%', delta: '-1.8 pts', deltaDirection: 'down', microInsight: 'Quarterly avg across stores', deltaContext: 'QoQ' },
+      'voc-issue-rate': { primaryValue: '3.2', delta: '+0.3', deltaDirection: 'up', microInsight: '3 of 8 stores impacted', deltaContext: 'QoQ' },
+      'shelf-audit': { primaryValue: '90%', delta: '-5 pts', deltaDirection: 'down', microInsight: 'Quarterly avg below target', deltaContext: 'vs target' },
+      'oos-rate': { primaryValue: '3.5%', delta: '+0.4 pts', deltaDirection: 'up', microInsight: 'Apparel drives 52%', deltaContext: 'QoQ' },
+      'margin-health': { primaryValue: '34.4%', primaryUnit: 'GM', delta: '-30 bps', deltaDirection: 'down', microInsight: 'Seasonal markdown impact', deltaContext: 'QoQ' },
     };
     
     const overrides = calendarMode === 'month' ? monthOverrides : quarterOverrides;
@@ -1026,6 +1027,7 @@ export const DistrictIntelligence: React.FC = () => {
         delta: override.delta,
         deltaDirection: override.deltaDirection,
         microInsight: override.microInsight,
+        deltaContext: override.deltaContext ?? kpi.deltaContext,
       };
     });
   };
@@ -1098,9 +1100,9 @@ export const DistrictIntelligence: React.FC = () => {
           title: 'Performance & Trends',
           icon: 'performance',
           bullets: [
-            'District DPI moved from <strong>85 → 87</strong> (+2pts MoM), placing in the <strong>top 10% — Excellence Tier</strong>. However, the triage items above represent emerging risks that could reverse this trajectory.',
             'Weekly revenue at <strong>$1.26M</strong> (+8% vs target, +5% WoW). 6 of 8 stores exceeded plan. Nashville Flagship and Memphis Central are the leading revenue contributors, but Johnson City Mall\'s operational issues are offsetting sales performance.',
             'Gross margin held at <strong>34.2%</strong> (+0.3pp WoW). YoY comparison shows a <strong>+1.8pp improvement</strong> driven by markdown optimization. Seasonal clearance contributed an estimated $18K margin recovery this period.',
+            'District DPI moved from <strong>85 → 87</strong> (+2pts MoM), placing in the <strong>top 10% — Excellence Tier</strong>. However, the triage items above represent emerging risks that could reverse this trajectory.',
             'Store-level variance is widening: top store (Nashville Flagship) at SPI 94 vs bottom (Johnson City Mall) at SPI 58. The gap increased by 4pts this month — requires targeted intervention.',
           ],
         },
@@ -1152,7 +1154,7 @@ export const DistrictIntelligence: React.FC = () => {
           icon: 'performance',
           bullets: [
             'District DPI at <strong>84</strong> (Stable tier). WoW trend is flat, but the shrinkage spike is a leading indicator of potential decline. YoY comparison shows DPI is +3pts vs Q1 last year.',
-            'Revenue at <strong>$1.38M</strong> (+2.1% WoW). Strong top-line performance masks the margin erosion from shrinkage and clearance markdowns (<strong>GM down 85 bps</strong>).',
+            'Revenue at <strong>$982K</strong> (+2.1% WoW). Strong top-line performance masks the margin erosion from shrinkage and clearance markdowns (<strong>GM down 85 bps</strong>).',
             'Urban flagship stores (Peachtree, Augusta) drive 62% of revenue but also 78% of shrinkage losses — a classic volume-vs-loss tradeoff that needs targeted intervention.',
           ],
         },
@@ -1195,7 +1197,7 @@ export const DistrictIntelligence: React.FC = () => {
           icon: 'performance',
           bullets: [
             'District DPI at <strong>82</strong> (mid-pack). WoW trend is <strong>-2pts</strong>, driven entirely by the compliance drop. YoY, the district is flat vs Q1 last year — no growth trajectory.',
-            'Revenue at <strong>$1.15M</strong> (+0.8% WoW). Modest growth but planogram gaps are suppressing impulse purchase conversion. Stores with compliant POGs show <strong>+12% basket size</strong> vs non-compliant.',
+            'Revenue at <strong>$1.08M</strong> (+1.4% WoW). Modest growth but planogram gaps are suppressing impulse purchase conversion. Stores with compliant POGs show <strong>+12% basket size</strong> vs non-compliant.',
             'Staff turnover at <strong>18% quarterly</strong> — highest in the region. Stores with >30% new hires have 15% lower audit scores, confirming onboarding gaps as a systemic issue.',
           ],
         },
@@ -1229,7 +1231,7 @@ export const DistrictIntelligence: React.FC = () => {
           icon: 'performance',
           bullets: [
             'District DPI at <strong>79</strong> — lowest in region despite <strong>$1.52M revenue</strong> (highest). The disconnect between sales volume and execution quality is the defining challenge.',
-            'Store performance is <strong>bimodal</strong>: coastal flagships (Miami Central DPI 91, Tampa Bay 87) vs inland stores (Jacksonville 54, Gainesville 61). No middle ground — this isn\'t a normal distribution.',
+            'Store performance is <strong>bimodal</strong>: coastal flagships (Miami Central SPI 91, Tampa Bay SPI 87) vs inland stores (Jacksonville SPI 54, Gainesville SPI 61). No middle ground — this isn\'t a normal distribution.',
             'YoY: Revenue up +4.2% but DPI down -3pts. The district is <strong>growing but deteriorating operationally</strong>. Spoilage losses are 3x chain average.',
           ],
         },
@@ -1247,37 +1249,38 @@ export const DistrictIntelligence: React.FC = () => {
       closing: 'Florida is a tale of two districts in one. Coastal stores are excellent; inland stores are in crisis. No amount of operational fixes will solve this without structural changes to how the district is managed and resourced.',
     },
     d19: {
-      greeting: `Alabama district continues to lead the region on efficiency. Only 1 minor triage item this week. Here's your district intelligence summary with benchmark insights.`,
+      greeting: `Alabama district has 3 active triage items this week — audit backlog, a receiving delay, and a VoC cleanliness spike — but remains among the top-performing districts in the region.`,
       sections: [
         {
           title: 'Triage & Active Items',
           icon: 'triage',
           bullets: [
-            '<strong>Audit Backlog</strong> at Huntsville South — minor backlog of 3 overdue audits. Low risk but should be cleared by Friday to maintain the district\'s 92% completion rate.',
-            'No critical or high-priority issues this week. Alabama is the only district with a clean triage slate.',
+            '<strong>Audit Backlog</strong> at Birmingham Center and Huntsville Plaza — 6 overdue audits total. Low-to-medium risk but should be cleared by Friday to protect the district\'s 92% completion rate.',
+            '<strong>Receiving Dock Delay</strong> at Montgomery Mall — 12h behind schedule. Impacts floor replenishment timing; monitor closely to prevent OOS on in-demand SKUs.',
+            '<strong>VoC: Store Cleanliness</strong> at Mobile Bay and Tuscaloosa Walk — +19% negative mentions in the past week. Early-stage signal; action now can prevent escalation.',
           ],
         },
         {
           title: 'Performance & Trends',
           icon: 'performance',
           bullets: [
+            'Revenue at <strong>$640K</strong> (+3.6% WoW). Modest volume for a 5-store district, but <strong>margin health at 35.1%</strong> is best in class — proving that efficiency drives profitability.',
             'District DPI at <strong>85</strong> — <strong>top quartile</strong>, consistent across all 3 months of Q1. WoW trend is +1pt. YoY improvement of +4pts confirms sustained execution quality.',
-            'Revenue at <strong>$820K</strong> (+1.2% WoW). Modest volume due to 5-store district, but <strong>margin health at 35.1%</strong> is best in class — proving efficiency drives profitability.',
-            'VoC satisfaction at <strong>85%</strong> — leads the region. Top themes: "Staff friendliness" and "Clean stores." Zero negative theme spikes in the past 4 weeks.',
+            'VoC satisfaction at <strong>85%</strong> — leads the region. Top themes: "Staff friendliness" and "Clean stores." The new cleanliness spike at 2 stores should be resolved before it affects the district average.',
           ],
         },
         {
           title: 'Recommendations & Next Steps',
           icon: 'recommendations',
           bullets: [
-            '<strong>This week:</strong> Clear Huntsville South audit backlog. Otherwise, maintain current operational cadence.',
+            '<strong>This week:</strong> Clear the 6-audit backlog at Birmingham Center and Huntsville Plaza. Escalate receiving dock delay at Montgomery Mall to supply chain if not resolved in 24h.',
+            '<strong>48 hours:</strong> Address VoC cleanliness spike at Mobile Bay and Tuscaloosa Walk — increase cleaning rounds during peak hours to reverse the trend before it reaches district level.',
             '<strong>Strategic:</strong> Document the Alabama execution playbook for replication across underperforming districts. Key differentiators: small store count, stable staffing, low turnover, strong DM engagement.',
-            '<strong>Growth:</strong> Propose expansion plan — use Q1 DPI 85 results to build the business case for 2 additional stores in the Alabama market.',
             '<strong>Recognition:</strong> Nominate David Park for best-practice sharing session at regional meeting. This district\'s approach is a scalable template.',
           ],
         },
       ],
-      closing: 'Alabama is the benchmark district. The playbook here — focused store count, stable staffing, deep DM engagement — should be the template for turning around underperforming districts like Florida (D11) and Carolina (D22).',
+      closing: 'Alabama remains a top-quartile district despite 3 active items this week. The triage items are manageable and early-stage — address them quickly to protect the DPI 85 standing. The district\'s playbook on staffing stability and DM engagement continues to be a model for underperforming districts like Florida (D11) and Carolina (D22).',
     },
   };
 
@@ -1641,7 +1644,10 @@ export const DistrictIntelligence: React.FC = () => {
               </div>
               <div className="dpi-change-card">
                 <div className={`dpi-change-value ${dpiChange < 0 ? 'negative' : ''}`}>
-                  <TrendingUpOutlined sx={{ fontSize: 18 }}/>
+                  {dpiChange >= 0
+                    ? <TrendingUpOutlined sx={{ fontSize: 18 }}/>
+                    : <TrendingDownOutlined sx={{ fontSize: 18 }}/>
+                  }
                   <span>{dpiChange >= 0 ? '+' : ''}{dpiChange}%</span>
                 </div>
                 <span className="dpi-change-label">{calendarMode === 'week' ? 'this week' : calendarMode === 'month' ? 'this month' : 'this quarter'}</span>
@@ -1679,7 +1685,9 @@ export const DistrictIntelligence: React.FC = () => {
             <div className="dpi-chain-comparison">
               <div className="chain-comparison-header">
                 <span className="chain-label-title">vs Chain Average</span>
-                <span className="chain-delta positive">+{districtDPI - chainAvgDPI} pts</span>
+                <span className={`chain-delta ${districtDPI >= chainAvgDPI ? 'positive' : 'negative'}`}>
+                  {districtDPI >= chainAvgDPI ? '+' : ''}{districtDPI - chainAvgDPI} pts
+                </span>
               </div>
               <div className="chain-comparison-bar">
                 <div className="chain-bar-track">
@@ -1714,9 +1722,11 @@ export const DistrictIntelligence: React.FC = () => {
             </div>
             <p className="bca-subtitle">Communication effectiveness, compliance gaps, and engagement insights</p>
           </div>
-          <button className="bca-create-btn" onClick={openBroadcastWizard}>
-            <CampaignOutlined sx={{ fontSize: 13 }}/> Create Broadcast
-          </button>
+          {!isHQ && (
+            <button className="bca-create-btn" onClick={openBroadcastWizard}>
+              <CampaignOutlined sx={{ fontSize: 13 }}/> Create Broadcast
+            </button>
+          )}
         </div>
 
         {/* A. Performance Overview — KPI Strip */}
@@ -1728,7 +1738,7 @@ export const DistrictIntelligence: React.FC = () => {
           </div>
           <div className="bca-kpi-card">
             <span className="bca-kpi-label">Sent This Week</span>
-            <span className="bca-kpi-value">{activeBroadcasts.effectiveness.length}</span>
+            <span className="bca-kpi-value">{activeBroadcasts.overview.sentThisWeek}</span>
             <span className="bca-kpi-context">broadcasts</span>
           </div>
           <div className="bca-kpi-card">
@@ -2658,11 +2668,11 @@ export const DistrictIntelligence: React.FC = () => {
                 </div>
               )}
 
-              {/* AI Copilot Skill mapping */}
+              {/* Ask Alan skill mapping */}
               <div className="dp-section">
                 <h3 className="dp-section-title">
                   <ShowChartOutlined sx={{ fontSize: 14 }}/>
-                  AI Copilot Skill
+                  Ask Alan skill
                 </h3>
                 <div className="kpi-panel-detail-row status-neutral">
                   <span className="kpi-panel-detail-label">
@@ -2680,12 +2690,20 @@ export const DistrictIntelligence: React.FC = () => {
               {/* Action CTAs */}
               <div className="dp-actions">
                 <button className="dp-action-btn outlined" onClick={() => {
-                  const d = heatmapDetail;
+                  const hd = heatmapDetail;
                   setHeatmapDetail(null);
-                  navigate(`/command-center/ai-copilot?mode=${d.skill}&context=audit-${d.category.toLowerCase().replace(/ /g, '-')}&store=${d.storeNumber}&storeName=${encodeURIComponent(d.storeName)}&score=${d.score}`);
+                  openAskAlan({
+                    heatmapAudit: {
+                      skill: hd.skill as import('../types').AskAlanSkillMode,
+                      context: `audit-${hd.category.toLowerCase().replace(/ /g, '-')}`,
+                      storeNumber: String(hd.storeNumber),
+                      storeName: hd.storeName,
+                      score: hd.score,
+                    },
+                  });
                 }}>
                   <AutoAwesomeOutlined sx={{ fontSize: 14 }}/>
-                  <span>Investigate in AI Copilot</span>
+                  <span>Ask Alan</span>
                 </button>
                 <button className="dp-action-btn outlined navigate" onClick={() => {
                   const d = heatmapDetail;
@@ -3604,11 +3622,11 @@ export const DistrictIntelligence: React.FC = () => {
                   <SendOutlined sx={{ fontSize: 14 }}/>
                   <span>Send Nudge</span>
                 </button>
-                <button className="dp-action-btn outlined" onClick={() => { closeBcaPanel(); showToast(`Follow-up assigned for "${bcaSelectedBroadcast.name}"`); }}>
+                <button className="dp-action-btn outlined" disabled={isHQ} onClick={() => { closeBcaPanel(); showToast(`Follow-up assigned for "${bcaSelectedBroadcast.name}"`); }}>
                   <AssignmentTurnedInOutlined sx={{ fontSize: 14 }}/>
                   <span>Assign Follow-up</span>
                 </button>
-                <button className="dp-action-btn outlined" onClick={() => { closeBcaPanel(); showToast(`Escalated "${bcaSelectedBroadcast.name}" to Regional`); }}>
+                <button className="dp-action-btn outlined" disabled={isHQ} onClick={() => { closeBcaPanel(); showToast(`Escalated "${bcaSelectedBroadcast.name}" to Regional`); }}>
                   <WarningAmberOutlined sx={{ fontSize: 14 }}/>
                   <span>Escalate</span>
                 </button>

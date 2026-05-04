@@ -59,7 +59,7 @@ const ALL_MODULES: SidebarRoute[] = [
     label: 'Store Operations Hub',
     icon: <ApartmentOutlined sx={{ fontSize: 20 }} />,
     children: [
-      { value: 'store-ops-home', label: 'My Space', icon: <HomeOutlined sx={{ fontSize: 18 }} />, link: '/store-operations/home' },
+      { value: 'store-ops-home', label: 'Dashboard', icon: <HomeOutlined sx={{ fontSize: 18 }} />, link: '/store-operations/home' },
       { value: 'district-intelligence', label: 'District Intelligence', icon: <PlaceOutlined sx={{ fontSize: 18 }} />, link: '/store-operations/district-intelligence' },
       { value: 'store-deep-dive', label: 'Store Deep Dive', icon: <StoreOutlined sx={{ fontSize: 18 }} />, link: '/store-operations/store-deep-dive' },
     ],

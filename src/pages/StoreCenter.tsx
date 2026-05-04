@@ -40,6 +40,7 @@ import OpenInNewOutlined from '@mui/icons-material/OpenInNewOutlined';
 import { Button, Badge, Card, Tabs } from 'impact-ui';
 import { AIDailyBrief, AIDailyBriefData } from '../components/common/AIDailyBrief';
 import { useAuth } from '../context/AuthContext';
+import { openAskAlan } from '../utils/openAskAlan';
 import './StoreCenter.css';
 // Reuses detail-panel/dp-* styles for the SM broadcast detail panel
 import './StoreOpsHome.css';
@@ -569,14 +570,57 @@ const getAIInsight = (store: StoreMeta) => ({
       ],
 });
 
-const compBenchmarks = [
-  { metric: 'Sales vs Plan', unit: '%', clusterAvg: 99.1, chainAvg: 97.4, clusterMin: 88.2, clusterMax: 112.4, clusterMedian: 98.8, higherIsBetter: true },
-  { metric: 'SEA Score', unit: '/100', clusterAvg: 87, chainAvg: 84, clusterMin: 68, clusterMax: 96, clusterMedian: 86, higherIsBetter: true },
-  { metric: 'VoC Score', unit: '/5', clusterAvg: 4.1, chainAvg: 3.9, clusterMin: 3.2, clusterMax: 4.8, clusterMedian: 4.1, higherIsBetter: true },
-  { metric: 'Availability', unit: '%', clusterAvg: 94.5, chainAvg: 93.1, clusterMin: 82.4, clusterMax: 98.6, clusterMedian: 94.7, higherIsBetter: true },
-  { metric: 'Gross Margin', unit: '%', clusterAvg: 40.2, chainAvg: 39.5, clusterMin: 33.6, clusterMax: 46.8, clusterMedian: 40.1, higherIsBetter: true },
-];
-const CLUSTER_SIZE = 12;
+// Chain-wide benchmarks vary by cluster — Flagship stores compete in a different peer pool
+// than Compact or Full-Line stores. Each cluster also has its own peer count (CLUSTER_SIZE).
+type BenchDef = { metric: string; unit: string; clusterAvg: number; chainAvg: number; clusterMin: number; clusterMax: number; clusterMedian: number; higherIsBetter: boolean };
+const CLUSTER_BENCH_CONFIG: Record<string, { size: number; label: string; benchmarks: BenchDef[] }> = {
+  'Metro North': {
+    size: 8,
+    label: 'Metro North Flagship',
+    benchmarks: [
+      { metric: 'Sales vs Plan', unit: '%',   clusterAvg: 101.4, chainAvg: 97.4, clusterMin: 90.1, clusterMax: 114.6, clusterMedian: 100.8, higherIsBetter: true },
+      { metric: 'SEA Score',     unit: '/100', clusterAvg: 89,    chainAvg: 84,   clusterMin: 74,   clusterMax: 98,    clusterMedian: 88,    higherIsBetter: true },
+      { metric: 'VoC Score',     unit: '/5',   clusterAvg: 4.3,   chainAvg: 3.9,  clusterMin: 3.6,  clusterMax: 4.9,   clusterMedian: 4.3,   higherIsBetter: true },
+      { metric: 'Availability',  unit: '%',    clusterAvg: 95.8,  chainAvg: 93.1, clusterMin: 85.2, clusterMax: 99.1,  clusterMedian: 95.6,  higherIsBetter: true },
+      { metric: 'Gross Margin',  unit: '%',    clusterAvg: 41.8,  chainAvg: 39.5, clusterMin: 35.4, clusterMax: 48.2,  clusterMedian: 41.6,  higherIsBetter: true },
+    ],
+  },
+  'Metro West': {
+    size: 10,
+    label: 'Metro West Full-Line',
+    benchmarks: [
+      { metric: 'Sales vs Plan', unit: '%',   clusterAvg: 98.6,  chainAvg: 97.4, clusterMin: 87.4, clusterMax: 111.2, clusterMedian: 98.2, higherIsBetter: true },
+      { metric: 'SEA Score',     unit: '/100', clusterAvg: 86,    chainAvg: 84,   clusterMin: 66,   clusterMax: 95,    clusterMedian: 85,   higherIsBetter: true },
+      { metric: 'VoC Score',     unit: '/5',   clusterAvg: 4.1,   chainAvg: 3.9,  clusterMin: 3.2,  clusterMax: 4.8,   clusterMedian: 4.1,  higherIsBetter: true },
+      { metric: 'Availability',  unit: '%',    clusterAvg: 94.2,  chainAvg: 93.1, clusterMin: 82.8, clusterMax: 98.4,  clusterMedian: 94.5, higherIsBetter: true },
+      { metric: 'Gross Margin',  unit: '%',    clusterAvg: 40.1,  chainAvg: 39.5, clusterMin: 33.2, clusterMax: 46.6,  clusterMedian: 40.0, higherIsBetter: true },
+    ],
+  },
+  'South Bay': {
+    size: 7,
+    label: 'South Bay Mixed-Format',
+    benchmarks: [
+      { metric: 'Sales vs Plan', unit: '%',   clusterAvg: 96.8,  chainAvg: 97.4, clusterMin: 85.6, clusterMax: 108.4, clusterMedian: 96.4, higherIsBetter: true },
+      { metric: 'SEA Score',     unit: '/100', clusterAvg: 84,    chainAvg: 84,   clusterMin: 64,   clusterMax: 93,    clusterMedian: 83,   higherIsBetter: true },
+      { metric: 'VoC Score',     unit: '/5',   clusterAvg: 3.9,   chainAvg: 3.9,  clusterMin: 3.0,  clusterMax: 4.6,   clusterMedian: 3.9,  higherIsBetter: true },
+      { metric: 'Availability',  unit: '%',    clusterAvg: 93.1,  chainAvg: 93.1, clusterMin: 80.6, clusterMax: 97.8,  clusterMedian: 93.2, higherIsBetter: true },
+      { metric: 'Gross Margin',  unit: '%',    clusterAvg: 39.4,  chainAvg: 39.5, clusterMin: 32.8, clusterMax: 45.6,  clusterMedian: 39.2, higherIsBetter: true },
+    ],
+  },
+  'East Region': {
+    size: 6,
+    label: 'East Region Compact',
+    benchmarks: [
+      { metric: 'Sales vs Plan', unit: '%',   clusterAvg: 94.6,  chainAvg: 97.4, clusterMin: 82.0, clusterMax: 106.2, clusterMedian: 94.0, higherIsBetter: true },
+      { metric: 'SEA Score',     unit: '/100', clusterAvg: 80,    chainAvg: 84,   clusterMin: 58,   clusterMax: 90,    clusterMedian: 79,   higherIsBetter: true },
+      { metric: 'VoC Score',     unit: '/5',   clusterAvg: 3.7,   chainAvg: 3.9,  clusterMin: 2.8,  clusterMax: 4.4,   clusterMedian: 3.7,  higherIsBetter: true },
+      { metric: 'Availability',  unit: '%',    clusterAvg: 91.4,  chainAvg: 93.1, clusterMin: 78.2, clusterMax: 96.4,  clusterMedian: 91.6, higherIsBetter: true },
+      { metric: 'Gross Margin',  unit: '%',    clusterAvg: 38.2,  chainAvg: 39.5, clusterMin: 30.6, clusterMax: 44.8,  clusterMedian: 38.0, higherIsBetter: true },
+    ],
+  },
+};
+// Fallback for any cluster not explicitly configured
+const DEFAULT_CLUSTER_BENCH = CLUSTER_BENCH_CONFIG['Metro West'];
 
 // ── Operational Compliance View Data ────────────────────
 interface BroadcastAction {
@@ -1193,7 +1237,10 @@ export const StoreCenter: React.FC = () => {
     s.number.includes(storeSearch)
   );
 
-  const getBenchmarks = () => compBenchmarks.map((b, idx) => {
+  const clusterConfig = CLUSTER_BENCH_CONFIG[store.cluster] ?? DEFAULT_CLUSTER_BENCH;
+  const clusterSize = clusterConfig.size;
+
+  const getBenchmarks = () => clusterConfig.benchmarks.map((b, idx) => {
     const storeVal = b.metric === 'Sales vs Plan' ? (store.dpi >= 85 ? 104.2 : store.dpi >= 75 ? 97.8 : 91.3)
       : b.metric === 'SEA Score' ? (store.dpi >= 80 ? 91 : 76)
       : b.metric === 'VoC Score' ? (store.dpi >= 80 ? 4.3 : 3.6)
@@ -1202,21 +1249,21 @@ export const StoreCenter: React.FC = () => {
     const vsCluster = storeVal - b.clusterAvg;
     const vsChain = storeVal - b.chainAvg;
 
-    // Rank: derive deterministic position within CLUSTER_SIZE based on where storeVal
+    // Rank: derive deterministic position within clusterSize based on where storeVal
     // lies between clusterMin..clusterMax. Position 1 = best (highest when higherIsBetter).
     const range = Math.max(0.0001, b.clusterMax - b.clusterMin);
     const clampedPos = Math.max(0, Math.min(1, (storeVal - b.clusterMin) / range));
     const percentile = b.higherIsBetter ? clampedPos : 1 - clampedPos;
-    const rank = Math.max(1, Math.min(CLUSTER_SIZE, Math.round((1 - percentile) * (CLUSTER_SIZE - 1) + 1)));
-    const quartile = rank <= Math.ceil(CLUSTER_SIZE * 0.25) ? 1
-      : rank <= Math.ceil(CLUSTER_SIZE * 0.5) ? 2
-        : rank <= Math.ceil(CLUSTER_SIZE * 0.75) ? 3 : 4;
+    const rank = Math.max(1, Math.min(clusterSize, Math.round((1 - percentile) * (clusterSize - 1) + 1)));
+    const quartile = rank <= Math.ceil(clusterSize * 0.25) ? 1
+      : rank <= Math.ceil(clusterSize * 0.5) ? 2
+        : rank <= Math.ceil(clusterSize * 0.75) ? 3 : 4;
 
     // Rank movement vs last period — deterministic per-metric nudge seeded by idx + store
     const moveSeed = (store.dpi + idx * 7) % 5; // 0..4
     const rankDelta = moveSeed === 0 ? 2 : moveSeed === 1 ? 1 : moveSeed === 2 ? 0 : moveSeed === 3 ? -1 : -2;
 
-    return { ...b, storeVal, vsCluster, vsChain, rank, rankTotal: CLUSTER_SIZE, quartile, rankDelta, clampedPos };
+    return { ...b, storeVal, vsCluster, vsChain, rank, rankTotal: clusterSize, quartile, rankDelta, clampedPos };
   });
 
   if (isPageLoading) {
@@ -2422,16 +2469,43 @@ export const StoreCenter: React.FC = () => {
               // Overall rank = average of metric ranks
               const avgRank = Math.round(benchmarks.reduce((s, b) => s + b.rank, 0) / benchmarks.length);
               const avgRankDelta = Math.round(benchmarks.reduce((s, b) => s + b.rankDelta, 0) / benchmarks.length);
-              const overallQuartile = avgRank <= Math.ceil(CLUSTER_SIZE * 0.25) ? 1
-                : avgRank <= Math.ceil(CLUSTER_SIZE * 0.5) ? 2
-                  : avgRank <= Math.ceil(CLUSTER_SIZE * 0.75) ? 3 : 4;
+              const overallQuartile = avgRank <= Math.ceil(clusterSize * 0.25) ? 1
+                : avgRank <= Math.ceil(clusterSize * 0.5) ? 2
+                  : avgRank <= Math.ceil(clusterSize * 0.75) ? 3 : 4;
 
               const sortedByRank = benchmarks.slice().sort((a, b) => a.rank - b.rank);
               const topStrengths = sortedByRank.slice(0, 2);
               const biggestGaps = sortedByRank.slice().reverse().slice(0, 2);
 
+              // Callout: does the cluster-wide rank tell a different story than the district rank?
+              const districtRank = store.rank;
+              const districtTotal = store.totalStores;
+              const compRankDiffersDistrict = avgRank !== districtRank;
+              const compBetterThanDistrict = avgRank < districtRank;
+
               return (
                 <div className="sc-bench-tab">
+                  {/* District vs Chain-Wide Rank callout — visible whenever the two ranks differ */}
+                  {compRankDiffersDistrict && (
+                    <div className={`sc-bench-rank-callout ${compBetterThanDistrict ? 'sc-bench-rank-callout--positive' : 'sc-bench-rank-callout--amber'}`}>
+                      <span className="sc-bench-callout-icon">ℹ</span>
+                      <div className="sc-bench-callout-body">
+                        <strong>
+                          {compBetterThanDistrict
+                            ? `Strong chain-wide cluster performance — ranks higher across peers than within district`
+                            : `District rank and cluster-wide rank diverge`}
+                        </strong>
+                        <span>
+                          {store.name} is <strong>#{districtRank} of {districtTotal}</strong> in District 14 by DPI, but ranks <strong>#{avgRank} of {clusterSize}</strong> among {clusterConfig.label} peers chain-wide.
+                          {' '}The cluster ranking compares execution across all {clusterConfig.label} stores regardless of district, and reflects a broader competitive peer set.
+                          {compBetterThanDistrict
+                            ? ` This store performs better chain-wide than its district position suggests — a strong signal.`
+                            : ` Some district peers in other clusters outperform this store chain-wide — there is room to close the gap.`}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Overall Summary — clean KPI strip (matches Inventory & Inbound pattern) */}
                   <div className="sc-bench-summary-strip">
                     {/* Cluster Rank tile */}
@@ -2439,7 +2513,7 @@ export const StoreCenter: React.FC = () => {
                       <span className="sc-bench-tile-label sc-bench-tile-label--primary">Overall Cluster Rank</span>
                       <div className="sc-bench-tile-value">
                         <span className="sc-bench-rank-num">#{avgRank}</span>
-                        <span className="sc-bench-rank-of">of {CLUSTER_SIZE}</span>
+                        <span className="sc-bench-rank-of">of {clusterSize}</span>
                       </div>
                       <span className="sc-bench-tile-sub">
                         {quartileLabel(overallQuartile)}
@@ -3176,11 +3250,11 @@ export const StoreCenter: React.FC = () => {
                   </div>
                 )}
 
-                {/* AI Copilot Skill */}
+                {/* Ask Alan skill */}
                 <div className="dp-section">
                   <h3 className="dp-section-title">
                     <ShowChartOutlined sx={{ fontSize: 14 }}/>
-                    AI Copilot Skill
+                    Ask Alan skill
                   </h3>
                   <div className="kpi-panel-detail-row status-neutral">
                     <span className="kpi-panel-detail-label">
@@ -3199,10 +3273,18 @@ export const StoreCenter: React.FC = () => {
                 <div className="dp-actions">
                   <button className="dp-action-btn outlined" onClick={() => {
                     setAuditCellDetail(null);
-                    navigate(`/command-center/ai-copilot?mode=${d.skill}&context=audit-${d.category.toLowerCase().replace(/ /g, '-')}&store=${store.number}&storeName=${encodeURIComponent(store.name)}&score=${d.score}`);
+                    openAskAlan({
+                      heatmapAudit: {
+                        skill: d.skill as import('../types').AskAlanSkillMode,
+                        context: `audit-${d.category.toLowerCase().replace(/ /g, '-')}`,
+                        storeNumber: String(store.number),
+                        storeName: store.name,
+                        score: d.score,
+                      },
+                    });
                   }}>
                     <AutoAwesomeOutlined sx={{ fontSize: 14 }}/>
-                    <span>Investigate in AI Copilot</span>
+                    <span>Ask Alan</span>
                   </button>
                   <button className="dp-action-btn outlined navigate" onClick={() => {
                     setAuditCellDetail(null);

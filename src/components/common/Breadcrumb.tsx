@@ -4,13 +4,13 @@ import { Breadcrumbs } from 'impact-ui';
 import './Breadcrumb.css';
 
 const ROUTE_LABELS: Record<string, string> = {
-  '/store-operations/home': 'My Space',
+  '/store-operations/home': 'Dashboard',
   '/store-operations/district-intelligence': 'District Intelligence',
   '/store-operations/store-deep-dive': 'Store Deep Dive',
   '/planogram/master-pog': 'Master POG Management',
   '/planogram/rule-management': 'POG Rule Management',
   '/planogram/localization-engine': 'POG Localization Engine',
-  '/command-center/ai-copilot': 'AI Copilot',
+  '/command-center/ai-copilot': 'Ask Alan',
   '/command-center/operations-queue': 'Operations Queue',
   '/command-center/communications': 'Communications',
   '/app-config/user-access': 'User Access Management',

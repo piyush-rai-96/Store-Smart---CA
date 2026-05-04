@@ -49,6 +49,7 @@ import {
 import './StoreOpsHome.css';
 import womensWallPlanogram from '../assets/C&A_WOMENS_WALL_STANDARD.png';
 import { HQHome } from './HQHome';
+import { openAskAlan } from '../utils/openAskAlan';
 
 // Detail Panel types
 type PanelSubView = 
@@ -125,7 +126,7 @@ const generateMockInsights = (): EnhancedInsightItem[] => [
     context: '12 SKUs below safety stock — immediate reorder needed',
     signal: '3 stores impacted',
     trend: 'down',
-    actionHint: 'View impacted stores',
+    actionHint: 'View Impacted Stores',
     actionCta: 'Review SKUs at Risk',
     isHero: true,
     impactDetail: 'Potential $24K revenue loss if unresolved',
@@ -970,7 +971,7 @@ export const StoreOpsHome: React.FC = () => {
               { id: '3421', name: 'Knoxville East #3421', status: 'info', detail: '+12% mentions · Cleaning hours reduced last month', manager: 'Megan Davis' },
             ],
             ctas: [
-              { label: 'Open in AI Copilot', icon: 'sparkles', action: 'copilot', kind: 'navigate' as const },
+              { label: 'Ask Alan', icon: 'sparkles', action: 'copilot', kind: 'navigate' as const },
             ],
             source: 'VoC Analytics',
             timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
@@ -1027,7 +1028,7 @@ export const StoreOpsHome: React.FC = () => {
         break;
       case 'copilot':
         closeDetailPanel();
-        navigate('/command-center/ai-copilot?mode=actions&context=voc-messy-aisles');
+        openAskAlan({ preset: 'voc-messy-aisles' });
         break;
       case 'review-skus':
         setSelectedSkus([]);
@@ -1098,7 +1099,7 @@ export const StoreOpsHome: React.FC = () => {
       <div className="store-ops-home">
         <div className="store-ops-loading">
           <div className="store-ops-loading-spinner" />
-          <p>Loading My Space...</p>
+          <p>Loading Dashboard...</p>
         </div>
       </div>
     );
@@ -1170,9 +1171,9 @@ export const StoreOpsHome: React.FC = () => {
               <div className="ai-brief-section">
                 <h3 className="ai-brief-section-title"><BarChartOutlined sx={{ fontSize: 14 }}/> District Performance Index</h3>
                 <ul className="ai-brief-bullets">
-                  <li>DPI moved from <strong>80 → 82</strong> (+2pts MoM), placing the district in the <strong>top 10% — Excellence Tier</strong>. This is the highest score in 6 months.</li>
+                  <li>DPI reached <strong>87</strong> this week (+2.4 pts WoW), placing the district in the <strong>top 10% — Excellence Tier</strong>. Up from 85 last week, continuing the improvement trend from 82 last month.</li>
                   <li>The uplift is causally linked to improved SEA compliance scores (+6pts avg across stores) and a reduction in overdue task backlog (down 40% from last month).</li>
-                  <li>Nashville Flagship leads at <strong>91 DPI</strong>. Murfreesboro Plaza is the laggard at 68, primarily due to supply chain disruptions dragging down in-stock scores.</li>
+                  <li>Nashville Flagship leads at <strong>94 SPI</strong>. Murfreesboro Plaza is the laggard at 78, primarily due to supply chain disruptions dragging down in-stock scores.</li>
                 </ul>
               </div>
 
@@ -1188,7 +1189,7 @@ export const StoreOpsHome: React.FC = () => {
               <div className="ai-brief-section">
                 <h3 className="ai-brief-section-title"><StarBorderOutlined sx={{ fontSize: 14 }}/> Customer Experience</h3>
                 <ul className="ai-brief-bullets">
-                  <li>NPS improved to <strong>72 (+12 points)</strong>. North region stores leading, with "helpful staff" as the top positive VoC theme. Store #2156 top rated at 84.</li>
+                  <li>NPS improved to <strong>72 (+12 pts QoQ)</strong>. North region stores leading, with "helpful staff" as the top positive VoC theme. Store #2156 top rated at 84.</li>
                   <li>Negative VoC theme <strong>"Messy Aisles"</strong> is trending up +34% — this is flagged as a Rising Risk in your Alerts section with a detailed breakdown.</li>
                 </ul>
               </div>
@@ -1263,7 +1264,7 @@ export const StoreOpsHome: React.FC = () => {
                   </div>
                   <div className="hero-actions">
                     <Button variant="contained" color="primary" className="hero-action-primary" onClick={() => openAlertPanel('product-recall')} endIcon={<KeyboardArrowRight sx={{ fontSize: 16 }}/>}>
-                      View impacted stores
+                      View Impacted Stores
                     </Button>
                   </div>
                 </div>
@@ -1290,11 +1291,11 @@ export const StoreOpsHome: React.FC = () => {
                   </div>
                   <div className="hero-top-store">
                     <AutoAwesomeOutlined sx={{ fontSize: 12 }}/>
-                    <span>AI Copilot has prepared an action plan for this theme</span>
+                    <span>Ask Alan has prepared an action plan for this theme</span>
                   </div>
                   <div className="hero-actions">
                     <Button variant="contained" color="primary" className="hero-action-primary" onClick={() => openAlertPanel('voc-trending')} endIcon={<KeyboardArrowRight sx={{ fontSize: 16 }}/>}>
-                      View impacted stores
+                      View Impacted Stores
                     </Button>
                   </div>
                 </div>
@@ -1332,7 +1333,7 @@ export const StoreOpsHome: React.FC = () => {
                     )}
                     <div className="hero-actions">
                       <Button variant="contained" color="primary" className="hero-action-primary" onClick={() => openAlertPanel('inventory-risk')} endIcon={<KeyboardArrowRight sx={{ fontSize: 16 }}/>}>
-                        View impacted stores
+                        View Impacted Stores
                       </Button>
                     </div>
                   </div>
@@ -1573,7 +1574,7 @@ export const StoreOpsHome: React.FC = () => {
                   <span className="kpi-snapshot-value">87%</span>
                   <span className="kpi-snapshot-label">On-Time Tasks</span>
                 </div>
-                <span className="kpi-snapshot-badge positive">+3%</span>
+                <span className="kpi-snapshot-badge positive">+3% WoW</span>
               </div>
               <div className="kpi-snapshot-item">
                 <div className="kpi-snapshot-item-icon nps"><StarBorderOutlined sx={{ fontSize: 16 }}/></div>
@@ -1619,9 +1620,9 @@ export const StoreOpsHome: React.FC = () => {
                 <div className="ai-brief-section">
                   <h3 className="ai-brief-section-title"><BarChartOutlined sx={{ fontSize: 14 }}/> District Performance Index</h3>
                   <ul className="ai-brief-bullets">
-                    <li>DPI moved from <strong>80 → 82</strong> (+2pts MoM), placing the district in the <strong>top 10% — Excellence Tier</strong>. This is the highest score in 6 months.</li>
+                    <li>DPI reached <strong>87</strong> this week (+2.4 pts WoW), placing the district in the <strong>top 10% — Excellence Tier</strong>. Up from 85 last week, continuing the improvement trend from 82 last month.</li>
                     <li>The uplift is causally linked to improved SEA compliance scores (+6pts avg across stores) and a reduction in overdue task backlog (down 40% from last month).</li>
-                    <li>Nashville Flagship leads at <strong>91 DPI</strong>. Murfreesboro Plaza is the laggard at 68, primarily due to supply chain disruptions dragging down in-stock scores.</li>
+                    <li>Nashville Flagship leads at <strong>94 SPI</strong>. Murfreesboro Plaza is the laggard at 78, primarily due to supply chain disruptions dragging down in-stock scores.</li>
                   </ul>
                 </div>
 
@@ -1637,7 +1638,7 @@ export const StoreOpsHome: React.FC = () => {
                 <div className="ai-brief-section">
                   <h3 className="ai-brief-section-title"><StarBorderOutlined sx={{ fontSize: 14 }}/> Customer Experience</h3>
                   <ul className="ai-brief-bullets">
-                    <li>NPS improved to <strong>72 (+12 points)</strong>. North region stores leading, with "helpful staff" as the top positive VoC theme. Store #2156 top rated at 84.</li>
+                    <li>NPS improved to <strong>72 (+12 pts QoQ)</strong>. North region stores leading, with "helpful staff" as the top positive VoC theme. Store #2156 top rated at 84.</li>
                     <li>Negative VoC theme <strong>"Messy Aisles"</strong> is trending up +34% — this is flagged as a Rising Risk in your Alerts section with a detailed breakdown.</li>
                   </ul>
                 </div>

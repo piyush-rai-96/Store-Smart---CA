@@ -3789,10 +3789,22 @@
   font-weight: var(--ia-font-weight-semibold);
 }
 
-.dp-action-btn.outlined:hover {
+.dp-action-btn.outlined:hover:not(:disabled) {
   background: var(--ia-color-primary-soft);
   border-color: var(--ia-color-primary-hover);
   color: var(--ia-color-primary-hover);
+}
+
+.dp-action-btn.outlined:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  border-color: var(--ia-color-border);
+  color: var(--ia-color-text-subtle);
+  background: var(--ia-color-bg-subtle);
+}
+
+.dp-action-btn.outlined:disabled svg {
+  color: var(--ia-color-text-subtle);
 }
 
 .dp-action-btn.outlined svg {

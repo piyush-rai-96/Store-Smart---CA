@@ -1380,33 +1380,64 @@
   color: var(--ia-color-text-secondary);
 }
 
-/* ── Task Created Card ── */
-.cop-task-card {
-  margin-top: 12px;
-  border: 1px solid var(--ia-color-border);
-  border-radius: 12px;
+/* ── Shared outcome cards (Action Item + Planogram Rule) ── */
+.cop-outcome-card {
   background: var(--ia-color-surface);
+  border: 1px solid var(--ia-color-primary-border);
+  border-radius: 12px;
   overflow: hidden;
+  margin-top: 12px;
+  box-shadow:
+    0 2px 12px rgba(99, 102, 241, 0.08),
+    0 0 0 1px rgba(99, 102, 241, 0.04);
+  animation: pogRuleSlideIn 0.4s ease-out;
+  transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.2s ease;
 }
 
-.cop-task-header {
+.cop-outcome-card:hover {
+  box-shadow:
+    0 4px 20px rgba(99, 102, 241, 0.12),
+    0 0 0 1px rgba(99, 102, 241, 0.08);
+}
+
+.cop-outcome-card__header {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 14px;
-  background: var(--ia-color-warning-bg);
-  border-bottom: 1px solid #fef08a;
-  font-size: var(--ia-text-13);
-  font-weight: var(--ia-font-weight-semibold);
-  color: #a16207;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, var(--ia-color-primary-soft) 0%, rgba(99, 102, 241, 0.06) 100%);
+  border-bottom: 1px solid var(--ia-color-primary-border);
+  font-size: var(--ia-text-12-5);
+  font-weight: var(--ia-font-weight-bold);
+  color: var(--ia-color-primary-pressed);
+  letter-spacing: 0.01em;
 }
 
+.cop-outcome-card__header svg {
+  color: var(--ia-color-primary);
+}
+
+.cop-outcome-card__body {
+  padding: 14px 16px;
+}
+
+.cop-outcome-card__hint {
+  font-size: var(--ia-text-xs);
+  color: var(--ia-color-text-secondary);
+  line-height: 1.55;
+  padding: 10px 12px;
+  margin-top: 4px;
+  background: var(--ia-color-bg-subtle);
+  border: 1px solid var(--ia-color-bg-muted);
+  border-radius: 8px;
+}
+
+/* ── Task Created Card ── */
 .cop-task-check {
   margin-left: auto;
 }
 
 .cop-task-body {
-  padding: 12px 14px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -1810,10 +1841,16 @@
 /* Pushed Success State */
 .cop-task-card.cop-task-pushed {
   border-color: #86efac;
+  box-shadow: 0 2px 12px rgba(16, 185, 129, 0.1);
 }
 
 .cop-task-card.cop-task-pushed .cop-task-header {
-  background: var(--ia-color-success-bg);
+  background: linear-gradient(135deg, var(--ia-color-success-bg) 0%, #d1fae5 100%);
+  border-bottom-color: #a7f3d0;
+  color: var(--ia-color-success);
+}
+
+.cop-task-card.cop-task-pushed .cop-task-header svg {
   color: var(--ia-color-success);
 }
 
@@ -1856,41 +1893,9 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-.cop-pog-rule-card {
-  background: var(--ia-color-surface);
-  border: 1px solid var(--ia-color-primary-border);
-  border-radius: 12px;
-  overflow: hidden;
-  margin-top: 12px;
-  box-shadow: 0 2px 12px rgba(99, 102, 241, 0.08), 0 0 0 1px rgba(99, 102, 241, 0.04);
-  animation: pogRuleSlideIn 0.4s ease-out;
-  transition: all 0.25s ease;
-}
-
-.cop-pog-rule-card:hover {
-  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.12), 0 0 0 1px rgba(99, 102, 241, 0.08);
-}
-
 .cop-pog-rule-card.cop-pog-rule-sent {
   border-color: #86efac;
   box-shadow: 0 2px 12px rgba(16, 185, 129, 0.1);
-}
-
-.cop-pog-rule-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
-  background: linear-gradient(135deg, var(--ia-color-primary-soft) 0%, var(--ia-color-primary-soft) 100%);
-  border-bottom: 1px solid var(--ia-color-primary-border);
-  font-size: var(--ia-text-12-5);
-  font-weight: var(--ia-font-weight-bold);
-  color: var(--ia-color-primary-pressed);
-  letter-spacing: 0.01em;
-}
-
-.cop-pog-rule-header svg {
-  color: var(--ia-color-primary);
 }
 
 .cop-pog-rule-sent .cop-pog-rule-header {
@@ -1904,7 +1909,6 @@
 }
 
 .cop-pog-rule-body {
-  padding: 14px 16px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -1926,13 +1930,6 @@
 }
 
 .cop-pog-rule-desc {
-  font-size: var(--ia-text-xs);
-  color: var(--ia-color-text-secondary);
-  line-height: 1.6;
-  padding: 8px 10px;
-  background: var(--ia-color-bg-subtle);
-  border: 1px solid var(--ia-color-bg-muted);
-  border-radius: 6px;
   margin-top: 4px;
 }
 
@@ -3288,6 +3285,11 @@
 /* ── Bullet-style Follow-up Questions ────────────────────────── */
 .cop-followups-inline {
   margin-top: 14px;
+}
+
+.cop-followups-inline--after-outcome {
+  margin-top: 18px;
+  padding-top: 4px;
 }
 
 .cop-followups-inline-label {

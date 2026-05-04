@@ -248,7 +248,7 @@ export const StoreExecution: React.FC = () => {
         <div className="exec-no-tasks">
           <InventoryOutlined sx={{ fontSize: 48 }}/>
           <h4>No Tasks Yet</h4>
-          <p>Use AI Copilot to audit shelves and generate execution tasks, or create tasks directly in Operations Queue.</p>
+          <p>Use Ask Alan to audit shelves and generate execution tasks, or create tasks directly in Operations Queue.</p>
         </div>
       ) : (
         <div className="exec-localization-groups">

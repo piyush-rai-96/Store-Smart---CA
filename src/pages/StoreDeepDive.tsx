@@ -47,6 +47,7 @@ import SearchOutlined from '@mui/icons-material/SearchOutlined';
 import Check from '@mui/icons-material/Check';
 import CalendarTodayOutlined from '@mui/icons-material/CalendarTodayOutlined';
 import FilterListOutlined from '@mui/icons-material/FilterListOutlined';
+import InfoOutlined from '@mui/icons-material/InfoOutlined';
 import { Card, Tabs } from 'impact-ui';
 import './StoreDeepDive.css';
 
@@ -179,6 +180,56 @@ const districtContext = {
   totalStores: districtStores.length,
 };
 
+// ── Chain-wide comp benchmarking peers (same cluster, multiple districts) ──
+// SPIs are set so each D14 store gets a different comp rank vs its district rank,
+// making the callout meaningful for every selection.
+const CLUSTER_PEERS: Record<string, { storeName: string; district: string; spi: number }[]> = {
+  'Urban Flagship': [
+    { storeName: 'King Street',      district: 'District 11 — Florida',   spi: 97 },
+    { storeName: 'Downtown Plaza',   district: 'District 14 — Tennessee', spi: 94 }, // self
+    { storeName: 'Brickell Center',  district: 'District 11 — Florida',   spi: 91 },
+    { storeName: 'Peachtree Plaza',  district: 'District 08 — Georgia',   spi: 87 },
+    { storeName: 'Westfield Center', district: 'District 14 — Tennessee', spi: 82 }, // self
+    { storeName: 'Uptown Walk',      district: 'District 22 — Carolina',  spi: 76 },
+  ],
+  'Mall Anchor': [
+    { storeName: 'Coral Gables',     district: 'District 11 — Florida',   spi: 93 },
+    { storeName: 'Riverside Mall',   district: 'District 14 — Tennessee', spi: 91 }, // self
+    { storeName: 'Savannah Square',  district: 'District 08 — Georgia',   spi: 86 },
+    { storeName: 'Augusta Mall',     district: 'District 08 — Georgia',   spi: 80 },
+    { storeName: 'Greensboro Lane',  district: 'District 22 — Carolina',  spi: 74 },
+    { storeName: 'Maple Heights',    district: 'District 14 — Tennessee', spi: 58 }, // self
+  ],
+  'Family Center': [
+    { storeName: 'Athens Center',    district: 'District 08 — Georgia',   spi: 90 },
+    { storeName: 'Macon Point',      district: 'District 08 — Georgia',   spi: 87 },
+    { storeName: 'Central Station',  district: 'District 14 — Tennessee', spi: 85 }, // self
+    { storeName: 'Durham Heights',   district: 'District 22 — Carolina',  spi: 81 },
+    { storeName: 'Harbor View',      district: 'District 14 — Tennessee', spi: 78 }, // self
+    { storeName: 'Chapel Hill',      district: 'District 22 — Carolina',  spi: 71 },
+    { storeName: 'Pine Grove',       district: 'District 14 — Tennessee', spi: 65 }, // self
+  ],
+  'Outlet Value': [
+    { storeName: 'Wilmington Bay',   district: 'District 22 — Carolina',  spi: 80 },
+    { storeName: 'Asheville Park',   district: 'District 22 — Carolina',  spi: 76 },
+    { storeName: 'Oak Street',       district: 'District 14 — Tennessee', spi: 72 }, // self
+    { storeName: 'Macon Center',     district: 'District 08 — Georgia',   spi: 68 },
+  ],
+};
+
+const getCompMetrics = (store: DistrictStore) => {
+  const peers = CLUSTER_PEERS[store.cluster] ?? [];
+  const sorted = [...peers].sort((a, b) => b.spi - a.spi);
+  const compRank = sorted.findIndex(p => p.storeName === store.storeName) + 1 || 1;
+  const medianIdx = Math.floor(sorted.length / 2);
+  const compMedianSpi = sorted[medianIdx]?.spi ?? store.spi;
+  const topPeer = sorted[0] ?? { storeName: store.storeName, district: districtContext.name, spi: store.spi };
+  const spiGapToTop = store.spi - topPeer.spi; // negative = behind top peer
+  // comp movement: based on tier vs chain median
+  const compMovement = store.spi > compMedianSpi + 6 ? 2 : store.spi > compMedianSpi ? 1 : store.spi === compMedianSpi ? 0 : store.spi > compMedianSpi - 6 ? -1 : -2;
+  return { compRank, compTotal: sorted.length, clusterName: store.cluster, topPeer, compMedianSpi, spiGapToTop, compMovement };
+};
+
 // ── Per-store data getters — everything below is derived from the selected store ──
 
 const getStoreMetrics = (store: DistrictStore) => {
@@ -186,19 +237,26 @@ const getStoreMetrics = (store: DistrictStore) => {
   const isPositive = tier === 'Excellence' || tier === 'Stable';
   const deltaBase = tier === 'Excellence' ? 2.8 : tier === 'Stable' ? 0.4 : tier === 'AtRisk' ? -2.4 : -5.6;
   const vsDistrict = store.spi - 79; // district avg ~79
-  const rank = districtStores
+  const districtRank = districtStores
     .slice()
     .sort((a, b) => b.spi - a.spi)
     .findIndex(s => s.id === store.id) + 1;
+  const comp = getCompMetrics(store);
   return {
     spi: store.spi,
     spiTier: tier,
     momentum: (isPositive ? 'Improving' : tier === 'Crisis' ? 'Slipping' : 'Slipping') as MomentumType,
     momentumDelta: deltaBase,
     vsDistrictAvg: +vsDistrict.toFixed(1),
-    compRank: rank,
-    compTotal: districtStores.length,
-    compMovement: tier === 'Excellence' ? 1 : tier === 'Stable' ? 0 : tier === 'AtRisk' ? -2 : -3,
+    districtRank,
+    districtTotal: districtStores.length,
+    compRank: comp.compRank,
+    compTotal: comp.compTotal,
+    clusterName: comp.clusterName,
+    topPeer: comp.topPeer,
+    compMedianSpi: comp.compMedianSpi,
+    spiGapToTop: comp.spiGapToTop,
+    compMovement: comp.compMovement,
     inboundRiskActive: !isPositive,
     delayedShipments: tier === 'Crisis' ? 4 : tier === 'AtRisk' ? 2 : 0,
     oosRiskSkus: tier === 'Crisis' ? 14 : tier === 'AtRisk' ? 8 : tier === 'Stable' ? 2 : 0,
@@ -949,7 +1007,7 @@ export const StoreDeepDive: React.FC = () => {
 
           {/* Comp Rank Badge */}
           <div className="comp-rank-container">
-            <div className={`comp-rank-badge ${adjustedSPI.compRank <= 4 ? 'top' : adjustedSPI.compRank <= 8 ? 'middle' : 'bottom'}`}>
+            <div className={`comp-rank-badge ${adjustedSPI.compRank === 1 ? 'top' : adjustedSPI.compRank <= Math.ceil(adjustedSPI.compTotal / 2) ? 'middle' : 'bottom'}`}>
               <span className="rank-number">#{adjustedSPI.compRank}</span>
               <span className="rank-total">of {adjustedSPI.compTotal}</span>
             </div>
@@ -968,7 +1026,19 @@ export const StoreDeepDive: React.FC = () => {
                 <span className="movement-flat">No change</span>
               )}
             </div>
-            <span className="comp-label">Comp Stores</span>
+            <span className="comp-label">{adjustedSPI.clusterName} peers</span>
+            {/* Callout: shown when chain-wide comp rank differs from district rank */}
+            {adjustedSPI.compRank !== adjustedSPI.districtRank && (
+              <div className={`comp-rank-callout ${adjustedSPI.compRank < adjustedSPI.districtRank ? 'callout-positive' : 'callout-amber'}`}>
+                <InfoOutlined sx={{ fontSize: 11 }}/>
+                <span>
+                  {adjustedSPI.compRank < adjustedSPI.districtRank
+                    ? `Leads ${adjustedSPI.clusterName} chain-wide · #${adjustedSPI.districtRank} in district`
+                    : `#${adjustedSPI.districtRank} in district · #${adjustedSPI.compRank} among ${adjustedSPI.clusterName} peers`
+                  }
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Inbound Risk Banner */}
@@ -999,10 +1069,16 @@ export const StoreDeepDive: React.FC = () => {
             </div>
             <div className="narrative-content">
               <p className="narrative-verdict">
-                <strong>Store performance declining</strong> — SPI dropped 6 points in 4 weeks, now in At Risk tier.
+                {adjustedSPI.spiTier === 'Excellence' && <><strong>Store performing at Excellence tier</strong> — SPI tracking above district average with strong execution across all streams.</>}
+                {adjustedSPI.spiTier === 'Stable' && <><strong>Store performance stable</strong> — SPI within target range. Minor gaps in compliance and VoC to close before next review.</>}
+                {adjustedSPI.spiTier === 'AtRisk' && <><strong>Store performance at risk</strong> — SPI has declined and now sits below district average. Execution and compliance gaps require immediate attention.</>}
+                {adjustedSPI.spiTier === 'Crisis' && <><strong>Critical: store performance in Crisis tier</strong> — SPI significantly below threshold. Urgent intervention required across multiple execution streams.</>}
               </p>
               <p className="narrative-explanation">
-                VoC dissatisfaction (fitting room wait times) is preceding sales decline. Planogram gaps in Women's Wall Display compounding size-run availability issues before delayed inbound arrives.
+                {adjustedSPI.spiTier === 'Excellence' && 'Planogram compliance and VoC scores are leading the district. Sustain current execution cadence and replicate best practices to peer stores.'}
+                {adjustedSPI.spiTier === 'Stable' && 'Shelf audit compliance and OOS rates are within acceptable range. Focus on closing the remaining VoC gap and ensuring full planogram adherence through end of reset cycle.'}
+                {adjustedSPI.spiTier === 'AtRisk' && 'VoC dissatisfaction is preceding sales decline. Planogram gaps in key wall displays are compounding size-run availability issues. Prioritize restocking and audit completion this week.'}
+                {adjustedSPI.spiTier === 'Crisis' && 'Multiple execution streams are failing simultaneously — OOS, planogram compliance, and VoC are all critical. Escalate to DM and initiate an emergency action plan for this store.'}
               </p>
             </div>
           </div>
@@ -1755,83 +1831,124 @@ export const StoreDeepDive: React.FC = () => {
               </div>
             </div>,
             /* Comp Benchmarking Panel */
-            <div className="tab-panel comp-panel">
-              <div className="comp-header">
-                <div className="comp-rank-large">
-                  <span className="rank-label">Comp Store Rank</span>
-                  <span className="rank-value">#4 of 12</span>
-                  <span className="rank-change negative">↓ 2 spots this month</span>
-                </div>
-                <div className="peer-group">
-                  <h4>Peer Group Definition</h4>
-                  <p>Urban High-Traffic stores in Tennessee region with similar sales volume ($150K–$200K weekly)</p>
-                </div>
-              </div>
+            (() => {
+              const sm = storeMetrics;
+              const spiVsMedian = sm.spi - sm.compMedianSpi;
+              const compRankDiffersDistrict = sm.compRank !== sm.districtRank;
 
-              {/* KPI Gap Radar */}
-              <div className="kpi-gap-section">
-                <h3>KPI Gap vs Comp Median</h3>
-                <div className="gap-grid">
-                  <div className="gap-item negative">
-                    <span className="gap-kpi">Net Sales</span>
-                    <span className="gap-value">-4.2%</span>
-                    <span className="gap-label">below median</span>
-                  </div>
-                  <div className="gap-item negative">
-                    <span className="gap-kpi">VoC Satisfaction</span>
-                    <span className="gap-value">-6.1%</span>
-                    <span className="gap-label">below median</span>
-                  </div>
-                  <div className="gap-item negative">
-                    <span className="gap-kpi">SEA Score</span>
-                    <span className="gap-value">-3.8</span>
-                    <span className="gap-label">below median</span>
-                  </div>
-                  <div className="gap-item neutral">
-                    <span className="gap-kpi">GM%</span>
-                    <span className="gap-value">-0.5%</span>
-                    <span className="gap-label">near median</span>
-                  </div>
-                </div>
-              </div>
+              // KPI gaps — derived from SPI vs cluster median
+              type GapItem = { kpi: string; value: string; label: string; cls: string };
+              const kpiGaps: GapItem[] = sm.spiTier === 'Excellence'
+                ? [
+                    { kpi: 'Net Sales',       value: `+${(Math.abs(spiVsMedian) * 0.3).toFixed(1)}%`, label: 'above median', cls: 'positive' },
+                    { kpi: 'VoC Satisfaction', value: `+${(Math.abs(spiVsMedian) * 0.25).toFixed(1)} pts`, label: 'above median', cls: 'positive' },
+                    { kpi: 'SEA Score',        value: `+${(Math.abs(spiVsMedian) * 0.4).toFixed(1)}`, label: 'above median', cls: 'positive' },
+                    { kpi: 'GM%',              value: '+0.8%', label: 'above median', cls: 'positive' },
+                  ]
+                : sm.spiTier === 'Stable'
+                ? [
+                    { kpi: 'Net Sales',        value: `${spiVsMedian >= 0 ? '+' : ''}${(spiVsMedian * 0.3).toFixed(1)}%`, label: spiVsMedian >= 0 ? 'above median' : 'near median', cls: spiVsMedian >= 0 ? 'positive' : 'neutral' },
+                    { kpi: 'VoC Satisfaction', value: `-1.8 pts`, label: 'near median', cls: 'neutral' },
+                    { kpi: 'SEA Score',        value: `-2.1`,     label: 'near median', cls: 'neutral' },
+                    { kpi: 'GM%',              value: '-0.3%',    label: 'near median', cls: 'neutral' },
+                  ]
+                : [
+                    { kpi: 'Net Sales',        value: `-${(Math.abs(spiVsMedian) * 0.35).toFixed(1)}%`, label: 'below median', cls: 'negative' },
+                    { kpi: 'VoC Satisfaction', value: `-${(Math.abs(spiVsMedian) * 0.28).toFixed(1)} pts`, label: 'below median', cls: 'negative' },
+                    { kpi: 'SEA Score',        value: `-${(Math.abs(spiVsMedian) * 0.45).toFixed(1)}`, label: 'below median', cls: 'negative' },
+                    { kpi: 'GM%',              value: '-1.2%',    label: 'below median', cls: 'negative' },
+                  ];
 
-              {/* Prescriptive Actions */}
-              <div className="prescriptive-actions">
-                <h3>
-                  <AutoAwesomeOutlined sx={{ fontSize: 16 }}/>
-                  Prescriptive Actions Based on Comp Analysis
-                </h3>
-                <div className="prescriptive-list">
-                  <div className="prescriptive-item">
-                    <div className="prescriptive-icon">
-                      <GroupOutlined sx={{ fontSize: 14 }}/>
+              // Prescriptive actions — dynamic per tier
+              type PrescriptiveAction = { icon: React.ReactNode; title: string; body: string };
+              const prescriptiveActions: PrescriptiveAction[] = sm.spiTier === 'Excellence'
+                ? [
+                    { icon: <EmojiEventsOutlined sx={{ fontSize: 14 }}/>, title: 'Share your playbook with chain peers', body: `${sm.topPeer.storeName} (${sm.topPeer.district}) leads the ${sm.clusterName} cluster at SPI ${sm.topPeer.spi}. Request a best-practice exchange to identify the remaining gap.` },
+                    { icon: <GroupOutlined sx={{ fontSize: 14 }}/>, title: 'Sustain staffing advantage', body: `Top ${sm.clusterName} stores maintain peak-hour coverage as a primary lever. Protect current staffing model during upcoming schedule changes.` },
+                    { icon: <AttachMoneyOutlined sx={{ fontSize: 14 }}/>, title: 'Expand high-lift planogram templates', body: `Your execution scores are ${Math.abs(spiVsMedian)} pts above the ${sm.clusterName} median. Codify current POG approach for chain-wide replication.` },
+                  ]
+                : sm.spiTier === 'Stable'
+                ? [
+                    { icon: <GppGoodOutlined sx={{ fontSize: 14 }}/>, title: 'Close SEA gap vs cluster median', body: `Addressing 2–3 open SEA checkpoints could move this store from #${sm.compRank} to #${Math.max(1, sm.compRank - 1)} in the ${sm.clusterName} comp ranking.` },
+                    { icon: <GroupOutlined sx={{ fontSize: 14 }}/>, title: 'Benchmark peak-hour coverage', body: `Top-ranked ${sm.clusterName} stores average 12% more floor staff during 11am–2pm. A targeted shift reallocation would improve both VoC and conversion.` },
+                    { icon: <AttachMoneyOutlined sx={{ fontSize: 14 }}/>, title: 'Planogram compliance as a sales lever', body: `${sm.clusterName} stores with full POG compliance average +4.8% net sales vs those with gaps. Prioritise current reset cycle completion.` },
+                  ]
+                : [
+                    { icon: <WarningAmberOutlined sx={{ fontSize: 14 }}/>, title: 'Urgent: close SPI gap to cluster median', body: `This store is ${Math.abs(spiVsMedian)} pts below the ${sm.clusterName} median (SPI ${sm.compMedianSpi}). Execution improvements in VoC and SEA are the fastest path to recovery.` },
+                    { icon: <GppGoodOutlined sx={{ fontSize: 14 }}/>, title: 'Benchmark against nearest comp peer', body: `${sm.topPeer.storeName} (${sm.topPeer.district}) leads this cluster at SPI ${sm.topPeer.spi}. Request a DM-level knowledge share to identify root-cause gaps.` },
+                    { icon: <AttachMoneyOutlined sx={{ fontSize: 14 }}/>, title: 'Revenue recovery vs comp median', body: `Based on comp performance, closing the SPI gap to median could recover an estimated $${sm.spiTier === 'Crisis' ? '12–18K' : '6–10K'} in weekly revenue.` },
+                  ];
+
+              return (
+                <div className="tab-panel comp-panel">
+                  {/* Rank vs District callout row */}
+                  {compRankDiffersDistrict && (
+                    <div className={`comp-context-callout ${sm.compRank < sm.districtRank ? 'comp-context-positive' : 'comp-context-amber'}`}>
+                      <InfoOutlined sx={{ fontSize: 14 }}/>
+                      <div className="comp-context-text">
+                        <strong>
+                          {sm.compRank < sm.districtRank
+                            ? `Chain-wide ${sm.clusterName} leader — above district ranking`
+                            : `Chain-wide rank is lower than district rank`}
+                        </strong>
+                        <span>
+                          This store ranks <strong>#{sm.districtRank} of {sm.districtTotal}</strong> in {districtContext.name}, but <strong>#{sm.compRank} of {sm.compTotal}</strong> among all {sm.clusterName} stores chain-wide.
+                          {sm.compRank > 1 && ` Top-ranked peer: ${sm.topPeer.storeName} (${sm.topPeer.district}) at SPI ${sm.topPeer.spi}.`}
+                          {' '}Chain-wide ranking compares execution across all similar-format stores regardless of district.
+                        </span>
+                      </div>
                     </div>
-                    <div className="prescriptive-content">
-                      <span className="prescriptive-title">Staffing optimization opportunity</span>
-                      <p>Top 3 comp stores have 15% more staff during 10am–2pm. Consider shift reallocation.</p>
+                  )}
+
+                  <div className="comp-header">
+                    <div className="comp-rank-large">
+                      <span className="rank-label">Comp Store Rank</span>
+                      <span className="rank-value">#{sm.compRank} of {sm.compTotal}</span>
+                      <span className={`rank-change ${sm.compMovement > 0 ? 'positive' : sm.compMovement < 0 ? 'negative' : ''}`}>
+                        {sm.compMovement > 0 ? `↑ ${sm.compMovement} spots` : sm.compMovement < 0 ? `↓ ${Math.abs(sm.compMovement)} spots` : '— No change'} this month
+                      </span>
+                    </div>
+                    <div className="peer-group">
+                      <h4>Peer Group Definition</h4>
+                      <p>{sm.clusterName} stores chain-wide with comparable format and sales volume — {sm.compTotal} stores across {[...new Set(CLUSTER_PEERS[sm.clusterName]?.map(p => p.district) ?? [])].length} districts</p>
                     </div>
                   </div>
-                  <div className="prescriptive-item">
-                    <div className="prescriptive-icon">
-                      <GppGoodOutlined sx={{ fontSize: 14 }}/>
-                    </div>
-                    <div className="prescriptive-content">
-                      <span className="prescriptive-title">SEA improvement potential</span>
-                      <p>Addressing safety checkpoint would move store from #4 to #2 in comp ranking.</p>
+
+                  {/* KPI Gap vs Comp Median */}
+                  <div className="kpi-gap-section">
+                    <h3>KPI Gap vs {sm.clusterName} Median (SPI {sm.compMedianSpi})</h3>
+                    <div className="gap-grid">
+                      {kpiGaps.map(g => (
+                        <div key={g.kpi} className={`gap-item ${g.cls}`}>
+                          <span className="gap-kpi">{g.kpi}</span>
+                          <span className="gap-value">{g.value}</span>
+                          <span className="gap-label">{g.label}</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                  <div className="prescriptive-item">
-                    <div className="prescriptive-icon">
-                      <AttachMoneyOutlined sx={{ fontSize: 14 }}/>
-                    </div>
-                    <div className="prescriptive-content">
-                      <span className="prescriptive-title">Revenue recovery path</span>
-                      <p>Fixing planogram gaps in high-velocity categories could recover ~$8K weekly based on comp performance.</p>
+
+                  {/* Prescriptive Actions */}
+                  <div className="prescriptive-actions">
+                    <h3>
+                      <AutoAwesomeOutlined sx={{ fontSize: 16 }}/>
+                      Prescriptive Actions Based on Comp Analysis
+                    </h3>
+                    <div className="prescriptive-list">
+                      {prescriptiveActions.map((action, i) => (
+                        <div key={i} className="prescriptive-item">
+                          <div className="prescriptive-icon">{action.icon}</div>
+                          <div className="prescriptive-content">
+                            <span className="prescriptive-title">{action.title}</span>
+                            <p>{action.body}</p>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>,
+              );
+            })(),
           ]}
           value={activeTab}
           onChange={(_, val) => setActiveTab(val)}
@@ -1857,16 +1974,20 @@ export const StoreDeepDive: React.FC = () => {
               </div>
               <div className="panel-comparison">
                 <div className="comparison-row">
-                  <span>vs Last Month</span>
-                  <span className="negative">-3.2%</span>
+                  <span>vs Last Period</span>
+                  <span className={selectedKPI.varianceType}>{selectedKPI.variance}</span>
                 </div>
                 <div className="comparison-row">
                   <span>vs Last Year</span>
-                  <span className="negative">-5.1%</span>
+                  <span className={selectedKPI.varianceType}>
+                    {selectedKPI.varianceType === 'positive' ? '+' : ''}{selectedKPI.variance}
+                  </span>
                 </div>
                 <div className="comparison-row">
                   <span>vs District Avg</span>
-                  <span className="negative">-4.2%</span>
+                  <span className={storeMetrics.vsDistrictAvg >= 0 ? 'positive' : 'negative'}>
+                    {storeMetrics.vsDistrictAvg >= 0 ? '+' : ''}{storeMetrics.vsDistrictAvg} pts
+                  </span>
                 </div>
               </div>
               <div className="panel-chart">

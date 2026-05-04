@@ -24,6 +24,8 @@ import AutoAwesomeOutlined from '@mui/icons-material/AutoAwesomeOutlined';
 import LayersOutlined from '@mui/icons-material/LayersOutlined';
 import ForumOutlined from '@mui/icons-material/ForumOutlined';
 import { Button, Chips, Badge, Tabs, EmptyState } from 'impact-ui';
+import { useAuth } from '../context/AuthContext';
+import { openAskAlan } from '../utils/openAskAlan';
 import './MessageCenter.css';
 
 // ── Types ──
@@ -116,17 +118,17 @@ const R = {
   ops:      '/command-center/operations-queue',
 };
 
-const mockChats: Chat[] = [
+const DM_CHATS: Chat[] = [
   {
     id: 'c1', type: 'direct', name: 'Sarah Chen', avatar: 'SC',
     participants: [contacts[0]], unread: 2, pinned: true,
     lastActivity: new Date(Date.now() - 5 * 60000),
     messages: [
-      { id: 'm1', senderId: 'u1', content: 'Heads up — AI Copilot flagged 3 POG drift issues for Energy Drinks at Store #2341 this morning.', timestamp: new Date(Date.now() - 45 * 60000), status: 'read' },
+      { id: 'm1', senderId: 'u1', content: 'Heads up — Ask Alan flagged 3 POG drift issues for Energy Drinks at Store #2341 this morning.', timestamp: new Date(Date.now() - 45 * 60000), status: 'read' },
       { id: 'm2', senderId: 'me', content: 'Saw it. I\'ve already pushed a Reset Shelf task to the Operations Queue.', timestamp: new Date(Date.now() - 40 * 60000), status: 'read', context: { label: 'Open Operations Queue', route: R.ops, kind: 'task' } },
       { id: 'm3', senderId: 'u1', content: 'Perfect. Loop in Anna if anything escalates — she owns the POG approvals this week.', timestamp: new Date(Date.now() - 30 * 60000), status: 'read' },
       { id: 'm5', senderId: 'u1', content: 'Also: District 14 compliance is back to 94%. Nashville drove most of the lift 📈', timestamp: new Date(Date.now() - 10 * 60000), status: 'delivered', context: { label: 'View District Intelligence', route: R.district, kind: 'audit' } },
-      { id: 'm6', senderId: 'u1', content: 'Can you review the Energy Drinks POG audit before EOD?', timestamp: new Date(Date.now() - 5 * 60000), status: 'delivered', context: { label: 'Open AI Copilot audit', route: R.copilot, kind: 'audit' } },
+      { id: 'm6', senderId: 'u1', content: 'Can you review the Energy Drinks POG audit before EOD?', timestamp: new Date(Date.now() - 5 * 60000), status: 'delivered', context: { label: 'Open in Ask Alan', route: R.copilot, kind: 'audit' } },
     ],
   },
   {
@@ -138,7 +140,7 @@ const mockChats: Chat[] = [
       { id: 'm10', senderId: 'u3', content: 'Morning shift check-in: all sections covered ✅', timestamp: new Date(Date.now() - 120 * 60000), status: 'read' },
       { id: 'm11', senderId: 'u5', content: 'Inventory count for Dairy done. Need to reorder milk — down to 15 units.', timestamp: new Date(Date.now() - 90 * 60000), status: 'read' },
       { id: 'm12', senderId: 'me', content: 'Submitting the PO now. Logged it as a task too.', timestamp: new Date(Date.now() - 85 * 60000), status: 'read', context: { label: 'View task in Operations Queue', route: R.ops, kind: 'task' } },
-      { id: 'm13', senderId: 'u3', content: 'POG drift on Aisle 7 endcap — facing count is off by 2. Re-shooting now.', timestamp: new Date(Date.now() - 30 * 60000), status: 'read', context: { label: 'Open POG Audit', route: R.copilot, kind: 'audit' } },
+      { id: 'm13', senderId: 'u3', content: 'POG drift on Aisle 7 endcap — facing count is off by 2. Re-shooting now.', timestamp: new Date(Date.now() - 30 * 60000), status: 'read', context: { label: 'Open in Ask Alan', route: R.copilot, kind: 'audit' } },
       { id: 'm14', senderId: 'u5', content: '@everyone Stockroom audit at 4 PM. Everyone needs to confirm by 3:30.', timestamp: new Date(Date.now() - 12 * 60000), status: 'delivered' },
     ],
   },
@@ -185,13 +187,13 @@ const mockChats: Chat[] = [
   },
   {
     id: 'c-pog', type: 'group', name: 'POG Compliance — District 14', avatar: 'PC',
-    description: 'AI Copilot audits, drift triage and POG approvals',
+    description: 'Ask Alan audits, drift triage and POG approvals',
     participants: [contacts[0], contacts[6], contacts[1], contacts[7]], unread: 3, pinned: false,
     lastActivity: new Date(Date.now() - 22 * 60000),
     messages: [
       { id: 'mp1', senderId: 'u7', content: 'Pushed the Spring Refresh Beverage template to Localization Engine for Tennessee stores.', timestamp: new Date(Date.now() - 240 * 60000), status: 'read', context: { label: 'Open Localization Engine', route: R.loc, kind: 'localization' } },
       { id: 'mp2', senderId: 'u1', content: 'Nashville is approved. Memphis still has 2 SKUs failing the SLA rule — reviewing.', timestamp: new Date(Date.now() - 180 * 60000), status: 'read', context: { label: 'Open POG Rules', route: R.pogRule, kind: 'pog' } },
-      { id: 'mp3', senderId: 'u7', content: 'Copilot just opened 4 new audits across Beverages — confidence 88–94%.', timestamp: new Date(Date.now() - 60 * 60000), status: 'delivered', context: { label: 'Triage in AI Copilot', route: R.copilot, kind: 'audit' } },
+      { id: 'mp3', senderId: 'u7', content: 'Ask Alan just opened 4 new audits across Beverages — confidence 88–94%.', timestamp: new Date(Date.now() - 60 * 60000), status: 'delivered', context: { label: 'Triage in Ask Alan', route: R.copilot, kind: 'audit' } },
       { id: 'mp4', senderId: 'u1', content: 'Pinning this thread. Anna will own approvals through Friday.', timestamp: new Date(Date.now() - 22 * 60000), status: 'delivered' },
     ],
   },
@@ -228,11 +230,192 @@ const mockChats: Chat[] = [
     participants: [contacts[6]], unread: 0, pinned: false,
     lastActivity: new Date(Date.now() - 600 * 60000),
     messages: [
-      { id: 'm60', senderId: 'u7', content: 'Aisle 5 planogram audit ready for sign-off — 91% match.', timestamp: new Date(Date.now() - 720 * 60000), status: 'read', context: { label: 'Open AI Copilot audit', route: R.copilot, kind: 'audit' } },
+      { id: 'm60', senderId: 'u7', content: 'Aisle 5 planogram audit ready for sign-off — 91% match.', timestamp: new Date(Date.now() - 720 * 60000), status: 'read', context: { label: 'Open in Ask Alan', route: R.copilot, kind: 'audit' } },
       { id: 'm61', senderId: 'me', content: 'Looks great Anna — approving now.', timestamp: new Date(Date.now() - 600 * 60000), status: 'read' },
     ],
   },
 ];
+
+// ── SM (Store Manager) chats — store-level operational conversations ──
+const SM_CHATS: Chat[] = [
+  {
+    id: 'sm1', type: 'direct', name: 'John Doe', avatar: 'JD',
+    participants: [{ id: 'u-dm', name: 'John Doe', avatar: 'JD', role: 'District Manager', roleCode: 'DM', online: true }],
+    unread: 2, pinned: true, lastActivity: new Date(Date.now() - 8 * 60000),
+    messages: [
+      { id: 'sm-m1', senderId: 'u-dm', content: 'Marco, the spring POG refresh needs to be done by Friday. Nashville stores are falling behind.', timestamp: new Date(Date.now() - 90 * 60000), status: 'read', context: { label: 'Open Operations Queue', route: R.ops, kind: 'task' } },
+      { id: 'sm-m2', senderId: 'me', content: 'Got it. Aisle 3 and 7 are done. Starting Beverages today — we had a delivery delay.', timestamp: new Date(Date.now() - 60 * 60000), status: 'read' },
+      { id: 'sm-m3', senderId: 'u-dm', content: 'Keep me posted. Compliance is at 91% — we need to hold the line. Great job on the Dairy reset btw.', timestamp: new Date(Date.now() - 30 * 60000), status: 'delivered' },
+      { id: 'sm-m4', senderId: 'u-dm', content: 'Can you also check the fire exit clearance? SEA flagged it yesterday.', timestamp: new Date(Date.now() - 8 * 60000), status: 'delivered' },
+    ],
+  },
+  {
+    id: 'sm2', type: 'group', name: 'Store #2034 — Team', avatar: 'ST',
+    description: 'Downtown Plaza #2034 daily operations',
+    participants: [
+      { id: 'u-assoc1', name: 'Emily Parker', avatar: 'EP', role: 'Store Associate', roleCode: 'SM', online: true },
+      { id: 'u-inv', name: 'Lisa Thompson', avatar: 'LT', role: 'Inventory Lead', roleCode: 'INV', store: 'Store #2034', online: true },
+      { id: 'u-assoc2', name: 'Chris Adams', avatar: 'CA', role: 'Store Associate', roleCode: 'SM', online: false, lastSeen: '45m ago' },
+    ],
+    unread: 3, pinned: true, lastActivity: new Date(Date.now() - 15 * 60000),
+    messages: [
+      { id: 'sm-t1', senderId: 'me', content: 'Morning team. Focus areas today: finish Beverage aisle reset and prep for the inventory count at 2 PM.', timestamp: new Date(Date.now() - 180 * 60000), status: 'read' },
+      { id: 'sm-t2', senderId: 'u-assoc1', content: 'On it! Endcap is already done. Starting cooler section now ✅', timestamp: new Date(Date.now() - 120 * 60000), status: 'read' },
+      { id: 'sm-t3', senderId: 'u-inv', content: 'Heads up — we\'re low on Sparkling Water (12 units). Re-order submitted.', timestamp: new Date(Date.now() - 60 * 60000), status: 'read', context: { label: 'View task in Operations Queue', route: R.ops, kind: 'task' } },
+      { id: 'sm-t4', senderId: 'u-assoc2', content: 'Fire exit area cleared. Photo uploaded to the audit.', timestamp: new Date(Date.now() - 15 * 60000), status: 'delivered', context: { label: 'Open in Ask Alan', route: R.copilot, kind: 'audit' } },
+    ],
+  },
+  {
+    id: 'sm3', type: 'direct', name: 'Lisa Thompson', avatar: 'LT',
+    participants: [{ id: 'u-inv', name: 'Lisa Thompson', avatar: 'LT', role: 'Inventory Lead', roleCode: 'INV', store: 'Store #2034', online: true }],
+    unread: 1, pinned: false, lastActivity: new Date(Date.now() - 45 * 60000),
+    messages: [
+      { id: 'sm-l1', senderId: 'u-inv', content: 'Dairy cooler temp was 39°F at 8 AM — within range but borderline. Monitoring.', timestamp: new Date(Date.now() - 120 * 60000), status: 'read' },
+      { id: 'sm-l2', senderId: 'me', content: 'Thanks Lisa. Log it and let me know if it drifts above 40°F — we\'ll need to call maintenance.', timestamp: new Date(Date.now() - 90 * 60000), status: 'read' },
+      { id: 'sm-l3', senderId: 'u-inv', content: 'Inventory count done for Snacks section: 98% accuracy. Two SKUs need reconciliation.', timestamp: new Date(Date.now() - 45 * 60000), status: 'delivered' },
+    ],
+  },
+  {
+    id: 'sm4', type: 'direct', name: 'David Kim', avatar: 'DK',
+    participants: [contacts[3]], unread: 0, pinned: false, lastActivity: new Date(Date.now() - 200 * 60000),
+    messages: [
+      { id: 'sm-d1', senderId: 'u4', content: 'LP walkthrough done. Everything looks good. One minor item — Camera 2 angle in stockroom needs adjustment.', timestamp: new Date(Date.now() - 300 * 60000), status: 'read' },
+      { id: 'sm-d2', senderId: 'me', content: 'I\'ll put in a maintenance request. Thanks for the heads up David.', timestamp: new Date(Date.now() - 200 * 60000), status: 'read' },
+    ],
+  },
+  {
+    id: 'sm5', type: 'broadcast', name: 'Safety Alerts', avatar: 'SA',
+    description: 'Critical safety and compliance alerts',
+    participants: contacts, unread: 1, pinned: false, lastActivity: new Date(Date.now() - 30 * 60000),
+    messages: [
+      { id: 'sm-sa1', senderId: 'u8', content: '🔴 New fire safety protocol effective immediately. All fire exits must be inspected by EOW.', timestamp: new Date(Date.now() - 480 * 60000), status: 'read', context: { label: 'Open Operations Queue', route: R.ops, kind: 'task' } },
+      { id: 'sm-sa2', senderId: 'u8', content: 'Mandatory safety training modules have been updated. All SMs must complete by EOM.', timestamp: new Date(Date.now() - 30 * 60000), status: 'delivered' },
+    ],
+  },
+  {
+    id: 'sm6', type: 'broadcast', name: 'Regional Updates', avatar: 'RU',
+    description: 'Official announcements from Regional HQ',
+    participants: contacts, unread: 1, pinned: false, lastActivity: new Date(Date.now() - 60 * 60000),
+    messages: [
+      { id: 'sm-ru1', senderId: 'u2', content: 'Q2 Planogram Refresh — all stores must complete the Spring Reset by May 20.', timestamp: new Date(Date.now() - 180 * 60000), status: 'read', context: { label: 'View task in Operations Queue', route: R.ops, kind: 'task' } },
+      { id: 'sm-ru2', senderId: 'u2', content: '🏆 Congrats to Store #2034, #1142, and #2341 for hitting 95%+ compliance this quarter.', timestamp: new Date(Date.now() - 60 * 60000), status: 'delivered' },
+    ],
+  },
+  {
+    id: 'sm7', type: 'broadcast', name: 'Operations — Spring Schedule', avatar: 'SS',
+    description: 'Spring operations & scheduling updates',
+    participants: contacts, unread: 1, pinned: true, lastActivity: new Date(Date.now() - 30 * 60000),
+    messages: [
+      { id: 'sm-ss1', senderId: 'u2', content: 'Modified store hours for Memorial Day weekend. Confirm your team\'s availability by Friday.', timestamp: new Date(Date.now() - 30 * 60000), status: 'delivered', context: { label: 'View tasks in Operations Queue', route: R.ops, kind: 'task' } },
+    ],
+  },
+];
+
+// ── HQ (Merchandising) chats — network-wide, strategic conversations ──
+const HQ_CHATS: Chat[] = [
+  {
+    id: 'hq1', type: 'direct', name: 'John Doe', avatar: 'JD',
+    participants: [{ id: 'u-dm14', name: 'John Doe', avatar: 'JD', role: 'District Manager — Tennessee', roleCode: 'DM', online: true }],
+    unread: 2, pinned: true, lastActivity: new Date(Date.now() - 10 * 60000),
+    messages: [
+      { id: 'hq-j1', senderId: 'me', content: 'John, District 14\'s spring POG refresh is tracking well. 6 of 8 stores at 90%+ compliance.', timestamp: new Date(Date.now() - 90 * 60000), status: 'read' },
+      { id: 'hq-j2', senderId: 'u-dm14', content: 'Thanks Elena. Johnson City Mall is lagging — fixture delivery was delayed. ETA tomorrow.', timestamp: new Date(Date.now() - 60 * 60000), status: 'read' },
+      { id: 'hq-j3', senderId: 'me', content: 'Noted. The Beverage End Cap template has been updated in the Localization Engine. Please review.', timestamp: new Date(Date.now() - 30 * 60000), status: 'read', context: { label: 'Open Localization Engine', route: R.loc, kind: 'localization' } },
+      { id: 'hq-j4', senderId: 'u-dm14', content: 'Reviewed and approved for Tennessee. Memphis and Nashville stores look good.', timestamp: new Date(Date.now() - 10 * 60000), status: 'delivered' },
+    ],
+  },
+  {
+    id: 'hq2', type: 'group', name: 'POG Compliance — All Districts', avatar: 'PC',
+    description: 'Cross-district POG compliance tracking and triage',
+    participants: [
+      { id: 'u-dm14', name: 'John Doe', avatar: 'JD', role: 'DM — Tennessee', roleCode: 'DM', online: true },
+      { id: 'u-dm22', name: 'Marcus Reed', avatar: 'MR', role: 'DM — Carolina', roleCode: 'DM', online: false, lastSeen: '1h ago' },
+      { id: 'u-dm19', name: 'Patricia Wells', avatar: 'PW', role: 'DM — Alabama', roleCode: 'DM', online: true },
+      contacts[6],
+    ],
+    unread: 4, pinned: true, lastActivity: new Date(Date.now() - 20 * 60000),
+    messages: [
+      { id: 'hq-pc1', senderId: 'me', content: 'Q2 POG refresh status: Tennessee 91%, Carolina 84%, Alabama 96%. Carolina needs attention.', timestamp: new Date(Date.now() - 180 * 60000), status: 'read', context: { label: 'View District Intelligence', route: R.district, kind: 'audit' } },
+      { id: 'hq-pc2', senderId: 'u-dm22', content: 'Carolina had 2 fixture shipments delayed. We\'re catching up this week — targeting 90% by Friday.', timestamp: new Date(Date.now() - 120 * 60000), status: 'read' },
+      { id: 'hq-pc3', senderId: 'u7', content: 'Pushed updated Beverage template to Localization Engine for all districts. 36 stores included.', timestamp: new Date(Date.now() - 60 * 60000), status: 'delivered', context: { label: 'Open Localization Engine', route: R.loc, kind: 'localization' } },
+      { id: 'hq-pc4', senderId: 'u-dm19', content: 'Alabama is all green. All 4 stores completed spring reset ahead of schedule.', timestamp: new Date(Date.now() - 20 * 60000), status: 'delivered' },
+    ],
+  },
+  {
+    id: 'hq3', type: 'direct', name: 'Anna Martinez', avatar: 'AM',
+    participants: [contacts[6]], unread: 1, pinned: false, lastActivity: new Date(Date.now() - 40 * 60000),
+    messages: [
+      { id: 'hq-a1', senderId: 'u7', content: 'The new Seasonal Promo End Cap rule has been added to POG Rule Management.', timestamp: new Date(Date.now() - 180 * 60000), status: 'read', context: { label: 'Open POG Rules', route: R.pogRule, kind: 'pog' } },
+      { id: 'hq-a2', senderId: 'me', content: 'Great. Make sure min-facing is set to 3 for high-velocity SKUs in the promo section.', timestamp: new Date(Date.now() - 120 * 60000), status: 'read' },
+      { id: 'hq-a3', senderId: 'u7', content: 'Done. Ask Alan flagged 5 stores with potential drift on Beverage Cooler layout. Confidence 88–94%.', timestamp: new Date(Date.now() - 40 * 60000), status: 'delivered', context: { label: 'Triage in Ask Alan', route: R.copilot, kind: 'audit' } },
+    ],
+  },
+  {
+    id: 'hq4', type: 'group', name: 'Merchandising Leadership', avatar: 'ML',
+    description: 'HQ merchandising strategy and planning',
+    participants: [
+      { id: 'u-vp', name: 'Mike Rodriguez', avatar: 'MR', role: 'Regional VP', roleCode: 'HQ', online: false, lastSeen: '2h ago' },
+      { id: 'u-ops', name: 'Robert Chang', avatar: 'RC', role: 'Operations Director', roleCode: 'OPS', online: true },
+    ],
+    unread: 0, pinned: false, lastActivity: new Date(Date.now() - 300 * 60000),
+    messages: [
+      { id: 'hq-ml1', senderId: 'u-vp', content: 'Q2 planogram refresh is on track. Network-wide compliance at 89% — up from 82% last quarter.', timestamp: new Date(Date.now() - 480 * 60000), status: 'read' },
+      { id: 'hq-ml2', senderId: 'u-ops', content: 'Gross margin recovery from spring markdown optimization is $18K this period.', timestamp: new Date(Date.now() - 420 * 60000), status: 'read' },
+      { id: 'hq-ml3', senderId: 'me', content: 'Great numbers. I\'ll prepare the district-level breakdown for the board review.', timestamp: new Date(Date.now() - 300 * 60000), status: 'read' },
+    ],
+  },
+  {
+    id: 'hq5', type: 'broadcast', name: 'Network-Wide Announcements', avatar: 'NW',
+    description: 'Official announcements from HQ Merchandising',
+    participants: contacts, unread: 0, pinned: false, lastActivity: new Date(Date.now() - 120 * 60000),
+    messages: [
+      { id: 'hq-nw1', senderId: 'me', content: 'Q2 Planogram Refresh — all districts must reach 90%+ compliance by May 20. Templates are live in POG Management.', timestamp: new Date(Date.now() - 240 * 60000), status: 'read', context: { label: 'Open Master POG Management', route: R.pog, kind: 'pog' } },
+      { id: 'hq-nw2', senderId: 'me', content: '🏆 Quarterly compliance awards: District 19 (Alabama) leads at 96%. District 14 close behind at 91%.', timestamp: new Date(Date.now() - 120 * 60000), status: 'delivered', context: { label: 'View District Intelligence', route: R.district, kind: 'audit' } },
+    ],
+  },
+  {
+    id: 'hq6', type: 'group', name: 'Localization Reviewers', avatar: 'LR',
+    description: 'Final sign-off on localized POGs before publish',
+    participants: [contacts[6], contacts[1], contacts[8]], unread: 1, pinned: false, lastActivity: new Date(Date.now() - 45 * 60000),
+    messages: [
+      { id: 'hq-lr1', senderId: 'u7', content: 'Beverages — Tennessee variant is ready for review. 12 stores included.', timestamp: new Date(Date.now() - 90 * 60000), status: 'read', context: { label: 'Open in Localization Engine', route: R.loc, kind: 'localization' } },
+      { id: 'hq-lr2', senderId: 'me', content: 'LGTM on assortment. One question on facing rules for store #3021.', timestamp: new Date(Date.now() - 45 * 60000), status: 'delivered', context: { label: 'View POG Rules', route: R.pogRule, kind: 'pog' } },
+    ],
+  },
+  {
+    id: 'hq7', type: 'broadcast', name: 'Performance Highlights', avatar: 'PH',
+    description: 'Quarterly performance updates and recognition',
+    participants: contacts, unread: 0, pinned: false, lastActivity: new Date(Date.now() - 150 * 60000),
+    messages: [
+      { id: 'hq-ph1', senderId: 'me', content: '🏆 Great start to Q2! Network-wide revenue +8% vs target. Top districts: Alabama, Tennessee, and Florida.', timestamp: new Date(Date.now() - 150 * 60000), status: 'read', context: { label: 'View District Intelligence', route: R.district, kind: 'audit' } },
+    ],
+  },
+];
+
+// ── ADMIN chats — platform, user management conversations ──
+const ADMIN_CHATS: Chat[] = [
+  ...DM_CHATS.slice(0, 4),
+  {
+    id: 'adm1', type: 'group', name: 'Platform Ops', avatar: 'PO',
+    description: 'System health, deployments, and platform operations',
+    participants: [contacts[7], contacts[1]], unread: 2, pinned: true, lastActivity: new Date(Date.now() - 5 * 60000),
+    messages: [
+      { id: 'adm-po1', senderId: 'u8', content: 'Ask Alan model update deployed. Audit confidence thresholds recalibrated.', timestamp: new Date(Date.now() - 120 * 60000), status: 'read' },
+      { id: 'adm-po2', senderId: 'me', content: 'Confirmed. Monitoring for the next 24h. No anomalies so far.', timestamp: new Date(Date.now() - 60 * 60000), status: 'read' },
+      { id: 'adm-po3', senderId: 'u8', content: '3 new user accounts provisioned for District 22 — Marcus Reed team.', timestamp: new Date(Date.now() - 5 * 60000), status: 'delivered' },
+    ],
+  },
+  ...DM_CHATS.slice(5),
+];
+
+const getChatsByRole = (role: string): Chat[] => {
+  switch (role) {
+    case 'SM':    return SM_CHATS;
+    case 'HQ':    return HQ_CHATS;
+    case 'ADMIN': return ADMIN_CHATS;
+    default:      return DM_CHATS;
+  }
+};
 
 // ── Helpers ──
 const formatTime = (date: Date) => {
@@ -278,9 +461,11 @@ const getContextIcon = (kind: MessageContext['kind']) => {
 // ── Component ──
 export const MessageCenter: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const roleChats = getChatsByRole(user?.role || 'DM');
   const [isLoading, setIsLoading]           = useState(true);
-  const [chats, setChats]                   = useState<Chat[]>(mockChats);
-  const [activeChat, setActiveChat]         = useState<string | null>('c1');
+  const [chats, setChats]                   = useState<Chat[]>(roleChats);
+  const [activeChat, setActiveChat]         = useState<string | null>(roleChats[0]?.id || null);
   const [inputValue, setInputValue]         = useState('');
   const [searchQuery, setSearchQuery]       = useState('');
   const [activeTab, setActiveTab]           = useState<Tab>('all');
@@ -626,7 +811,19 @@ export const MessageCenter: React.FC = () => {
                             <button
                               type="button"
                               className={`mc-msg-context mc-msg-context--${msg.context.kind} ${isMe ? 'mc-msg-context--me' : ''}`}
-                              onClick={() => navigate(msg.context!.route)}
+                              onClick={() => {
+                                const route = msg.context!.route;
+                                if (route === R.copilot || route.includes('ai-copilot')) {
+                                  openAskAlan({
+                                    skill: 'pog',
+                                    initialMessage:
+                                      'Summarize open planogram audits and shelf compliance items I should triage next.',
+                                    autoSend: true,
+                                  });
+                                  return;
+                                }
+                                navigate(route);
+                              }}
                             >
                               <span className="mc-msg-context-icon">{getContextIcon(msg.context.kind)}</span>
                               <span className="mc-msg-context-label">{msg.context.label}</span>
