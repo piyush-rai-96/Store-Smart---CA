@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import SearchOutlined from '@mui/icons-material/SearchOutlined';
 import Add from '@mui/icons-material/Add';
-import VisibilityOutlined from '@mui/icons-material/VisibilityOutlined';
 import EditOutlined from '@mui/icons-material/EditOutlined';
 import DeleteOutlined from '@mui/icons-material/DeleteOutlined';
 import WarningAmberOutlined from '@mui/icons-material/WarningAmberOutlined';
@@ -1535,9 +1534,6 @@ export const POGRuleManagement: React.FC = () => {
                         </td>
                         <td>
                           <div className="action-buttons">
-                            <button className="action-btn view" onClick={() => handleViewRule(rule)} title="View">
-                              <VisibilityOutlined sx={{ fontSize: 16 }} />
-                            </button>
                             <button className="action-btn edit" onClick={() => handleEditRule(rule)} title="Edit">
                               <EditOutlined sx={{ fontSize: 16 }} />
                             </button>

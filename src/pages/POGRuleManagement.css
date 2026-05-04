@@ -228,6 +228,7 @@
 .rule-table {
   width: 100%;
   border-collapse: collapse;
+  min-width: 1100px;
 }
 
 .rule-table th {
@@ -240,6 +241,14 @@
   letter-spacing: 0.5px;
   background: var(--ia-color-bg-subtle);
   border-bottom: 1px solid var(--ia-color-border);
+  white-space: nowrap;
+}
+
+.rule-table th:last-child,
+.rule-table td:last-child {
+  min-width: 80px;
+  width: 80px;
+  text-align: center;
 }
 
 .rule-table td {
@@ -2950,19 +2959,21 @@
 /* Action Buttons */
 .action-buttons {
   display: flex;
-  gap: 4px;
+  gap: 2px;
+  flex-shrink: 0;
+  justify-content: center;
 }
 
 .action-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
-  border: none;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--ia-color-text-tertiary);
+  width: 32px;
+  height: 32px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: var(--ia-color-bg-subtle);
+  color: var(--ia-color-text-secondary);
   cursor: pointer;
   transition: all 0.15s ease;
 }
@@ -2970,16 +2981,19 @@
 .action-btn.view:hover {
   background: var(--ia-color-primary-soft);
   color: var(--ia-color-primary);
+  border-color: var(--ia-color-primary-soft);
 }
 
 .action-btn.edit:hover {
   background: var(--ia-color-primary-soft);
   color: var(--ia-color-primary);
+  border-color: var(--ia-color-primary-soft);
 }
 
 .action-btn.delete:hover {
   background: var(--ia-color-error-bg);
   color: var(--ia-color-error-strong);
+  border-color: var(--ia-color-error-bg);
 }
 
 /* Empty State */
